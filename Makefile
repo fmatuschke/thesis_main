@@ -29,19 +29,22 @@ git-submodules:
 
 .PHONY: fastpli-pull
 .Oneshell:
-fastpli-pull: 
+fastpli-pull:
 	cd fastpli
+	rm -r build/
 	git pull
 	cd ..
 	git add fastpli
 
+.PHONY: fastpli/build
 .ONESHELL:
-fastpli/build/: fastpli/
+fastpli/build: fastpli/
 	cd fastpli
-	make build 
+	make build
 
 .PHONY: fastpli
-fastpli: env fastpli/ git-submodules fastpli/build/
+fastpli: env fastpli/ git-submodules fastpli/build
+	$(PIP) uninstall fastpli -y
 	$(PIP) install fastpli/build/. -q
 
 # CLEANING
