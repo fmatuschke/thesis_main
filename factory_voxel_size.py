@@ -28,13 +28,13 @@ SCALE = LAP / ORG
 NUM_LAP_PIXEL = 5
 LENGTH = NUM_LAP_PIXEL * LAP * np.sqrt(3)
 
-print()
-print("NUM_LAP_PIXEL", NUM_LAP_PIXEL)
-print("LENGTH", LENGTH)
-print()
-print(RND_LIST)
-print(RADIUS_LIST)
-print()
+# print()
+# print("NUM_LAP_PIXEL", NUM_LAP_PIXEL)
+# print("LENGTH", LENGTH)
+# print()
+# print(RND_LIST)
+# print(RADIUS_LIST)
+# print()
 
 np.random.seed(42)
 
@@ -42,21 +42,23 @@ np.random.seed(42)
 solver = fastpli.model.solver.Solver()
 solver.drag = 0
 
-solver.omp_num_threads = 4
+solver.omp_num_threads = 1
 
 # mpi
 index = 0
 comm = MPI.COMM_WORLD
 
-for radius in tqdm(RADIUS_LIST):
+for radius in RADIUS_LIST:
     solver.obj_mean_length = 2 * radius
     solver.obj_min_radius = 4 * radius
 
-    for rnd in tqdm(RND_LIST * radius):
+    for rnd in RND_LIST * radius:
 
         index += 1
         if index % comm.Get_size() != comm.Get_rank():
             continue
+
+        print(radius, rnd)
 
         fiber_bundle = fastpli.model.sandbox.shape.box(
             -0.5 * np.array([LENGTH, LENGTH, LENGTH]),
