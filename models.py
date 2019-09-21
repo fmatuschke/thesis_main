@@ -93,6 +93,7 @@ for radius, rnd in PARAMETERS[comm.Get_rank()::comm.Get_size()]:
                           mode='w-')
 
     with h5py.File(file_name, 'a') as h5f:
+        h5f['version'] = fastpli.__version__
         with open(os.path.abspath(__file__), 'r') as f:
             h5f['script'] = f.read()
 

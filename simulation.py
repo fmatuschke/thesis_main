@@ -8,6 +8,7 @@ import fastpli.analysis
 import fastpli.io
 
 from mpi4py import MPI
+from tqdm import tqdm
 import imageio
 
 
@@ -39,6 +40,7 @@ for file in file_list[comm.Get_rank()::comm.Get_size()]:
                    'w-') as h5f:
 
         ### save script ###
+        h5f['version'] = fastpli.__version__
         with open(os.path.abspath(__file__), 'r') as f:
             h5f['script'] = f.read()
 
@@ -53,9 +55,11 @@ for file in file_list[comm.Get_rank()::comm.Get_size()]:
 
         # print('Memory: ' + str(simpli.memory_usage()))
 
+        print('loading models')
         simpli.fiber_bundles = fastpli.io.fiber.load(file, 'fiber_bundles')
 
-        for m, (dn, model) in enumerate([(-0.001, 'p'), (0.001, 'r')]):
+        print('starting simlation')
+        for m, (dn, model) in tqdm(enumerate([(-0.001, 'p'), (0.001, 'r')])):
 
             simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
                                                 (1.0, dn, 1, model)]]
@@ -75,10 +79,10 @@ for file in file_list[comm.Get_rank()::comm.Get_size()]:
             h5f[model + '/tissue_properties'] = tissue_properties
 
             ### Simulate PLI Measurement ###
-            for name, gain, intensity, res, tilt_angle in [
+            for name, gain, intensity, res, tilt_angle in tqdm([
                 ('LAP', 3, 26000, PIXEL_SIZE_LAP, 5.5),
                 ('PM', 1.5, 50000, PIXEL_SIZE_PM, 3.9)
-            ]:
+            ]):
 
                 simpli.filter_rotations = np.deg2rad([0, 30, 60, 90, 120, 150])
                 simpli.light_intensity = intensity  # a.u.
@@ -96,7 +100,7 @@ for file in file_list[comm.Get_rank()::comm.Get_size()]:
 
                 name = name + '/' + model
 
-                for t, (theta, phi) in enumerate(TILTS):
+                for t, (theta, phi) in tqdm(enumerate(TILTS)):
                     images = simpli.run_simulation(label_field, vec_field,
                                                    tissue_properties,
                                                    np.deg2rad(theta),
