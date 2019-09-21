@@ -10,6 +10,15 @@ from tqdm import tqdm
 from mpi4py import MPI
 from numba import njit
 
+
+def save_fibers(file_name, fiber_bundles):
+    fastpli.io.fiber.save(file_name, fiber_bundles, mode='w-')
+    with h5py.File(file_name, 'r+') as h5f:
+        h5f['version'] = fastpli.__version__
+        with open(os.path.abspath(__file__), 'r') as f:
+            h5f['script'] = f.read()
+
+
 # reproducability
 np.random.seed(42)
 
@@ -34,7 +43,7 @@ LENGTH = NUM_LAP_PIXEL * LAP * np.sqrt(3)
 
 os.makedirs(os.path.join(FILE_PATH, 'output', 'models'), exist_ok=True)
 
-### create fiber_bundle(s) ###
+# setup solver
 solver = fastpli.model.solver.Solver()
 solver.drag = 0
 solver.omp_num_threads = 8
@@ -73,7 +82,7 @@ for radius, rnd in PARAMETERS[comm.Get_rank()::comm.Get_size()]:
         solver.fiber_bundles = [fiber_bundle]
         del fiber_bundle
 
-        ### run solver ###
+        # Run Solver
         # solver.draw_scene()
         for i in range(100):
             print("rank:" + str(comm.Get_rank()), "step:", i, solver.num_obj,
@@ -82,7 +91,7 @@ for radius, rnd in PARAMETERS[comm.Get_rank()::comm.Get_size()]:
             if solver.step():
                 break
 
-    ### save data ###
+    # Save Data
     file_name = 'cube_hom_radius_' + str(round(radius, 2)) + '_rnd_' + str(
         round(rnd, 2))
     file_name = os.path.join(FILE_PATH, 'output', 'models', file_name + '.h5')
@@ -92,7 +101,7 @@ for radius, rnd in PARAMETERS[comm.Get_rank()::comm.Get_size()]:
                           'fiber_bundles',
                           mode='w-')
 
-    with h5py.File(file_name, 'a') as h5f:
+    with h5py.File(file_name, 'r+') as h5f:
         h5f['version'] = fastpli.__version__
         with open(os.path.abspath(__file__), 'r') as f:
             h5f['script'] = f.read()
