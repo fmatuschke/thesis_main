@@ -1,0 +1,3 @@
+[submodule "fastpli"]
+	path = fastpli
+	url = git@gitlab.fz-juelich.de:f.matuschke/fastpli.git
