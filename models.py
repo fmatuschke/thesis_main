@@ -51,12 +51,12 @@ for radius, rnd in PARAMETERS[comm.Get_rank()::comm.Get_size()]:
     solver.obj_mean_length = 4 * radius
     solver.obj_min_radius = 8 * radius
 
-    # pre gerenate initial fiber configuration
-    # saves memory to don't do it
-    solver.fiber_bundles = fastpli.model.sandbox.shape.box(
-        -0.5 * np.array([LENGTH, LENGTH, LENGTH]),
-        0.5 * np.array([LENGTH, LENGTH, LENGTH]), np.deg2rad(0), np.deg2rad(90),
-        2 * radius + 1e-9, radius, 2)
+    solver.fiber_bundles = [
+        fastpli.model.sandbox.shape.box(
+            -0.5 * np.array([LENGTH, LENGTH, LENGTH]),
+            0.5 * np.array([LENGTH, LENGTH, LENGTH]), np.deg2rad(0),
+            np.deg2rad(90), 2 * radius + 1e-9, radius, 2)
+    ]
 
     print("rank:" + str(comm.Get_rank()), "init:", solver.num_obj,
           solver.num_col_obj)
@@ -90,7 +90,7 @@ for radius, rnd in PARAMETERS[comm.Get_rank()::comm.Get_size()]:
     fastpli.io.fiber.save(file_name,
                           solver.fiber_bundles,
                           'fiber_bundles',
-                          mode='w')
+                          mode='w-')
 
     with h5py.File(file_name, 'a') as h5f:
         with open(os.path.abspath(__file__), 'r') as f:

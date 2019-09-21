@@ -43,12 +43,18 @@ fastpli/build: fastpli/
 	make build
 
 .PHONY: fastpli
-fastpli: env fastpli/ git-submodules fastpli/build
+fastpli: env fastpli/ git-submodules clean-build fastpli/build
 	$(PIP) uninstall fastpli -y
 	$(PIP) install fastpli/build/. -q
 
 # CLEANING
 .PHONY: clean
-clean:
+clean: clean-env clean-build
+
+.PHONY: clean-env
+clean-env:
 	rm -rf env-*
+
+.PHONY: clean-build
+clean-build:
 	rm -rf fastpli/build
