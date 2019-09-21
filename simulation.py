@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 import h5py
 import os
 import glob
@@ -42,16 +43,20 @@ os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 file_list = glob.glob(os.path.join(FILE_PATH, 'output', 'models', '*.h5'))
 
 for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
-    file_name = os.path.basename(file)
-    tqdm.write(file_name)
+    file_name_0 = os.path.basename(file)
+    tqdm.write(file_name_0)
 
-    for (f_phi, f_theta) in FIBER_ROTATIONS:
+    tqdm.write('loading models')
+    fiber_bundles = fastpli.io.fiber.load(file, 'fiber_bundles')
 
-        file_name = os.path.splitext(file_name)[0] + '_theta_' + str(
-            f_theta) + '_phi_' + str(f_phi) + '.h5'
+    for (f_phi, f_alpha) in FIBER_ROTATIONS:
+        tqdm.write("rotation: " + str(f_phi) + ', ' + str(f_alpha))
+
+        file_name = os.path.splitext(file_name_0)[0] + '_alpha_' + str(
+            f_alpha) + '_phi_' + str(f_phi) + '.h5'
 
         f_phi = np.deg2rad(f_phi)
-        f_theta = np.deg2rad(f_theta)
+        f_alpha = np.deg2rad(f_alpha)
         with h5py.File(
                 os.path.join(FILE_PATH, 'output/simulations/', file_name),
                 'w-') as h5f:
@@ -75,14 +80,14 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
 
             tqdm.write('Memory: ' + str(simpli.memory_usage()))
 
-            tqdm.write('loading models')
-            rot = fastpli.tools.rotation.a_on_b([0, 0, 1], [
-                np.sin(f_theta) * np.cos(f_phi),
-                np.sin(f_theta) * np.sin(f_phi),
-                np.cos(f_theta)
+            tqdm.write('rotating models')
+            rot = fastpli.tools.rotation.a_on_b([1, 0, 0], [
+                np.cos(f_alpha) * np.cos(f_phi),
+                np.cos(f_alpha) * np.sin(f_phi),
+                np.sin(f_alpha)
             ])
             simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
-                fastpli.io.fiber.load(file, 'fiber_bundles'), rot)
+                copy.deepcopy(fiber_bundles), rot)
 
             tqdm.write('starting simlation')
             for m, (dn, model) in enumerate([(-0.001, 'p'), (0.001, 'r')]):
