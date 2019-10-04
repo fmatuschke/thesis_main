@@ -20,7 +20,7 @@ env-update: env
 
 # FASTPLI
 fastpli/:
-	git submodule add git@gitlab.fz-juelich.de:f.matuschke/fastpli.git fastpli
+	git submodule add git@jugit.fz-juelich.de:f.matuschke/fastpli.git fastpli
 	git submodule init
 
 .PHONY: git-submodules
