@@ -30,21 +30,25 @@ FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 
-### 3 crossing fiber bundles ###
-RADIUS_OUT = 640
-RADIUS_IN = RADIUS_OUT * 0.6
-FIBER_RADIUS_0 = 1
-FIBER_RADIUS = 10.0
-FIBER_SPACING = FIBER_RADIUS * 3.0 + 1e-9
-# FIBER_STEPS = 25
 MODEL_NAME = "y_shape_hom"
 OUTPUT_PATH = os.path.join(FILE_PATH, 'output', 'models')
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
+### 3 crossing fiber bundles ###
+RADIUS_OUT = 640
+RADIUS_IN = RADIUS_OUT * 0.6
+F_RADIUS = 1
+FB_RADIUS = 10.0
+FB_SPACING = FB_RADIUS * 2
+FB_STEPS = 25
+p0 = np.array((0, 0, 0))
+p1 = np.array((0, 0, 60))
+p_shift = np.array([(RADIUS_OUT + RADIUS_IN) * 0.5 / np.cos(np.deg2rad(30)), 0,
+                    0])
+V_FRACTION = 0.25
+
 solver = fastpli.model.solver.Solver()
 solver.omp_num_threads = 8
-solver.obj_mean_length = FIBER_RADIUS * 4
-solver.obj_min_radius = FIBER_RADIUS * 8
 
 
 def next_file_name():
@@ -66,114 +70,149 @@ def next_file_name():
     return name + ".%s" % i
 
 
-p0 = np.array((0, 0, 0))
-p1 = np.array((0, 0, 60))
-p_shift = np.array([(RADIUS_OUT + RADIUS_IN) * 0.5 / np.cos(np.deg2rad(30)), 0,
-                    0])
-
-fiber_bundles = []
-
 # fiber seeds
 print("seeding")
-seeds = fastpli.model.sandbox.seeds.triangular_circle(RADIUS_OUT, FIBER_SPACING)
+seeds = fastpli.model.sandbox.seeds.triangular_circle(RADIUS_OUT, FB_SPACING)
+fiber_bundles = []
 
 # first
 print("fiber_bundle 0")
 dp = np.dot(fastpli.tools.rotation.z(np.deg2rad(0)), p_shift)
-data = fastpli.model.sandbox.build.cylinder(p0 + dp + 0 / 3 * FIBER_RADIUS,
-                                            p1 + dp + 0 / 3 * FIBER_RADIUS,
-                                            RADIUS_IN, RADIUS_OUT, seeds,
-                                            FIBER_RADIUS, np.deg2rad(180 - 30),
-                                            np.deg2rad(180 + 30), 'c')
+data = fastpli.model.sandbox.build.cylinder(p0 + dp + 0 / 3 * FB_RADIUS,
+                                            p1 + dp + 0 / 3 * FB_RADIUS,
+                                            RADIUS_IN,
+                                            RADIUS_OUT,
+                                            seeds,
+                                            FB_RADIUS,
+                                            np.deg2rad(180 - 30),
+                                            np.deg2rad(180 + 30),
+                                            'c',
+                                            steps=FB_STEPS)
 
 fiber_bundles.append(data)
 
 # second
 print("fiber_bundle 1")
 dp = np.dot(fastpli.tools.rotation.z(np.deg2rad(120)), p_shift)
-data = fastpli.model.sandbox.build.cylinder(p0 + dp + 1 / 3 * FIBER_RADIUS,
-                                            p1 + dp + 1 / 3 * FIBER_RADIUS,
-                                            RADIUS_IN, RADIUS_OUT, seeds,
-                                            FIBER_RADIUS,
+data = fastpli.model.sandbox.build.cylinder(p0 + dp + 1 / 3 * FB_RADIUS,
+                                            p1 + dp + 1 / 3 * FB_RADIUS,
+                                            RADIUS_IN,
+                                            RADIUS_OUT,
+                                            seeds,
+                                            FB_RADIUS,
                                             np.deg2rad(180 - 30 + 120),
-                                            np.deg2rad(180 + 30 + 120), 'c')
+                                            np.deg2rad(180 + 30 + 120),
+                                            'c',
+                                            steps=FB_STEPS)
 fiber_bundles.append(data)
 
-# # third
+# third
 print("fiber_bundle 2")
 dp = np.dot(fastpli.tools.rotation.z(np.deg2rad(240)), p_shift)
-data = fastpli.model.sandbox.build.cylinder(p0 + dp + 1 / 3 * FIBER_RADIUS,
-                                            p1 + dp + 1 / 3 * FIBER_RADIUS,
-                                            RADIUS_IN, RADIUS_OUT, seeds,
-                                            FIBER_RADIUS,
+data = fastpli.model.sandbox.build.cylinder(p0 + dp + 1 / 3 * FB_RADIUS,
+                                            p1 + dp + 1 / 3 * FB_RADIUS,
+                                            RADIUS_IN,
+                                            RADIUS_OUT,
+                                            seeds,
+                                            FB_RADIUS,
                                             np.deg2rad(180 - 30 + 240),
-                                            np.deg2rad(180 + 30 + 240), 'c')
+                                            np.deg2rad(180 + 30 + 240),
+                                            'c',
+                                            steps=FB_STEPS)
 fiber_bundles.append(data)
 
 solver.fiber_bundles = fiber_bundles
+solver.obj_mean_length = FB_RADIUS * 4
+solver.obj_min_radius = FB_RADIUS * 8
 solver.boundry_checking(10)
 solver.draw_scene()
+# input()
 
 # add displacement
 print("displacement")
 for fb in fiber_bundles:
     for f in fb:
-        f[:, :-1] += np.random.uniform(-FIBER_RADIUS * 0.25,
-                                       FIBER_RADIUS * 0.25, (f.shape[0], 3))
+        f[:, :-1] += np.random.uniform(-FB_RADIUS * 0.25, FB_RADIUS * 0.25,
+                                       (f.shape[0], 3))
 
 solver.fiber_bundles = fiber_bundles
+solver.obj_mean_length = FB_RADIUS * 4
+solver.obj_min_radius = FB_RADIUS * 8
 solver.boundry_checking(10)
 solver.draw_scene()
+# input()
+
+# solve fiber bundles
+print("FB solving")
+for i in trange(25):
+    solved = solver.step()
+    if (i % 25) == 0:
+        solver.draw_scene()
+        tqdm.write("fb step %i, %i, %i" %
+                   (i, solver.num_obj, solver.num_col_obj))
+
+    if solved:
+        break
 
 # add rnd fibers
 new_fbs = []
+num_fibers = 0
 for fb in fiber_bundles:
     for f in fb:
-        rnd_num = np.random.poisson(FIBER_RADIUS / FIBER_RADIUS_0 * 4 / np.pi)
-        rnd_seed = np.random.uniform(-FIBER_RADIUS, FIBER_RADIUS, (rnd_num, 2))
-        # rnd_seed = fastpli.model.sandbox.seeds.crop_circle(
-        #     FIBER_RADIUS, rnd_seed)
-        new_fbs.append([
-            fastpli.model.sandbox.build.bundle(f[:, :-1], rnd_seed,
-                                               FIBER_RADIUS_0)[0]
-        ])
+        rnd_num = np.random.poisson(FB_RADIUS**2 / F_RADIUS**2 * V_FRACTION)
+
+        rnd_phi = np.random.uniform(0, 2 * np.pi, rnd_num)
+        rnd_r = FB_RADIUS * np.sqrt(np.random.uniform(0, 1, rnd_num))
+        rnd_seeds = np.transpose(
+            np.array([rnd_r * np.cos(rnd_phi), rnd_r * np.sin(rnd_phi)]))
+
+        # rnd_seeds = np.random.uniform(-FB_RADIUS, FB_RADIUS, (rnd_num, 2))
+        # rnd_seeds = fastpli.model.sandbox.seeds.crop_circle(FB_RADIUS, rnd_seed)
+        rnd_radii = np.abs(np.random.poisson(100, rnd_seeds.shape[0]) / 100)
+
+        new_fbs.append(
+            fastpli.model.sandbox.build.bundle(f[:, :-1], rnd_seeds, rnd_radii))
+
+        num_fibers += len(new_fbs[-1])
+
+print("Num Fibers: ", num_fibers)
 
 fiber_bundles = new_fbs
 solver.fiber_bundles = fiber_bundles
-# solver.obj_mean_length = FIBER_RADIUS_0 * 4
-# solver.obj_min_radius = FIBER_RADIUS_0 * 8
-# solver.boundry_checking(10)
 solver.draw_scene()
-
-input()
-
-# add displacement
-print("displacement")
-for fb in fiber_bundles:
-    for f in fb:
-        f[:, :-1] += np.random.uniform(-FIBER_RADIUS_0 * 0.25,
-                                       FIBER_RADIUS_0 * 0.25, (f.shape[0], 3))
-
-solver.fiber_bundles = fiber_bundles
-solver.boundry_checking(100)
-solver.draw_scene()
-
 # input()
 
-# file_pref = next_file_name()
-# print(file_pref)
-# save_fibers(file_pref + '.init.h5', fiber_bundles)
+# add displacement
+print("final rnd displacement and radii")
+for fb in fiber_bundles:
+    for f in fb:
+        f[:, :-1] += np.random.uniform(-F_RADIUS * 0.25, F_RADIUS * 0.25,
+                                       (f.shape[0], 3))
+        f[:, -1] *= np.random.uniform(0.95, 1.05, f.shape[0])
 
-# for i in trange(10000):
-#     solved = solver.step()
-#     if (i % 25) == 0:
-#         solver.draw_scene()
-#         tqdm.write("step %i, %i, %i" % (i, solver.num_obj, solver.num_col_obj))
+solver.fiber_bundles = fiber_bundles
+solver.obj_mean_length = F_RADIUS * 4
+solver.obj_min_radius = F_RADIUS * 8
+solver.boundry_checking(100)
+solver.draw_scene()
+# input()
 
-#     if solved:
-#         break
+file_pref = next_file_name()
+print(file_pref)
+save_fibers(file_pref + '.init.h5', fiber_bundles)
 
-# print("step:", i, solver.num_obj, solver.num_col_obj)
+print("objs:", solver.num_obj)
+for i in trange(10000):
+    solved = solver.step()
+    if (i % 25) == 0:
+        solver.draw_scene()
+        tqdm.write("f step %i, %i, %i" %
+                   (i, solver.num_obj, solver.num_col_obj))
 
-# save_fibers(file_pref + '.solved.h5', solver.fiber_bundles, solver.as_dict(), i,
-#             solver.num_col_obj)
+    if solved:
+        break
+
+print("step:", i, solver.num_obj, solver.num_col_obj)
+
+save_fibers(file_pref + '.solved.h5', solver.fiber_bundles, solver.as_dict(), i,
+            solver.num_col_obj)
