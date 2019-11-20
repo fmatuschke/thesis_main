@@ -13,13 +13,13 @@ import os
 def save_fibers(file_name, fiber_bundles, solver_dict=None, i=0, n=0):
     fastpli.io.fiber.save(file_name, fiber_bundles)
     with h5py.File(file_name, 'r+') as h5f:
-        h5f['version'] = fastpli.__version__
+        h5f['/fiber_bundles'].attrs['version'] = fastpli.__version__
         with open(os.path.abspath(__file__), 'r') as f:
-            h5f['/'].attrs['script'] = f.read()
+            h5f['/fiber_bundles'].attrs['script'] = f.read()
         if solver_dict:
-            h5f['/'].attrs['solver'] = str(solver_dict)
-            h5f['/'].attrs['solver.steps'] = i
-            h5f['/'].attrs['solver.num_col_obj'] = n
+            h5f['/fiber_bundles'].attrs['solver'] = str(solver_dict)
+            h5f['/fiber_bundles'].attrs['solver.steps'] = i
+            h5f['/fiber_bundles'].attrs['solver.num_col_obj'] = n
 
 
 # reproducability

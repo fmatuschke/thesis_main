@@ -14,13 +14,13 @@ import os
 def save_fibers(file_name, fiber_bundles, solver_dict=None, i=0, n=0):
     fastpli.io.fiber.save(file_name, fiber_bundles)
     with h5py.File(file_name, 'r+') as h5f:
-        h5f['version'] = fastpli.__version__
+        h5f['/fiber_bundles'].attrs['version'] = fastpli.__version__
         with open(os.path.abspath(__file__), 'r') as f:
-            h5f['/'].attrs['script'] = f.read()
+            h5f['/fiber_bundles'].attrs['script'] = f.read()
         if solver_dict:
-            h5f['/'].attrs['solver'] = str(solver_dict)
-            h5f['/'].attrs['solver.steps'] = i
-            h5f['/'].attrs['solver.num_col_obj'] = n
+            h5f['/fiber_bundles'].attrs['solver'] = str(solver_dict)
+            h5f['/fiber_bundles'].attrs['solver.steps'] = i
+            h5f['/fiber_bundles'].attrs['solver.num_col_obj'] = n
 
 
 # reproducability
@@ -30,7 +30,7 @@ FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 
-MODEL_NAME = "y_shape_hom"
+MODEL_NAME = "y_shape_fb"
 OUTPUT_PATH = os.path.join(FILE_PATH, 'output', 'models')
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
@@ -48,7 +48,7 @@ p_shift = np.array([(RADIUS_OUT + RADIUS_IN) * 0.5 / np.cos(np.deg2rad(30)), 0,
 V_FRACTION = 0.25
 
 solver = fastpli.model.solver.Solver()
-solver.omp_num_threads = 8
+solver.omp_num_threads = 1
 
 
 def next_file_name():

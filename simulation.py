@@ -44,9 +44,9 @@ comm = MPI.COMM_WORLD
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 
 file_name = 'y_shape_hom_solved.h5'
-h5_file_name = 'y_shape_hom_solved.' + str(FACTOR) + '.h5'
+h5_file_name = file_name + '.' + str(FACTOR) + '.h5'
 with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
-               'w') as h5f:
+               'w-') as h5f:
 
     # save script
     h5f['version'] = fastpli.__version__
@@ -60,11 +60,11 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
     simpli.set_voi(VOI[0], VOI[1])  # in mu meter
 
     tqdm.write('Memory: ' + str(simpli.memory_usage()))
-    sleep(10)
+    # sleep(10)
 
     tqdm.write('loading models')
     simpli.fiber_bundles = fastpli.io.fiber.load(
-        os.path.join(FILE_PATH, 'output/models', file_name), 'fiber_bundles')
+        os.path.join(FILE_PATH, 'output/models', file_name), '/fiber_bundles/')
 
     tqdm.write('starting simlation')
     for m, (dn, model) in enumerate([(-0.001, 'p'), (0.001, 'r')]):
