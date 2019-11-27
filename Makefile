@@ -40,7 +40,8 @@ fastpli-pull:
 .ONESHELL:
 fastpli/build: fastpli/
 	cd fastpli
-	make build
+	# make build
+	make BUILD=info build
 
 .PHONY: fastpli
 fastpli: env fastpli/ git-submodules clean-build fastpli/build
