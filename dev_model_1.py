@@ -210,8 +210,8 @@ solver.draw_scene()
 
 file_pref = next_file_name()
 print(file_pref)
-save_fibers(file_pref + '.init.h5', solver.fiber_bundles)
-fastpli.io.fiber.save(file_pref + '.init.dat', solver.fiber_bundles)
+# save_fibers(file_pref + '.init.h5', solver.fiber_bundles)
+# fastpli.io.fiber.save(file_pref + '.init.dat', solver.fiber_bundles)
 
 print("objs:", solver.num_obj)
 for i in trange(10000):
@@ -231,6 +231,6 @@ for i in trange(10000):
 
 print("step:", i, solver.num_obj, solver.num_col_obj)
 
-save_fibers(file_pref + '.solved.h5', solver.fiber_bundles, solver.as_dict(), i,
-            solver.num_col_obj)
-fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)
+# save_fibers(file_pref + '.solved.h5', solver.fiber_bundles, solver.as_dict(), i,
+#             solver.num_col_obj)
+# fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)

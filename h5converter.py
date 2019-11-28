@@ -10,5 +10,6 @@ import h5py
 from tqdm import tqdm, trange
 import os
 
-fbs = fastpli.io.fiber.load('output/models/y_shape_hom.0.solved.h5', '/')
-fastpli.io.fiber.save('output/models/y_shape_hom.0.solved.dat', fbs)
+fbs = fastpli.io.fiber.load('output/models/y_shape_fb.1.init.h5',
+                            '/fiber_bundles/')
+fastpli.io.fiber.save('output/models/y_shape_fb.1.init.dat', fbs)

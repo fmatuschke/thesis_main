@@ -14,7 +14,7 @@ from tqdm import tqdm
 from time import sleep
 import imageio
 
-NUM_PROC = 24
+NUM_PROC = 12
 
 
 def data2image(data):
@@ -33,6 +33,29 @@ FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 
+
+def increment_file_name(file_name):
+    import glob
+
+    file_path = os.path.dirname(file_name)
+    file_name = os.path.basename(file_name)
+    file_base = file_name.rpartition('.')[0]
+    file_ext = file_name.rpartition('.')[-1]
+    files = glob.glob(os.path.join(file_path, file_base + '*.' + file_ext))
+
+    def in_list(i, file):
+        for f in files:
+            if file_base + ".%s." % i in f:
+                return True
+        return False
+
+    i = 0
+    while in_list(i, files):
+        i += 1
+
+    return os.path.join(file_path, file_base + ".%s." % i + file_ext)
+
+
 # PARAMETERS
 PIXEL_SIZE_LAP = 65
 PIXEL_SIZE_PM = 1.25
@@ -43,8 +66,11 @@ THICKNESS = 60
 comm = MPI.COMM_WORLD
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 
-file_name = 'y_shape_hom_solved.h5'
-h5_file_name = file_name + '.' + str(FACTOR) + '.h5'
+input_file_name = 'y_shape_fb.0.solved.h5'
+h5_file_name = os.path.join(FILE_PATH, 'output/simulations', input_file_name)
+h5_file_name = increment_file_name(h5_file_name)
+output_base_name = os.path.basename(h5_file_name)
+
 with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
                'w-') as h5f:
 
@@ -64,10 +90,11 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
 
     tqdm.write('loading models')
     simpli.fiber_bundles = fastpli.io.fiber.load(
-        os.path.join(FILE_PATH, 'output/models', file_name), '/fiber_bundles/')
+        os.path.join(FILE_PATH, 'output/models', input_file_name),
+        '/fiber_bundles/')
 
     tqdm.write('starting simlation')
-    for m, (dn, model) in enumerate([(-0.001, 'p'), (0.001, 'r')]):
+    for m, (dn, model) in enumerate([(-0.001, 'p'), (0.002, 'r')]):
         tqdm.write("tissue: " + str(m) + ', ' + str(dn) + ', ' + str(model))
 
         simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
@@ -166,8 +193,8 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
             h5f[name + '/' + model].attrs['simpli'] = str(simpli.as_dict())
 
             imageio.imwrite(
-                'output/simulations/' + file_name + '_' + name + '_' + model +
-                '.png',
+                'output/simulations/' + output_base_name + '_' + name + '_' +
+                model + '.png',
                 data2image(
                     fastpli.analysis.images.fom_hsv_black(
                         rofl_direction, rofl_incl)))
