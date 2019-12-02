@@ -105,7 +105,7 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
         label_field, vec_field, tissue_properties = simpli.generate_tissue()
 
         if m == 0:
-            dset = h5f.create_dataset('tissue',
+            dset = h5f.create_dataset('tissue_222',
                                       np.array(label_field.shape) // 2,
                                       dtype=np.uint8,
                                       compression='gzip',
