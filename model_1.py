@@ -57,7 +57,7 @@ p_shift = np.array([(RADIUS_OUT + RADIUS_IN) * 0.5 / np.cos(np.deg2rad(30)), 0,
 V_FRACTION = 0.5
 
 solver = fastpli.model.solver.Solver()
-solver.omp_num_threads = 24
+solver.omp_num_threads = 8
 
 
 def next_file_name():

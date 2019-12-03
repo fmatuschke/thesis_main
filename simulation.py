@@ -66,7 +66,7 @@ THICKNESS = 60
 comm = MPI.COMM_WORLD
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 
-input_file_name = 'y_shape_fb.0.solved.h5'
+input_file_name = 'y_shape_fb.1.solved.h5'
 h5_file_name = os.path.join(FILE_PATH, 'output/simulations', input_file_name)
 h5_file_name = increment_file_name(h5_file_name)
 output_base_name = os.path.basename(h5_file_name)
