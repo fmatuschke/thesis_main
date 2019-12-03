@@ -3,34 +3,13 @@ import fastpli.io
 import fastpli.tools
 import fastpli.objects
 import fastpli.model.solver
+import fastpli_helper as helper
 
 import time
 import numpy as np
 import h5py
 from tqdm import tqdm, trange
 import os
-
-
-def get_pip_freeze():
-    try:
-        from pip._internal.operations import freeze
-    except ImportError:
-        from pip.operations import freeze
-    return "\n".join(freeze.freeze())
-
-
-def save_fibers(file_name, fiber_bundles, solver_dict=None, i=0, n=0):
-    fastpli.io.fiber.save(file_name, fiber_bundles, '/fiber_bundles', 'w-')
-    with h5py.File(file_name, 'r+') as h5f:
-        h5f['/fiber_bundles'].attrs['version'] = fastpli.__version__
-        h5f['/fiber_bundles'].attrs['pip_freeze'] = get_pip_freeze()
-        with open(os.path.abspath(__file__), 'r') as f:
-            h5f['/fiber_bundles'].attrs['script'] = f.read()
-        if solver_dict:
-            h5f['/fiber_bundles'].attrs['solver'] = str(solver_dict)
-            h5f['/fiber_bundles'].attrs['solver.steps'] = i
-            h5f['/fiber_bundles'].attrs['solver.num_col_obj'] = n
-
 
 # reproducability
 np.random.seed(42)
@@ -58,26 +37,6 @@ V_FRACTION = 0.5
 
 solver = fastpli.model.solver.Solver()
 solver.omp_num_threads = 8
-
-
-def next_file_name():
-    import glob
-
-    name = os.path.join(OUTPUT_PATH, MODEL_NAME)
-    files = glob.glob(os.path.join(OUTPUT_PATH, MODEL_NAME + '*'))
-
-    def in_list(i, file):
-        for f in files:
-            if name + ".%s" % i in f:
-                return True
-        return False
-
-    i = 0
-    while in_list(i, files):
-        i += 1
-
-    return name + ".%s" % i
-
 
 # fiber seeds
 print("seeding")
@@ -208,9 +167,9 @@ fiber_bundles = solver.fiber_bundles
 solver.draw_scene()
 # input()
 
-file_pref = next_file_name()
+file_pref = helper.version_file_name(os.path.join(OUTPUT_PATH, MODEL_NAME))
 print(file_pref)
-save_fibers(file_pref + '.init.h5', solver.fiber_bundles)
+helper.save_h5_fibers(file_pref + '.init.h5', solver.fiber_bundles, __file__)
 fastpli.io.fiber.save(file_pref + '.init.dat', solver.fiber_bundles)
 
 print("objs:", solver.num_obj)
@@ -218,19 +177,19 @@ for i in trange(10000):
     solved = solver.step()
     if (i % 25) == 0:
         solver.draw_scene()
-        tqdm.write("f step %i, %i, %i" %
-                   (i, solver.num_obj, solver.num_col_obj))
+        tqdm.write("f step %i, %i, %i, %i" %
+                   (i, solver.num_obj, solver.num_col_obj, solver.overlap))
     if (i % 1000) == 0:
-        save_fibers(file_pref + '.step.' + str(i) + '.h5', solver.fiber_bundles,
-                    solver.as_dict(), i, solver.num_col_obj)
+        helper.save_h5_fibers(file_pref + '.step.' + str(i) + '.h5',
+                              solver.fiber_bundles, __file__, solver.as_dict(),
+                              i, solver.num_col_obj, solver.overlap)
         fastpli.io.fiber.save(file_pref + '.step.' + str(i) + '.dat',
                               solver.fiber_bundles)
 
     if solved:
         break
 
-print("step:", i, solver.num_obj, solver.num_col_obj)
-
-save_fibers(file_pref + '.solved.h5', solver.fiber_bundles, solver.as_dict(), i,
-            solver.num_col_obj)
+print("step:", i, solver.num_obj, solver.num_col_obj, solver.overlap)
+helper.save_h5_fibers(file_pref + '.solved.h5', solver.fiber_bundles, __file__,
+                      solver.as_dict(), i, solver.num_col_obj, solver.overlap)
 fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)

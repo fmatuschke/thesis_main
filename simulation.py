@@ -6,6 +6,7 @@ import glob
 import fastpli.simulation
 import fastpli.analysis
 import fastpli.io
+import fastpli_helper as helper
 
 import multiprocessing as mp
 
@@ -14,7 +15,7 @@ from tqdm import tqdm
 from time import sleep
 import imageio
 
-NUM_PROC = 12
+NUM_PROC = 8
 
 
 def data2image(data):
@@ -23,7 +24,6 @@ def data2image(data):
 
 mp_pool = mp.Pool(NUM_PROC)
 
-# VOI = [(-60, -60, 0), (0, 0, 60)]
 VOI = [(-200, -200, 0), (200, 200, 60)]
 
 # reproducability
@@ -32,29 +32,6 @@ np.random.seed(42)
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
-
-
-def increment_file_name(file_name):
-    import glob
-
-    file_path = os.path.dirname(file_name)
-    file_name = os.path.basename(file_name)
-    file_base = file_name.rpartition('.')[0]
-    file_ext = file_name.rpartition('.')[-1]
-    files = glob.glob(os.path.join(file_path, file_base + '*.' + file_ext))
-
-    def in_list(i, file):
-        for f in files:
-            if file_base + ".%s." % i in f:
-                return True
-        return False
-
-    i = 0
-    while in_list(i, files):
-        i += 1
-
-    return os.path.join(file_path, file_base + ".%s." % i + file_ext)
-
 
 # PARAMETERS
 PIXEL_SIZE_LAP = 65
@@ -66,9 +43,9 @@ THICKNESS = 60
 comm = MPI.COMM_WORLD
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 
-input_file_name = 'y_shape_fb.1.solved.h5'
+input_file_name = 'y_shape_fb.1.solved'
 h5_file_name = os.path.join(FILE_PATH, 'output/simulations', input_file_name)
-h5_file_name = increment_file_name(h5_file_name)
+h5_file_name = helper.version_file_name(h5_file_name) + '.h5'
 output_base_name = os.path.basename(h5_file_name)
 
 with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
@@ -78,6 +55,7 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
     h5f['version'] = fastpli.__version__
     with open(os.path.abspath(__file__), 'r') as f:
         h5f['script'] = f.read()
+        h5f['pip_freeze'] = helper.pip_freeze()
 
     # Setup Simpli for Tissue Generation
     simpli = fastpli.simulation.Simpli()
@@ -90,7 +68,7 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
 
     tqdm.write('loading models')
     simpli.fiber_bundles = fastpli.io.fiber.load(
-        os.path.join(FILE_PATH, 'output/models', input_file_name),
+        os.path.join(FILE_PATH, 'output/models', input_file_name + '.h5'),
         '/fiber_bundles/')
 
     tqdm.write('starting simlation')
