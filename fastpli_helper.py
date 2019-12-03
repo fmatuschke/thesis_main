@@ -44,13 +44,16 @@ def version_file_name(file_name):
 
     file_path = os.path.dirname(file_name)
     file_name = os.path.basename(file_name)
-    file_base = file_name.rpartition('.')[0]
-    file_ext = file_name.rpartition('.')[-1]
-    files = glob.glob(os.path.join(file_path, file_base + '*.' + file_ext))
+    files = glob.glob(file_name)
+
+    print(file_name)
 
     def in_list(i, file):
         for f in files:
-            if file_base + ".v{}".format(i) in f:
+            print(f)
+            print(file_name + ".v{}".format(i))
+            print()
+            if file_name + ".v{}".format(i) in f:
                 return True
         return False
 
@@ -58,4 +61,4 @@ def version_file_name(file_name):
     while in_list(i, files):
         i += 1
 
-    return os.path.join(file_path, file_base + ".v{}".format(i))
+    return os.path.join(file_path, file_name + ".v{}".format(i))

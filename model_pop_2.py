@@ -84,7 +84,7 @@ for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
 
     # Save Data
     file_pref = helper.version_file_name(
-        os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(dphi)))
+        os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(round(dphi, 1))))
 
     print(file_pref)
 
