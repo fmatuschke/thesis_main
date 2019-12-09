@@ -35,8 +35,11 @@ p_shift = np.array([(RADIUS_OUT + RADIUS_IN) * 0.5 / np.cos(np.deg2rad(30)), 0,
                     0])
 V_FRACTION = 0.5
 
+# init solver
 solver = fastpli.model.solver.Solver()
 solver.omp_num_threads = 8
+file_pref = helper.version_file_name(os.path.join(OUTPUT_PATH, MODEL_NAME))
+print(file_pref)
 
 # fiber seeds
 print("seeding")
@@ -95,7 +98,6 @@ solver.obj_min_radius = FB_RADIUS * 8
 solver.boundry_checking(10)
 fiber_bundles = solver.fiber_bundles
 solver.draw_scene()
-# input()
 
 # add displacement
 print("displacement")
@@ -152,7 +154,6 @@ solver.obj_min_radius = F_RADIUS * 5
 solver.boundry_checking(100)
 fiber_bundles = solver.fiber_bundles
 solver.draw_scene()
-# input()
 
 # add displacement
 print("final rnd displacement and radii")
@@ -165,10 +166,7 @@ solver.fiber_bundles = fiber_bundles
 solver.boundry_checking(100)
 fiber_bundles = solver.fiber_bundles
 solver.draw_scene()
-# input()
 
-file_pref = helper.version_file_name(os.path.join(OUTPUT_PATH, MODEL_NAME))
-print(file_pref)
 helper.save_h5_fibers(file_pref + '.init.h5', solver.fiber_bundles, __file__)
 fastpli.io.fiber.save(file_pref + '.init.dat', solver.fiber_bundles)
 
@@ -177,8 +175,9 @@ for i in trange(10000):
     solved = solver.step()
     if (i % 25) == 0:
         solver.draw_scene()
-        tqdm.write("f step %i, %i, %i, %i" %
-                   (i, solver.num_obj, solver.num_col_obj, solver.overlap))
+        tqdm.write("f step {}, {}, {}, {}%".format(
+            i, solver.num_obj, solver.num_col_obj,
+            round(solver.overlap / solver.num_col_obj * 100)))
     if (i % 1000) == 0:
         helper.save_h5_fibers(file_pref + '.step.' + str(i) + '.h5',
                               solver.fiber_bundles, __file__, solver.as_dict(),
@@ -189,7 +188,8 @@ for i in trange(10000):
     if solved:
         break
 
-print("step:", i, solver.num_obj, solver.num_col_obj, solver.overlap)
+print("step:", i, solver.num_obj, solver.num_col_obj,
+      solver.overlap / solver.num_col_obj * 100)
 helper.save_h5_fibers(file_pref + '.solved.h5', solver.fiber_bundles, __file__,
                       solver.as_dict(), i, solver.num_col_obj, solver.overlap)
 fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)

@@ -2,6 +2,7 @@ import numpy as np
 import h5py
 import os
 import glob
+import sys
 
 import fastpli.simulation
 import fastpli.analysis
@@ -43,7 +44,8 @@ THICKNESS = 60
 comm = MPI.COMM_WORLD
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 
-input_file_name = 'y_shape_fb.1.solved'
+input_file_name = sys.argv[1]
+
 h5_file_name = os.path.join(FILE_PATH, 'output/simulations', input_file_name)
 h5_file_name = helper.version_file_name(h5_file_name) + '.h5'
 output_base_name = os.path.basename(h5_file_name)
@@ -68,7 +70,7 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
 
     tqdm.write('loading models')
     simpli.fiber_bundles = fastpli.io.fiber.load(
-        os.path.join(FILE_PATH, 'output/models', input_file_name + '.h5'),
+        os.path.join(FILE_PATH, 'output/models', input_file_name),
         '/fiber_bundles/')
 
     tqdm.write('starting simlation')
