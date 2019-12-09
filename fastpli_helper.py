@@ -6,7 +6,7 @@ import os
 import fastpli.io
 
 
-def _pip_freeze():
+def pip_freeze():
     try:
         from pip._internal.operations import freeze
     except ImportError:
@@ -25,7 +25,7 @@ def save_h5_fibers(h5_name,
     fastpli.io.fiber.save(h5_name, fiber_bundles, '/fiber_bundles', 'w-')
     with h5py.File(h5_name, 'r+') as h5f:
         h5f['/fiber_bundles'].attrs['version'] = fastpli.__version__
-        h5f['/fiber_bundles'].attrs['pip_freeze'] = _pip_freeze()
+        h5f['/fiber_bundles'].attrs['pip_freeze'] = pip_freeze()
         h5f['/fiber_bundles'].attrs['script'] = open(
             os.path.abspath(file_script), 'r').read()
 
@@ -44,15 +44,10 @@ def version_file_name(file_name):
 
     file_path = os.path.dirname(file_name)
     file_name = os.path.basename(file_name)
-    files = glob.glob(file_name)
-
-    print(file_name)
+    files = glob.glob(os.path.join(file_path, file_name + '*'))
 
     def in_list(i, file):
         for f in files:
-            print(f)
-            print(file_name + ".v{}".format(i))
-            print()
             if file_name + ".v{}".format(i) in f:
                 return True
         return False

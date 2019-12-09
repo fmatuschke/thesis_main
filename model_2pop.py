@@ -19,7 +19,7 @@ FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 
-MODEL_NAME = "cube_pop_2"
+MODEL_NAME = "cube_2pop"
 OUTPUT_PATH = os.path.join(FILE_PATH, 'output', 'models')
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
@@ -43,9 +43,13 @@ radius_old = None
 for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
     print("rank:" + str(comm.Get_rank()), "parameter:", PARAMETERS[rank])
 
+    file_pref = helper.version_file_name(
+        os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(round(dphi, 1))))
+    print("rank:" + file_pref)
+
     seeds = fastpli.model.sandbox.seeds.triangular_grid(LENGTH,
                                                         LENGTH,
-                                                        1.5 * RADIUS_LOGMEAN,
+                                                        2 * RADIUS_LOGMEAN,
                                                         center=True)
     rnd_radii = RADIUS_LOGMEAN * np.random.lognormal(0, 0.1, seeds.shape[0])
 
@@ -83,21 +87,16 @@ for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
           solver.num_col_obj)
 
     # Save Data
-    file_pref = helper.version_file_name(
-        os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(round(dphi, 1))))
-
-    print(file_pref)
-
     helper.save_h5_fibers(file_pref + '.init.h5', solver.fiber_bundles,
                           __file__)
     fastpli.io.fiber.save(file_pref + '.init.dat', solver.fiber_bundles)
 
     # Run Solver
-    for i in tqdm(range(1000)):
+    for i in tqdm(range(10000)):
         if solver.step():
             break
 
-        if i % 25 == 0:
+        if i % 50 == 0:
             tqdm.write("rank: {} step: {} {} {} {}%".format(
                 comm.Get_rank(), i, solver.num_obj, solver.num_col_obj,
                 round(solver.overlap / solver.num_col_obj * 100)))
