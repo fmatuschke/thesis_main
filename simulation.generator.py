@@ -2,6 +2,7 @@ import yep
 
 import fastpli.simulation
 import fastpli.analysis
+import fastpli.tools
 import fastpli.io
 
 import numpy as np
@@ -17,24 +18,19 @@ FILE_BASE = os.path.basename(FILE_NAME)
 FILE_OUTPUT = os.path.join(FILE_PATH, 'output')
 os.makedirs(FILE_OUTPUT, exist_ok=True)
 
-yep.start(
-    os.path.join(FILE_OUTPUT,
-                 FILE_BASE + '.' + fastpli.__git__hash__ + '.prof'))
+file_name = fastpli.tools.helper.version_file_name(
+    os.path.join(FILE_OUTPUT, FILE_BASE + '.' + fastpli.__git__hash__))
+
+yep.start(file_name + '.prof')
 
 np.random.seed(42)
 
-with h5py.File(
-        FILE_OUTPUT + '/' + FILE_BASE + '.' + fastpli.__git__hash__ + '.h5',
-        'w') as h5f:
+with h5py.File(file_name + '.h5', 'w') as h5f:
 
     # save script
     with open(os.path.abspath(__file__), 'r') as f:
-        try:
-            from pip._internal.operations import freeze
-        except ImportError:
-            from pip.operations import freeze
         h5f['script'] = f.read()
-        h5f['pip_freeze'] = "\n".join(freeze.freeze())
+        h5f['pip_freeze'] = fastpli.tools.helper.pip_freeze()
 
     # Setup Simpli for Tissue Generation
     simpli = fastpli.simulation.Simpli()
@@ -58,7 +54,5 @@ with h5py.File(
 
 yep.stop()
 
-os.system("google-pprof --callgrind " + sys.executable + " " + FILE_OUTPUT +
-          '/' + FILE_BASE + '.' + fastpli.__git__hash__ + ".prof > " +
-          FILE_OUTPUT + '/' + FILE_BASE + '.' + fastpli.__git__hash__ +
-          ".callgrind")
+os.system("google-pprof --callgrind " + sys.executable + " " + file_name +
+          ".prof > " + file_name + ".callgrind")

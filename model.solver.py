@@ -33,6 +33,8 @@ solver.obj_min_radius = 1
 solver.obj_mean_length = 2
 solver.omp_num_threads = 1
 
+solver.boundry_checking(10)
+
 ### run solver ###
 yep.start(
     os.path.join(FILE_OUTPUT,

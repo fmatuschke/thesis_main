@@ -22,9 +22,6 @@ env-update: env
 fastpli/:
 	git submodule add git@jugit.fz-juelich.de:f.matuschke/fastpli.git fastpli
 	git submodule init
-
-.PHONY: git-submodules
-git-submodules:
 	git submodule update --init --recursive
 
 .PHONY: fastpli-pull
@@ -44,7 +41,7 @@ fastpli/build: fastpli/
 	make BUILD=info build
 
 .PHONY: fastpli
-fastpli: env fastpli/ git-submodules clean-build fastpli/build
+fastpli: env fastpli/ clean-build fastpli/build
 	$(PIP) uninstall fastpli -y
 	$(PIP) install fastpli/build/. -q
 
