@@ -33,13 +33,11 @@ PARAMETERS = DPHI
 solver = fastpli.model.solver.Solver()
 solver.obj_mean_length = RADIUS_LOGMEAN * 2
 solver.obj_min_radius = RADIUS_LOGMEAN * 5
-solver.omp_num_threads = 8
+solver.omp_num_threads = 2
 
 # mpi
-index = 0
 comm = MPI.COMM_WORLD
 
-radius_old = None
 for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
     print("rank:" + str(comm.Get_rank()), "parameter:", PARAMETERS[rank])
 
@@ -47,10 +45,11 @@ for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
         os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(round(dphi, 1))))
     print("rank:" + file_pref)
 
-    seeds = fastpli.model.sandbox.seeds.triangular_grid(LENGTH,
-                                                        LENGTH,
+    seeds = fastpli.model.sandbox.seeds.triangular_grid(LENGTH * 2,
+                                                        LENGTH * 2,
                                                         2 * RADIUS_LOGMEAN,
                                                         center=True)
+
     rnd_radii = RADIUS_LOGMEAN * np.random.lognormal(0, 0.1, seeds.shape[0])
 
     print(np.mean(rnd_radii), np.std(rnd_radii))
@@ -60,8 +59,15 @@ for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
             p=-0.5 * np.array([LENGTH, LENGTH, LENGTH]),
             q=0.5 * np.array([LENGTH, LENGTH, LENGTH]),
             phi=np.deg2rad(0),
-            theta=np.deg2rad(dphi),
+            theta=np.deg2rad(90),
             seeds=seeds,
+            radii=rnd_radii),
+        fastpli.model.sandbox.build.cuboid(
+            p=-0.5 * np.array([LENGTH, LENGTH, LENGTH]),
+            q=0.5 * np.array([LENGTH, LENGTH, LENGTH]),
+            phi=np.deg2rad(dphi),
+            theta=np.deg2rad(90),
+            seeds=seeds + RADIUS_LOGMEAN,
             radii=rnd_radii)
     ]
 
@@ -75,13 +81,16 @@ for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
     # check boundry to split fiber into segments
     for fb in fiber_bundles:
         for f in fb:
-            f[:, :-1] += np.random.normal(0, 0.25 * RADIUS_LOGMEAN,
+            f[:, :-1] += np.random.normal(0, 0.05 * RADIUS_LOGMEAN,
                                           (f.shape[0], 3))
             f[:, -1] *= np.random.lognormal(0, 0.05, f.shape[0])
     solver.fiber_bundles = fiber_bundles
 
     solver.boundry_checking(100)
     fiber_bundles = solver.fiber_bundles
+
+    # if comm.Get_rank() == 0:
+    #     solver.draw_scene()
 
     print("rank:" + str(comm.Get_rank()), "init:", solver.num_obj,
           solver.num_col_obj)
@@ -100,6 +109,8 @@ for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
             tqdm.write("rank: {} step: {} {} {} {}%".format(
                 comm.Get_rank(), i, solver.num_obj, solver.num_col_obj,
                 round(solver.overlap / solver.num_col_obj * 100)))
+            # if comm.Get_rank() == 0:
+            #     solver.draw_scene()
 
     print("rank: {} step: {} {}".format(comm.Get_rank(), i, solver.num_obj,
                                         solver.num_col_obj))
