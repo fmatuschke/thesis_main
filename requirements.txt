@@ -1,8 +1,4 @@
 yapf
-pep8
+pylint
 tqdm
 imageio
-mpi4py
-h5py
-numpy
-scipy

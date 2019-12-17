@@ -5,10 +5,11 @@ PYTHON=env-$(HOST)/bin/python3
 PIP=env-$(HOST)/bin/pip3
 
 .PHONY: install
-install: env env-update fastpli
+install: env fastpli
 
 # ENV
 env: env-$(HOST)/bin/python3
+	$(PIP) install -r requirements.txt -q
 
 env-$(HOST)/bin/python3:
 	python3 -m venv env-$(HOST)/
@@ -16,7 +17,6 @@ env-$(HOST)/bin/python3:
 .PHONY: env-update
 env-update: env
 	$(PIP) install --upgrade pip -q
-	$(PIP) install -r requirements.txt -q
 
 # FASTPLI
 fastpli/:
