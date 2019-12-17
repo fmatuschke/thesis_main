@@ -11,44 +11,44 @@ import fastpli_helper as helper
 
 import multiprocessing as mp
 
-from mpi4py import MPI
 from tqdm import tqdm
-from time import sleep
 import imageio
-
-NUM_PROC = 8
 
 
 def data2image(data):
     return np.swapaxes(np.flip(data, 1), 0, 1)
 
 
-mp_pool = mp.Pool(NUM_PROC)
-
-VOI = [(-200, -200, 0), (200, 200, 60)]
-
 # reproducability
 np.random.seed(42)
 
+# global
+INPUT_FILE = sys.argv[1]
+INPUT_FILE = os.path.basename(INPUT_FILE)
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 
 # PARAMETERS
+VOI = [(-200, -200, 0), (200, 200, 60)]
 PIXEL_SIZE_LAP = 65
 PIXEL_SIZE_PM = 1.25
 FACTOR = 10
 VOXEL_SIZE = PIXEL_SIZE_PM / FACTOR
 THICKNESS = 60
 
-comm = MPI.COMM_WORLD
+# Parallel
+NUM_PROC = 8
+mp_pool = mp.Pool(NUM_PROC)
+
+# comm = MPI.COMM_WORLD
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 
-input_file_name = sys.argv[1]
-
-h5_file_name = os.path.join(FILE_PATH, 'output/simulations', input_file_name)
+h5_file_name = os.path.join(FILE_PATH, 'output/simulations', INPUT_FILE)
 h5_file_name = helper.version_file_name(h5_file_name) + '.h5'
 output_base_name = os.path.basename(h5_file_name)
+
+print(h5_file_name)
 
 with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
                'w-') as h5f:
@@ -66,12 +66,10 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
     simpli.set_voi(VOI[0], VOI[1])  # in mu meter
 
     tqdm.write('Memory: ' + str(simpli.memory_usage()))
-    # sleep(10)
 
     tqdm.write('loading models')
     simpli.fiber_bundles = fastpli.io.fiber.load(
-        os.path.join(FILE_PATH, 'output/models', input_file_name),
-        '/fiber_bundles/')
+        os.path.join(FILE_PATH, 'output/models', INPUT_FILE), 'fiber_bundles')
 
     tqdm.write('starting simlation')
     for m, (dn, model) in enumerate([(-0.001, 'p'), (0.002, 'r')]):
@@ -91,6 +89,13 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
                                       compression='gzip',
                                       compression_opts=1)
             dset[:] = label_field[::2, ::2, ::2]
+
+            dset = h5f.create_dataset('tissue_median_section',
+                                      label_field.shape[:-1],
+                                      dtype=np.uint8,
+                                      compression='gzip',
+                                      compression_opts=1)
+            dset[:] = np.median(label_field, axis=-1)
 
         # h5f['vectorfield'] = vec_field
         h5f[model + '/tissue_properties'] = tissue_properties
