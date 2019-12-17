@@ -2,4 +2,3 @@ yapf
 pylint
 tqdm
 imageio
-yep

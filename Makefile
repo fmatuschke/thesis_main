@@ -5,10 +5,11 @@ PYTHON=env-$(HOST)/bin/python3
 PIP=env-$(HOST)/bin/pip3
 
 .PHONY: install
-install: env env-update fastpli
+install: env fastpli
 
 # ENV
 env: env-$(HOST)/bin/python3
+	$(PIP) install -r requirements.txt -q
 
 env-$(HOST)/bin/python3:
 	python3 -m venv env-$(HOST)/
@@ -16,12 +17,14 @@ env-$(HOST)/bin/python3:
 .PHONY: env-update
 env-update: env
 	$(PIP) install --upgrade pip -q
-	$(PIP) install -r requirements.txt -q
 
 # FASTPLI
 fastpli/:
 	git submodule add git@jugit.fz-juelich.de:f.matuschke/fastpli.git fastpli
 	git submodule init
+
+.PHONY: git-submodules
+git-submodules:
 	git submodule update --init --recursive
 
 .PHONY: fastpli-pull
@@ -37,11 +40,10 @@ fastpli-pull:
 .ONESHELL:
 fastpli/build: fastpli/
 	cd fastpli
-	# make build
-	make BUILD=info build
+	make build
 
 .PHONY: fastpli
-fastpli: env fastpli/ clean-build fastpli/build
+fastpli: env fastpli/ git-submodules clean-build fastpli/build
 	$(PIP) uninstall fastpli -y
 	$(PIP) install fastpli/build/. -q
 
