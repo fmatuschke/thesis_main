@@ -7,6 +7,7 @@ import glob
 import fastpli.simulation
 import fastpli.analysis
 import fastpli.objects
+import fastpli.tools
 import fastpli.io
 
 from mpi4py import MPI
@@ -18,6 +19,9 @@ def data2image(data):
     return np.swapaxes(np.flip(data, 1), 0, 1)
 
 
+comm = MPI.COMM_WORLD
+NUM_THREADS = 4
+
 # reproducability
 np.random.seed(42)
 
@@ -28,7 +32,7 @@ FILE_BASE = os.path.basename(FILE_NAME)
 # PARAMETERS
 PIXEL_SIZE_LAP = 65
 PIXEL_SIZE_PM = 1.25
-NUM_LAP_PIXEL = 5
+NUM_LAP_PIXEL = 1
 THICKNESS = 60
 
 FIBER_ROTATIONS_PHI = [0, 45]
@@ -38,12 +42,13 @@ for phi in FIBER_ROTATIONS_PHI:
     for theta in FIBER_ROTATIONS_THETA:
         FIBER_ROTATIONS.append((phi, theta))
 
-comm = MPI.COMM_WORLD
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
-file_list = glob.glob(os.path.join(FILE_PATH, 'output', 'models', '*.h5'))
+file_list = sorted(
+    glob.glob(os.path.join(FILE_PATH, 'output', 'models', '*.h5')))
 
 for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
-    file_name_0 = os.path.basename(file)
+    file_name_0 = fastpli.tools.version_file_name(file)
+
     tqdm.write(file_name_0)
 
     tqdm.write('loading models')
@@ -52,8 +57,8 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
     for (f_phi, f_alpha) in FIBER_ROTATIONS:
         tqdm.write("rotation: " + str(f_phi) + ', ' + str(f_alpha))
 
-        file_name = os.path.splitext(file_name_0)[0] + '_alpha_' + str(
-            f_alpha) + '_phi_' + str(f_phi) + '.h5'
+        file_name = file_name_0 + '_alpha_' + str(f_alpha) + '_phi_' + str(
+            f_phi) + '.h5'
 
         f_phi = np.deg2rad(f_phi)
         f_alpha = np.deg2rad(f_alpha)
@@ -65,17 +70,18 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
             h5f['version'] = fastpli.__version__
             with open(os.path.abspath(__file__), 'r') as f:
                 h5f['script'] = f.read()
+                h5f['pip_freeze'] = fastpli.tools.helper.pip_freeze()
 
             # Setup Simpli for Tissue Generation
             simpli = fastpli.simulation.Simpli()
-            simpli.omp_num_threads = 4
+            simpli.omp_num_threads = NUM_THREADS
             simpli.voxel_size = 0.25  # in mu meter
             simpli.set_voi([
                 -0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP,
+                -0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP, -0.5 * THICKNESS
+            ], [
                 0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP,
-                -0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP,
-                0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP, -0.5 * THICKNESS,
-                0.5 * THICKNESS
+                0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP, 0.5 * THICKNESS
             ])  # in mu meter
 
             tqdm.write('Memory: ' + str(simpli.memory_usage()))

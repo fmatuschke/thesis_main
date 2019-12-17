@@ -1,5 +1,6 @@
 import fastpli.model.solver
 import fastpli.model.sandbox
+import fastpli.tools
 import fastpli.io
 
 import numpy as np
@@ -8,8 +9,6 @@ import os
 
 from tqdm import tqdm
 from mpi4py import MPI
-
-import fastpli_helper as helper
 
 # reproducability
 np.random.seed(42)
@@ -24,26 +23,34 @@ OUTPUT_PATH = os.path.join(FILE_PATH, 'output', 'models')
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
 # FIBERS
-DPHI = np.linspace(0, 90, 10, True)
+LENGTH = 65
 RADIUS_LOGMEAN = 1
-LENGTH = 65 * np.sqrt(3)
-PARAMETERS = DPHI
-
-# setup solver
-solver = fastpli.model.solver.Solver()
-solver.obj_mean_length = RADIUS_LOGMEAN * 2
-solver.obj_min_radius = RADIUS_LOGMEAN * 5
-solver.omp_num_threads = 2
+DPHI = np.linspace(0, 90, 10, True)
+PSI = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+PDPHI, PPSI = np.meshgrid(DPHI, PSI)
 
 # mpi
 comm = MPI.COMM_WORLD
 
-for rank, dphi in enumerate(PARAMETERS[comm.Get_rank()::comm.Get_size()]):
-    print("rank:" + str(comm.Get_rank()), "parameter:", PARAMETERS[rank])
+print(PDPHI.size)
 
-    file_pref = helper.version_file_name(
-        os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(round(dphi, 1))))
-    print("rank:" + file_pref)
+for dphi, psi in list(zip(PDPHI.flatten(),
+                          PPSI.flatten()))[comm.Get_rank()::comm.Get_size()]:
+    print(dphi, psi)
+
+    if dphi == 0 and psi < 1:
+        continue
+
+    # setup solver
+    solver = fastpli.model.solver.Solver()
+    solver.obj_mean_length = RADIUS_LOGMEAN * 2
+    solver.obj_min_radius = RADIUS_LOGMEAN * 5
+    solver.omp_num_threads = 2
+
+    file_pref = fastpli.tools.version_file_name(
+        os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(round(dphi, 1))) +
+        '_psi_' + str(round(psi, 1)))
+    print("rank {}: {}".format(str(comm.Get_rank()), file_pref))
 
     seeds = fastpli.model.sandbox.seeds.triangular_grid(LENGTH * 2,
                                                         LENGTH * 2,
