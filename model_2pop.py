@@ -5,6 +5,7 @@ import fastpli.io
 
 import numpy as np
 import h5py
+import sys
 import os
 
 from tqdm import tqdm
@@ -19,7 +20,11 @@ FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 
 MODEL_NAME = "cube_2pop"
+
 OUTPUT_PATH = os.path.join(FILE_PATH, 'output', 'models')
+if len(sys.argv) > 1:
+    OUTPUT_PATH = os.path.join(sys.argv[1], 'output', 'models')
+
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
 # FIBERS
