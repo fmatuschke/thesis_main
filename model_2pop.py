@@ -23,7 +23,7 @@ OUTPUT_PATH = os.path.join(FILE_PATH, 'output', 'models')
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
 # FIBERS
-LENGTH = 65
+LENGTH = 120
 RADIUS_LOGMEAN = 1
 DPHI = np.linspace(0, 90, 10, True)
 PSI = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
@@ -36,10 +36,11 @@ print(PDPHI.size)
 
 for dphi, psi in list(zip(PDPHI.flatten(),
                           PPSI.flatten()))[comm.Get_rank()::comm.Get_size()]:
-    print(dphi, psi)
 
-    if dphi == 0 and psi < 1:
+    if psi == 1 and dphi != 0:
         continue
+
+    print(dphi, psi)
 
     # setup solver
     solver = fastpli.model.solver.Solver()
@@ -47,7 +48,7 @@ for dphi, psi in list(zip(PDPHI.flatten(),
     solver.obj_min_radius = RADIUS_LOGMEAN * 5
     solver.omp_num_threads = 2
 
-    file_pref = fastpli.tools.version_file_name(
+    file_pref = fastpli.tools.helper.version_file_name(
         os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(round(dphi, 1))) +
         '_psi_' + str(round(psi, 1)))
     print("rank {}: {}".format(str(comm.Get_rank()), file_pref))
@@ -103,8 +104,9 @@ for dphi, psi in list(zip(PDPHI.flatten(),
           solver.num_col_obj)
 
     # Save Data
-    helper.save_h5_fibers(file_pref + '.init.h5', solver.fiber_bundles,
-                          __file__)
+    fastpli.tools.helper.save_h5_fibers(file_pref + '.init.h5',
+                                        solver.fiber_bundles, 'fiber_bundles',
+                                        __file__)
     fastpli.io.fiber.save(file_pref + '.init.dat', solver.fiber_bundles)
 
     # Run Solver
@@ -112,17 +114,21 @@ for dphi, psi in list(zip(PDPHI.flatten(),
         if solver.step():
             break
 
+        overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
         if i % 50 == 0:
             tqdm.write("rank: {} step: {} {} {} {}%".format(
                 comm.Get_rank(), i, solver.num_obj, solver.num_col_obj,
-                round(solver.overlap / solver.num_col_obj * 100)))
-            # if comm.Get_rank() == 0:
-            #     solver.draw_scene()
+                round(overlap * 100)))
+
+        if overlap <= 0.01:
+            break
 
     print("rank: {} step: {} {}".format(comm.Get_rank(), i, solver.num_obj,
                                         solver.num_col_obj))
 
-    helper.save_h5_fibers(file_pref + '.solved.h5', solver.fiber_bundles,
-                          __file__, solver.as_dict(), i, solver.num_col_obj,
-                          solver.overlap)
+    fastpli.tools.helper.save_h5_fibers(file_pref + '.solved.h5',
+                                        solver.fiber_bundles,
+                                        'fiber_bundles', __file__,
+                                        solver.as_dict(), i, solver.num_col_obj,
+                                        solver.overlap)
     fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)
