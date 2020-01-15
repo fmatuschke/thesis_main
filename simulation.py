@@ -35,36 +35,46 @@ PIXEL_SIZE_PM = 1.25
 NUM_LAP_PIXEL = 1
 THICKNESS = 60
 
-FIBER_ROTATIONS_PHI = [0, 45]
-FIBER_ROTATIONS_THETA = [0, 20, 40, 60, 70, 80, 90]
-FIBER_ROTATIONS = []
-for phi in FIBER_ROTATIONS_PHI:
-    for theta in FIBER_ROTATIONS_THETA:
-        FIBER_ROTATIONS.append((phi, theta))
+# FIBER_ROTATIONS_PHI = np.linspace(0, 90, 10, True)
 
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 file_list = sorted(
-    glob.glob(os.path.join(FILE_PATH, 'output', 'models', '*.h5')))
+    glob.glob(os.path.join(FILE_PATH, 'output', 'models', '*v1.solved*.h5')))
 
 for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
-    file_name_0 = fastpli.tools.version_file_name(file)
 
-    tqdm.write(file_name_0)
+    tqdm.write(file)
 
     tqdm.write('loading models')
     fiber_bundles = fastpli.io.fiber.load(file, 'fiber_bundles')
 
-    for (f_phi, f_alpha) in FIBER_ROTATIONS:
-        tqdm.write("rotation: " + str(f_phi) + ', ' + str(f_alpha))
+    dphi = float(file.split("dphi_")[-1].split("_psi")[0])
+    n_rot = int(
+        np.round(
+            np.sqrt((1 - np.cos(2 * np.deg2rad(dphi))) /
+                    (1 - np.cos(np.deg2rad(10))))))
 
-        file_name = file_name_0 + '_alpha_' + str(f_alpha) + '_phi_' + str(
-            f_phi) + '.h5'
+    if n_rot > 0:
+        n_rot = max(n_rot, 2)
 
-        f_phi = np.deg2rad(f_phi)
-        f_alpha = np.deg2rad(f_alpha)
-        with h5py.File(
-                os.path.join(FILE_PATH, 'output/simulations/', file_name),
-                'w-') as h5f:
+    FIBER_ROTATIONS_PHI = np.linspace(0, 90, n_rot, True)
+    tqdm.write("{}: {}".format(str(dphi), str(n_rot)))
+
+    if n_rot == 0:
+        FIBER_ROTATIONS_PHI = [0]
+
+    for f_phi in FIBER_ROTATIONS_PHI:
+        tqdm.write("rotation: " + str(f_phi))
+
+        _, file_name = os.path.split(file)
+        file_name = os.path.splitext(file_name)[0]
+        file_name += '_phi_{:.2f}'.format(f_phi)
+
+        file_name = fastpli.tools.helper.version_file_name(
+            os.path.join(FILE_PATH, 'output/simulations', file_name))
+
+        tqdm.write(file_name)
+        with h5py.File(file_name + '.h5', 'w-') as h5f:
 
             # save script
             h5f['version'] = fastpli.__version__
@@ -87,11 +97,7 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
             tqdm.write('Memory: ' + str(simpli.memory_usage()))
 
             tqdm.write('rotating models')
-            rot = fastpli.tools.rotation.a_on_b([1, 0, 0], [
-                np.cos(f_alpha) * np.cos(f_phi),
-                np.cos(f_alpha) * np.sin(f_phi),
-                np.sin(f_alpha)
-            ])
+            rot = fastpli.tools.rotation.x(np.deg2rad(f_phi))
             simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
                 copy.deepcopy(fiber_bundles), rot)
 
@@ -100,7 +106,8 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                 tqdm.write("tissue: " + str(m) + ', ' + str(dn) + ', ' +
                            str(model))
                 simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
-                                                    (1.0, dn, 1, model)]]
+                                                    (1.0, dn, 1, model)]
+                                                  ] * len(fiber_bundles)
 
                 # Generate Tissue
                 label_field, vec_field, tissue_properties = simpli.generate_tissue(
@@ -131,7 +138,7 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                     simpli.filter_rotations = np.deg2rad(
                         [0, 30, 60, 90, 120, 150])
                     simpli.light_intensity = intensity  # a.u.
-                    simpli.untilt_sensor = True
+                    simpli._untilt_sensor_view = True
                     simpli.wavelength = 525  # in nm
                     simpli.resolution = res  # in mu meter
 
@@ -154,13 +161,13 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                         h5f[name + '/' + model + '/data/' + str(t)] = images
 
                         # apply optic to simulation
-                        tqdm.write('optic')
+                        # tqdm.write('optic')
                         new_images = simpli.apply_optic(images, gain=gain)
                         h5f[name + '/' + model + '/optic/' +
                             str(t)] = new_images
 
                         # calculate modalities
-                        tqdm.write('epa')
+                        # tqdm.write('epa')
                         epa = simpli.apply_epa(new_images)
                         h5f[name + '/' + model + '/epa/' + str(t) +
                             '/transmittance'] = epa[0]
@@ -178,6 +185,11 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                     mask = None  # keep analysing all pixels
 
                     tqdm.write('rofl')
+
+                    tilting_stack = np.array(tilting_stack)
+                    while tilting_stack.ndim < 4:
+                        tilting_stack = np.expand_dims(tilting_stack, axis=-2)
+
                     rofl_direction, rofl_incl, rofl_t_rel, _ = simpli.apply_rofl(
                         tilting_stack,
                         tilt_angle=np.deg2rad(tilt_angle),
@@ -192,9 +204,9 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                     h5f[name + '/' + model].attrs['simpli'] = str(
                         simpli.as_dict())
 
-                    imageio.imwrite(
-                        'output/simulations/' + file_name + '_' + name + '_' +
-                        model + '.png',
-                        data2image(
-                            fastpli.analysis.images.fom_hsv_black(
-                                rofl_direction, rofl_incl)))
+                    if name not "LAP":
+                        imageio.imwrite(
+                            file_name + '_' + name + '_' + model + '.png',
+                            data2image(
+                                fastpli.analysis.images.fom_hsv_black(
+                                    rofl_direction, rofl_incl)))

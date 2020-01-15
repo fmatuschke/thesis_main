@@ -31,7 +31,7 @@ os.makedirs(OUTPUT_PATH, exist_ok=True)
 LENGTH = 120
 RADIUS_LOGMEAN = 1
 DPHI = np.linspace(0, 90, 10, True)
-PSI = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+PSI = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 PDPHI, PPSI = np.meshgrid(DPHI, PSI)
 
 # mpi
@@ -41,9 +41,6 @@ print(PDPHI.size)
 
 for dphi, psi in list(zip(PDPHI.flatten(),
                           PPSI.flatten()))[comm.Get_rank()::comm.Get_size()]:
-
-    if psi == 1 and dphi != 0:
-        continue
 
     print(dphi, psi)
 
@@ -63,9 +60,13 @@ for dphi, psi in list(zip(PDPHI.flatten(),
                                                         2 * RADIUS_LOGMEAN,
                                                         center=True)
 
-    rnd_radii = RADIUS_LOGMEAN * np.random.lognormal(0, 0.1, seeds.shape[0])
+    # print(np.mean(rnd_radii), np.std(rnd_radii))
 
-    print(np.mean(rnd_radii), np.std(rnd_radii))
+    # pick random seeds for volume distribution
+    seeds_0 = seeds[np.random.rand(seeds.shape[0]) < psi, :]
+    seeds_1 = seeds[np.random.rand(seeds.shape[0]) < (1 - psi), :]
+    rnd_radii_0 = RADIUS_LOGMEAN * np.random.lognormal(0, 0.1, seeds_0.shape[0])
+    rnd_radii_1 = RADIUS_LOGMEAN * np.random.lognormal(0, 0.1, seeds_1.shape[0])
 
     fiber_bundles = [
         fastpli.model.sandbox.build.cuboid(
@@ -73,20 +74,18 @@ for dphi, psi in list(zip(PDPHI.flatten(),
             q=0.5 * np.array([LENGTH, LENGTH, LENGTH]),
             phi=np.deg2rad(0),
             theta=np.deg2rad(90),
-            seeds=seeds,
-            radii=rnd_radii),
+            seeds=seeds_0,
+            radii=rnd_radii_0),
         fastpli.model.sandbox.build.cuboid(
             p=-0.5 * np.array([LENGTH, LENGTH, LENGTH]),
             q=0.5 * np.array([LENGTH, LENGTH, LENGTH]),
             phi=np.deg2rad(dphi),
             theta=np.deg2rad(90),
-            seeds=seeds + RADIUS_LOGMEAN,
-            radii=rnd_radii)
+            seeds=seeds_1 + RADIUS_LOGMEAN,
+            radii=rnd_radii_1)
     ]
 
-    solver.fiber_bundles = fiber_bundles
-    solver.boundry_checking(100)
-    fiber_bundles = solver.fiber_bundles
+    fiber_bundles = solver.boundry_check(fiber_bundles, 100)
 
     print("rank:" + str(comm.Get_rank()), "init:", solver.num_obj,
           solver.num_col_obj)
@@ -97,10 +96,8 @@ for dphi, psi in list(zip(PDPHI.flatten(),
             f[:, :-1] += np.random.normal(0, 0.05 * RADIUS_LOGMEAN,
                                           (f.shape[0], 3))
             f[:, -1] *= np.random.lognormal(0, 0.05, f.shape[0])
-    solver.fiber_bundles = fiber_bundles
 
-    solver.boundry_checking(100)
-    fiber_bundles = solver.fiber_bundles
+    fiber_bundles = solver.boundry_check(fiber_bundles, 100)
 
     # if comm.Get_rank() == 0:
     #     solver.draw_scene()
