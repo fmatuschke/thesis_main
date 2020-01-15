@@ -35,11 +35,14 @@ PIXEL_SIZE_PM = 1.25
 NUM_LAP_PIXEL = 1
 THICKNESS = 60
 
+if len(sys.argv) > 1:
+    FILE_PATH = sys.argv[1]
+
 # FIBER_ROTATIONS_PHI = np.linspace(0, 90, 10, True)
 
 os.makedirs(os.path.join(FILE_PATH, 'output', 'simulations'), exist_ok=True)
 file_list = sorted(
-    glob.glob(os.path.join(FILE_PATH, 'output', 'models', '*v1.solved*.h5')))
+    glob.glob(os.path.join(FILE_PATH, 'output', 'models', '*.solved*.h5')))
 
 for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
 

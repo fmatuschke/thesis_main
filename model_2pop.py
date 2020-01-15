@@ -31,16 +31,18 @@ os.makedirs(OUTPUT_PATH, exist_ok=True)
 LENGTH = 120
 RADIUS_LOGMEAN = 1
 DPHI = np.linspace(0, 90, 10, True)
-PSI = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 PDPHI, PPSI = np.meshgrid(DPHI, PSI)
+PARAMETER = list(zip(PDPHI.flatten(), PPSI.flatten()))
+PARAMETER.append((0, 0))
+PARAMETER.append((0, 1))
 
 # mpi
 comm = MPI.COMM_WORLD
 
 print(PDPHI.size)
 
-for dphi, psi in list(zip(PDPHI.flatten(),
-                          PPSI.flatten()))[comm.Get_rank()::comm.Get_size()]:
+for dphi, psi in PARAMETER[comm.Get_rank()::comm.Get_size()]:
 
     print(dphi, psi)
 
@@ -48,7 +50,7 @@ for dphi, psi in list(zip(PDPHI.flatten(),
     solver = fastpli.model.solver.Solver()
     solver.obj_mean_length = RADIUS_LOGMEAN * 2
     solver.obj_min_radius = RADIUS_LOGMEAN * 5
-    solver.omp_num_threads = 2
+    solver.omp_num_threads = 4
 
     file_pref = fastpli.tools.helper.version_file_name(
         os.path.join(OUTPUT_PATH, MODEL_NAME + '_dphi_' + str(round(dphi, 1))) +
