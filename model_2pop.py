@@ -34,8 +34,8 @@ DPHI = np.linspace(0, 90, 10, True)
 PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 PDPHI, PPSI = np.meshgrid(DPHI, PSI)
 PARAMETER = list(zip(PDPHI.flatten(), PPSI.flatten()))
-PARAMETER.append((0, 0))
-PARAMETER.append((0, 1))
+PARAMETER.append((0.0, 0.0))
+PARAMETER.append((0.0, 1.0))
 
 # mpi
 comm = MPI.COMM_WORLD

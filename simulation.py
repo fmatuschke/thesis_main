@@ -35,6 +35,7 @@ PIXEL_SIZE_LAP = 65
 PIXEL_SIZE_PM = 1.25
 NUM_LAP_PIXEL = 1
 THICKNESS = 60
+VOXEL_SIZE = 0.1
 
 if len(sys.argv) > 1:
     FILE_PATH = sys.argv[1]
@@ -78,6 +79,26 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
             os.path.join(FILE_PATH, 'output/simulations', file_name))
 
         tqdm.write(file_name)
+
+        # Setup Simpli for Tissue Generation
+        simpli = fastpli.simulation.Simpli()
+        simpli.omp_num_threads = NUM_THREADS
+        simpli.voxel_size = VOXEL_SIZE  # in mu meter
+        simpli.set_voi([
+            -0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP,
+            -0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP, -0.5 * THICKNESS
+        ], [
+            0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP,
+            0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP, 0.5 * THICKNESS
+        ])  # in mu meter
+
+        tqdm.write('Memory: ' + str(simpli.memory_usage()))
+
+        tqdm.write('rotating models')
+        rot = fastpli.tools.rotation.x(np.deg2rad(f_phi))
+        simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
+            copy.deepcopy(fiber_bundles), rot)
+
         with h5py.File(file_name + '.h5', 'w-') as h5f:
 
             # save script
@@ -85,25 +106,6 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
             with open(os.path.abspath(__file__), 'r') as f:
                 h5f['script'] = f.read()
                 h5f['pip_freeze'] = fastpli.tools.helper.pip_freeze()
-
-            # Setup Simpli for Tissue Generation
-            simpli = fastpli.simulation.Simpli()
-            simpli.omp_num_threads = NUM_THREADS
-            simpli.voxel_size = 0.25  # in mu meter
-            simpli.set_voi([
-                -0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP,
-                -0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP, -0.5 * THICKNESS
-            ], [
-                0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP,
-                0.5 * NUM_LAP_PIXEL * PIXEL_SIZE_LAP, 0.5 * THICKNESS
-            ])  # in mu meter
-
-            tqdm.write('Memory: ' + str(simpli.memory_usage()))
-
-            tqdm.write('rotating models')
-            rot = fastpli.tools.rotation.x(np.deg2rad(f_phi))
-            simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
-                copy.deepcopy(fiber_bundles), rot)
 
             tqdm.write('starting simlation')
             for m, (dn, model) in enumerate([(-0.001, 'p'), (0.001, 'r')]):
