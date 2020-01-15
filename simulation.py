@@ -2,6 +2,7 @@ import numpy as np
 import copy
 import h5py
 import os
+import sys
 import glob
 
 import fastpli.simulation
@@ -207,7 +208,7 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                     h5f[name + '/' + model].attrs['simpli'] = str(
                         simpli.as_dict())
 
-                    if name not "LAP":
+                    if name != "LAP":
                         imageio.imwrite(
                             file_name + '_' + name + '_' + model + '.png',
                             data2image(
