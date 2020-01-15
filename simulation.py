@@ -153,9 +153,7 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
 
                     tilting_stack = [None] * len(TILTS)
 
-                    if name is 'PM':
-                        label_field = np.flip(label_field, 2)
-                        vec_field = np.flip(vec_field, 2)
+                    simpli.flip_z_beam = (name is 'PM')
 
                     for t, (theta, phi) in enumerate(TILTS):
                         tqdm.write('tilt: ' + str(theta) + ', ' + str(phi))

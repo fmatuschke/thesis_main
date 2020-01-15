@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --output=mpi-out.%j
 #SBATCH --error=mpi-err.%j
-#SBATCH --time=10:00:00
+#SBATCH --time=4:00:00
 #SBATCH --partition=batch
 #SBATCH --mail-user=f.matuschke@fz-juelich.de
 #SBATCH --mail-type=ALL
