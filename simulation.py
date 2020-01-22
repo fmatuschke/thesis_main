@@ -144,7 +144,7 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                     simpli.filter_rotations = np.deg2rad(
                         [0, 30, 60, 90, 120, 150])
                     simpli.light_intensity = intensity  # a.u.
-                    simpli._untilt_sensor_view = True
+                    simpli.untilt_sensor_view = True
                     simpli.wavelength = 525  # in nm
                     simpli.resolution = res  # in mu meter
 
