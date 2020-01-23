@@ -21,9 +21,11 @@ FILE_BASE = os.path.basename(FILE_NAME)
 
 MODEL_NAME = "cube_2pop"
 
-OUTPUT_PATH = os.path.join(FILE_PATH, 'output', 'models')
+OUTPUT_PATH = os.path.join(FILE_PATH, 'models')
 if len(sys.argv) > 1:
-    OUTPUT_PATH = os.path.join(sys.argv[1], 'output', 'models')
+    OUTPUT_PATH = os.path.join(sys.argv[1], 'models')
+else:
+    raise ValueError("No input")
 
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
