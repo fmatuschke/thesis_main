@@ -89,7 +89,8 @@ for dphi, psi in PARAMETER[comm.Get_rank()::comm.Get_size()]:
             radii=rnd_radii_1)
     ]
 
-    fiber_bundles = solver.boundry_check(fiber_bundles, 100)
+    solver.fiber_bundles = fiber_bundles
+    fiber_bundles = solver.apply_boundary_conditions(100)
 
     print("rank:" + str(comm.Get_rank()), "init:", solver.num_obj,
           solver.num_col_obj)
@@ -101,7 +102,8 @@ for dphi, psi in PARAMETER[comm.Get_rank()::comm.Get_size()]:
                                           (f.shape[0], 3))
             f[:, -1] *= np.random.lognormal(0, 0.05, f.shape[0])
 
-    fiber_bundles = solver.boundry_check(fiber_bundles, 100)
+    solver.fiber_bundles = fiber_bundles
+    fiber_bundles = solver.apply_boundary_conditions(100)
 
     # if comm.Get_rank() == 0:
     #     solver.draw_scene()
