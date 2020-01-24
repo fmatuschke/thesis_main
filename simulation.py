@@ -10,6 +10,7 @@ import h5py
 import os
 import sys
 import glob
+import gc
 
 import fastpli.simulation
 import fastpli.objects
@@ -128,3 +129,5 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                                                    tissue_properties,
                                                    h5f=dset,
                                                    mp_pool=mp_pool)
+
+        gc.collect()

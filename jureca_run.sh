@@ -1,6 +1,6 @@
 #!/bin/bash -x
 #SBATCH --nodes=8
-#SBATCH --ntasks=92
+#SBATCH --ntasks=96
 #SBATCH --ntasks-per-node=12
 #SBATCH --cpus-per-task=4
 #SBATCH --output=mpi-out.%j
