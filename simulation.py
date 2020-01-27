@@ -102,7 +102,7 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
 
         with h5py.File(file_name + '.h5', 'w-') as h5f:
             with open(os.path.abspath(__file__), 'r') as script:
-                h5f['script'] = script.read()
+                h5f['parameter/script'] = script.read()
 
             save = ["label_field"]
             for m, (dn, model) in enumerate([(-0.001, 'p'), (0.002, 'r')]):
