@@ -1,6 +1,3 @@
-import multiprocessing as mp
-mp_pool = mp.Pool(NUM_THREADS)
-
 import numpy as np
 import copy
 import h5py
@@ -24,6 +21,9 @@ NUM_THREADS = 4
 VOXEL_SIZE = 0.1
 LENGTH = 65
 THICKNESS = 60
+
+import multiprocessing as mp
+mp_pool = mp.Pool(NUM_THREADS)
 
 comm = MPI.COMM_WORLD
 FILE_NAME = os.path.abspath(__file__)
