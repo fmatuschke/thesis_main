@@ -41,8 +41,8 @@ file_list = sorted(glob.glob(os.path.join(FILE_PATH, 'models', '*.solved*.h5')))
 # print Memory
 simpli = fastpli.simulation.Simpli()
 simpli.voxel_size = VOXEL_SIZE  # in mu meter
-simpli.set_voi(-0.5 * np.array([65 + DELTA_V, 65 + DELTA_V, 60]),
-               0.5 * np.array([65 - DELTA_V, 65 - DELTA_V, 60]))  # in mu meter
+simpli.set_voi(-0.5 * np.array([65, 65, 60]),
+               0.5 * np.array([65, 65, 60]))  # in mu meter
 print('Single Memory: ' + str(round(simpli.memory_usage())) + ' MB')
 print('Total Memory: ' + str(round(simpli.memory_usage() * comm.Get_size())) +
       ' MB')
