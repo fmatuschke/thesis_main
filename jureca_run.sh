@@ -6,7 +6,7 @@
 #SBATCH --output=mpi-out.%j
 #SBATCH --error=mpi-err.%j
 #SBATCH --time=4:00:00
-#SBATCH --partition=mem256
+#SBATCH --partition=mem512
 #SBATCH --mail-user=f.matuschke@fz-juelich.de
 #SBATCH --mail-type=ALL
 

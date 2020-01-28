@@ -131,8 +131,8 @@ for dphi, psi in PARAMETER[comm.Get_rank()::comm.Get_size()]:
         if overlap <= 0.01:
             break
 
-    print("rank: {} step: {} {}".format(comm.Get_rank(), i, solver.num_obj,
-                                        solver.num_col_obj))
+    print("rank: {} step: {} {} {}".format(comm.Get_rank(), i, solver.num_obj,
+                                           solver.num_col_obj))
 
     fastpli.tools.helper.save_h5_fibers(file_pref + '.solved.h5',
                                         solver.fiber_bundles,

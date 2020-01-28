@@ -148,3 +148,5 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                     dset['parameter/model/phi'] = f_phi
 
         gc.collect()
+
+MPI.Finalize()
