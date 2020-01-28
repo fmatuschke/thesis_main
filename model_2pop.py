@@ -139,4 +139,9 @@ for dphi, psi in PARAMETER[comm.Get_rank()::comm.Get_size()]:
                                         'fiber_bundles', __file__,
                                         solver.as_dict(), i, solver.num_col_obj,
                                         solver.overlap)
+
+    h5f = h5py.File(file_pref + '.solved.h5', 'r+')
+    h5f['fiber_bundles'].attrs['psi'] = psi
+    h5f['fiber_bundles'].attrs['dphi'] = dphi
+
     fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)

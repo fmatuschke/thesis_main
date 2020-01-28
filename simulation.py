@@ -24,9 +24,6 @@ NUM_THREADS = 4
 VOXEL_SIZE = 0.1
 LENGTH = 65
 THICKNESS = 60
-DELTA_V = np.ceil(
-    np.tan(np.deg2rad(5.5)) * THICKNESS / 2 / VOXEL_SIZE) * VOXEL_SIZE
-DELTA_P = int(round(DELTA_V / VOXEL_SIZE))
 
 comm = MPI.COMM_WORLD
 FILE_NAME = os.path.abspath(__file__)
@@ -60,7 +57,11 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
     # tqdm.write('loading models')
     fiber_bundles = fastpli.io.fiber.load(file, 'fiber_bundles')
 
-    dphi = float(file.split("dphi_")[-1].split("_psi")[0])
+    with h5py.File(file, 'r')['fiber_bundles'] as h5f:
+        psi = h5f.attrs["psi"]
+        dphi = h5f.attrs["dphi"]
+
+    # dphi = float(file.split("dphi_")[-1].split("_psi")[0])
     n_rot = int(
         np.round(
             np.sqrt((1 - np.cos(2 * np.deg2rad(dphi))) /
@@ -91,9 +92,9 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
         simpli = fastpli.simulation.Simpli()
         simpli.omp_num_threads = NUM_THREADS
         simpli.voxel_size = VOXEL_SIZE  # in mu meter
-        simpli.set_voi(
-            -0.5 * np.array([65 + DELTA_V, 65 + DELTA_V, 60]),
-            0.5 * np.array([65 + DELTA_V, 65 + DELTA_V, 60]))  # in mu meter
+        # simpli.set_voi(
+        #     -0.5 * np.array([65 + DELTA_V, 65 + DELTA_V, 60]),
+        #     0.5 * np.array([65 + DELTA_V, 65 + DELTA_V, 60]))  # in mu meter
         simpli.filter_rotations = np.deg2rad([0, 30, 60, 90, 120, 150])
         simpli.interpolate = True
         simpli.wavelength = 525  # in nm
@@ -128,6 +129,10 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                     simpli.light_intensity = intensity  # a.u.
                     simpli.resolution = res  # in mu meter
                     simpli.sensor_gain = gain
+                    simpli.set_voi(
+                        -0.5 * np.array([LENGTH, LENGTH, THICKNESS]), 0.5 *
+                        np.array([LENGTH, LENGTH, THICKNESS]))  # in mu meter
+                    simpli.add_crop_tilt_halo()
 
                     dset = h5f.create_group(name + '/' + model)
                     simpli.save_parameter(h5f=dset)
@@ -135,6 +140,11 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                                                    vector_field,
                                                    tissue_properties,
                                                    h5f=dset,
+                                                   crop_tilt=True,
                                                    mp_pool=mp_pool)
+
+                    dset['parameter/model/psi'] = psi
+                    dset['parameter/model/dphi'] = dphi
+                    dset['parameter/model/phi'] = f_phi
 
         gc.collect()
