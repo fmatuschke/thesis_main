@@ -1,6 +1,3 @@
-NUM_THREADS = 4
-VOXEL_SIZE = 0.1
-
 import multiprocessing as mp
 mp_pool = mp.Pool(NUM_THREADS)
 
@@ -22,6 +19,15 @@ from tqdm import tqdm
 # reproducability
 np.random.seed(42)
 
+# PARAMETER
+NUM_THREADS = 4
+VOXEL_SIZE = 0.1
+LENGTH = 65
+THICKNESS = 60
+DELTA_V = np.ceil(
+    np.tan(np.deg2rad(5.5)) * THICKNESS / 2 / VOXEL_SIZE) * VOXEL_SIZE
+DELTA_P = int(round(DELTA_V / VOXEL_SIZE))
+
 comm = MPI.COMM_WORLD
 FILE_NAME = os.path.abspath(__file__)
 # FILE_PATH = os.path.dirname(FILE_NAME) + '/output
@@ -38,8 +44,8 @@ file_list = sorted(glob.glob(os.path.join(FILE_PATH, 'models', '*.solved*.h5')))
 # print Memory
 simpli = fastpli.simulation.Simpli()
 simpli.voxel_size = VOXEL_SIZE  # in mu meter
-simpli.set_voi(-0.5 * np.array([65, 65, 60]),
-               0.5 * np.array([65, 65, 60]))  # in mu meter
+simpli.set_voi(-0.5 * np.array([65 + DELTA_V, 65 + DELTA_V, 60]),
+               0.5 * np.array([65 - DELTA_V, 65 - DELTA_V, 60]))  # in mu meter
 print('Single Memory: ' + str(round(simpli.memory_usage())) + ' MB')
 print('Total Memory: ' + str(round(simpli.memory_usage() * comm.Get_size())) +
       ' MB')
@@ -85,8 +91,9 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
         simpli = fastpli.simulation.Simpli()
         simpli.omp_num_threads = NUM_THREADS
         simpli.voxel_size = VOXEL_SIZE  # in mu meter
-        simpli.set_voi(-0.5 * np.array([65, 65, 60]),
-                       0.5 * np.array([65, 65, 60]))  # in mu meter
+        simpli.set_voi(
+            -0.5 * np.array([65 + DELTA_V, 65 + DELTA_V, 60]),
+            0.5 * np.array([65 + DELTA_V, 65 + DELTA_V, 60]))  # in mu meter
         simpli.filter_rotations = np.deg2rad([0, 30, 60, 90, 120, 150])
         simpli.interpolate = True
         simpli.wavelength = 525  # in nm

@@ -6,6 +6,8 @@ import glob
 
 import matplotlib.pyplot as plt
 import scipy.stats
+import seaborn as sns
+import pandas as pd
 
 from tqdm import tqdm
 
@@ -44,22 +46,27 @@ with h5py.File(file_list[0], 'r') as h5f:
     for name in ['PM']:
         h5f_sub = h5f[name + '/p']
         res = h5f_sub['analysis/rofl/direction'][...].shape
-shape = (len(file_list), 2, res[0], res[1])
+shape = (len(file_list), 2, res[0] * res[1])
 
-if not os.path.isfile(os.path.join(FILE_PATH, 'analysis', version + '.npz')):
+dataframe = pd.DataFrame(
+    columns=["phi", "dphi", "psi", "rofl_dir", "rofl_inc", "rofl_trel"])
+
+if not os.path.isfile(os.path.join(
+        FILE_PATH, 'analysis', version + '.npz')) or not os.path.isfile(
+            os.path.join(FILE_PATH, 'analysis', version + '.pkl')):
 
     print('collect rofl data')
 
-    rofl_dire = np.empty(shape)
-    rofl_incl = np.empty(shape)
+    rofl_dir = np.empty(shape)
+    rofl_inc = np.empty(shape)
     rofl_trel = np.empty(shape)
 
-    rofl_dire_mean = np.empty(shape[:2])
-    rofl_incl_mean = np.empty(shape[:2])
+    rofl_dir_mean = np.empty(shape[:2])
+    rofl_inc_mean = np.empty(shape[:2])
     rofl_trel_mean = np.empty(shape[:2])
 
-    rofl_dire_std = np.empty(shape[:2])
-    rofl_incl_std = np.empty(shape[:2])
+    rofl_dir_std = np.empty(shape[:2])
+    rofl_inc_std = np.empty(shape[:2])
     rofl_trel_std = np.empty(shape[:2])
 
     dphi_list = []
@@ -81,86 +88,132 @@ if not os.path.isfile(os.path.join(FILE_PATH, 'analysis', version + '.npz')):
                 for m, model in enumerate(['p', 'r']):
                     h5f_sub = h5f[name + '/' + model]
 
-                    rofl_dire[f, m] = h5f_sub['analysis/rofl/direction'][...]
-                    rofl_incl[f, m] = h5f_sub['analysis/rofl/inclination'][...]
-                    rofl_trel[f, m] = h5f_sub['analysis/rofl/t_rel'][...]
+                    rofl_dir[f, m] = h5f_sub['analysis/rofl/direction'][
+                        ...].flatten()
+                    rofl_inc[f, m] = h5f_sub['analysis/rofl/inclination'][
+                        ...].flatten()
+                    rofl_trel[f, m] = h5f_sub['analysis/rofl/t_rel'][
+                        ...].flatten()
 
-                    # mean, std = calcMeanStdAngle(rofl_dire[f, m].flatten())
-                    mean = scipy.stats.circmean(rofl_dire[f, m].flatten(),
-                                                np.pi / 2, -np.pi / 2)
-                    std = scipy.stats.circstd(rofl_dire[f, m].flatten(),
-                                              np.pi / 2, -np.pi / 2)
-                    rofl_dire_mean[f, m] = mean
-                    rofl_dire_std[f, m] = std
+                    rofl_dir[f, m][rofl_dir[f, m] > np.pi / 2] -= np.pi
+                    # rofl_inc[f, m][rofl_inc[f, m] > np.pi / 2] -= np.pi
 
-                    # mean, std = calcMeanStdAngle(rofl_incl[f, m].flatten())
-                    mean = scipy.stats.circmean(rofl_incl[f, m].flatten(),
-                                                np.pi / 2, -np.pi / 2)
-                    std = scipy.stats.circstd(rofl_incl[f, m].flatten(),
-                                              np.pi / 2, -np.pi / 2)
-                    rofl_incl_mean[f, m] = mean
-                    rofl_incl_std[f, m] = std
+                    # mean, std = calcMeanStdAngle(rofl_dir[f, m].flatten())
+                    mean = scipy.stats.circmean(rofl_dir[f, m], np.pi / 2,
+                                                -np.pi / 2)
+                    std = scipy.stats.circstd(rofl_dir[f, m], np.pi / 2,
+                                              -np.pi / 2)
+                    rofl_dir_mean[f, m] = mean
+                    rofl_dir_std[f, m] = std
 
-                    rofl_trel_mean[f, m] = np.mean(rofl_trel[f, m].flatten())
-                    rofl_trel_std[f, m] = np.std(rofl_trel[f, m].flatten())
+                    # mean, std = calcMeanStdAngle(rofl_inc[f, m].flatten())
+                    mean = scipy.stats.circmean(rofl_inc[f, m], np.pi / 2,
+                                                -np.pi / 2)
+                    std = scipy.stats.circstd(rofl_inc[f, m], np.pi / 2,
+                                              -np.pi / 2)
+                    rofl_inc_mean[f, m] = mean
+                    rofl_inc_std[f, m] = std
+
+                    rofl_trel_mean[f, m] = np.mean(rofl_trel[f, m])
+                    rofl_trel_std[f, m] = np.std(rofl_trel[f, m])
+
+                    df = pd.DataFrame({
+                        "phi": [phi] * rofl_inc[f, m].size,
+                        "dphi": [dphi] * rofl_inc[f, m].size,
+                        "psi": [psi] * rofl_inc[f, m].size,
+                        "rofl_dir":
+                            np.rad2deg(rofl_dir[f, m].flatten()).tolist(),
+                        "rofl_inc":
+                            np.rad2deg(rofl_inc[f, m].flatten()).tolist(),
+                        "rofl_trel":
+                            np.rad2deg(rofl_trel[f, m].flatten()).tolist()
+                    })
+
+                    dataframe = dataframe.append(df)
 
     dphi_list = np.array(dphi_list)
     psi_list = np.array(psi_list)
     phi_list = np.array(phi_list)
 
     np.savez(os.path.join(FILE_PATH, 'analysis', version),
-             rofl_dire=rofl_dire,
-             rofl_incl=rofl_incl,
+             rofl_dir=rofl_dir,
+             rofl_inc=rofl_inc,
              rofl_trel=rofl_trel,
-             rofl_dire_mean=rofl_dire_mean,
-             rofl_dire_std=rofl_dire_std,
-             rofl_incl_mean=rofl_incl_mean,
-             rofl_incl_std=rofl_incl_std,
+             rofl_dir_mean=rofl_dir_mean,
+             rofl_dir_std=rofl_dir_std,
+             rofl_inc_mean=rofl_inc_mean,
+             rofl_inc_std=rofl_inc_std,
              rofl_trel_mean=rofl_trel_mean,
              rofl_trel_std=rofl_trel_std,
              dphi_list=dphi_list,
              psi_list=psi_list,
              phi_list=phi_list)
 
+    species = [
+        str(i) + ',' + str(j) + ',' + str(k)
+        for i, j, k in zip(dataframe['psi'].to_numpy(), dataframe['phi'].
+                           to_numpy(), dataframe['dphi'].to_numpy())
+    ]
+    dataframe.insert(0, "species", species)
+    dataframe.to_pickle(os.path.join(FILE_PATH, 'analysis', version + '.pkl'))
+
+    dataframe.to_csv(os.path.join(FILE_PATH, 'analysis', version + '.csv'))
+
 npzfile = np.load(os.path.join(FILE_PATH, 'analysis', version + '.npz'))
+dataframe = pd.read_pickle(os.path.join(FILE_PATH, 'analysis',
+                                        version + '.pkl'))
 
-# print(npzfile.files)
-
-psi_list = npzfile['psi_list']
-phi_list = npzfile['phi_list']
-
-print(np.unique(psi_list))
-
-for p in np.unique(psi_list):
-    ind = np.where(np.logical_and(psi_list == p, phi_list == 0))[0]
-    p = p * 5
-
-    # print(ind)
-
-    m = 0
-    # for m in [0, 1]:
-    print(npzfile['dphi_list'][ind])
-    # print(np.rad2deg(npzfile['rofl_dire_mean'][ind, m]))
-    # print(np.rad2deg(npzfile['rofl_dire_std'][ind, m]))
-
-    plt.subplot(311)
-    plt.errorbar(npzfile['dphi_list'][ind] + m + p - 0.5 * 5,
-                 np.rad2deg(npzfile['rofl_dire_mean'][ind, m]),
-                 np.rad2deg(npzfile['rofl_dire_std'][ind, m]),
-                 linestyle='None',
-                 marker='^')
-
-    plt.subplot(312)
-    plt.errorbar(npzfile['dphi_list'][ind] + m + p - 0.5 * 5,
-                 np.rad2deg(npzfile['rofl_incl_mean'][ind, m]),
-                 np.rad2deg(npzfile['rofl_incl_std'][ind, m]),
-                 linestyle='None',
-                 marker='^')
-
-    plt.subplot(313)
-    plt.errorbar(npzfile['dphi_list'][ind] + m + p - 0.5 * 5,
-                 npzfile['rofl_trel_mean'][ind, m],
-                 npzfile['rofl_trel_std'][ind, m],
-                 linestyle='None',
-                 marker='^')
+sns.set(style="ticks")
+df = dataframe.loc[dataframe['phi'] == 0.0]
+# print(df.shape)
+print(list(set(df["species"].to_list())))
+print(len(list(set(df["species"].to_list()))))
+print(list(set(df["dphi"])))
+df = df[["dphi", "rofl_dir", "rofl_trel", "species"]]
+g = sns.pairplot(df, hue="species", diag_kind=None)
+g.axes[0, 0].set_xlim((-5, 95))
+g.axes[1, 0].set_xlim((-5, 95))
+g.axes[2, 0].set_xlim((-5, 95))
+# g.axes[2, 0].set_xlim((-5, 10))
+# g.axes[2, 1].set_xlim((-5, 10))
+# g.axes[2, 2].set_xlim((-5, 10))
 plt.show()
+
+# df = dataframe.loc[dataframe['psi'] == 0.5]
+# print(list(set(df["species"].to_list())))
+
+if False:
+    psi_list = npzfile['psi_list']
+    phi_list = npzfile['phi_list']
+    dphi_list = npzfile['dphi_list']
+
+    print(np.unique(psi_list))
+
+    for p in np.unique(psi_list):
+        ind = np.where(np.logical_and(psi_list == p, phi_list == 0))[0]
+
+        dp = 5
+        p = p * dp
+
+        m = 0
+        plt.subplot(311)
+        plt.errorbar(npzfile['dphi_list'][ind] + m + p - 0.5 * dp,
+                     np.rad2deg(npzfile['rofl_dir_mean'][ind, m]),
+                     np.rad2deg(npzfile['rofl_dir_std'][ind, m]),
+                     linestyle='None',
+                     marker='^')
+
+        plt.subplot(312)
+        plt.errorbar(npzfile['dphi_list'][ind] + m + p - 0.5 * dp,
+                     np.rad2deg(npzfile['rofl_inc_mean'][ind, m]),
+                     np.rad2deg(npzfile['rofl_inc_std'][ind, m]),
+                     linestyle='None',
+                     marker='^')
+
+        plt.subplot(313)
+        plt.errorbar(npzfile['dphi_list'][ind] + m + p - 0.5 * dp,
+                     npzfile['rofl_trel_mean'][ind, m],
+                     npzfile['rofl_trel_std'][ind, m],
+                     linestyle='None',
+                     marker='^')
+    plt.show()

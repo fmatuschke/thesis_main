@@ -3,3 +3,4 @@ pylint
 tqdm
 imageio
 matplotlib
+seaborn
