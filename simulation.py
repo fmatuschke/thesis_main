@@ -1,4 +1,3 @@
-#%% import
 import numpy as np
 import copy
 import h5py
@@ -24,7 +23,7 @@ mp_pool = mp.Pool(NUM_THREADS)
 # reproducability
 np.random.seed(42)
 
-#%% path
+# path
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
@@ -45,7 +44,7 @@ parser.add_argument("-i",
 args = parser.parse_args()
 os.makedirs(os.path.join(args.output, 'simulations'), exist_ok=True)
 
-#%% logger
+# logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 
@@ -78,7 +77,7 @@ logger.info(f"Single Memory: {round(simpli.memory_usage())} MB")
 logger.info(f"Total Memory: {round(simpli.memory_usage()* comm.Get_size())} MB")
 del simpli
 
-#%% simulation loop
+# simulation loop
 for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
     logger.info(f"input file: {file}")
 

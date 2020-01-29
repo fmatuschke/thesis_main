@@ -1,4 +1,3 @@
-#%% import
 import fastpli.model.solver
 import fastpli.model.sandbox
 import fastpli.tools
@@ -21,7 +20,7 @@ NUM_THREADS = 4
 # reproducability
 np.random.seed(42)
 
-#%% path
+# path
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
@@ -36,7 +35,7 @@ parser.add_argument("-o",
 args = parser.parse_args()
 os.makedirs(os.path.join(args.output, 'models'), exist_ok=True)
 
-#%% logger
+# logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 
@@ -48,7 +47,7 @@ formatter = logging.Formatter(
 mh.setFormatter(formatter)
 logger.addHandler(mh)
 
-#%% Fiber Model
+# Fiber Model
 LENGTH = 120
 RADIUS_LOGMEAN = 1
 DPHI = np.linspace(0, 90, 10, True)
@@ -58,7 +57,7 @@ PARAMETER = list(zip(PDPHI.flatten(), PPSI.flatten()))
 PARAMETER.append((0.0, 0.0))
 PARAMETER.append((0.0, 1.0))
 
-#%% solve
+# solve
 for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     logger.info(f"dphi:{dphi}, psi:{psi}")
 
@@ -128,7 +127,7 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     # Run Solver
     logger.info(f"run solver")
-    for i in tqdm(range(10)):
+    for i in tqdm(range(10000)):
         if solver.step():
             break
 
@@ -156,5 +155,3 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     logger.debug(f"save solved dat")
     fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)
-
-    break
