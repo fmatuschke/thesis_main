@@ -144,8 +144,8 @@ def main():
                             -0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
                             0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
                         simpli.tilts = np.deg2rad(
-                            np.array([(0, 0), (5.5, 0), (5.5, 90), (5.5, 180),
-                                      (5.5, 270)]))
+                            np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
+                                      (tilt_angle, 180), (tilt_angle, 270)]))
                         simpli.add_crop_tilt_halo()
 
                         simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
