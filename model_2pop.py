@@ -127,7 +127,7 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     # Run Solver
     logger.info(f"run solver")
-    for i in tqdm(range(100)):
+    for i in tqdm(range(10000)):
         if solver.step():
             break
 
