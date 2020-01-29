@@ -28,12 +28,6 @@ FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 
-if __name__ == "__main__":
-    try:
-        main()
-    except:
-        comm.Abort()
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -186,3 +180,10 @@ def main():
                         del label_field
                         del vector_field
                         del simpli
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except:
+        comm.Abort()

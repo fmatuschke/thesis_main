@@ -25,12 +25,6 @@ FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 
-if __name__ == "__main__":
-    try:
-        main()
-    except:
-        comm.Abort()
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -166,3 +160,10 @@ def main():
 
         logger.debug(f"save solved dat")
         fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except:
+        comm.Abort()
