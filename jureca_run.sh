@@ -11,4 +11,4 @@
 #SBATCH --mail-type=ALL
 
 srun -n 96 env-jureca/bin/python3 -u model_2pop.py -o /p/scratch/cjinm11/matuschke1/thesis/2_cube_factory/output
-srun -n 96 env-jureca/bin/python3 -u simulation.py /p/scratch/cjinm11/matuschke1/thesis/2_cube_factory/output -i "*v0.solved*.h5"
+srun -n 96 env-jureca/bin/python3 -u simulation.py -o /p/scratch/cjinm11/matuschke1/thesis/2_cube_factory/output -i "*v0.solved*.h5"
