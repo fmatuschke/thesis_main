@@ -11,10 +11,12 @@ import h5py
 import sys
 import os
 
-from MPIFileHandler import MPIFileHandler
 from tqdm import tqdm
+
+from MPIFileHandler import MPIFileHandler
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
+NUM_THREADS = 4
 
 # reproducability
 np.random.seed(42)
@@ -23,7 +25,6 @@ np.random.seed(42)
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
-MODEL_NAME = "cube_2pop"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-o",
@@ -40,7 +41,7 @@ logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 
 log_file = fastpli.tools.helper.version_file_name(
-    os.path.join(args.output, MODEL_NAME)) + ".log"
+    os.path.join(args.output, FILE_BASE + '.solver')) + ".log"
 mh = MPIFileHandler(log_file)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
@@ -65,10 +66,10 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     solver = fastpli.model.solver.Solver()
     solver.obj_mean_length = RADIUS_LOGMEAN * 2
     solver.obj_min_radius = RADIUS_LOGMEAN * 5
-    solver.omp_num_threads = 4
+    solver.omp_num_threads = NUM_THREADS
 
     file_pref = fastpli.tools.helper.version_file_name(
-        os.path.join(args.output, 'models', MODEL_NAME + '_dphi_' +
+        os.path.join(args.output, 'models', FILE_BASE + '_dphi_' +
                      str(round(dphi, 1))) + '_psi_' + str(round(psi, 1)))
     logger.info(f"file_pref: {file_pref}")
 
@@ -127,7 +128,7 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     # Run Solver
     logger.info(f"run solver")
-    for i in tqdm(range(10000)):
+    for i in tqdm(range(10)):
         if solver.step():
             break
 
@@ -155,3 +156,5 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     logger.debug(f"save solved dat")
     fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)
+
+    break
