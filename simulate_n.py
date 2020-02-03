@@ -3,6 +3,8 @@ import copy
 import h5py
 import warnings
 
+from tqdm import tqdm
+
 from fastpli.analysis.images import fom_hsv_black
 
 
@@ -38,25 +40,24 @@ def run_simulation_pipeline_n(simpli,
         simpli._print("{}: theta: {} deg, phi: {} deg".format(
             t, round(np.rad2deg(theta), 2), round(np.rad2deg(phi), 2)))
 
-        images_n = []
+        # images_n = []
         new_images_n = []
+        images = simpli.run_simulation(label_field, vector_field,
+                                       tissue_properties, theta, phi)
+
+        if crop_tilt:
+            delta_voxel = simpli.crop_tilt_voxel()
+            images = images[delta_voxel:-1 - delta_voxel,
+                            delta_voxel:-1 - delta_voxel, :]
+
+            # images_n.append(images)
+
         for _ in range(n_repeat):
-            images = simpli.run_simulation(label_field, vector_field,
-                                           tissue_properties, theta, phi)
-
-            if crop_tilt:
-                delta_voxel = simpli.crop_tilt_voxel()
-                print(delta_voxel)
-                images = images[delta_voxel:-1 - delta_voxel,
-                                delta_voxel:-1 - delta_voxel, :]
-
-            images_n.append(images)
-
             # apply optic to simulation
             new_images = simpli.apply_optic(images, mp_pool=mp_pool)
             new_images_n.append(new_images)
 
-        images = np.vstack(images_n)
+        # images = np.vstack(images_n)
         new_images = np.vstack(new_images_n)
 
         if h5f:

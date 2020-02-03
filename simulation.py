@@ -9,9 +9,10 @@ import os
 import warnings
 
 import fastpli.simulation
+import fastpli.analysis
 import fastpli.objects
 import fastpli.tools
-from fastpli.analysis.images import fom_hsv_black
+import fastpli.io
 
 from tqdm import tqdm
 
@@ -31,6 +32,7 @@ np.random.seed(42)
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-o",
@@ -41,20 +43,24 @@ parser.add_argument("-o",
 
 parser.add_argument("-i",
                     "--input",
-                    type=str,
+                    nargs='*',
                     required=True,
-                    help="input regex string.")
+                    help="input string.")
+
+parser.add_argument("-f",
+                    "--overwrite",
+                    action='store_true',
+                    help="overwrite existing data")
 
 args = parser.parse_args()
-os.makedirs(os.path.join(args.output, 'simulations'), exist_ok=True)
+os.makedirs(args.output, exist_ok=args.overwrite)
 
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 
-log_file = fastpli.tools.helper.version_file_name(
-    os.path.join(args.output, 'simulation')) + ".log"
-mh = MPIFileHandler(log_file)
+log_file = FILE_NAME + ".log"
+mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 mh.setFormatter(formatter)
@@ -62,18 +68,16 @@ logger.addHandler(mh)
 
 # PARAMETER
 VOXEL_SIZE = 0.25
-LENGTH = 65
+LENGTH = 60
 THICKNESS = 60
 
-file_list = sorted(glob.glob(os.path.join(args.output, 'models', args.input)))
-if not file_list:
-    logger.error("no files detected")
+file_list = args.input
 
 # print Memory
 simpli = fastpli.simulation.Simpli()
 simpli.voxel_size = VOXEL_SIZE  # in mu meter
-simpli.set_voi(-0.5 * np.array([65, 65, 60]),
-               0.5 * np.array([65, 65, 60]))  # in mu meter
+simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
+               0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
 
 logger.info(f"Single Memory: {round(simpli.memory_usage())} MB")
 logger.info(f"Total Memory: {round(simpli.memory_usage()* comm.Get_size())} MB")
@@ -84,11 +88,10 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
     logger.info(f"input file: {file}")
 
     # Loading fiber models and prepair rotations
-    fiber_bundles = fastpli.io.fiber.load(file, 'fiber_bundles')
-
     with h5py.File(file, 'r') as h5f:
-        psi = h5f['fiber_bundles'].attrs["psi"]
-        dphi = h5f['fiber_bundles'].attrs["dphi"]
+        fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
+        psi = h5f['/'].attrs["psi"]
+        dphi = h5f['/'].attrs["dphi"]
 
     n_rot = int(
         np.round(
@@ -108,18 +111,17 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
         file_name += '_phi_{:.2f}'.format(f_phi)
-        file_name = fastpli.tools.helper.version_file_name(
-            os.path.join(args.output, 'simulations', file_name))
+        file_name = os.path.join(args.output, file_name)
 
         logger.info(f"rotation : {f_phi}")
         logger.info(f"output file: {file_name}")
 
         rot = fastpli.tools.rotation.x(np.deg2rad(f_phi))
 
-        with h5py.File(file_name + '.h5', 'w-') as h5f:
+        with h5py.File(file_name + '.h5', 'w') as h5f:
             with open(os.path.abspath(__file__), 'r') as script:
-                h5f['parameter/script'] = script.read()
-            h5f['parameter/input_file'] = file
+                h5f.attrs['parameter/script'] = script.read()
+            h5f.attrs['parameter/input_file'] = file
 
             for m, (dn, model) in enumerate([(-0.001, 'p'), (0.002, 'r')]):
                 for name, gain, intensity, res, tilt_angle, sigma in [
@@ -165,17 +167,19 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                     simpli.light_intensity = intensity  # a.u.
                     simpli.sensor_gain = gain
 
-                    simpli.save_parameter(h5f=dset)
+                    simpli.save_parameter_h5(h5f=dset)
 
                     if name == 'LAP':
-                        run_simulation_pipeline_n(simpli,
-                                                  label_field,
-                                                  vector_field,
-                                                  tissue_properties,
-                                                  int(20 / 1.25),
-                                                  h5f=dset,
-                                                  crop_tilt=True,
-                                                  mp_pool=mp_pool)
+                        run_simulation_pipeline_n(
+                            simpli,
+                            label_field,
+                            vector_field,
+                            tissue_properties,
+                            #   int(20 / 1.25),
+                            256,
+                            h5f=dset,
+                            crop_tilt=True,
+                            mp_pool=mp_pool)
                     else:
                         simpli.run_simulation_pipeline(label_field,
                                                        vector_field,
@@ -184,9 +188,9 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
                                                        crop_tilt=True,
                                                        mp_pool=mp_pool)
 
-                    dset['parameter/model/psi'] = psi
-                    dset['parameter/model/dphi'] = dphi
-                    dset['parameter/model/phi'] = f_phi
+                    dset.attrs['parameter/model/psi'] = psi
+                    dset.attrs['parameter/model/dphi'] = dphi
+                    dset.attrs['parameter/model/phi'] = f_phi
 
                     del label_field
                     del vector_field

@@ -58,7 +58,7 @@ os.makedirs(args.output, exist_ok=args.overwrite)
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 log_file = output_name + ".log"
-mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY)
+mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 mh.setFormatter(formatter)
@@ -137,10 +137,11 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     # Save Data
     logger.debug(f"save init")
-    fastpli.tools.helper.save_h5_fibers(file_pref + '.init.h5',
-                                        solver.fiber_bundles, 'fiber_bundles',
-                                        __file__)
-    fastpli.io.fiber.save(file_pref + '.init.dat', solver.fiber_bundles)
+    with h5py.File(file_pref + '.init.h5', 'w') as h5f:
+        solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
+        h5f['/'].attrs['psi'] = psi
+        h5f['/'].attrs['dphi'] = dphi
+    fastpli.io.fiber_bundles.save(file_pref + '.init.dat', solver.fiber_bundles)
 
     # Run Solver
     logger.info(f"run solver")
@@ -160,15 +161,9 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     logger.info(f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}")
 
     logger.debug(f"save solved")
-    fastpli.tools.helper.save_h5_fibers(file_pref + '.solved.h5',
-                                        solver.fiber_bundles, 'fiber_bundles',
-                                        __file__, solver.get_dict(), i,
-                                        solver.num_col_obj, solver.overlap)
-
-    logger.debug(f"save solved attrs")
-    h5f = h5py.File(file_pref + '.solved.h5', 'r+')
-    h5f['fiber_bundles'].attrs['psi'] = psi
-    h5f['fiber_bundles'].attrs['dphi'] = dphi
-
-    logger.debug(f"save solved dat")
-    fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)
+    with h5py.File(file_pref + '.solved.h5', 'w') as h5f:
+        solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
+        h5f['/'].attrs['psi'] = psi
+        h5f['/'].attrs['dphi'] = dphi
+    fastpli.io.fiber_bundles.save(file_pref + '.solved.dat',
+                                  solver.fiber_bundles)
