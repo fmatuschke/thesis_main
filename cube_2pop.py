@@ -40,11 +40,6 @@ parser.add_argument("-n",
                     required=True,
                     help="Number of max_steps.")
 
-parser.add_argument("-f",
-                    "--overwrite",
-                    action='store_true',
-                    help="overwrite existing data")
-
 parser.add_argument("-r",
                     "--fiber_radius",
                     default=1,
@@ -52,7 +47,7 @@ parser.add_argument("-r",
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
-os.makedirs(args.output, exist_ok=args.overwrite)
+os.makedirs(args.output, exist_ok=True)
 
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
@@ -137,7 +132,7 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     # Save Data
     logger.debug(f"save init")
-    with h5py.File(file_pref + '.init.h5', 'w') as h5f:
+    with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['dphi'] = dphi
@@ -161,7 +156,7 @@ for dphi, psi in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     logger.info(f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}")
 
     logger.debug(f"save solved")
-    with h5py.File(file_pref + '.solved.h5', 'w') as h5f:
+    with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['dphi'] = dphi

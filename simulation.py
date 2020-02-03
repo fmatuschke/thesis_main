@@ -47,13 +47,8 @@ parser.add_argument("-i",
                     required=True,
                     help="input string.")
 
-parser.add_argument("-f",
-                    "--overwrite",
-                    action='store_true',
-                    help="overwrite existing data")
-
 args = parser.parse_args()
-os.makedirs(args.output, exist_ok=args.overwrite)
+os.makedirs(args.output, exist_ok=True)
 
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
@@ -118,7 +113,7 @@ for file in tqdm(file_list[comm.Get_rank()::comm.Get_size()]):
 
         rot = fastpli.tools.rotation.x(np.deg2rad(f_phi))
 
-        with h5py.File(file_name + '.h5', 'w') as h5f:
+        with h5py.File(file_name + '.h5', 'w-') as h5f:
             with open(os.path.abspath(__file__), 'r') as script:
                 h5f.attrs['parameter/script'] = script.read()
             h5f.attrs['parameter/input_file'] = file
