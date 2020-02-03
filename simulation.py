@@ -53,13 +53,13 @@ os.makedirs(args.output, exist_ok=True)
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
-
-log_file = FILE_NAME + ".log"
+log_file = output_name + ".log"
 mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 mh.setFormatter(formatter)
 logger.addHandler(mh)
+logger.info("args: " + " ".join(sys.argv[1:]))
 
 # PARAMETER
 VOXEL_SIZE = 0.25
