@@ -6,6 +6,7 @@ import warnings
 from tqdm import tqdm
 
 from fastpli.analysis.images import fom_hsv_black
+from fastpli.simulation import optic
 
 
 def run_simulation_pipeline_n(simpli,
@@ -50,14 +51,18 @@ def run_simulation_pipeline_n(simpli,
             images = images[delta_voxel:-1 - delta_voxel,
                             delta_voxel:-1 - delta_voxel, :]
 
-            # images_n.append(images)
+        # apply optic to simulation
+        if not simpli._sensor_gain:
+            raise ValueError("sensor_gain not set")
+        output = simpli.apply_optic_resample(images, mp_pool=mp_pool)
+        if np.amin(output) < 0:
+            raise AssertionError("intensity < 0 detected")
 
         for _ in range(n_repeat):
-            # apply optic to simulation
-            new_images = simpli.apply_optic(images, mp_pool=mp_pool)
-            new_images_n.append(new_images)
+            if simpli._sensor_gain > 0:
+                output = optic.add_noise(output, simpli._sensor_gain)
+            new_images_n.append(output.copy())
 
-        # images = np.vstack(images_n)
         new_images = np.vstack(new_images_n)
 
         if h5f:

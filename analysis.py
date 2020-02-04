@@ -1,3 +1,4 @@
+#%% prepair data
 import numpy as np
 import h5py
 import os
@@ -14,46 +15,29 @@ from tqdm import tqdm
 # reproducability
 np.random.seed(42)
 
-
-def calcMeanStdAngle(angles):
-    msin = 1 / angles.size * np.sum(np.sin(angles.flatten()))
-    mcos = 1 / angles.size * np.sum(np.cos(angles.flatten()))
-
-    mean = np.arctan2(msin, mcos)
-    std = np.sqrt(-2 * np.log(msin * msin + mcos * mcos))
-
-    return mean, std
-
-
-def calcMeanStdHalfAngle(angles):
-    mean, std = calcMeanStdAngle(2 * angles)
-    return mean / 2, std / 2
-
-
-# /data/PLI-Group/felix/data/judac/felix/project/2_cube_factory/output
+FILE_PATH = '/data/PLI-Group/felix/data/judac/felix/project/2_cube_factory/cube_2pop/simulations'
 if len(sys.argv) > 1:
     FILE_PATH = sys.argv[1]
 else:
     raise ValueError("need file output path")
 
-version = 'v0'
+#%% prepair data
 os.makedirs(os.path.join(FILE_PATH, 'analysis'), exist_ok=True)
-file_list = sorted(
-    glob.glob(os.path.join(FILE_PATH, 'simulations', '*.' + version + '.h5')))
+file_list = sorted(glob.glob(os.path.join(FILE_PATH, '*.h5')))
 
 # get resolution:
 with h5py.File(file_list[0], 'r') as h5f:
     for name in ['PM']:
         h5f_sub = h5f[name + '/p']
-        res = h5f_sub['analysis/rofl/direction'][...].shape
+        res = h5f_sub['analysis/rofl/direction'].shape
 shape = (len(file_list), 2, res[0] * res[1])
 
 dataframe = pd.DataFrame(
     columns=["phi", "dphi", "psi", "rofl_dir", "rofl_inc", "rofl_trel"])
 
 if not os.path.isfile(os.path.join(
-        FILE_PATH, 'analysis', version + '.npz')) or not os.path.isfile(
-            os.path.join(FILE_PATH, 'analysis', version + '.pkl')):
+        FILE_PATH, 'analysis', 'data.npz')) or not os.path.isfile(
+            os.path.join(FILE_PATH, 'analysis', 'data.pkl')):
 
     print('collect rofl data')
 
@@ -74,15 +58,6 @@ if not os.path.isfile(os.path.join(
     phi_list = []
 
     for f, file in enumerate(tqdm(file_list)):
-        # TODO: werte mit in h5 abspeichern !
-        dphi = float(file.partition('_dphi_')[-1].partition('_psi')[0])
-        psi = float(file.partition('_psi_')[-1].partition('.v')[0])
-        phi = float(file.partition('_phi_')[-1].partition('.v')[0])
-
-        dphi_list.append(dphi)
-        psi_list.append(psi)
-        phi_list.append(phi)
-
         with h5py.File(file, 'r') as h5f:
             for name in ['PM']:
                 for m, model in enumerate(['p', 'r']):
@@ -117,6 +92,14 @@ if not os.path.isfile(os.path.join(
                     rofl_trel_mean[f, m] = np.mean(rofl_trel[f, m])
                     rofl_trel_std[f, m] = np.std(rofl_trel[f, m])
 
+                    psi = h5f_sub.attrs['parameter/model/psi']
+                    dphi = h5f_sub.attrs['parameter/model/dphi']
+                    phi = h5f_sub.attrs['parameter/model/phi']
+
+                    dphi_list.append(psi)
+                    psi_list.append(dphi)
+                    phi_list.append(phi)
+
                     df = pd.DataFrame({
                         "phi": [phi] * rofl_inc[f, m].size,
                         "dphi": [dphi] * rofl_inc[f, m].size,
@@ -135,7 +118,7 @@ if not os.path.isfile(os.path.join(
     psi_list = np.array(psi_list)
     phi_list = np.array(phi_list)
 
-    np.savez(os.path.join(FILE_PATH, 'analysis', version),
+    np.savez(os.path.join(FILE_PATH, 'analysis', 'data'),
              rofl_dir=rofl_dir,
              rofl_inc=rofl_inc,
              rofl_trel=rofl_trel,
@@ -155,13 +138,11 @@ if not os.path.isfile(os.path.join(
                            to_numpy(), dataframe['dphi'].to_numpy())
     ]
     dataframe.insert(0, "species", species)
-    dataframe.to_pickle(os.path.join(FILE_PATH, 'analysis', version + '.pkl'))
+    dataframe.to_pickle(os.path.join(FILE_PATH, 'analysis', 'data.pkl'))
 
-    dataframe.to_csv(os.path.join(FILE_PATH, 'analysis', version + '.csv'))
-
-npzfile = np.load(os.path.join(FILE_PATH, 'analysis', version + '.npz'))
-dataframe = pd.read_pickle(os.path.join(FILE_PATH, 'analysis',
-                                        version + '.pkl'))
+#%% visualize data
+npzfile = np.load(os.path.join(FILE_PATH, 'analysis', 'data.npz'))
+dataframe = pd.read_pickle(os.path.join(FILE_PATH, 'analysis', 'data.pkl'))
 
 sns.set(style="ticks")
 df = dataframe.loc[dataframe['phi'] == 0.0]
