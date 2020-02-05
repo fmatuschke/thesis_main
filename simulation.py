@@ -153,11 +153,8 @@ for file, f0_inc in tqdm(FILE_AND_INC[comm.Get_rank()::comm.Get_size()]):
                     simpli.optical_sigma = 0.71  # in pixel size
                     simpli.verbose = 0
 
-                    simpli.set_voi(
-                        -0.5 *
-                        np.array([LENGTH, LENGTH, THICKNESS] - 0.5 * PIXEL_LAP),
-                        0.5 *
-                        np.array([LENGTH, LENGTH, THICKNESS] + 0.5 * PIXEL_LAP))
+                    simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
+                                   0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
                     simpli.tilts = np.deg2rad(
                         np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
                                   (tilt_angle, 180), (tilt_angle, 270)]))

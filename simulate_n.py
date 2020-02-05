@@ -54,13 +54,15 @@ def run_simulation_pipeline_n(simpli,
         # apply optic to simulation
         if not simpli._sensor_gain:
             raise ValueError("sensor_gain not set")
-        output = simpli.apply_optic_resample(images, mp_pool=mp_pool)
-        if np.amin(output) < 0:
+        output_org = simpli.apply_optic_resample(images, mp_pool=mp_pool)
+        if np.amin(output_org) < 0:
             raise AssertionError("intensity < 0 detected")
 
         for _ in range(n_repeat):
             if simpli._sensor_gain > 0:
-                output = optic.add_noise(output, simpli._sensor_gain)
+                output = optic.add_noise(output_org, simpli._sensor_gain)
+            else:
+                output = output_org
             new_images_n.append(output.copy())
 
         new_images = np.vstack(new_images_n)
