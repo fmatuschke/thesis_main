@@ -72,7 +72,6 @@ PARAMETER.append((0.0, 0.0))
 PARAMETER.append((1.0, 0.0))
 
 # solve
-PARAMETER = PARAMETER[:2]
 for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     logger.info(f"psi:{psi}, omega:{omega}")
 
