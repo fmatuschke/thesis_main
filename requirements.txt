@@ -1,3 +1,5 @@
 yapf
 pylint
 tqdm
+matplotlib
+pandas
