@@ -201,7 +201,7 @@ df_circ = pd.DataFrame()
 #                         subplot_kw={'projection': 'polar'})
 # axes = axs.reshape(-1)
 
-fig, ax = plt.subplots(1, 1)
+# fig, ax = plt.subplots(1, 1)
 
 for omega in list(range(0, 100, 10))[::-1][comm.Get_rank()::comm.Get_size()]:
     INPUT_FILE = f'input/cube_2pop_psi_0.5_omega_{omega}.0.solved.h5'
@@ -225,53 +225,68 @@ for omega in list(range(0, 100, 10))[::-1][comm.Get_rank()::comm.Get_size()]:
 
     # fig, axs = plt.subplots()
 
-    for m in ['p']:
+    df_dir = pd.DataFrame()
 
-        df_dir = pd.DataFrame()
+    data_ref = df[np.logical_and(
+        df['model'] == 'r',
+        df['voxel_size'] == VOXEL_SIZES[0])]['direction'].to_numpy()
+    x_ref, y_ref = statistic.direction_histogram(data_ref, N=2 * 36, ax=None)
+
+    for m in ['p', 'r']:
+
+        # df_dir = pd.DataFrame()
+
+        # data_ref = df[np.logical_and(
+        #     df['model'] == m,
+        #     df['voxel_size'] == VOXEL_SIZES[0])]['direction'].to_numpy()
+        # x_ref, y_ref = statistic.direction_histogram(data_ref,
+        #                                              N=2 * 36,
+        #                                              ax=None)
+
         for i, (name,
                 group) in enumerate(df[df['model'] == m].groupby('voxel_size')):
             data = group['direction'].to_numpy()
 
-            ax.clear()
+            # ax.clear()
 
             # fig, axs = plt.subplots(nrows=1,
             #                         ncols=1,
             #                         subplot_kw={'projection': 'polar'})
 
-            x, y = statistic.direction_histogram(data, N=36, ax=None)
+            x, y = statistic.direction_histogram(data, N=2 * 36, ax=None)
             # statistic.direction_histogram(data, N=36, ax=axs)
 
-            mu, kappa = astropy.stats.vonmisesmle(data * 2)
+            # mu, kappa = astropy.stats.vonmisesmle(data * 2)
 
-            muu, kappaa, pp = scipy.stats.vonmises.fit(data * 2,
-                                                       kappa,
-                                                       loc=mu,
-                                                       scale=1)
+            # muu, kappaa, pp = scipy.stats.vonmises.fit(data * 2,
+            #                                            kappa,
+            #                                            loc=mu,
+            #                                            scale=1)
 
-            (muuu, kappaaa), _ = scipy.optimize.curve_fit(
-                lambda x, m, k: scipy.stats.vonmises.pdf(x - m, k),
-                x * 2,
-                y,
-                p0=(mu, kappa),
-                bounds=(0, [2 * np.pi, 10]),
-                # method='trf'
-            )
+            # (muuu, kappaaa), _ = scipy.optimize.curve_fit(
+            #     lambda x, m, k: scipy.stats.vonmises.pdf(x - m, k),
+            #     x * 2,
+            #     y,
+            #     p0=(mu, kappa),
+            #     bounds=(0, [2 * np.pi, 10]),
+            #     # method='trf'
+            # )
 
-            xx = np.linspace(0, 4 * np.pi, 100)
+            # xx = np.linspace(0, 4 * np.pi, 100)
 
-            plt.plot(x, y)
-            plt.plot(xx / 2, scipy.stats.vonmises.pdf(xx - mu, kappa))
-            plt.plot(xx / 2, scipy.stats.vonmises.pdf(xx - muu, kappaa))
-            plt.plot(xx / 2, scipy.stats.vonmises.pdf(xx - muuu, kappaaa))
+            # plt.plot(x, y)
+            # plt.plot(xx / 2, scipy.stats.vonmises.pdf(xx - mu, kappa))
+            # plt.plot(xx / 2, scipy.stats.vonmises.pdf(xx - muu, kappaa))
+            # plt.plot(xx / 2, scipy.stats.vonmises.pdf(xx - muuu, kappaaa))
 
-            print(kappa, mu)
-            print(kappaa, muu, pp)
-            print(kappaaa, muuu)
-            print()
+            # print(kappa, mu)
+            # print(kappaa, muu, pp)
+            # print(kappaaa, muuu)
+            # print()
 
-            plt.ion()
-            plt.show()
-            plt.pause(0.001)
+            # plt.ion()
+            # plt.show()
+            # plt.pause(0.001)
 
             if i == 0:
                 df_ = pd.DataFrame({'direction': x, name: y})
@@ -282,22 +297,31 @@ for omega in list(range(0, 100, 10))[::-1][comm.Get_rank()::comm.Get_size()]:
 
             # sys.exit()
 
-        #     df_circ = df_circ.append(
-        #         {
-        #             "voxel_size":
-        #                 float(name),
-        #             "model":
-        #                 m,
-        #             "omega":
-        #                 float(omega),
-        #             "diff_mean":
-        #                 scipy.stats.circmean(group['direction'].to_numpy()),
-        #             "diff_std":
-        #                 scipy.stats.circstd(group['direction'].to_numpy())
-        #         },
-        #         ignore_index=True)
+            df_circ = df_circ.append(
+                {
+                    "voxel_size": float(name),
+                    "model": m,
+                    "omega": float(omega),
+                    "delta": np.mean((y_ref - y)**2)
+                },
+                ignore_index=True)
 
-        df_dir.to_csv(OUTPUT_NAME + f'.direction.voxel_size.{m}' + '.csv')
+            # df_circ = df_circ.append(
+            #     {
+            #         "voxel_size":
+            #             float(name),
+            #         "model":
+            #             m,
+            #         "omega":
+            #             float(omega),
+            #         "diff_mean":
+            #             scipy.stats.circmean(group['direction'].to_numpy()),
+            #         "diff_std":
+            #             scipy.stats.circstd(group['direction'].to_numpy())
+            #     },
+            #     ignore_index=True)
+
+        # df_dir.to_csv(OUTPUT_NAME + f'.direction.voxel_size.{m}' + '.csv')
 
 # plt.show()
 
@@ -326,3 +350,31 @@ for omega in list(range(0, 100, 10))[::-1][comm.Get_rank()::comm.Get_size()]:
 
 # with open('test.tex', 'w') as file:
 #     file.write(filedata)
+
+# df_circ.groupby(['voxel_size', 'model']).count()['delta'].unstack().plot()
+
+# print(df_circ.groupby(['voxel_size', 'model']))
+# print(df_circ.groupby(['voxel_size', 'model']).count())
+# print(df_circ.groupby(['voxel_size', 'model']).count()['delta'])
+# print(df_circ.groupby(['voxel_size', 'model']).count()['delta'].unstack())
+# plt.show()
+
+# df_circ.pivot(index='voxel_size', columns='model', values='delta')
+
+fig, ax = plt.subplots()
+# fig, axs = plt.subplots(nrows=4, ncols=3)
+# ax = axs.reshape(-1)
+
+i = 0
+
+for key, grp in df_circ.groupby(['omega']):
+    for k, g in grp.groupby(['model']):
+        # print(g)
+        g.plot(ax=ax,
+               kind='line',
+               x='voxel_size',
+               y='delta',
+               label=str(key) + '_' + k)
+    i += 1
+
+plt.show()
