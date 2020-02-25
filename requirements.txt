@@ -3,3 +3,4 @@ pylint
 tqdm
 matplotlib
 pandas
+seaborn
