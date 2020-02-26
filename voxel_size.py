@@ -114,15 +114,21 @@ for omega in list(range(0, 100, 10))[comm.Get_rank()::comm.Get_size()]:
                     del vector_field
                     del simpli
 
-for omega in list(range(0, 100, 10)):
-    INPUT_FILE = f'input/cube_2pop_psi_0.5_omega_{omega}.0.solved.h5'
+if not os.path.isfile(FILE_NAME + '.pkl'):
 
-    OUTPUT_NAME = FILE_NAME + '_' + os.path.basename(
-        INPUT_FILE) + '_vref_' + str(VOXEL_SIZES[0]) + '_size_' + str(LENGTH)
-    if not os.path.isfile(OUTPUT_NAME + '.epa.pkl'):
-        print("analyse data")
-        import fastpli.simulation.optic
-        import fastpli.analysis
+    print("analyse data")
+    import fastpli.simulation.optic
+    import fastpli.analysis
+
+    df = pd.DataFrame()
+
+    for omega in list(range(0, 100, 10)):
+        INPUT_FILE = f'input/cube_2pop_psi_0.5_omega_{omega}.0.solved.h5'
+
+        OUTPUT_NAME = FILE_NAME + '_' + os.path.basename(
+            INPUT_FILE) + '_vref_' + str(
+                VOXEL_SIZES[0]) + '_size_' + str(LENGTH)
+
         with h5py.File(OUTPUT_NAME + '.h5', 'r') as h5f:
             voxel_size_ref = str(min([float(i) for i in h5f]))
             print(voxel_size_ref)
@@ -130,10 +136,9 @@ for omega in list(range(0, 100, 10)):
             data_ref['r'] = h5f[voxel_size_ref + '/r/simulation/data/0'][:]
             data_ref['p'] = h5f[voxel_size_ref + '/p/simulation/data/0'][:]
 
-            df_data = pd.DataFrame()
-            df_epa = pd.DataFrame()
             for voxel_size in h5f:
                 for model in h5f[voxel_size]:
+
                     dset = h5f[voxel_size + '/' + model]
 
                     data = dset['simulation/data/0'][:]
@@ -145,7 +150,7 @@ for omega in list(range(0, 100, 10)):
                         for i in range(data_ref[model].shape[-1]):
                             data_ref_optic[:, :,
                                            i] = fastpli.simulation.optic.resample(
-                                               data_ref[model][:, :, i],
+                                               data_ref['r'][:, :, i],
                                                float(voxel_size_ref) /
                                                float(voxel_size))
                     else:
@@ -153,40 +158,34 @@ for omega in list(range(0, 100, 10)):
 
                     data_ref_optic = np.array(data_ref_optic)
 
-                    df1 = pd.DataFrame({
-                        'voxel_size': [float(voxel_size)] * data.size,
-                        'model': [model] * data.size,
-                        'data': data.flatten(),
-                        'data_ref': data_ref_optic.flatten(),
-                        # 'diff':
-                        #     np.abs(data - data_ref_optic).flatten(),
-                        # 'dev':
-                        #     np.abs(data - data_ref_optic).flatten() /
-                        #     data_ref_optic.flatten(),
-                    })
-
                     trans, dirc, ret = fastpli.analysis.epa.epa(data)
                     ref_trans, ref_dirc, ref_ret = fastpli.analysis.epa.epa(
                         data_ref_optic)
 
-                    dirc[dirc > np.pi / 2] -= np.pi
+                    # print(np.sum(np.abs(data - data_ref_optic)),
+                    #       np.sum(np.abs(trans - ref_trans)),
+                    #       np.sum(np.abs(dirc - ref_dirc)),
+                    #       np.sum(np.abs(ret - ref_ret)))
 
-                    df2 = pd.DataFrame({
-                        'voxel_size': [float(voxel_size)] * trans.size,
-                        'model': [model] * trans.size,
-                        'transmittance': trans.flatten(),
-                        'direction': dirc.flatten(),
-                        'retardation': ret.flatten(),
-                        'opt_transmittance': ref_trans.flatten(),
-                        'opt_direction': ref_dirc.flatten(),
-                        'opt_retardation': ref_ret.flatten()
-                    })
+                    # dirc[dirc > np.pi / 2] -= np.pi
 
-                    df_data = df_data.append(df1)
-                    df_epa = df_epa.append(df2)
+                    df = df.append(
+                        {
+                            'voxel_size': float(voxel_size),
+                            'model': model,
+                            'omega': float(omega),
+                            'data': data.flatten().tolist(),
+                            'data_ref': data_ref_optic.flatten().tolist(),
+                            'transmittance': trans.flatten().tolist(),
+                            'direction': dirc.flatten().tolist(),
+                            'retardation': ret.flatten().tolist(),
+                            'opt_transmittance': ref_trans.flatten().tolist(),
+                            'opt_direction': ref_dirc.flatten().tolist(),
+                            'opt_retardation': ref_ret.flatten().tolist()
+                        },
+                        ignore_index=True)
 
-            df_data.to_pickle(OUTPUT_NAME + '.data.pkl')
-            df_epa.to_pickle(OUTPUT_NAME + '.epa.pkl')
+    df.to_pickle(FILE_NAME + '.pkl')
 
 import seaborn as sns
 import statistic
@@ -196,52 +195,74 @@ import astropy.stats
 
 df_analyse = pd.DataFrame()
 
-for omega in list(range(0, 100, 10)):
-    INPUT_FILE = f'input/cube_2pop_psi_0.5_omega_{omega}.0.solved.h5'
+df = pd.read_pickle(FILE_NAME + '.pkl')
 
-    OUTPUT_NAME = FILE_NAME + '_' + os.path.basename(
-        INPUT_FILE) + '_vref_' + str(VOXEL_SIZES[0]) + '_size_' + str(LENGTH)
-    df = pd.read_pickle(OUTPUT_NAME + '.epa.pkl')
+fig, ax = plt.subplots()
+# for m in ['p', 'r']:
+for m, m_group in df.groupby('model'):
+    for vs, vs_group in m_group.groupby('voxel_size'):
+        for o, o_group in vs_group.groupby('omega'):
 
-    df_ref = df[(df['model'] == 'r') & (df['voxel_size'] == VOXEL_SIZES[0])]
-
-    for m in ['p', 'r']:
-        for i, (name,
-                group) in enumerate(df[df['model'] == m].groupby('voxel_size')):
+            # print(str(vs) + '_' + m + '_' + str(o))
+            # print(o_group)
 
             df_analyse = df_analyse.append(
                 {
                     "voxel_size":
-                        float(name),
+                        float(vs),
                     "model":
                         m,
                     "omega":
-                        float(omega),
+                        float(o),
                     "mean_diff_dir":
                         np.mean(
-                            np.abs(group['opt_direction'].to_numpy() -
-                                   group['direction'].to_numpy())),
+                            np.abs(
+                                np.array(o_group['opt_direction'].iloc[0]) -
+                                np.array(o_group['direction'].iloc[0]))),
                     "mean_diff_ret":
                         np.mean(
-                            np.abs(group['opt_retardation'].to_numpy() -
-                                   group['retardation'].to_numpy())),
+                            np.abs(
+                                np.array(o_group['opt_retardation'].iloc[0]) -
+                                np.array(o_group['retardation'].iloc[0]))),
                     "mean_diff_rel_ret":
                         np.mean(
-                            np.abs(group['opt_retardation'].to_numpy() -
-                                   group['retardation'].to_numpy()) /
-                            group['opt_retardation'].to_numpy()),
+                            np.abs(
+                                np.array(o_group['opt_retardation'].iloc[0]) -
+                                np.array(o_group['retardation'].iloc[0])) /
+                            np.array(o_group['opt_retardation'].iloc[0])),
                     "mean_diff_trans":
                         np.mean(
-                            np.abs(group['opt_transmittance'].to_numpy() -
-                                   group['transmittance'].to_numpy()))
+                            np.abs(
+                                np.array(o_group['opt_transmittance'].iloc[0]) -
+                                np.array(o_group['transmittance'].iloc[0])))
                 },
                 ignore_index=True)
+
+            # x = np.array(o_group['opt_retardation'].iloc[0])
+            # y = np.array(o_group['retardation'].iloc[0])
+
+            # # ax.scatter(x, y)
+            # ax.hist2d(x, y, bins=(50, 50), cmap=plt.cm.viridis)
+            # ax.plot([np.min(np.append(x, y)),
+            #          np.max(np.append(x, y))],
+            #         [np.min(np.append(x, y)),
+            #          np.max(np.append(x, y))])
+            # ax.set_title(str(vs) + '_' + m + '_' + str(o))
+            # ax.axis('equal')
+            # plt.ion()
+            # plt.show()
+            # plt.pause(0.25)
+
+            # ax.clear()
 
 for mod in ['trans', 'dir', 'ret', 'rel_ret']:
     fig, ax = plt.subplots(2, 1)
     fig.suptitle(mod)
     for i, (k, g) in enumerate(df_analyse.groupby(['model'])):
         ax[i].set_title(k)
+
+        # sns.boxplot(x='voxel_size', y='mean_diff_rel_ret', hue='omega', data=g)
+
         for key, grp in g.groupby(['omega']):
             # print(g)
             grp.plot(ax=ax[i],
