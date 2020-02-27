@@ -24,18 +24,21 @@ FILE_BASE = os.path.basename(FILE_NAME)
 FILE_NAME = os.path.splitext(FILE_BASE)[0]
 FILE_NAME = os.path.join('output/', FILE_NAME)
 
-LENGTH = 5
+# TODO: add noise and ref voxel size without noise
+
 VOXEL_SIZES = [
-    0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.12, 0.14, 0.16,
-    0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5
+    0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.12,
+    0.14, 0.16, 0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5
 ]
+VOXEL_SIZES = np.array(VOXEL_SIZES) * 10
+LENGTH = VOXEL_SIZES[-1] * 10
+
+FILE_NAME = FILE_NAME + f"_vref_{VOXEL_SIZES[0]}_length_{LENGTH}"
 
 for omega in list(range(0, 100, 10))[comm.Get_rank()::comm.Get_size()]:
 
     INPUT_FILE = f'input/cube_2pop_psi_0.5_omega_{omega}.0.solved.h5'
-
-    OUTPUT_NAME = FILE_NAME + '_' + os.path.basename(
-        INPUT_FILE) + '_vref_' + str(VOXEL_SIZES[0]) + '_size_' + str(LENGTH)
+    OUTPUT_NAME = FILE_NAME + '_' + os.path.basename(INPUT_FILE)
 
     if not os.path.isfile(OUTPUT_NAME + '.h5'):
         print("simulate data")
@@ -125,9 +128,7 @@ if not os.path.isfile(FILE_NAME + '.pkl'):
     for omega in list(range(0, 100, 10)):
         INPUT_FILE = f'input/cube_2pop_psi_0.5_omega_{omega}.0.solved.h5'
 
-        OUTPUT_NAME = FILE_NAME + '_' + os.path.basename(
-            INPUT_FILE) + '_vref_' + str(
-                VOXEL_SIZES[0]) + '_size_' + str(LENGTH)
+        OUTPUT_NAME = FILE_NAME + '_' + os.path.basename(INPUT_FILE)
 
         with h5py.File(OUTPUT_NAME + '.h5', 'r') as h5f:
             voxel_size_ref = str(min([float(i) for i in h5f]))
@@ -191,85 +192,53 @@ import seaborn as sns
 import statistic
 import scipy.stats
 import scipy.optimize
-import astropy.stats
+# import astropy.stats
 
-df_analyse = pd.DataFrame()
+if not os.path.isfile(FILE_NAME + '.analyse.pkl'):
 
-df = pd.read_pickle(FILE_NAME + '.pkl')
+    df_analyse = pd.DataFrame()
 
-fig, ax = plt.subplots()
-# for m in ['p', 'r']:
-for m, m_group in df.groupby('model'):
-    for vs, vs_group in m_group.groupby('voxel_size'):
-        for o, o_group in vs_group.groupby('omega'):
+    df = pd.read_pickle(FILE_NAME + '.pkl')
 
-            # print(str(vs) + '_' + m + '_' + str(o))
-            # print(o_group)
+    # fig, ax = plt.subplots()
+    # for m in ['p', 'r']:
+    for m, m_group in df.groupby('model'):
+        for o, o_group in m_group.groupby('omega'):
+            df_ = pd.DataFrame()
+            for vs, vs_group in o_group.groupby('voxel_size'):
 
-            df_analyse = df_analyse.append(
-                {
-                    "voxel_size":
-                        float(vs),
-                    "model":
-                        m,
-                    "omega":
-                        float(o),
-                    "mean_diff_dir":
-                        np.mean(
-                            np.abs(
-                                np.array(o_group['opt_direction'].iloc[0]) -
-                                np.array(o_group['direction'].iloc[0]))),
-                    "mean_diff_ret":
-                        np.mean(
-                            np.abs(
-                                np.array(o_group['opt_retardation'].iloc[0]) -
-                                np.array(o_group['retardation'].iloc[0]))),
-                    "mean_diff_rel_ret":
-                        np.mean(
-                            np.abs(
-                                np.array(o_group['opt_retardation'].iloc[0]) -
-                                np.array(o_group['retardation'].iloc[0])) /
-                            np.array(o_group['opt_retardation'].iloc[0])),
-                    "mean_diff_trans":
-                        np.mean(
-                            np.abs(
-                                np.array(o_group['opt_transmittance'].iloc[0]) -
-                                np.array(o_group['transmittance'].iloc[0])))
-                },
-                ignore_index=True)
+                # print(str(vs) + '_' + m + '_' + str(o))
+                # print(o_group)
 
-            # x = np.array(o_group['opt_retardation'].iloc[0])
-            # y = np.array(o_group['retardation'].iloc[0])
+                n = np.array(vs_group['opt_direction'].iloc[0]).size
 
-            # # ax.scatter(x, y)
-            # ax.hist2d(x, y, bins=(50, 50), cmap=plt.cm.viridis)
-            # ax.plot([np.min(np.append(x, y)),
-            #          np.max(np.append(x, y))],
-            #         [np.min(np.append(x, y)),
-            #          np.max(np.append(x, y))])
-            # ax.set_title(str(vs) + '_' + m + '_' + str(o))
-            # ax.axis('equal')
-            # plt.ion()
-            # plt.show()
-            # plt.pause(0.25)
+                dirc = statistic._remap_direction_sym(
+                    np.array(vs_group['opt_direction'].iloc[0]) -
+                    np.array(vs_group['direction'].iloc[0]))
 
-            # ax.clear()
+                df_ = df_.append(
+                    pd.DataFrame({
+                        "voxel_size": [float(vs)] * n,
+                        "model": [m] * n,
+                        "omega": [float(o)] * n,
+                        "diff_dir":
+                            np.rad2deg(dirc),
+                        "diff_ret":
+                            np.array(vs_group['opt_retardation'].iloc[0]) -
+                            np.array(vs_group['retardation'].iloc[0]),
+                        "diff_trans":
+                            np.array(vs_group['opt_transmittance'].iloc[0]) -
+                            np.array(vs_group['transmittance'].iloc[0])
+                    }))
+            df_analyse = df_analyse.append(df_)
 
-for mod in ['trans', 'dir', 'ret', 'rel_ret']:
-    fig, ax = plt.subplots(2, 1)
-    fig.suptitle(mod)
-    for i, (k, g) in enumerate(df_analyse.groupby(['model'])):
-        ax[i].set_title(k)
+    df_analyse.to_pickle(FILE_NAME + '.analyse.pkl')
 
-        # sns.boxplot(x='voxel_size', y='mean_diff_rel_ret', hue='omega', data=g)
+df_analyse = pd.read_pickle(FILE_NAME + '.analyse.pkl')
 
-        for key, grp in g.groupby(['omega']):
-            # print(g)
-            grp.plot(ax=ax[i],
-                     kind='line',
-                     x='voxel_size',
-                     y='mean_diff_' + mod,
-                     marker='d',
-                     label=str(key) + '_' + k)
+sns.boxplot(x='voxel_size',
+            y='diff_dir',
+            hue='omega',
+            data=df_analyse[(df_analyse.model == 'p')])
 
 plt.show()

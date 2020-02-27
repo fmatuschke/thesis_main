@@ -8,6 +8,24 @@ def _remap_direction(phi):
     return phi
 
 
+def _remap_direction_sym(phi):
+    phi = phi % np.pi
+    phi[phi < 0] += np.pi
+    phi[phi > np.pi / 2] -= np.pi
+    return phi
+
+
+# def _remap_direction(phi):
+#     phi = np.unwrap(phi)
+#     phi[phi < 0] += np.pi
+#     return phi
+
+# def _remap_direction_sym(phi):
+#     phi = _remap_direction(phi)
+#     phi[phi > np.pi / 2] -= np.pi
+#     return phi
+
+
 def _remap_orientation(phi, theta):
     phi = phi % (2 * np.pi)
     theta = theta % np.pi
