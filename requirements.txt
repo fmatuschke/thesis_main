@@ -4,6 +4,4 @@ tqdm
 matplotlib
 pandas
 seaborn
-snakemake
-jupyterlab
 tikzplotlib
