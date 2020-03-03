@@ -68,7 +68,7 @@ def run_simulation_pipeline_n(simpli,
         new_images = np.vstack(new_images_n)
 
         if h5f:
-            h5f['simulation/data/' + str(t)] = images
+            h5f['simulation/data/' + str(t)] = images.astype(np.float32)
             h5f['simulation/data/' + str(t)].attrs['theta'] = theta
             h5f['simulation/data/' + str(t)].attrs['phi'] = phi
         if h5f:
