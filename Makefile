@@ -9,7 +9,6 @@ install: env fastpli
 
 # ENV
 env: env-$(HOST)/bin/python3
-	$(PIP) install -r requirements.txt -q
 
 env-$(HOST)/bin/python3:
 	python3 -m venv env-$(HOST)/
@@ -17,6 +16,10 @@ env-$(HOST)/bin/python3:
 .PHONY: env-update
 env-update: env
 	$(PIP) install --upgrade pip -q
+
+.PHONY: requirements
+requirements: env
+	$(PIP) install -r requirements.txt -q
 
 # FASTPLI
 fastpli/:
@@ -27,9 +30,9 @@ fastpli/:
 git-submodules:
 	git submodule update --init --recursive
 
-.PHONY: fastpli-pull
+.PHONY: update
 .Oneshell:
-fastpli-pull:
+update:
 	cd fastpli
 	rm -r build/
 	git pull
