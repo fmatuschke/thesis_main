@@ -7,21 +7,19 @@ import pandas as pd
 import fastpli.simulation.optic
 import fastpli.analysis
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--input',
-#                     type=str,
-#                     required=True,
-#                     nargs='+',
-#                     help='input h5 files')
-# parser.add_argument('--resolution',
-#                     nargs='+',
-#                     type=float,
-#                     required=True,
-#                     help='values of voxel sizes')
-# parser.add_argument('--output', type=str, required=True, help='output pkl')
-# args = parser.parse_args()
-
-# INPUT_FILES = input
+parser = argparse.ArgumentParser()
+parser.add_argument('--input',
+                    type=str,
+                    required=True,
+                    nargs='+',
+                    help='input h5 files')
+parser.add_argument('--resolution',
+                    nargs='+',
+                    type=float,
+                    required=True,
+                    help='values of voxel sizes')
+parser.add_argument('--output', type=str, required=True, help='output pkl')
+args = parser.parse_args()
 
 
 def optic_and_epa(input, output, resolution):
@@ -55,6 +53,8 @@ def optic_and_epa(input, output, resolution):
                 raise ValueError("voxel_size_ref differs")
 
             omega = float(file.rsplit("_omega_")[-1].split("_")[0])
+            f0 = float(file.rsplit("_f0_")[-1].split("_")[0])
+            f1 = float(file.rsplit("_f1_")[-1].split("_")[0])
 
             data_ref = {}
             print(file, voxel_size_ref + '/r/simulation/data/0')
@@ -133,3 +133,16 @@ def optic_and_epa(input, output, resolution):
         df.to_csv(output)
     else:
         raise ValueError("output not recognized")
+
+
+if __name__ == "__main__":
+
+    files = args.input
+    output = args.output
+
+    # files.sort()
+    # file_name = files[0]
+    # file_name = file_name.rpartition(".simulation")[0] + '.analysis.pkl'
+    optic_and_epa(input=args.input,
+                  output=args.output,
+                  resolution=args.resolution)

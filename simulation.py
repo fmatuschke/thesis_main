@@ -1,7 +1,10 @@
 import numpy as np
-import h5py
 import os
 import sys
+import glob
+import argparse
+import logging
+import h5py
 
 import fastpli.simulation
 import fastpli.analysis
@@ -9,8 +12,51 @@ import fastpli.objects
 import fastpli.tools
 import fastpli.io
 
+from tqdm import tqdm
+from mpi4py import MPI
+from MPIFileHandler import MPIFileHandler
+comm = MPI.COMM_WORLD
+
 # reproducability
 np.random.seed(42)
+
+# path
+FILE_NAME = os.path.abspath(__file__)
+FILE_PATH = os.path.dirname(FILE_NAME)
+FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
+
+# Parameter
+OMEGAS = [0, 30, 60, 90]
+VOXEL_SIZES = [0.025, 0.05, 0.1, 0.25, 0.75, 1.25]
+# RESOLUTIONS = [1.25, 2.5]
+LENGTH = VOXEL_SIZES[-1] * 10
+
+# Arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('--input',
+                    type=str,
+                    required=True,
+                    nargs='+',
+                    help='input h5 files')
+parser.add_argument('--output', type=str, required=True, help='output path')
+parser.add_argument('-t',
+                    '--num-threads-per-process',
+                    type=int,
+                    required=True,
+                    help='number of threads for each process')
+args = parser.parse_args()
+
+# logger
+logger = logging.getLogger("rank[%i]" % comm.rank)
+logger.setLevel(logging.DEBUG)
+log_file = os.path.join(args.output, FILE_NAME) + ".log"
+mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
+formatter = logging.Formatter(
+    '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
+mh.setFormatter(formatter)
+logger.addHandler(mh)
+logger.info("args: " + " ".join(sys.argv[1:]))
 
 
 def simulation(input,
@@ -22,12 +68,16 @@ def simulation(input,
                rot_f1=0,
                num_threads=1):
 
+    logger.info(f'simulation()')
+
     if os.path.isfile(output):
         print("output already exists:", output)
         return
 
     os.makedirs(os.path.dirname(output), exist_ok=True)
     with h5py.File(output, 'w-') as h5f:
+        logger.info(f"output:{output}")
+
         fiber_bundles = fastpli.io.fiber_bundles.load(input, '/')
 
         if rot_f0 or rot_f1:
@@ -36,12 +86,39 @@ def simulation(input,
             fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
                 fiber_bundles, np.dot(rot_inc, rot_phi))
 
+        h5f['/'].attrs['input'] = input
+        h5f['/'].attrs['output'] = output
+
+        with h5py.File(input, 'r') as h5f_in:
+            omega = h5f_in['/'].attrs['omega']
+            psi = h5f_in['/'].attrs['psi']
+
+        h5f['/'].attrs['omega'] = omega
+        h5f['/'].attrs['psi'] = psi
+        h5f['/'].attrs['voxel_sizes'] = voxel_sizes
+        h5f['/'].attrs['length'] = length
+        h5f['/'].attrs['thickness'] = thickness
+        h5f['/'].attrs['rot_f0'] = rot_f0
+        h5f['/'].attrs['rot_f1'] = rot_f1
+        h5f['/'].attrs['num_threads'] = num_threads
+
+        logger.info(f'omega: {omega}')
+        logger.info(f'psi: {psi}')
+        logger.info(f'voxel_sizes: {voxel_sizes}')
+        logger.info(f'length: {length}')
+        logger.info(f'thickness: {thickness}')
+        logger.info(f'rot_f0: {rot_f0}')
+        logger.info(f'rot_f1: {rot_f1}')
+        logger.info(f'num_threads: {num_threads}')
+
         with open(os.path.abspath(__file__), 'r') as script:
             h5f.attrs['script'] = script.read()
 
         for voxel_size in voxel_sizes:
+            logger.info(f'voxel_size: {voxel_size}')
             for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
                 dset = h5f.create_group(str(voxel_size) + '/' + model)
+                logger.info(f'dn: {dn}, model: {model}')
 
                 # Setup Simpli
                 simpli = fastpli.simulation.Simpli()
@@ -77,6 +154,7 @@ def simulation(input,
                 simpli.save_parameter_h5(h5f=dset)
                 for t, tilt in enumerate(simpli._tilts):
                     theta, phi = tilt[0], tilt[1]
+                    logger.info(f'theta: {theta}, phi: {phi}')
                     images = simpli.run_simulation(label_field, vector_field,
                                                    tissue_properties, theta,
                                                    phi)
@@ -90,3 +168,61 @@ def simulation(input,
                 del label_field
                 del vector_field
                 del simpli
+
+    logger.info(f'simulation - finished')
+
+
+def _rot_pop2_factory(omega, delta_omega):
+    import fastpli.tools
+    import fastpli.objects
+
+    inc_list = np.arange(0, 90 + 1e-9, delta_omega)
+
+    n_rot = int(
+        round(2 * np.pi / np.deg2rad(delta_omega) * np.sin(np.deg2rad(omega))))
+
+    if n_rot == 0:
+        fiber_phi_rotations = [0]
+    else:
+        n_rot = max(n_rot, 8)
+        fiber_phi_rotations = np.linspace(0, 360, n_rot, False)
+
+    for f0_inc in inc_list:
+        for f1_rot in fiber_phi_rotations:
+            yield f0_inc, f1_rot
+
+
+if __name__ == '__main__':
+    # Simulation
+    files = args.input
+    parameter = []
+    for file in files:
+        omega = float(file.split("_omega_")[-1].split("_")[0])
+        if not omega in OMEGAS:
+            continue
+        for f0, f1 in _rot_pop2_factory(omega, OMEGAS[1] - OMEGAS[0]):
+            parameter.append((file, f0, f1))
+
+    logger.info(f"len files: {len(files)}")
+    logger.info(f"num parameters: {len(parameter)}")
+
+    for p in parameter[comm.Get_rank()::comm.Get_size()]:
+        file, f0, f1 = p
+        file_name = os.path.basename(file)
+        file_name = file_name.rpartition(".solved")[0]
+        output = os.path.join(
+            args.output,
+            f"{file_name}_vref_{VOXEL_SIZES[0]}_length_{LENGTH}_f0_{f0}_f1_{f1}_.simulation.h5"
+        )
+
+        if os.path.isfile(output):
+            logger.info(f"{output} already exists")
+
+        simulation(input=file,
+                   output=output,
+                   voxel_sizes=VOXEL_SIZES,
+                   length=LENGTH,
+                   thickness=60,
+                   rot_f0=f0,
+                   rot_f1=f1,
+                   num_threads=args.num_threads_per_process)
