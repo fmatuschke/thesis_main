@@ -136,6 +136,9 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['omega'] = omega
+        h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
+        h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
+
     # fastpli.io.fiber_bundles.save(file_pref + '.init.dat', solver.fiber_bundles)
 
     # Run Solver
@@ -165,6 +168,8 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
         h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
         h5f['/'].attrs['num_obj'] = solver.num_obj
         h5f['/'].attrs['num_steps'] = solver.step_num
+        h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
+        h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
 
     # fastpli.io.fiber_bundles.save(file_pref + '.solved.dat',
     #                               solver.fiber_bundles)
