@@ -81,8 +81,7 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     solver.obj_min_radius = RADIUS_LOGMEAN * 5
     solver.omp_num_threads = NUM_THREADS
 
-    file_pref = output_name + '_psi_' + str(round(psi, 2)) + '_omega_' + str(
-        round(omega, 2))
+    file_pref = output_name + f"_psi_{round(psi, 2)}_omega_{round(omega, 2)}_"
     logger.info(f"file_pref: {file_pref}")
 
     seeds = fastpli.model.sandbox.seeds.triangular_grid(LENGTH * 2,
@@ -154,11 +153,18 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
         if overlap <= 0.01:
             break
 
+    overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
+
     logger.info(f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}")
     logger.debug(f"save solved")
     with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['omega'] = omega
-    fastpli.io.fiber_bundles.save(file_pref + '.solved.dat',
-                                  solver.fiber_bundles)
+        h5f['/'].attrs['overlap'] = overlap
+        h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
+        h5f['/'].attrs['num_obj'] = solver.num_obj
+        h5f['/'].attrs['num_steps'] = solver.step_num
+
+    # fastpli.io.fiber_bundles.save(file_pref + '.solved.dat',
+    #                               solver.fiber_bundles)
