@@ -140,6 +140,7 @@ def simulation(input,
                 simpli.tilts = np.deg2rad(np.array([(0, 0)]))
                 simpli.add_crop_tilt_halo()
 
+                logger.info(f'memory: {round(simpli.memory_usage(), 2)} MB')
                 if simpli.memory_usage() > 24 * 1e3:
                     print(str(round(simpli.memory_usage(), 2)) + 'MB')
 
@@ -197,7 +198,10 @@ if __name__ == '__main__':
     # Simulation
     files = args.input
     parameter = []
+
     for file in files:
+        if os.path.isdir(file):
+            raise IOError("path is a directory")
         omega = float(file.split("_omega_")[-1].split("_")[0])
         if not omega in OMEGAS:
             continue
@@ -207,8 +211,7 @@ if __name__ == '__main__':
     logger.info(f"len files: {len(files)}")
     logger.info(f"num parameters: {len(parameter)}")
 
-    for p in parameter[comm.Get_rank()::comm.Get_size()]:
-        file, f0, f1 = p
+    for file, f0, f1 in parameter[comm.Get_rank()::comm.Get_size()]:
         file_name = os.path.basename(file)
         file_name = file_name.rpartition(".solved")[0]
         output = os.path.join(
