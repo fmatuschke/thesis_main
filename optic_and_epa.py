@@ -51,6 +51,9 @@ def _resample(data, scale):
 def _optic_and_epa(parameter):
     file, resolution, voxel_size_ref = parameter[0], parameter[1], parameter[2]
 
+    if not os.path.isfile(file):
+        print(f"skipping: {file}")
+
     df = pd.DataFrame()
     # if time.time() - os.stat(file).st_mtime < 60 * 10:
     #     print(f"skipping {file}")
