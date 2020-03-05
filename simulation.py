@@ -216,7 +216,7 @@ if __name__ == '__main__':
         file_name = file_name.rpartition(".solved")[0]
         output = os.path.join(
             args.output,
-            f"{file_name}_vref_{VOXEL_SIZES[0]}_length_{LENGTH}_f0_{f0}_f1_{f1}_.simulation.h5"
+            f"{file_name}_vref_{VOXEL_SIZES[0]}_length_{LENGTH}_f0_{round(f0,1)}_f1_{round(f1,1)}_.simulation.h5"
         )
 
         if os.path.isfile(output):

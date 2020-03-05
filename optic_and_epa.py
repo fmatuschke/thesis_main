@@ -4,6 +4,7 @@ import argparse
 import h5py
 import os
 import pandas as pd
+import time
 
 from tqdm import tqdm
 
@@ -49,17 +50,22 @@ def _resample(data, scale):
 
 def _optic_and_epa(parameter):
     file, resolution, voxel_size_ref = parameter[0], parameter[1], parameter[2]
+
     df = pd.DataFrame()
+    # if time.time() - os.stat(file).st_mtime < 60 * 10:
+    #     print(f"skipping {file}")
+    #     return df
+
     with h5py.File(file, 'r') as h5f:
         if str(min([float(i) for i in h5f])) != voxel_size_ref:
             raise ValueError("voxel_size_ref differs")
 
-        omega = float(file.rsplit("_omega_")[-1].split("_")[0])
-        f0 = float(file.rsplit("_f0_")[-1].split("_")[0])
-        f1 = float(file.rsplit("_f1_")[-1].split(".simulation")[0])
+        omega = h5f['/'].attrs['omega']
+        psi = h5f['/'].attrs['psi']
+        f0 = h5f['/'].attrs['rot_f0']
+        f1 = h5f['/'].attrs['rot_f1']
 
         data_ref = {}
-        # print(file, voxel_size_ref + '/r/simulation/data/0')
         data_ref['r'] = h5f[voxel_size_ref + '/r/simulation/data/0'][:]
         data_ref['p'] = h5f[voxel_size_ref + '/p/simulation/data/0'][:]
 
@@ -71,63 +77,34 @@ def _optic_and_epa(parameter):
                 for res in resolution:
                     # rescale
                     scale = float(voxel_size_ref) / float(res)
-                    data_ref_optic_r = _resample(data_ref['r'], scale)
-                    ref_r_trans, ref_r_dirc, ref_r_ret = fastpli.analysis.epa.epa(
-                        data_ref_optic_r)
-
-                    scale = float(voxel_size_ref) / float(res)
-                    data_ref_optic_p = _resample(data_ref['p'], scale)
-                    ref_p_trans, ref_p_dirc, ref_p_ret = fastpli.analysis.epa.epa(
-                        data_ref_optic_p)
+                    data_ref_optic = _resample(data_ref[model], scale)
+                    ref_trans, ref_dirc, ref_ret = fastpli.analysis.epa.epa(
+                        data_ref_optic)
 
                     scale = float(voxel_size) / float(res)
                     data_optic = _resample(data, scale)
                     trans, dirc, ret = fastpli.analysis.epa.epa(data_optic)
 
-                    if not np.array_equal(
-                            data_optic.shape,
-                            data_ref_optic_r.shape) or not np.array_equal(
-                                data_optic.shape, data_ref_optic_p.shape):
-                        raise ValueError(
-                            f"Wrong scale: {data_optic.shape}, {data_ref_optic_r.shape}, {data_ref_optic_p.shape}"
-                        )
-
                     df = df.append(
                         {
-                            'voxel_size':
-                                float(voxel_size),
-                            'model':
-                                model,
-                            'resolution':
-                                res,
-                            'omega':
-                                float(omega),
-                            'f0':
-                                f0,
-                            'f1':
-                                f1,
+                            'voxel_size': float(voxel_size),
+                            'model': model,
+                            'resolution': res,
+                            'omega': float(omega),
+                            'psi': float(psi),
+                            'f0': f0,
+                            'f1': f1,
                             # 'data':
                             #     data.flatten().tolist(),
-                            'transmittance':
-                                trans.flatten().tolist(),
-                            'direction':
-                                dirc.flatten().tolist(),
-                            'retardation':
-                                ret.flatten().tolist(),
-                            'transmittance_ref_r':
-                                ref_r_trans.flatten().tolist(),
-                            'direction_ref_r':
-                                ref_r_dirc.flatten().tolist(),
-                            'retardation_ref_r':
-                                ref_r_ret.flatten().tolist(),
-                            'transmittance_ref_p':
-                                ref_p_trans.flatten().tolist(),
-                            'direction_ref_p':
-                                ref_p_dirc.flatten().tolist(),
-                            'retardation_ref_p':
-                                ref_p_ret.flatten().tolist()
+                            'transmittance': trans.flatten().tolist(),
+                            'direction': dirc.flatten().tolist(),
+                            'retardation': ret.flatten().tolist(),
+                            'transmittance_ref': ref_trans.flatten().tolist(),
+                            'direction_ref': ref_dirc.flatten().tolist(),
+                            'retardation_ref': ref_ret.flatten().tolist(),
                         },
                         ignore_index=True)
+
     return df
 
 
@@ -146,7 +123,7 @@ def optic_and_epa(input, output, resolution):
             d for d in tqdm(pool.imap(_optic_and_epa, parameter),
                             total=len(parameter))
         ]
-        for d in dfs:
+        for d in tqdm(dfs):
             df = df.append(d)
 
     if ".pkl" in output:
