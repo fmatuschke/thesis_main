@@ -51,6 +51,7 @@ args = parser.parse_args()
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 log_file = os.path.join(args.output, FILE_NAME) + ".log"
+os.makedirs(os.path.dirname(args.output), exist_ok=True)
 mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
