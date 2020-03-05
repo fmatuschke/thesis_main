@@ -226,3 +226,5 @@ if __name__ == '__main__':
                    rot_f0=f0,
                    rot_f1=f1,
                    num_threads=args.num_threads_per_process)
+
+    logger.info("finished")

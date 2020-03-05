@@ -10,4 +10,4 @@
 #SBATCH --mail-user=f.matuschke@fz-juelich.de
 #SBATCH --mail-type=ALL
 
-env-jureca/bin/python3 -u simulation.py -t 4 --output /p/scratch/cjinm11/matuschke1/thesis/5/output --input /p/fastdata/pli/Projects/Felix/thesis/models/*.solved.h5
+env-jureca/bin/python3 -u simulation.py -t 4 --output /p/scratch/cjinm11/matuschke1/thesis/5/output --input /p/scratch/cjinm11/matuschke1/thesis/2/output

@@ -1,5 +1,4 @@
 import numpy as np
-import h5py
 import glob
 import sys
 import os
@@ -12,16 +11,11 @@ import statistic
 import scipy.stats
 import scipy.optimize
 import tikzplotlib
-# import astropy.stats
 
-df = pd.read_pickle(
-    "output/" +
-    "cube_2pop_psi_0.5_omega_0.0_vref_0.025_length_12.5.analysis.pkl")
-
-df_analyse = pd.DataFrame()
+df = pd.read_pickle("output/data.pkl")
 
 ref = 'r'
-
+df_analyse = pd.DataFrame()
 for m, m_group in df.groupby('model'):
     for o, o_group in m_group.groupby('omega'):
         for r, r_group in o_group.groupby('resolution'):
@@ -32,50 +26,52 @@ for m, m_group in df.groupby('model'):
                     np.array(vs_group['direction_ref_' + ref].iloc[0]) -
                     np.array(vs_group['direction'].iloc[0]))
 
-                n = dirc.size
-                df_ = df_.append(
-                    pd.DataFrame({
-                        "voxel_size": [float(vs)] * n,
-                        "resolution": [float(r)] * n,
-                        "model": [m] * n,
-                        "omega": [float(o)] * n,
+                df_analyse = df_analyse.append({
+                        "voxel_size":
+                            float(vs),
+                        "resolution":
+                            float(r),
+                        "model":
+                            m,
+                        "omega":
+                            float(o),
                         "transmittance":
-                            np.array(vs_group['transmittance'].iloc[0]),
+                            vs_group['transmittance'].iloc[0],
                         "direction":
-                            np.array(vs_group['direction'].iloc[0]),
+                            vs_group['direction'].iloc[0],
                         "retardation":
-                            np.array(vs_group['retardation'].iloc[0]),
-                        "diff_dir":
-                            np.rad2deg(dirc),
+                            vs_group['retardation'].iloc[0],
+                        "diff_dir": (np.rad2deg(dirc)).tolist(),
                         "diff_ret":
-                            np.array(vs_group['retardation_ref_' + ref].iloc[0])
-                            - np.array(vs_group['retardation'].iloc[0]),
-                        "diff_trans":
+                            (np.array(
+                                vs_group['retardation_ref_' + ref].iloc[0]) -
+                             np.array(
+                                 vs_group['retardation'].iloc[0])).tolist(),
+                        "diff_trans": (
                             np.array(
                                 vs_group['transmittance_ref_' + ref].iloc[0]) -
-                            np.array(vs_group['transmittance'].iloc[0])
-                    }))
+                            np.array(vs_group['transmittance'].iloc[0])).tolist()
+                    }, ignore_index=True)
 
-            df_analyse = df_analyse.append(df_)
+# fig, axs = plt.subplots(2, 1)
+sns.boxplot(
+    x='voxel_size',
+    y='diff_dir',
+    hue='omega',
+    data=df_analyse[(df_analyse.model == 'r') &
+                    (df_analyse.resolution == 1.25)].explode('diff_dir'),
+    # ax=axs[0]
+)
+tikzplotlib.save("voxel_size_vs_diff_dir.tex")
 
-# df_analyse.to_csv(
-#     "cube_2pop_psi_0.5_omega_0.0_vref_0.025_length_12.5.analysis.csv")
+sns.boxplot(
+    x='voxel_size',
+    y='retardation',
+    hue='omega',
+    data=df_analyse[(df_analyse.model == 'r') &
+                    (df_analyse.resolution == 1.25)].explode('retardation'),
+    # ax=axs[1]
+)
 
-fig, axs = plt.subplots(2, 1)
-sns.boxplot(x='voxel_size',
-            y='diff_dir',
-            hue='omega',
-            data=df_analyse[(df_analyse.model == 'r') &
-                            (df_analyse.resolution == 1.25)],
-            ax=axs[0])
-
-sns.boxplot(x='voxel_size',
-            y='retardation',
-            hue='omega',
-            data=df_analyse[(df_analyse.model == 'r') &
-                            (df_analyse.resolution == 1.25)],
-            ax=axs[1])
-
-tikzplotlib.save("test.tex")
-
+tikzplotlib.save("voxel_size_vs_retardation.tex")
 # plt.show()
