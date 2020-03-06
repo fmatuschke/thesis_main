@@ -69,44 +69,61 @@ def _optic_and_epa(parameter):
         f1 = h5f['/'].attrs['rot_f1']
 
         data_ref = {}
-        data_ref['r'] = h5f[voxel_size_ref + '/r/simulation/data/0'][:]
-        data_ref['p'] = h5f[voxel_size_ref + '/p/simulation/data/0'][:]
+        for i in h5f[voxel_size_ref + '/r/simulation/data'].keys():
+            print(i)
+            data_ref['r'] = h5f[voxel_size_ref + f'/r/simulation/data/{i}'][:]
+            data_ref['p'] = h5f[voxel_size_ref + f'/p/simulation/data/{i}'][:]
 
-        for voxel_size in h5f:
-            for model in h5f[voxel_size]:
-                dset = h5f[voxel_size + '/' + model]
-                data = dset['simulation/data/0'][:]
+            for voxel_size in h5f:
+                for model in h5f[voxel_size]:
+                    dset = h5f[voxel_size + '/' + model]
+                    data = dset[f'simulation/data/{i}'][:]
 
-                for res in resolution:
-                    # rescale
-                    scale = float(voxel_size_ref) / float(res)
-                    data_ref_optic = _resample(data_ref[model], scale)
-                    ref_trans, ref_dirc, ref_ret = fastpli.analysis.epa.epa(
-                        data_ref_optic)
+                    for res in resolution:
+                        # rescale
+                        scale = float(voxel_size_ref) / float(res)
+                        data_ref_optic = _resample(data_ref[model], scale)
+                        ref_trans, ref_dirc, ref_ret = fastpli.analysis.epa.epa(
+                            data_ref_optic)
 
-                    scale = float(voxel_size) / float(res)
-                    data_optic = _resample(data, scale)
-                    trans, dirc, ret = fastpli.analysis.epa.epa(data_optic)
+                        scale = float(voxel_size) / float(res)
+                        data_optic = _resample(data, scale)
+                        trans, dirc, ret = fastpli.analysis.epa.epa(data_optic)
 
-                    df = df.append(
-                        {
-                            'voxel_size': float(voxel_size),
-                            'model': model,
-                            'resolution': res,
-                            'omega': float(omega),
-                            'psi': float(psi),
-                            'f0': f0,
-                            'f1': f1,
-                            # 'data':
-                            #     data.flatten().tolist(),
-                            'transmittance': trans.flatten().tolist(),
-                            'direction': dirc.flatten().tolist(),
-                            'retardation': ret.flatten().tolist(),
-                            'transmittance_ref': ref_trans.flatten().tolist(),
-                            'direction_ref': ref_dirc.flatten().tolist(),
-                            'retardation_ref': ref_ret.flatten().tolist(),
-                        },
-                        ignore_index=True)
+                        df = df.append(
+                            {
+                                'voxel_size':
+                                    float(voxel_size),
+                                'model':
+                                    model,
+                                'resolution':
+                                    res,
+                                'omega':
+                                    float(omega),
+                                'psi':
+                                    float(psi),
+                                'f0':
+                                    f0,
+                                'f1':
+                                    f1,
+                                'tilt':
+                                    i,
+                                # 'data':
+                                #     data.flatten().tolist(),
+                                'transmittance':
+                                    trans.flatten().tolist(),
+                                'direction':
+                                    dirc.flatten().tolist(),
+                                'retardation':
+                                    ret.flatten().tolist(),
+                                'transmittance_ref':
+                                    ref_trans.flatten().tolist(),
+                                'direction_ref':
+                                    ref_dirc.flatten().tolist(),
+                                'retardation_ref':
+                                    ref_ret.flatten().tolist(),
+                            },
+                            ignore_index=True)
 
     return df
 
