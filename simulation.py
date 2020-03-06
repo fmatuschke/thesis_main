@@ -144,9 +144,6 @@ def simulation(input,
                     simpli.tilts = np.deg2rad(np.array([(0, 0)]))
                 simpli.add_crop_tilt_halo()
 
-                print(f'memory: {round(simpli.memory_usage(), 2)} MB')
-                return
-
                 logger.info(f'memory: {round(simpli.memory_usage(), 2)} MB')
                 if simpli.memory_usage() > 24 * 1e3:
                     print(str(round(simpli.memory_usage(), 2)) + 'MB')
