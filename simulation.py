@@ -28,23 +28,22 @@ FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
 # Parameter
 OMEGAS = [0, 30, 60, 90]
-VOXEL_SIZES = [0.025, 0.05, 0.1, 0.25, 0.75, 1.25]
+# VOXEL_SIZES = [0.025, 0.05, 0.1, 0.25, 0.75, 1.25]
+# LENGTH = VOXEL_SIZES[-1]*10
+
+# VOXEL_SIZES = [0.1, 0.25, 0.75, 1.25, 10, 20, 40, 60]
+# LENGTH = VOXEL_SIZES[-1]
+
 # RESOLUTIONS = [1.25, 2.5]
-LENGTH = VOXEL_SIZES[-1] * 10
 
 # Arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('--input',
-                    type=str,
-                    required=True,
-                    nargs='+',
-                    help='input h5 files')
-parser.add_argument('--output', type=str, required=True, help='output path')
-parser.add_argument('-t',
-                    '--num-threads-per-process',
-                    type=int,
-                    required=True,
-                    help='number of threads for each process')
+parser.add_argument('-i', '--input', type=str, required=True, nargs='+')
+parser.add_argument('-o', '--output', type=str, required=True)
+parser.add_argument('--voxel-size', type=float, required=True, nargs='+')
+parser.add_argument('--length', type=float, required=True)
+parser.add_argument('-t', '--num-threads-per-process', type=int, required=True)
+parser.add_argument('--tilting', action='store_true')
 args = parser.parse_args()
 
 # logger
@@ -67,6 +66,7 @@ def simulation(input,
                thickness,
                rot_f0=0,
                rot_f1=0,
+               tilting=False,
                num_threads=1):
 
     logger.info(f'simulation()')
@@ -101,6 +101,7 @@ def simulation(input,
         h5f['/'].attrs['thickness'] = thickness
         h5f['/'].attrs['rot_f0'] = rot_f0
         h5f['/'].attrs['rot_f1'] = rot_f1
+        h5f['/'].attrs['tilting'] = tilting
         h5f['/'].attrs['num_threads'] = num_threads
 
         logger.info(f'omega: {omega}')
@@ -110,6 +111,7 @@ def simulation(input,
         logger.info(f'thickness: {thickness}')
         logger.info(f'rot_f0: {rot_f0}')
         logger.info(f'rot_f1: {rot_f1}')
+        logger.info(f'tilting: {tilting}')
         logger.info(f'num_threads: {num_threads}')
 
         with open(os.path.abspath(__file__), 'r') as script:
@@ -134,11 +136,16 @@ def simulation(input,
                 simpli.set_voi(-0.5 * np.array([length, length, thickness]),
                                0.5 * np.array([length, length, thickness]))
 
-                # simpli.tilts = np.deg2rad(
-                #     np.array([(0, 0), (5.5, 0), (5.5, 90), (5.5, 180),
-                #               (5.5, 270)]))
-                simpli.tilts = np.deg2rad(np.array([(0, 0)]))
+                if tilting:
+                    simpli.tilts = np.deg2rad(
+                        np.array([(0, 0), (5.5, 0), (5.5, 90), (5.5, 180),
+                                  (5.5, 270)]))
+                else:
+                    simpli.tilts = np.deg2rad(np.array([(0, 0)]))
                 simpli.add_crop_tilt_halo()
+
+                print(f'memory: {round(simpli.memory_usage(), 2)} MB')
+                return
 
                 logger.info(f'memory: {round(simpli.memory_usage(), 2)} MB')
                 if simpli.memory_usage() > 24 * 1e3:
@@ -216,7 +223,7 @@ if __name__ == '__main__':
         file_name = file_name.rpartition(".solved")[0]
         output = os.path.join(
             args.output,
-            f"{file_name}_vref_{VOXEL_SIZES[0]}_length_{LENGTH}_f0_{round(f0,1)}_f1_{round(f1,1)}_.simulation.h5"
+            f"{file_name}_vref_{args.voxel_size[0]}_length_{args.length}_f0_{round(f0,1)}_f1_{round(f1,1)}_.simulation.h5"
         )
 
         if os.path.isfile(output):
@@ -224,11 +231,12 @@ if __name__ == '__main__':
 
         simulation(input=file,
                    output=output,
-                   voxel_sizes=VOXEL_SIZES,
-                   length=LENGTH,
+                   voxel_sizes=args.voxel_size,
+                   length=args.length,
                    thickness=60,
                    rot_f0=f0,
                    rot_f1=f1,
+                   tilting=args.tilting,
                    num_threads=args.num_threads_per_process)
 
     logger.info("finished")
