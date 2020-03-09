@@ -20,7 +20,7 @@ SECONDS=`echo $TIME | cut -d: -f3`
 
 COREH=`bc <<< "scale=2; $NODES * 24.0 * $HOURS + $MINUTES / 60.0 + $SECONDS / 60.0 / 60.0"`
 
-echo "Process takes $COREH CoreH"
+echo "Process allocates $COREH CoreH"
 
 if (( $(echo "$COREH > 1000" | bc -l) )); then
    read -p "Are you sure? (y/n) " yn
