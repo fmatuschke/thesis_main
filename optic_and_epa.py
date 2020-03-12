@@ -5,6 +5,7 @@ import h5py
 import os
 import pandas as pd
 import time
+import warnings
 
 from tqdm import tqdm
 
@@ -70,7 +71,6 @@ def _optic_and_epa(parameter):
 
         data_ref = {}
         for i in h5f[voxel_size_ref + '/r/simulation/data'].keys():
-            print(i)
             data_ref['r'] = h5f[voxel_size_ref + f'/r/simulation/data/{i}'][:]
             data_ref['p'] = h5f[voxel_size_ref + f'/p/simulation/data/{i}'][:]
 
@@ -80,6 +80,10 @@ def _optic_and_epa(parameter):
                     data = dset[f'simulation/data/{i}'][:]
 
                     for res in resolution:
+                        if float(voxel_size) > float(res):
+                            warnings.warn("voxel_sizes > res: Skipping ...")
+                            continue
+
                         # rescale
                         scale = float(voxel_size_ref) / float(res)
                         data_ref_optic = _resample(data_ref[model], scale)
@@ -89,6 +93,14 @@ def _optic_and_epa(parameter):
                         scale = float(voxel_size) / float(res)
                         data_optic = _resample(data, scale)
                         trans, dirc, ret = fastpli.analysis.epa.epa(data_optic)
+
+                        if not np.array_equal(
+                                trans.shape,
+                                ref_trans.shape) or not np.array_equal(
+                                    dirc.shape,
+                                    ref_dirc.shape) or not np.array_equal(
+                                        ret.shape, ref_ret.shape):
+                            raise ValueError(f"FOOOO")
 
                         df = df.append(
                             {
@@ -159,9 +171,6 @@ if __name__ == "__main__":
     files = args.input
     output = args.output
 
-    # files.sort()
-    # file_name = files[0]
-    # file_name = file_name.rpartition(".simulation")[0] + '.analysis.pkl'
     optic_and_epa(input=args.input,
                   output=args.output,
                   resolution=args.resolution)

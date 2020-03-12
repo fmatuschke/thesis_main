@@ -42,7 +42,7 @@ def _remap_orientation(phi, theta):
 
     if np.any(phi < 0) or np.any(phi >= 2 * np.pi) or np.any(
             theta < 0) or np.any(theta > 0.5 * np.pi):
-        raise ValueError
+        raise ValueError(f"phi:{phi}, theta:{theta}")
 
     return phi, theta
 

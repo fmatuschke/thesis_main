@@ -153,7 +153,7 @@ def simulation(input,
                                                     (1.0, dn, 0, model)]
                                                   ] * len(fiber_bundles)
                 label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
-                    h5f=dset, save=["label_field"])
+                    h5f=dset)  #, save=["label_field"]
 
                 # Simulate PLI Measurement
                 simpli.light_intensity = 1  # a.u.
