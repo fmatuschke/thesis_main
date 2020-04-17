@@ -2,6 +2,3 @@ yapf
 pylint
 tqdm
 imageio
-matplotlib
-seaborn
-mpi4py
