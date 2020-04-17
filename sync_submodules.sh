@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "syncing submodules"
 
 if [ -z "$SSH_AGENT_PID" ]; then
@@ -7,24 +9,26 @@ if [ -z "$SSH_AGENT_PID" ]; then
 	ssh-add ~/.ssh/id_rsa
 fi
 
-git reset
+if [ -n "$(git status --ignore-submodules -s)" ] ; then
+   echo "git main repository not clean"
+   exit 1
+fi
 
 for d in */ ; do
 
 	(
 	cd $d
-	if [ -z $(git rev-parse --show-superproject-working-tree) ] ; then
-		echo "$d no git repository"
+	if [ -z "$(git rev-parse --show-superproject-working-tree)" ] ; then
+		echo "$d no git submodule"
 		continue
 	fi
 
 	if [ -n "$(git status -s)" ]; then
 		echo "$d modified"
-		continue
+      exit 1
 	fi
 
-   echo "$d"
-
+   echo "$d push"
 	git push
 	)
 
