@@ -7,12 +7,11 @@ if [ $? != 0 ]
 
     # create layout array
     tmux split-window -h
-    tmux split-window -v  
+    tmux split-window -v
 
     # configure panes
     tmux select-pane -t 1
     tmux send-keys 'htop -s PERCENT_CPU' C-m
-
 
     tmux select-pane -t 0
 fi

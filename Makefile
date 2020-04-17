@@ -31,24 +31,22 @@ git-submodules:
 	git submodule update --init --recursive
 
 .PHONY: update
-.Oneshell:
 update:
-	cd fastpli
-	rm -r build/
-	git pull
-	cd ..
+	cd fastpli \
+	rm -r build/ \
+	git pull \
+	cd .. \
 	git add fastpli
 
 .PHONY: fastpli/build
-.ONESHELL:
 fastpli/build: fastpli/
-	cd fastpli
-	make build
+	cd fastpli \
+	make .build
 
 .PHONY: fastpli
 fastpli: env fastpli/ git-submodules clean-build fastpli/build
 	$(PIP) uninstall fastpli -y
-	$(PIP) install fastpli/build/. -q
+	$(PIP) install fastpli/. -q
 
 # CLEANING
 .PHONY: clean

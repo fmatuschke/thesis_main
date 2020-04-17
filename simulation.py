@@ -119,7 +119,7 @@ def simulation(input,
 
         for voxel_size in voxel_sizes:
             logger.info(f'voxel_size: {voxel_size}')
-            for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
+            for dn, model in [(-0.002, 'p'), (0.004, 'r')]:
                 dset = h5f.create_group(str(voxel_size) + '/' + model)
                 logger.info(f'dn: {dn}, model: {model}')
 
@@ -128,7 +128,8 @@ def simulation(input,
                 simpli.omp_num_threads = num_threads
                 simpli.voxel_size = voxel_size
                 simpli.resolution = voxel_size
-                simpli.filter_rotations = np.deg2rad([0, 30, 60, 90, 120, 150])
+                simpli.filter_rotations = np.deg2rad(
+                    [0, 20, 40, 60, 80, 100, 120, 140, 160])
                 simpli.interpolate = True
                 simpli.untilt_sensor_view = True
                 simpli.wavelength = 525  # in nm

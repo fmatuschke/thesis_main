@@ -6,5 +6,3 @@ pandas
 seaborn
 tikzplotlib
 mpi4py
-jupyter
-jupyterlab
