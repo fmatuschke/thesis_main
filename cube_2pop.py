@@ -6,6 +6,7 @@ import fastpli.io
 import numpy as np
 import argparse
 import logging
+import time
 import h5py
 import sys
 import os
