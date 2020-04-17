@@ -16,3 +16,6 @@
 [submodule "4_profiling"]
 	path = 4_profiling
 	url = git@jugit.fz-juelich.de:f.matuschke/thesis_profiling.git
+[submodule "5_singleton"]
+	path = 5_singleton
+	url = git@jugit.fz-juelich.de:f.matuschke/thesis_singleton.git
