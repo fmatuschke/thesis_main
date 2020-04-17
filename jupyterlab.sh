@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
 
 if [ ! -d "env-$(hostname)" ]; then
    conda create --prefix ./env-ime263
