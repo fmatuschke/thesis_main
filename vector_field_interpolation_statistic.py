@@ -88,3 +88,10 @@ def GetVec(x, y, z, label_field, vector_field, interpolate):
 
     # Nearest Neighbor
     return vector_field[int(x), int(y), int(z)]
+
+
+if __name__ == "__main__":
+    import fastpli.simulation
+    import fastpli.analysis
+    import fastpli.tools
+    import fastpli.io
