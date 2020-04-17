@@ -7,3 +7,6 @@
 [submodule "1_tests"]
 	path = 1_tests
 	url = git@jugit.fz-juelich.de:f.matuschke/thesis_tests.git
+[submodule "2_cube_factory"]
+	path = 2_cube_factory
+	url = git@jugit.fz-juelich.de:f.matuschke/thesis_cube_factory.git
