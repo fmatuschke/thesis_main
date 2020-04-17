@@ -4,3 +4,6 @@
 [submodule "0_core"]
 	path = 0_core
 	url = git@jugit.fz-juelich.de:f.matuschke/thesis_core.git
+[submodule "1_tests"]
+	path = 1_tests
+	url = git@jugit.fz-juelich.de:f.matuschke/thesis_tests.git
