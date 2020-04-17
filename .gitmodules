@@ -10,3 +10,6 @@
 [submodule "2_cube_factory"]
 	path = 2_cube_factory
 	url = git@jugit.fz-juelich.de:f.matuschke/thesis_cube_factory.git
+[submodule "3_y_shape"]
+	path = 3_y_shape
+	url = git@jugit.fz-juelich.de:f.matuschke/thesis_y_shape.git
