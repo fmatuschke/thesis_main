@@ -9,6 +9,8 @@ if [ -z "$SSH_AGENT_PID" ]; then
 	ssh-add ~/.ssh/id_rsa
 fi
 
+cp 0_core/.gitattributes .
+
 for d in [0-9]_*/ ; do
 
 	if [ d == "0_core" ]; then
