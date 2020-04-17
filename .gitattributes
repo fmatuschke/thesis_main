@@ -1,1 +1,2 @@
 * annex.largefiles=largerthan=100kb
+*.ipynb filter=jupyter_clear_output
