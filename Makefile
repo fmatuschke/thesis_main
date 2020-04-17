@@ -31,30 +31,32 @@ git-submodules:
 .Oneshell:
 fastpli-pull:
 	cd fastpli
-	rm -r build/
-	git pull
+	git pull origin development
 	cd ..
 	git add fastpli
 
-.PHONY: fastpli/build
+.PHONY: fastpli/setup.py
 .ONESHELL:
-fastpli/build: fastpli/
+fastpli/setup.py: fastpli/
 	cd fastpli
-	make build
+	make fastpli
 
 .PHONY: fastpli
-fastpli: env fastpli/ git-submodules clean-build fastpli/build
+fastpli: env fastpli/ git-submodules fastpli/setup.py #clean-fastpli
 	$(PIP) uninstall fastpli -y
-	$(PIP) install fastpli/build/. -q
+	$(PIP) install fastpli/. -q
+	@echo "Done"
 
 # CLEANING
 .PHONY: clean
-clean: clean-env clean-build
+clean: clean-env clean-fastpli
 
 .PHONY: clean-env
 clean-env:
 	rm -rf env-*
 
-.PHONY: clean-build
-clean-build:
-	rm -rf fastpli/build
+.PHONY: clean-fastpli
+.ONESHELL:
+clean-fastpli:
+	cd fastpli
+	make clean
