@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "syncing core"
 
 if [ -z "$SSH_AGENT_PID" ]; then
