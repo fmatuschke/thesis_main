@@ -2,3 +2,6 @@ yapf
 pylint
 tqdm
 imageio
+matplotlib
+scipy
+numba
