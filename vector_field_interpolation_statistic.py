@@ -25,6 +25,26 @@ def VectorOrientationAddition(v, u):
 
 
 @njit(cache=True)
+def VectorOrientationSubstraction(v, u):
+    if np.dot(v, u) >= 0:
+        return v - u
+    else:
+        return v + u
+
+
+@njit(cache=True)
+def VectorOrientationSubstractionField(v, u):
+    shape = v.shape
+    v = np.reshape(v, (-1, 3))
+    u = np.reshape(u, (-1, 3))
+    result = np.empty_like(v)
+    for i in range(v.shape[0]):
+        result[i, :] = VectorOrientationSubstraction(v[i, :], u[i, :])
+    result = np.reshape(result, shape)
+    return result
+
+
+@njit(cache=True)
 def InterpolateVec(x, y, z, vector_field):
     # Trilinear interpolate
     x0 = int(min(max(np.floor(x), 0), vector_field.shape[0] - 1))
@@ -126,6 +146,9 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     import scipy.ndimage
 
+    import tikzplotlib
+    from skimage.external import tifffile as tif
+
     np.random.seed(42)
 
     file_name = 'fastpli.example.' + FILE_BASE + '.h5'
@@ -147,43 +170,63 @@ if __name__ == "__main__":
                      'cube_2pop_psi_0.5_omega_0.0_.solved.h5'))
 
     # define layers (e.g. axon, myelin) inside fibers of each fiber_bundle fiber_bundle
-    for dn, model in [(-0.002, 'r')]:  #, (0.004, 'r')
-        simpli.fiber_bundles_properties = [[  #(0.75, 0, 0, 'b'),
-            (1.0, dn, 0, model)
-        ]] * len(simpli.fiber_bundles)
+    for s, scale in enumerate([2, 3]):
+        fig, axs = plt.subplots(2, 3)
+        for m, (dn, model) in enumerate([(-0.002, 'p'), (0.004, 'r')]):
+            simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
+                                                (1.0, dn, 0, model)]] * len(
+                                                    simpli.fiber_bundles)
 
-        # Generate Tissue
-        print("Run Generation:")
-        simpli.voxel_size = 0.25  # in µm meter
-        simpli.set_voi([-10] * 3, [10] * 3)  # in µm meter
-
-        print('VOI:', simpli.get_voi())
-        print('Memory:', f'{simpli.memory_usage("MB"):.0f} MB')
-        if simpli.memory_usage('MB') > 2**12:
-            print("MEMORY!")
-            sys.exit(1)
-        tissue, optical_axis, tissue_properties = simpli.generate_tissue()
-
-        for scale in [2]:
-            print(f"scale: {scale}")
-            simpli.voxel_size = simpli.voxel_size / scale  # in µm meter
-            simpli.set_voi([-10] * 3, [10] * 3)  # in µm meter
+            # Generate Tissue
+            print("Run Generation:")
+            voxel_size = 0.5  # in µm meter
+            simpli.voxel_size = 0.2  # in µm meter
+            simpli.set_voi([-5] * 3, [5] * 3)  # in µm meter
 
             print('VOI:', simpli.get_voi())
             print('Memory:', f'{simpli.memory_usage("MB"):.0f} MB')
             if simpli.memory_usage('MB') > 2**12:
                 print("MEMORY!")
                 sys.exit(1)
-            _, optical_axis_high, tissue_properties = simpli.generate_tissue()
+            tissue, optical_axis, tissue_properties = simpli.generate_tissue()
+
+            print(f"scale: {scale}")
+            simpli.voxel_size = voxel_size / scale  # in µm meter
+
+            print('VOI:', simpli.get_voi())
+            print('Memory:', f'{simpli.memory_usage("MB"):.0f} MB')
+            if simpli.memory_usage('MB') > 2**12:
+                print("MEMORY!")
+                sys.exit(1)
+            tissue_high, optical_axis_high, tissue_properties = simpli.generate_tissue(
+            )
 
             # vf_zoom = scipy.ndimage.zoom(optical_axis, scale, order=0)
             vf_intp = IntpVecField(tissue, optical_axis, scale, True)
 
-            vf_diff = optical_axis_high - vf_intp
+            vf_diff = np.linalg.norm(VectorOrientationSubstractionField(
+                optical_axis_high, vf_intp),
+                                     axis=-1)
 
-            # plt.imshow(optical_axis_high[:, :, 5, 0], vmin=-1, vmax=1)
-            # plt.show()
-            # plt.imshow(vf_intp[:, :, 0, 0], vmin=-1, vmax=1)
-            # plt.show()
-            plt.imshow(vf_diff[:, :, 5, 0], vmin=-1, vmax=1)
-            plt.show()
+            vmax = np.amax(vf_diff)
+            axs[m, 0].imshow(vf_diff[vf_diff.shape[0] // 2, :, :],
+                             vmin=0,
+                             vmax=vmax)
+            axs[m, 1].imshow(vf_diff[:, vf_diff.shape[1] // 2, :],
+                             vmin=0,
+                             vmax=vmax)
+            pcm = axs[m, 2].imshow(vf_diff[:, :, vf_diff.shape[2] // 2],
+                                   vmin=0,
+                                   vmax=vmax)
+
+            if m == 0:
+                fig.colorbar(pcm, ax=axs[:, 2])
+
+            print(tissue_high.shape)
+            np.savez(f"test_vfdiff_{scale}.npz")
+            tif.imsave(f"vfdiff_{scale}.tiff", vf_diff, bigtiff=True)
+            tif.imsave(f"label_{scale}.tiff", tissue_high, bigtiff=True)
+
+        # tikzplotlib.save(f"test_{scale}.tex")
+
+    # plt.show()
