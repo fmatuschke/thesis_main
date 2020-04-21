@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "save submodules"
+echo "*** save submodules ***"
 
 if [ -z "$SSH_AGENT_PID" ]; then
 	eval "$(ssh-agent -s)"
@@ -13,12 +13,13 @@ for d in */ ; do
 	(
 	cd $d
 	if [ -z "$(git rev-parse --show-superproject-working-tree)" ] ; then
-		# echo "$d no git submodule"
 		continue
 	fi
 
+	echo "* $d - save submodules"
+
 	if [ -n "$(git status -s)" ]; then
-		echo "* $d found untracked files"
+		echo "found untracked files"
 		git status
 		while true; do
 			read -p "commit? " yn
@@ -30,11 +31,11 @@ for d in */ ; do
 		done
 
 		if [ -n "$(git status -s)" ]; then
-			echo "$d still modified"
+			echo "still modified"
 			exit 1
 		fi
 	else
-		echo "* $d clean"
+		echo "clean"
 	fi
 	)
 done

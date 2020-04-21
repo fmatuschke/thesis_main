@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "syncing core"
+echo "*** syncing core ***"
 
 if [ -z "$SSH_AGENT_PID" ]; then
 	eval "$(ssh-agent -s)"
@@ -18,12 +18,12 @@ for d in [0-9]_*/ ; do
 	fi
 
 	(
-	echo "$d"
 	cd $d
 	if [ ! $(git rev-parse --show-superproject-working-tree) ] ; then
-		echo "$d no git repository"
 		continue
 	fi
+
+	echo "* $d - syncinc core"
 
 	if [ -n "$(git status -s)" ]; then
 		echo "$d modified"
@@ -37,10 +37,18 @@ for d in [0-9]_*/ ; do
 
 		git commit -m "SYNC CORE"
 		git push
-		echo ""
 	fi
 	)
 
+done
+
+while true; do
+	read -p "save submodules? " yn
+	case $yn in
+		[Yy]* ) bash ./save_submodules.sh;  break;;
+		[Nn]* ) exit;;
+		* ) echo "Please answer yes or no.";;
+	esac
 done
 
 echo "... done"
