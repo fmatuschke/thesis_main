@@ -19,3 +19,6 @@
 [submodule "5_singleton"]
 	path = 5_singleton
 	url = git@jugit.fz-juelich.de:f.matuschke/thesis_singleton.git
+[submodule "fastpli"]
+	path = fastpli
+	url = git@jugit.fz-juelich.de:f.matuschke/fastpli.git
