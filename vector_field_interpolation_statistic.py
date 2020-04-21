@@ -144,7 +144,6 @@ if __name__ == "__main__":
     import sys
 
     import matplotlib.pyplot as plt
-    import scipy.ndimage
 
     import tikzplotlib
     from skimage.external import tifffile as tif
@@ -201,7 +200,6 @@ if __name__ == "__main__":
             tissue_high, optical_axis_high, tissue_properties = simpli.generate_tissue(
             )
 
-            # vf_zoom = scipy.ndimage.zoom(optical_axis, scale, order=0)
             vf_intp = IntpVecField(tissue, optical_axis, scale, True)
 
             vf_diff = np.linalg.norm(VectorOrientationSubstractionField(
