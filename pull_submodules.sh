@@ -9,7 +9,7 @@ for d in */ ; do
 	(
 	cd $d
 	if [ -z "$(git rev-parse --show-superproject-working-tree)" ] ; then
-		echo "$d no git submodule"
+		# echo "$d no git submodule"
 		continue
 	fi
 
@@ -18,7 +18,7 @@ for d in */ ; do
       exit 1
 	fi
 
-   echo "$d push"
+   echo "* $d pull"
    git checkout master
    git pull
 	)

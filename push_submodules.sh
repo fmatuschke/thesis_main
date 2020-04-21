@@ -9,17 +9,17 @@ if [ -z "$SSH_AGENT_PID" ]; then
 	ssh-add ~/.ssh/id_rsa
 fi
 
-if [ -n "$(git status --ignore-submodules -s)" ] ; then
-   echo "git main repository not clean"
-   exit 1
-fi
+# if [ -n "$(git status --ignore-submodules -s)" ] ; then
+#    echo "git main repository not clean"
+#    exit 1
+# fi
 
 for d in */ ; do
 
 	(
 	cd $d
 	if [ -z "$(git rev-parse --show-superproject-working-tree)" ] ; then
-		echo "$d no git submodule"
+		# echo "$d no git submodule"
 		continue
 	fi
 
@@ -28,7 +28,7 @@ for d in */ ; do
       exit 1
 	fi
 
-   echo "$d push"
+   echo "* $d push"
 	git push
 	)
 
@@ -36,7 +36,7 @@ for d in */ ; do
 
 done
 
-git commit -m "UPDATE SUBMODULES"
-git push
+# git commit -m "UPDATE SUBMODULES"
+# git push
 
 echo "... done"
