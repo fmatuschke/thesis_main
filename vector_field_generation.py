@@ -64,33 +64,37 @@ def InterpolateVec(x, y, z, vector_field, label_field):
 
     label = GetLabel(x0, y0, z0, label_field)  # nearest neighbor
 
-    c000 = vector_field[x0, y0, z0] * (GetLabel(x0, y0, z0,
-                                                label_field) == label)
-    c100 = vector_field[x1, y0, z0] * (GetLabel(x1, y0, z0,
-                                                label_field) == label)
-    c010 = vector_field[x0, y1, z0] * (GetLabel(x0, y1, z0,
-                                                label_field) == label)
-    c110 = vector_field[x1, y1, z0] * (GetLabel(x1, y1, z0,
-                                                label_field) == label)
-    c001 = vector_field[x0, y0, z1] * (GetLabel(x0, y0, z1,
-                                                label_field) == label)
-    c101 = vector_field[x1, y0, z1] * (GetLabel(x1, y0, z1,
-                                                label_field) == label)
-    c011 = vector_field[x0, y1, z1] * (GetLabel(x0, y1, z1,
-                                                label_field) == label)
-    c111 = vector_field[x1, y1, z1] * (GetLabel(x1, y1, z1,
-                                                label_field) == label)
+    l000 = GetLabel(x0, y0, z0, label_field) == label
+    l100 = GetLabel(x1, y0, z0, label_field) == label
+    l010 = GetLabel(x0, y1, z0, label_field) == label
+    l110 = GetLabel(x1, y1, z0, label_field) == label
+    l001 = GetLabel(x0, y0, z1, label_field) == label
+    l101 = GetLabel(x1, y0, z1, label_field) == label
+    l011 = GetLabel(x0, y1, z1, label_field) == label
+    l111 = GetLabel(x1, y1, z1, label_field) == label
 
-    c00 = VectorOrientationAddition(c000 * (1 - xd), c100 * xd)
-    c01 = VectorOrientationAddition(c001 * (1 - xd), c101 * xd)
-    c10 = VectorOrientationAddition(c010 * (1 - xd), c110 * xd)
-    c11 = VectorOrientationAddition(c011 * (1 - xd), c111 * xd)
+    c000 = vector_field[x0, y0, z0]
+    c100 = vector_field[x1, y0, z0]
+    c010 = vector_field[x0, y1, z0]
+    c110 = vector_field[x1, y1, z0]
+    c001 = vector_field[x0, y0, z1]
+    c101 = vector_field[x1, y0, z1]
+    c011 = vector_field[x0, y1, z1]
+    c111 = vector_field[x1, y1, z1]
 
-    c0 = VectorOrientationAddition(c00 * (1 - yd), c10 * yd)
-    c1 = VectorOrientationAddition(c01 * (1 - yd), c11 * yd)
+    c00 = VectorOrientationAddition(c000 * (1 - xd * l100), c100 * xd * l000)
+    c01 = VectorOrientationAddition(c001 * (1 - xd * l101), c101 * xd * l001)
+    c10 = VectorOrientationAddition(c010 * (1 - xd * l110), c110 * xd * l010)
+    c11 = VectorOrientationAddition(c011 * (1 - xd * l111), c111 * xd * l011)
 
-    return VectorOrientationAddition(c0 * (1 - zd),
-                                     c1 * zd).astype(vector_field.dtype)
+    c0 = VectorOrientationAddition(c00 * (1 - yd * np.any(c10)),
+                                   c10 * yd * np.any(c00))
+    c1 = VectorOrientationAddition(c01 * (1 - yd * np.any(c11)),
+                                   c11 * yd * np.any(c01))
+
+    return VectorOrientationAddition(c0 * (1 - zd * np.any(c1)),
+                                     c1 * zd * np.any(c0)).astype(
+                                         vector_field.dtype)
 
 
 @njit(cache=True)
@@ -113,8 +117,13 @@ def IntpVecField(label_field, vector_field, scale, interpolate=True):
     for x in range(sx):
         for y in range(sy):
             for z in range(sz):
-                vector_field_intp[x, y, z, :] = GetVec(
-                    (0.5 + x) / scale, (0.5 * y) / scale, (0.5 + z) / scale,
-                    label_field, vector_field, interpolate)
+                xs = (0.5 + x) / scale
+                ys = (0.5 + y) / scale
+                zs = (0.5 + z) / scale
+
+                # print(x, y, z, "<->", xs, ys, zs)
+                vector_field_intp[x, y,
+                                  z, :] = GetVec(xs, ys, zs, label_field,
+                                                 vector_field, interpolate)
 
     return vector_field_intp
