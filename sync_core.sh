@@ -30,7 +30,7 @@ for d in [0-9]_*/ ; do
 		continue
 	fi
 
-	rsync -au --exclude='.git' ../0_core/ .
+	rsync -au --exclude='.git' --exclude='requirements.txt' ../0_core/ .
 
 	if [ -n "$(git status -s)" ]; then
 		git add .

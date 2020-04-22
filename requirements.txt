@@ -1,0 +1,9 @@
+yapf
+pylint
+numpy
+tqdm
+matplotlib
+pandas
+seaborn
+tikzplotlib
+mpi4py
