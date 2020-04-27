@@ -92,9 +92,14 @@ def InterpolateVec(x, y, z, vector_field, label_field):
     c1 = VectorOrientationAddition(c01 * (1 - yd * np.any(c11)),
                                    c11 * yd * np.any(c01))
 
-    return VectorOrientationAddition(c0 * (1 - zd * np.any(c1)),
-                                     c1 * zd * np.any(c0)).astype(
-                                         vector_field.dtype)
+    c = VectorOrientationAddition(c0 * (1 - zd * np.any(c1)),
+                                    c1 * zd * np.any(c0)).astype(
+                                    vector_field.dtype)
+    
+    if np.any(c):
+        c /= np.linalg.norm(c)
+    
+    return c
 
 
 @njit(cache=True)
