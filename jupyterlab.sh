@@ -15,6 +15,10 @@ fi
 if ! env-$(hostname)/bin/pip3 freeze | grep jupyterlab= -q; then
    env-$(hostname)/bin/pip3 install jupyterlab
    env-$(hostname)/bin/pip3 install jupyterlab-git
+   env-$(hostname)/bin/pip3 install jupyterthemes
+   env-$(hostname)/bin/pip3 install jupyter_contrib_nbextensions
+   # jupyter contrib nbextension install --user
+   # jt -t onedork -cellw 99% -T -nf ptsans -lineh 125
 fi
 
 env-$(hostname)/bin/pip3 install -r requirements.txt
