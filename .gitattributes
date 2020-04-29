@@ -1,5 +1,4 @@
 * annex.largefiles=largerthan=100kb
-
 *.ipynb filter=jupyter_clear_output
 # add to .gitconfig
 # [filter "jupyter_clear_output"]
