@@ -11,8 +11,6 @@ def VectorOrientationAddition(v, u):
         return v - u
 
 
-# @vectorize([float32[:](float32[:], float32[:]),
-#             float64[:](float64[:], float64[:])])
 @njit(cache=True)
 def VectorOrientationSubstraction(v, u):
     if np.dot(v, u) >= 0:
@@ -23,15 +21,38 @@ def VectorOrientationSubstraction(v, u):
 
 @njit(cache=True, parallel=True)
 def VectorOrientationSubstractionField(v, u):
-    shape = v.shape
-    v = np.reshape(v, (-1, 3))
-    u = np.reshape(u, (-1, 3))
-    result = np.empty_like(v)
+    r = np.empty_like(v)
     for i in prange(v.shape[0]):
-        result[i, :] = VectorOrientationSubstraction(v[i, :], u[i, :])
-    result = np.reshape(result, shape)
-    return result
+        for j in range(v.shape[1]):
+            for k in range(v.shape[2]):
+                r[i, j,
+                  k, :] = VectorOrientationSubstraction(v[i, j, k, :], u[i, j,
+                                                                         k, :])
+    return r
 
+
+@njit(cache=True, parallel=True)
+def VectorOrientationDiffNorm(v, u):
+    r = np.empty(v.shape[:-1])
+    for i in prange(v.shape[0]):
+        for j in range(v.shape[1]):
+            for k in range(v.shape[2]):
+                r[i, j, k] = np.linalg.norm(
+                    VectorOrientationSubstraction(v[i, j, k, :], u[i, j, k, :]))
+    return r
+
+
+# @njit(cache=True, parallel=True)
+# def GetTissuePartsMask(tissue_high, vf_diff):
+#     mask = np.empty(vf_diff.shape, np.uint8)
+#     for i in prange(tissue_high.shape[0]):
+#         for j in range(tissue_high.shape[1]):
+#             for k in range(tissue_high.shape[2]):
+#                 mask[i, j,
+#                      k] = (tissue_high[i, j, k] > 0 and tissue_high[i, j, k] % 2
+#                            == 0) or vf_diff[i, j, k] != 0
+
+#     return mask
 
 # @njit(cache=True)
 # def InterpolateVec(x, y, z, vector_field, label_field):
@@ -91,7 +112,6 @@ def VectorOrientationSubstractionField(v, u):
 #         c /= np.linalg.norm(c)
 
 #     return c
-
 
 # @njit(cache=True)
 # def InterpolateVec_new(x, y, z, vector_field, label_field):
@@ -155,7 +175,6 @@ def VectorOrientationSubstractionField(v, u):
 
 #     return c
 
-
 # @njit(cache=True)
 # def GetVector(x, y, z, label_field, vector_field, interpolate):
 #     if interpolate:
@@ -164,7 +183,6 @@ def VectorOrientationSubstractionField(v, u):
 
 #     # Nearest Neighbor
 #     return vector_field[int(np.floor(x)), int(np.floor(y)), int(np.floor(z)), :]
-
 
 # @njit(cache=True)
 # def IntpVecField_(x, scale, label_field, vector_field, interpolate):
@@ -186,7 +204,6 @@ def VectorOrientationSubstractionField(v, u):
 #                                                    vector_field, interpolate)
 
 #     return vector_field_intp
-
 
 # # @njit(cache=True)
 # def IntpVecField(label_field,
