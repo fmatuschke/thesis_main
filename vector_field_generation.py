@@ -1,6 +1,5 @@
 import numpy as np
-import os
-from numba import njit, vectorize, float32, float64, prange
+from numba import njit, prange
 
 
 @njit(cache=True)
