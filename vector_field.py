@@ -1,16 +1,16 @@
 import os
-import imp
 import sys
-print(sys.version)
-
 import numpy as np
-from numba import njit
 import h5py
 import yaml
+print(sys.version)
 
-FILE_PATH = os.path.dirname(os.path.abspath(__file__))
-os.makedirs(os.path.join(FILE_PATH, "output"), exist_ok=True)
-print(FILE_PATH)
+FILE_NAME = os.path.abspath(__file__)
+FILE_PATH = os.path.dirname(FILE_NAME)
+FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
+FILE_NAME = os.path.join('output/', FILE_NAME)
+os.makedirs(os.path.join(FILE_PATH, 'output'), exist_ok=True)
 
 NUM_PROC = 16
 with open(os.path.join(FILE_PATH, '.numba_config.yaml'), 'w') as file:
@@ -21,17 +21,12 @@ import fastpli.simulation
 import fastpli.analysis
 import fastpli.tools
 import fastpli.io
-imp.reload(fastpli)
+import vector_field_generation as vfg
 
 import matplotlib.pyplot as plt
 import tikzplotlib
-# from skimage.external import tifffile as tif
-
-import vector_field_generation as vfg
-imp.reload(vfg)
 
 np.random.seed(42)
-
 print(fastpli.__version__)
 
 for voxel_size in [1, 0.5, 0.2, 0.1]:
@@ -59,6 +54,11 @@ for voxel_size in [1, 0.5, 0.2, 0.1]:
             f"low res: {scale}, model: {model} -> {simpli.memory_usage('MB'):.0f} MB"
         )
         tissue, optical_axis, tissue_properties = simpli.generate_tissue()
+
+        with h5py.File(f"{FILE_NAME}_{voxel_size:.02f}_{scale}_{model}.h5",
+                       'w') as h5f:
+            with open(os.path.abspath(__file__), 'r') as f:
+                simpli.save_parameter_h5(h5f, f.read())
 
         # high resolution
         simpli.voxel_size = voxel_size / scale  # in µm meter
@@ -100,11 +100,9 @@ for voxel_size in [1, 0.5, 0.2, 0.1]:
         plt.plot(x, tmp)
         plt.plot([0, 1], [0, 0])
         tikzplotlib.save(
-            os.path.join(FILE_PATH, "output",
-                         f"test_{voxel_size:.02f}_{scale}_{model}.tex"))
+            f"{FILE_NAME}_line_{voxel_size:.02f}_{scale}_{model}.tex")
 
         # show optical_axis_high_norm
-        # vf_norm = np.linalg.norm(optical_axis_high, axis=-1)
         fig, axs = plt.subplots(1, 3)
         axs[0].imshow(np.linalg.norm(optical_axis_high[vf_diff.shape[0] //
                                                        2, :, :],
@@ -122,13 +120,11 @@ for voxel_size in [1, 0.5, 0.2, 0.1]:
                       vmin=0,
                       vmax=1)
 
-        tikzplotlib.save(os.path.join(
-            FILE_PATH, "output",
-            f"optical_axis_high_norm_{voxel_size:.02f}_{scale}_{model}.tex"),
-                         tex_relative_path_to_data="\currfiledir")
+        tikzplotlib.save(
+            f"{FILE_NAME}_optical_axis_high_norm_{voxel_size:.02f}_{scale}_{model}.tex",
+            tex_relative_path_to_data="\currfiledir")
 
         # show vf+intp
-        # vf_norm_ = np.linalg.norm(vf_intp, axis=-1)
         fig, axs = plt.subplots(1, 3)
         axs[0].imshow(np.linalg.norm(vf_intp[vf_diff.shape[0] // 2, :, :],
                                      axis=-1),
@@ -143,19 +139,15 @@ for voxel_size in [1, 0.5, 0.2, 0.1]:
                       vmin=0,
                       vmax=1)
 
-        tikzplotlib.save(os.path.join(
-            FILE_PATH, "output",
-            f"vf_intp_norm_{voxel_size:.02f}_{scale}_{model}.tex"),
-                         tex_relative_path_to_data="\currfiledir")
+        tikzplotlib.save(
+            f"{FILE_NAME}_vf_intp_norm_{voxel_size:.02f}_{scale}_{model}.tex",
+            tex_relative_path_to_data="\currfiledir")
 
         # show vf_diff with tissue_high overlay
         fig, axs = plt.subplots(1, 3, frameon=False)
         axs[0].imshow(vf_diff[vf_diff.shape[0] // 2, :, :], vmin=0, vmax=vmax)
         axs[1].imshow(vf_diff[:, vf_diff.shape[1] // 2, :], vmin=0, vmax=vmax)
         axs[2].imshow(vf_diff[:, :, vf_diff.shape[2] // 2], vmin=0, vmax=vmax)
-        # tis = tissue_high.copy()
-        # print(np.sum(tis == 4))
-        # tis[tis % 2 == 1] = 0
         axs[0].imshow(tissue_high[vf_diff.shape[0] // 2, :, :],
                       vmin=0,
                       vmax=4,
@@ -166,7 +158,7 @@ for voxel_size in [1, 0.5, 0.2, 0.1]:
                       vmax=4,
                       cmap='gray',
                       alpha=0.25)
-        axs[2].imshow(optical_axis_high[:, :, vf_diff.shape[2] // 2],
+        axs[2].imshow(tissue_high[:, :, vf_diff.shape[2] // 2],
                       vmin=0,
                       vmax=4,
                       cmap='gray',
@@ -174,7 +166,6 @@ for voxel_size in [1, 0.5, 0.2, 0.1]:
         for ax in axs:
             ax.axis('off')
 
-        tikzplotlib.save(os.path.join(
-            FILE_PATH, "output",
-            f"vdiff_{voxel_size:.02f}_{scale}_{model}.tex"),
-                         tex_relative_path_to_data="\currfiledir")
+        tikzplotlib.save(
+            f"{FILE_NAME}_vdiff_{voxel_size:.02f}_{scale}_{model}.tex",
+            tex_relative_path_to_data="\currfiledir")
