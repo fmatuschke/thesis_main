@@ -1,0 +1,56 @@
+\documentclass{standalone} 
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\begin{document}
+%
+\foreach \alpha in {0,-22.5,...,-90}{
+\begin{tikzpicture}[]
+% 
+\pgfmathsetmacro{\r}{1}
+% 
+\begin{axis}[
+    view       = {65}{25},
+    axis lines = middle,
+    xmin       = -\r*1.25,
+    ymin       = -\r*1.25,
+    zmin       = -\r*1.25,
+    xmax       = \r*1.25,
+    ymax       = \r*1.25,
+    zmax       = \r*1.25,
+    height     = 16cm,
+    xtick      = \empty,
+    ytick      = \empty,
+    ztick      = \empty
+]
+% 
+% \pgfmathsetmacro{\samples}{10}
+\pgfplotsset{tikzDefaults/.style=
+  { domain     = 0:360,
+    samples    = 20,
+    samples y  = 0,
+    % thick,
+    smooth,
+    red,
+    mark=*
+    %mark=*, only marks
+    }}
+% 
+\pgfmathsetmacro{\r}{1}
+% \pgfmathsetmacro{\alpha}{30}
+\addplot3[only marks,blue]
+    ({\r*cos(0)*cos(\alpha)},{0},{-\r*cos(0)*sin(\alpha)});
+\foreach \omega in {0,10,...,90}{
+  \addplot3 [tikzDefaults]
+    (
+    {\r*cos(\omega)*cos(\alpha)+\r*sin(\omega)*cos(x)*sin(\alpha)},
+    {-\r*sin(\omega)*sin(x)},
+    {-\r*cos(\omega)*sin(\alpha)+\r*sin(\omega)*cos(x)*cos(\alpha)}
+    );
+}
+\end{axis}
+\end{tikzpicture}
+}
+% 
+\end{document}

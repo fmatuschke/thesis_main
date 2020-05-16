@@ -1,0 +1,72 @@
+\documentclass[border=10pt]{standalone}
+
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary {calc, intersections}
+\usepackage{pgfplots}
+\begin{document}
+
+\begin{tikzpicture}
+\path [] (-5,-3) grid (7,14);
+\foreach \pa/\pb/\ra/\rb [count=\ii] in {
+(0,10)/{(4,6)}/3/2,
+(4,6)/{(-2,0)}/2/2.5
+} {
+    \def\l{c\ii}
+    % 
+    \pgfmathsetmacro{\rone}{\ra}
+    \pgfmathsetmacro{\rtwo}{\rb}
+    \pgfmathsetmacro{\out}{\rone/(\rone - \rtwo)}
+    \node[draw, circle,minimum size=2 * \rone cm,inner sep=0pt] (\l1) at \pa {};
+    \node[circle,minimum size=2 * \rtwo cm,inner sep=0pt] (\l2) at \pb {};
+    \path (\l1.center) -- node[coordinate,pos=\out] (out) {}  (\l2.center);
+    % 
+    \foreach \i in {1,2}
+    \foreach \j in {1,2}
+    \foreach \k in {out}
+    \coordinate (t\i\j\k) at (tangent cs:node=\l\i,point={(\k)},solution=\j);
+    % 
+    \foreach \i in {1,2}
+    \foreach \k in {out}
+    \draw[red] ($(t1\i\k)!-0cm!(t2\i\k)$) --  ($(t2\i\k)!-0cm!(t1\i\k)$);
+    % 
+    % last circle
+    \ifnum\ii=2
+        \node[draw,circle,minimum size=2 * \rtwo cm,inner sep=0pt] (last) at \pb {};
+    \fi
+}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\path [] (-5,-3) grid (4,14);
+\foreach \pa/\pb/\ra/\rb [count=\ii] in {
+(0,10)/{(-2,0)}/3/2.5
+} {
+    \def\l{c\ii}
+    % 
+    \pgfmathsetmacro{\rone}{\ra}
+    \pgfmathsetmacro{\rtwo}{\rb}
+    \pgfmathsetmacro{\out}{\rone/(\rone - \rtwo)}
+    \node[draw, circle,minimum size=2 * \rone cm,inner sep=0pt] (\l1) at \pa {};
+    \node[circle,minimum size=2 * \rtwo cm,inner sep=0pt] (\l2) at \pb {};
+    \path (\l1.center) -- node[coordinate,pos=\out] (out) {}  (\l2.center);
+    % 
+    \foreach \i in {1,2}
+    \foreach \j in {1,2}
+    \foreach \k in {out}
+    \coordinate (t\i\j\k) at (tangent cs:node=\l\i,point={(\k)},solution=\j);
+    % 
+    \foreach \i in {1,2}
+    \foreach \k in {out}
+    \draw[red] ($(t1\i\k)!-0cm!(t2\i\k)$) --  ($(t2\i\k)!-0cm!(t1\i\k)$);
+    % 
+    % last circle
+    \ifnum\ii=1
+        \node[draw,circle,minimum size=2 * \rtwo cm,inner sep=0pt] (last) at \pb {};
+    \fi
+}
+\end{tikzpicture}
+
+
+
+\end{document}

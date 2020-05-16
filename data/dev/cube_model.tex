@@ -1,0 +1,31 @@
+\documentclass{article} 
+
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+
+\begin{document}
+
+\tdplotsetmaincoords{60}{110}
+\tdplotsetrotatedcoords{-90}{-90}{0}
+%
+\begin{tikzpicture}[scale=5,tdplot_rotated_coords]
+  \coordinate (O) at (0,0,0);
+  \draw[thick,->] (0,0,0) -- (1,0,0) node[anchor=north east]{$x$};
+  \draw[thick,->] (0,0,0) -- (0,1,0) node[anchor=north west]{$y$};
+  \draw[thick,->] (0,0,0) -- (0,0,1) node[anchor=south]{$z$};
+  \def\rvec{1}
+  \def\thetavec{45}
+  \def\phivec{30}
+  \tdplotsetcoord{P}{\rvec}{\thetavec}{\phivec}
+  \draw[-stealth,color=red] (O) -- (P) node[above right] {$P$};
+  \draw[dashed, color=red] (O) -- (Pxy);
+  \draw[dashed, color=red] (P) -- (Pxy);
+%  \draw[dashed, color=red] (P) -- (Pyz);
+%  \draw[dashed, color=red] (O) -- (Pxz);
+%  \draw[dashed, color=red] (P) -- (Pxz);
+  \tdplotdrawarc[tdplot_rotated_coords]{(O)}{0.2}{0}{\phivec}{anchor=north east}{$\phi$}
+  \tdplotsetrotatedthetaplanecoords{\phivec}
+  \tdplotdrawarc[tdplot_rotated_coords]{(0,0,0)}{0.5}{0}{\thetavec}{anchor=south west}{$\theta$}
+\end{tikzpicture}
+
+\end{document}

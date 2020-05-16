@@ -1,0 +1,12 @@
+\documentclass[]{standalone}
+% 
+\usepackage{tikz}
+\usetikzlibrary{external}
+\tikzexternalize[prefix=tikz/, figure name=\thesubsection_, optimize command away=\includepdf]
+% 
+\begin{document}
+\input{gfx/pli/pli_detail_pm.tikz}
+% \begin{tikzpicture}
+% \draw[] (0,0) -- (1,1);
+% \end{tikzpicture}
+\end{document}

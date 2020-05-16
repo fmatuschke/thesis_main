@@ -1,0 +1,42 @@
+\documentclass{book}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage[nameinlink]{cleveref}
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+
+\begin{document}
+
+\chapter{First Chapter}\label{chapter}
+\section{Some Section}\label{sectiona}
+\section{Some Other Section}\label{sectionb}
+
+\begin{figure}[!ht]
+  \centering
+  \rule{30mm}{20mm}
+  \caption{Some Figure}\label{figure}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \rule{30mm}{20mm}
+  \caption{Some Figure}\label{figure1}
+\end{figure}
+
+\begin{figure}[!tb]
+    \centering
+    % \includegraphics{gfx/model/medusa/4.jpg}
+	\caption{4}\label{jhgfgg}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \rule{30mm}{20mm}
+  \caption{Some Figure}\label{figure2}
+\end{figure}
+
+Using \texttt{\textbackslash autoref}, we can refer to \autoref{chapter}, \autoref{sectiona}, and \autoref{figure1}, but using a range fails:~\autoref{sectiona,sectionb}
+
+Using \texttt{\textbackslash cleveref}, we can refer to \cref{chapter}, \cref{sectiona}, and \cref{figure1}. \Cref{chapter}. \Cref{sectiona}. \Cref{figure1}. A range has no problem now:~\cref{sectiona,sectionb}\\
+
+\cref{jhgfgg}
+
+\end{document}
