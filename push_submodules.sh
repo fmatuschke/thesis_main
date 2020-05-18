@@ -11,11 +11,12 @@ fi
 
 for d in */ ; do
 
+	if [ ! -f ${d}.git ] | [ ! -d ${d}.git ] ; then
+		continue # .git is only a file in submodules
+   fi
+
 	(
 	cd $d
-	if [ -z "$(git rev-parse --show-superproject-working-tree)" ] ; then
-		continue
-	fi
 
 	echo "* $d - push submodules"
 
@@ -27,7 +28,7 @@ for d in */ ; do
 	git push
 	)
 
-   git add $d
+	git add $d
 
 done
 

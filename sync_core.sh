@@ -13,28 +13,28 @@ cp 0_core/.gitattributes .
 
 for d in [0-9]_*/ ; do
 
-	if [ d == "0_core" ]; then
+	if [ $d == "0_core/" ]; then
 		continue
 	fi
 
+	if [ ! -f ${d}.git ] | [ ! -d ${d}.git ] ; then
+		continue # .git is only a file in submodules
+   fi
+
 	(
 	cd $d
-	if [ ! $(git rev-parse --show-superproject-working-tree) ] ; then
-		continue
-	fi
 
 	echo "* $d - syncinc core"
 
 	if [ -n "$(git status -s)" ]; then
 		echo "$d modified"
-		continue
+		exit 1
 	fi
 
 	rsync -au --exclude='.git' --exclude='requirements.txt' ../0_core/ .
 
-	if [ -n "$(git status -s)" ]; then
+	if [ "$(git status -s)" ]; then
 		git add .
-
 		git commit -m "SYNC CORE"
 		git push
 	fi

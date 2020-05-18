@@ -4,15 +4,16 @@ set -euo pipefail
 
 echo "*** pull submodules ***"
 
-git submodule update --init --recursive
+# git submodule update --init --recursive
 
 for d in */ ; do
 
+	if [ ! -f ${d}.git ] | [ ! -d ${d}.git ] ; then
+		continue # .git is only a file in submodules
+   fi
+
 	(
 	cd $d
-	if [ -z "$(git rev-parse --show-superproject-working-tree)" ] ; then
-		continue
-	fi
 
 	echo "* $d - pull submodules"
 
