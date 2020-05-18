@@ -1,18 +1,18 @@
 default: install
 
-HOST=$(shell hostname)
-PYTHON=env-$(HOST)/bin/python3
-PIP=env-$(HOST)/bin/pip3
+VENV=env-$(shell hostname)
+PYTHON=$(VENV)/bin/python3
+PIP=$(VENV)/bin/pip3
 
 .PHONY: install
 install: env fastpli
 
 # ENV
-env: env-$(HOST)/bin/python3
+env: $(VENV)/bin/python3
 	$(PIP) install -r requirements.txt -q
 
-env-$(HOST)/bin/python3:
-	python3 -m venv env-$(HOST)/
+$(VENV)/bin/python3:
+	python3 -m venv $(VENV)/
 
 .PHONY: env-update
 env-update: env
