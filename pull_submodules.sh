@@ -22,7 +22,7 @@ for d in */ ; do
       exit 1
 	fi
 
-	if [ `git branch --list development` ] ; then
+	if [ $d == "fastpli/" ] ; then
 		git checkout development &> /dev/null
 	else
 		git checkout master &> /dev/null
