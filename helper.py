@@ -81,6 +81,9 @@ def hist2d_2_tikz(h,
         f.write("]\n")
         f.write(f"\\addplot3 [surf] file {{{file_name}.dat}};\n")
         f.write("\\end{polaraxis}\n")
+        f.write("\\pgfresetboundingbox \\path ")
+        f.write("($(current axis.below south west) - (1,0)$) rectangle ")
+        f.write("($(current axis.above north east) + (2,0)$);\n")
         f.write("\\end{tikzpicture}\n")
         if standalone:
             f.write("%\n")
