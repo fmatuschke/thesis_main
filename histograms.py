@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 import os
+import subprocess
 
 import fastpli.analysis
 import fastpli.io
@@ -32,25 +33,43 @@ file_list = list(
     filter(lambda file: True if os.path.isfile(file) else False, file_list))
 
 for file in tqdm(file_list):
-    if not os.path.isfile(file):
-        continue
 
     fbs = fastpli.io.fiber_bundles.load(file)
     phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs)
-    h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
-                                                        theta,
-                                                        n_angle=50,
-                                                        n_radius=25,
-                                                        normed=True)
+    h, x, y, _ = fastpli.analysis.orientation.histogram(
+        phi,
+        theta,
+        n_phi=60,
+        n_theta=30,
+        weight_area=True,
+        # fun=lambda x: np.log2(x),
+    )
 
     file_path = os.path.dirname(file)
     file_base = os.path.basename(file)
     file_name, _ = os.path.splitext(file_base)
     file_pre = os.path.join(file_path, file_name)
 
-    hist2d_2_tikz(h,
-                  np.rad2deg(x),
-                  np.rad2deg(y),
-                  f"{args.output}/{file_name}.tikz",
-                  path_to_data="\currfiledir",
-                  info=[FILE_NAME])
+    hist2d_2_tikz(
+        h,
+        np.rad2deg(x),
+        np.rad2deg(y),
+        f"{args.output}/{file_name}.tikz",
+        #   path_to_data="\currfiledir",
+        standalone=True,
+        info=[FILE_NAME])
+
+    # subprocess.run(
+    #     f"cd {args.output} && pdflatex {file_name}.tikz && rm {file_name}.aux {file_name}.log",
+    #     shell=True,
+    #     stdout=subprocess.DEVNULL,
+    #     check=True)
+
+    hist2d_2_tikz(
+        h,
+        np.rad2deg(x),
+        np.rad2deg(y),
+        f"{args.output}/{file_name}.tikz",
+        path_to_data="\currfiledir",
+        # standalone=True,
+        info=[FILE_NAME])

@@ -39,7 +39,7 @@ parser.add_argument("-o",
                     "--output",
                     type=str,
                     required=True,
-                    help="Output path of solver.")
+                    help="Output path.")
 
 parser.add_argument("-i",
                     "--input",
