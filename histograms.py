@@ -52,14 +52,14 @@ for file in tqdm(
     file_name, _ = os.path.splitext(file_base)
     file_pre = os.path.join(file_path, file_name)
 
-    hist2d_2_tikz(
-        h,
-        np.rad2deg(x),
-        np.rad2deg(y),
-        f"{args.output}/{file_name}.tikz",
-        #   path_to_data="\currfiledir",
-        standalone=True,
-        info=[FILE_NAME])
+    # hist2d_2_tikz(
+    #     h,
+    #     np.rad2deg(x),
+    #     np.rad2deg(y),
+    #     f"{args.output}/{file_name}.tikz",
+    #     #   path_to_data="\currfiledir",
+    #     standalone=True,
+    #     info=[FILE_NAME])
 
     # subprocess.run(
     #     f"cd {args.output} && pdflatex {file_name}.tikz && rm {file_name}.aux {file_name}.log",

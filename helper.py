@@ -52,7 +52,7 @@ def hist2d_2_tikz(h,
             f.write("\\usepackage{siunitx}\n")
             f.write("\\begin{document}\n")
             f.write("%\n")
-        f.write("\\begin{tikzpicture}\n")
+        f.write("\\begin{tikzpicture}[trim axis left, baseline]\n")
         f.write("\\begin{polaraxis}[\n")
         f.write("    xtick={0,45,...,315},\n")
         f.write(
