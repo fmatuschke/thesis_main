@@ -9,6 +9,7 @@ import fastpli.io
 from helper import hist2d_2_tikz
 
 from tqdm import tqdm
+from mpi4py import MPI
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i",
@@ -32,7 +33,8 @@ FILE_NAME = os.path.abspath(__file__)
 file_list = list(
     filter(lambda file: True if os.path.isfile(file) else False, file_list))
 
-for file in tqdm(file_list):
+for file in tqdm(
+        file_list[MPI.COMM_WORLD.Get_rank()::MPI.COMM_WORLD.Get_size()]):
 
     fbs = fastpli.io.fiber_bundles.load(file)
     phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs)
