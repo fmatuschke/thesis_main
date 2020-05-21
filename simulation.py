@@ -79,7 +79,7 @@ file_list = args.input
 # print Memory
 simpli = fastpli.simulation.Simpli()
 simpli.voxel_size = args.voxel_size  # in mu meter
-simpli.resolution = PIXEL_LAP  # in mu meter
+simpli.pixel_size = PIXEL_LAP  # in mu meter
 simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
                0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
 simpli.tilts = np.deg2rad(np.array([(5.5, 0)]))
