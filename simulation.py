@@ -85,8 +85,11 @@ simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
 simpli.tilts = np.deg2rad(np.array([(5.5, 0)]))
 simpli.add_crop_tilt_halo()
 
-logger.info(f"Single Memory: {round(simpli.memory_usage())} MB")
-logger.info(f"Total Memory: {round(simpli.memory_usage()* comm.Get_size())} MB")
+if comm.Get_rank() == 0:
+    print(f"Single Memory: {simpli.memory_usage():.0f} MB")
+    print(f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
+logger.info(f"Single Memory: {simpli.memory_usage():.0f} MB")
+logger.info(f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
 del simpli
 
 # simulation loop
@@ -168,7 +171,7 @@ for file, f0_inc in tqdm(FILE_AND_INC[comm.Get_rank()::comm.Get_size()]):
 
                     logger.info(f"tissue_pipeline: model:{model}")
 
-                    save = ["label_field"] if m == 0 and name == 'LAP' else None
+                    save = ["label_field"] if m == 0 and name == 'LAP' else []
                     label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                         h5f=dset, save=save)
 
