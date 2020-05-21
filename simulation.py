@@ -145,7 +145,7 @@ for file, f0_inc in tqdm(FILE_AND_INC[comm.Get_rank()::comm.Get_size()]):
                     simpli = fastpli.simulation.Simpli()
                     simpli.omp_num_threads = NUM_THREADS
                     simpli.voxel_size = args.voxel_size
-                    simpli.resolution = res
+                    simpli.pixel_size = res
                     simpli.filter_rotations = np.deg2rad(
                         [0, 30, 60, 90, 120, 150])
                     simpli.interpolate = True
