@@ -1,9 +1,0 @@
-* annex.largefiles=largerthan=100kb
-
-*.ipynb filter=jupyter_clear_output
-# add to .gitconfig
-# [filter "jupyter_clear_output"]
-#     clean = "jupyter nbconvert --stdin --stdout --log-level=ERROR \
-#              --to notebook --ClearOutputPreprocessor.enabled=True"
-#     smudge = cat
-#     required = true
