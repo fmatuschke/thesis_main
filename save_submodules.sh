@@ -10,12 +10,13 @@ if [ -z "$SSH_AGENT_PID" ]; then
 fi
 
 for d in */ ; do
+
+	if [ ! -f ${d}.git ] | [ ! -d ${d}.git ] ; then
+		continue # .git is only a file in submodules
+   fi
+
 	(
 	cd $d
-	if [ -z "$(git rev-parse --show-superproject-working-tree)" ] ; then
-		continue
-	fi
-
 	echo "* $d - save submodules"
 
 	if [ -n "$(git status -s)" ]; then
