@@ -24,7 +24,14 @@ def hist2d_2_pgf_dat(h, x, y, file, info=""):
             f.write("\n")
 
 
-def hist2d_2_tikz(h, x, y, file, y_label=None, path_to_data=None, info=""):
+def hist2d_2_tikz(h,
+                  x,
+                  y,
+                  file,
+                  y_label=None,
+                  path_to_data=None,
+                  standalone=False,
+                  info=""):
 
     file_path = os.path.dirname(file)
     file_base = os.path.basename(file)
@@ -34,10 +41,18 @@ def hist2d_2_tikz(h, x, y, file, y_label=None, path_to_data=None, info=""):
     hist2d_2_pgf_dat(h, x, y, f"{file_pre}.dat", info)
 
     if path_to_data:
-        file_pre = path_to_data + "/" + file_name
+        file_name = path_to_data + "/" + file_name
 
     with open(file, 'w') as f:
-        f.write("\\begin{tikzpicture}\n")
+        if standalone:
+            f.write("\\documentclass[]{standalone}\n")
+            f.write("\\usepackage{pgfplots}\n")
+            f.write("\\usepgfplotslibrary{polar}\n")
+            f.write("\\pgfplotsset{compat=1.17}\n")
+            f.write("\\usepackage{siunitx}\n")
+            f.write("\\begin{document}\n")
+            f.write("%\n")
+        f.write("\\begin{tikzpicture}[trim axis left, baseline]\n")
         f.write("\\begin{polaraxis}[\n")
         f.write("    xtick={0,45,...,315},\n")
         f.write(
@@ -64,6 +79,12 @@ def hist2d_2_tikz(h, x, y, file, y_label=None, path_to_data=None, info=""):
             f.write(f"        ylabel={{{y_label}}},\n")
         f.write("    },\n")
         f.write("]\n")
-        f.write(f"\\addplot3 [surf] file {{{file_pre}.dat}};\n")
+        f.write(f"\\addplot3 [surf] file {{{file_name}.dat}};\n")
         f.write("\\end{polaraxis}\n")
+        f.write("\\pgfresetboundingbox \\path ")
+        f.write("($(current axis.below south west) - (1,0)$) rectangle ")
+        f.write("($(current axis.above north east) + (2,0)$);\n")
         f.write("\\end{tikzpicture}\n")
+        if standalone:
+            f.write("%\n")
+            f.write("\\end{document}\n")
