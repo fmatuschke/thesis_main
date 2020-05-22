@@ -4,6 +4,11 @@ set -euo pipefail
 
 echo "*** pull submodules ***"
 
+if [ -z "$SSH_AGENT_PID" ]; then
+	eval "$(ssh-agent -s)"
+	ssh-add ~/.ssh/id_rsa
+fi
+
 # git submodule update --init --recursive
 
 for d in */ ; do
