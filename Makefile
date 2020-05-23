@@ -19,10 +19,6 @@ env-update: env
 	$(PIP) install --upgrade pip -q
 
 # FASTPLI
-fastpli/:
-	git submodule add git@jugit.fz-juelich.de:f.matuschke/fastpli.git fastpli
-	git submodule init
-
 .PHONY: git-submodules
 git-submodules:
 	git submodule update --init --recursive
@@ -42,7 +38,7 @@ fastpli/setup.py: fastpli/
 	make fastpli
 
 .PHONY: fastpli
-fastpli: env fastpli/ git-submodules fastpli/setup.py #clean-fastpli
+fastpli: env git-submodules clean-fastpli fastpli/setup.py
 	$(PIP) uninstall fastpli -y
 	$(PIP) install fastpli/. -q
 	@echo "Done"
