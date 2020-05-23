@@ -23,8 +23,6 @@ from MPIFileHandler import MPIFileHandler
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 import multiprocessing as mp
-NUM_THREADS = 2
-mp_pool = mp.Pool(NUM_THREADS)
 
 # reproducability
 np.random.seed(42)
@@ -54,8 +52,16 @@ parser.add_argument("-v",
                     required=True,
                     help="voxel_size in um.")
 
+parser.add_argument("-t",
+                    "--threads",
+                    type=int,
+                    required=True,
+                    help="number of threads")
+
 args = parser.parse_args()
 os.makedirs(args.output, exist_ok=True)
+
+mp_pool = mp.Pool(args.threads)
 
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
@@ -147,7 +153,7 @@ for file, f0_inc in tqdm(FILE_AND_INC[comm.Get_rank()::comm.Get_size()]):
 
                     # Setup Simpli
                     simpli = fastpli.simulation.Simpli()
-                    simpli.omp_num_threads = NUM_THREADS
+                    simpli.omp_num_threads = args.threads
                     simpli.voxel_size = args.voxel_size
                     simpli.pixel_size = res
                     simpli.filter_rotations = np.deg2rad(
