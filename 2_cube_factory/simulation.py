@@ -6,6 +6,7 @@ import logging
 import glob
 import sys
 import os
+
 import warnings
 
 import fastpli.simulation
@@ -22,7 +23,7 @@ from MPIFileHandler import MPIFileHandler
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 import multiprocessing as mp
-NUM_THREADS = 4
+NUM_THREADS = 2
 mp_pool = mp.Pool(NUM_THREADS)
 
 # reproducability
@@ -171,7 +172,8 @@ for file, f0_inc in tqdm(FILE_AND_INC[comm.Get_rank()::comm.Get_size()]):
 
                     logger.info(f"tissue_pipeline: model:{model}")
 
-                    save = ["label_field"] if m == 0 and name == 'LAP' else []
+                    save = ['optic', 'epa', 'mask', 'rofl']
+#                     save += ['tissue'] if m == 0 and name == 'LAP' else []
                     label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                         h5f=dset, save=save)
 
