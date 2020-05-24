@@ -15,6 +15,7 @@ def run_simulation_pipeline_n(simpli,
                               tissue_properties,
                               n_repeat,
                               h5f=None,
+                              save = ['data','optic', 'epa', 'mask', 'rofl'],
                               crop_tilt=False,
                               mp_pool=None):
     '''
@@ -67,11 +68,11 @@ def run_simulation_pipeline_n(simpli,
 
         new_images = np.vstack(new_images_n)
 
-        if h5f:
+        if h5f and 'data' in save:
             h5f['simulation/data/' + str(t)] = images.astype(np.float32)
             h5f['simulation/data/' + str(t)].attrs['theta'] = theta
             h5f['simulation/data/' + str(t)].attrs['phi'] = phi
-        if h5f:
+        if h5f and 'optic' in save:
             h5f['simulation/optic/' + str(t)] = new_images
             h5f['simulation/optic/' + str(t)].attrs['theta'] = theta
             h5f['simulation/optic/' + str(t)].attrs['phi'] = phi
@@ -79,7 +80,7 @@ def run_simulation_pipeline_n(simpli,
         # calculate modalities
         epa = simpli.apply_epa(new_images)
 
-        if h5f:
+        if h5f and 'epa' in save:
             h5f['analysis/epa/' + str(t) + '/transmittance'] = epa[0]
             h5f['analysis/epa/' + str(t) + '/direction'] = np.rad2deg(epa[1])
             h5f['analysis/epa/' + str(t) + '/retardation'] = epa[2]
@@ -96,9 +97,10 @@ def run_simulation_pipeline_n(simpli,
         tilting_stack[t] = new_images
 
     # pseudo mask
-    mask = np.sum(label_field, 2) > 0
-    mask = simpli.apply_optic_resample(1.0 * mask, mp_pool=mp_pool) > 0.1
-    h5f['simulation/optic/mask'] = np.uint8(mask)
+    if h5f  and 'mask' in save:
+        mask = np.sum(label_field, 2) > 0
+        mask = simpli.apply_optic_resample(1.0 * mask, mp_pool=mp_pool) > 0.1
+        h5f['simulation/optic/mask'] = np.uint8(mask)
 
     tilting_stack = np.array(tilting_stack)
     while tilting_stack.ndim < 4:
@@ -122,7 +124,7 @@ def run_simulation_pipeline_n(simpli,
         rofl_func = None
         rofl_n_iter = None
 
-    if h5f and flag_rofl:
+    if h5f and flag_rofl and 'rofl' in save:
         h5f['analysis/rofl/direction'] = rofl_direction
         h5f['analysis/rofl/inclination'] = rofl_incl
         h5f['analysis/rofl/t_rel'] = rofl_t_rel

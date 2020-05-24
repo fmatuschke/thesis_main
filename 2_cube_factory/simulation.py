@@ -100,8 +100,8 @@ logger.info(f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
 del simpli
 
 # simulation loop
-FILE_AND_INC = [(f, i) for f in file_list for i in FIBER_INCLINATION]
-for file, f0_inc in tqdm(FILE_AND_INC[comm.Get_rank()::comm.Get_size()]):
+parameter = [(f, i) for f in file_list for i in FIBER_INCLINATION]
+for file, f0_inc in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
     logger.info(f"input file: {file}")
 
     # Loading fiber models and prepair rotations
@@ -197,8 +197,9 @@ for file, f0_inc in tqdm(FILE_AND_INC[comm.Get_rank()::comm.Get_size()]):
                                                   label_field,
                                                   vector_field,
                                                   tissue_properties,
-                                                  256,
+                                                  int((PIXEL_LAP/PIXEL_PM)**2),
                                                   h5f=dset,
+                                                  save=save,
                                                   crop_tilt=True,
                                                   mp_pool=mp_pool)
                     else:
@@ -206,6 +207,7 @@ for file, f0_inc in tqdm(FILE_AND_INC[comm.Get_rank()::comm.Get_size()]):
                                                        vector_field,
                                                        tissue_properties,
                                                        h5f=dset,
+                                                       save=save,
                                                        crop_tilt=True,
                                                        mp_pool=mp_pool)
 
