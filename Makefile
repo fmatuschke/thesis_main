@@ -31,14 +31,14 @@ fastpli-pull:
 	cd ..
 	git add fastpli
 
-.PHONY: fastpli/setup.py
+.PHONY: fastpli/setup
 .ONESHELL:
-fastpli/setup.py: fastpli/
+fastpli/setup: fastpli/
 	cd fastpli
 	make fastpli
 
 .PHONY: fastpli
-fastpli: env git-submodules clean-fastpli fastpli/setup.py
+fastpli: env git-submodules fastpli/setup
 	$(PIP) uninstall fastpli -y
 	$(PIP) install fastpli/. -q
 	@echo "Done"
