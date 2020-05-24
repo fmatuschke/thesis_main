@@ -9,6 +9,7 @@ install: env fastpli
 
 # ENV
 env: $(VENV)/bin/python3
+	$(PIP) install wheel -q
 	$(PIP) install -r requirements.txt -q
 
 $(VENV)/bin/python3:
@@ -39,20 +40,17 @@ fastpli/setup: fastpli/
 
 .PHONY: fastpli
 fastpli: env git-submodules fastpli/setup
-	$(PIP) uninstall fastpli -y
-	$(PIP) install fastpli/. -q
+	$(PIP) uninstall fastpli -y -q
+	$(PIP) install fastpli/.
 	@echo "Done"
 
 # CLEANING
 .PHONY: clean
-clean: clean-env clean-fastpli
-
-.PHONY: clean-env
-clean-env:
+clean:
 	rm -rf env-*
 
-.PHONY: clean-fastpli
-.ONESHELL:
-clean-fastpli:
-	cd fastpli
-	make clean
+#.PHONY: clean-fastpli
+#.ONESHELL:
+#clean-fastpli:
+#	cd fastpli
+#	make clean
