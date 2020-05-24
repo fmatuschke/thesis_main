@@ -3,6 +3,7 @@ import copy
 import h5py
 import argparse
 import logging
+import subprocess
 import glob
 import sys
 import os
@@ -73,6 +74,7 @@ formatter = logging.Formatter(
 mh.setFormatter(formatter)
 logger.addHandler(mh)
 logger.info("args: " + " ".join(sys.argv[1:]))
+logger.info(f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD'])}")
 
 # PARAMETER
 PIXEL_PM = 1.25
@@ -153,6 +155,7 @@ for file, f0_inc in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
 
                     # Setup Simpli
                     simpli = fastpli.simulation.Simpli()
+                    warnings.filterwarnings("ignore", message="UserWarning: objects overlap")
                     simpli.omp_num_threads = args.threads
                     simpli.voxel_size = args.voxel_size
                     simpli.pixel_size = res
@@ -178,7 +181,7 @@ for file, f0_inc in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
 
                     logger.info(f"tissue_pipeline: model:{model}")
 
-                    save = ['optic', 'epa', 'mask', 'rofl']
+                    save = ['optic', 'epa', 'rofl']
 #                     save += ['tissue'] if m == 0 and name == 'LAP' else []
                     label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                         h5f=dset, save=save)
@@ -191,6 +194,13 @@ for file, f0_inc in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
                     simpli.sensor_gain = gain
 
                     simpli.save_parameter_h5(h5f=dset)
+
+                    # images = simpli.run_simulation(tissue, optical_axis, tissue_properties,
+                    #                    theta, phi)
+                    # images = self.rm_crop_tilt_halo(images)
+                    # dset['simulation/data/' + str(t)] = images
+                    # dset['simulation/data/' + str(t)].attrs['theta'] = theta
+                    # dset['simulation/data/' + str(t)].attrs['phi'] = phi
 
                     if name == 'LAP':
                         run_simulation_pipeline_n(simpli,

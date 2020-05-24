@@ -12,20 +12,10 @@ source env-$(hostname)/bin/activate
 if ! pip3 freeze | grep jupyterlab= -q; then
    # pip3 install jupyterlab
    # pip3 install jupyterlab-git
-   pip3 install jupyter
-   pip3 install jupyterthemes
-   pip3 install jupyter_contrib_nbextensions
+   pip3 install jupyter -q
+   pip3 install jupyterthemes -q
+   pip3 install jupyter_contrib_nbextensions -q
    jupyter contrib nbextension install --user
    jt -t onedork -cellw 99% -T -nf ptsans -lineh 125
    cp custom.css ~/.jupyter/custom/custom.css
 fi
-
-(
-cd fastpli
-make fastpli
-)
-pip3 install fastpli/.
-pip3 install -r requirements.txt
-
-# echo "install requirements.txt"
-# find . -maxdepth 2 -name "requirements.txt" -exec pip3 install -q -r {} \;
