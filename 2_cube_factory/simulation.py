@@ -68,6 +68,11 @@ mp_pool = mp.Pool(args.threads)
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 log_file = os.path.join(args.output, "simulation.log")
+
+if os.path.isfile(log_file):
+    print("Log file already exists")
+    sys.exit(1)
+    
 mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
@@ -102,14 +107,12 @@ logger.info(f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
 del simpli
 
 # simulation loop
-parameter = [(f, i) for f in file_list for i in FIBER_INCLINATION]
-for file, f0_inc in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
+parameter = []
+fiber_inc = [(f, i) for f in file_list for i in FIBER_INCLINATION]
+for file, f0_inc in fiber_inc:
     logger.info(f"input file: {file}")
 
-    # Loading fiber models and prepair rotations
     with h5py.File(file, 'r') as h5f:
-        fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
-        psi = h5f['/'].attrs["psi"]
         omega = h5f['/'].attrs["omega"]
 
     n_rot = int(
@@ -118,116 +121,122 @@ for file, f0_inc in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
                     (1 - np.cos(np.deg2rad(10))))))
 
     if n_rot == 0:
-        fiber_phi_rotations = [0]
+        parameter.append((file, f0_inc, 0))
     else:
         n_rot = max(n_rot, 3)
-        fiber_phi_rotations = np.linspace(0, 90, n_rot, True)
+        for f_rot in np.linspace(0, 90, n_rot, True):
+            parameter.append((file, f0_inc, f_rot))
 
-    logger.info(f"omega: {omega}, n_rot: {n_rot}")
+for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
+    _, file_name = os.path.split(file)
+    file_name = os.path.splitext(file_name)[0]
+    file_name += '_inc_{:.2f}'.format(f0_inc)
+    file_name += '_rot_{:.2f}'.format(f1_rot)
+    file_name = os.path.join(args.output, file_name)
+    logger.info(f"input file: {file}")
+    logger.info(f"output file: {file_name}")
+    
+    with h5py.File(file, 'r') as h5f:
+        fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
+        psi = h5f['/'].attrs["psi"]
+        omega = h5f['/'].attrs["omega"]
+    
+    logger.info(f"omega: {omega}")
+    logger.info(f"psi: {psi}")
+    logger.info(f"inclination : {f0_inc}")
+    logger.info(f"rotation : {f1_rot}")
 
-    # for f0_inc in FIBER_INCLINATION:
-    for f1_rot in fiber_phi_rotations:
-        _, file_name = os.path.split(file)
-        file_name = os.path.splitext(file_name)[0]
-        file_name += '_inc_{:.2f}'.format(f0_inc)
-        file_name += '_rot_{:.2f}'.format(f1_rot)
-        file_name = os.path.join(args.output, file_name)
+    rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
+    rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
+    rot = np.dot(rot_inc, rot_phi)
 
-        logger.info(f"inclination : {f0_inc}")
-        logger.info(f"rotation : {f1_rot}")
-        logger.info(f"output file: {file_name}")
+    with h5py.File(file_name + '.h5', 'w-') as h5f:
+        with open(os.path.abspath(__file__), 'r') as script:
+            h5f.attrs['script'] = script.read()
+            h5f.attrs['input_file'] = file
 
-        rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
-        rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
-        rot = np.dot(rot_inc, rot_phi)
+        for m, (dn, model) in enumerate([(-0.001, 'p'), (0.002, 'r')]):
+            for name, gain, intensity, res, tilt_angle, sigma in [
+                ('LAP', 3, 26000, PIXEL_LAP, 5.5, 0.71),
+                ('PM', 1.5, 50000, PIXEL_PM, 3.9, 0.71)
+            ]:
+                dset = h5f.create_group(name + '/' + model)
 
-        with h5py.File(file_name + '.h5', 'w-') as h5f:
-            with open(os.path.abspath(__file__), 'r') as script:
-                h5f.attrs['script'] = script.read()
-                h5f.attrs['input_file'] = file
+                # Setup Simpli
+                simpli = fastpli.simulation.Simpli()
+                warnings.filterwarnings("ignore", message="objects overlap")
+                simpli.omp_num_threads = args.threads
+                simpli.voxel_size = args.voxel_size
+                simpli.pixel_size = res
+                simpli.filter_rotations = np.deg2rad(
+                    [0, 30, 60, 90, 120, 150])
+                simpli.interpolate = True
+                simpli.wavelength = 525  # in nm
+                simpli.optical_sigma = 0.71  # in pixel size
+                simpli.verbose = 0
 
-            for m, (dn, model) in enumerate([(-0.001, 'p'), (0.002, 'r')]):
-                for name, gain, intensity, res, tilt_angle, sigma in [
-                    ('LAP', 3, 26000, PIXEL_LAP, 5.5, 0.71),
-                    ('PM', 1.5, 50000, PIXEL_PM, 3.9, 0.71)
-                ]:
-                    dset = h5f.create_group(name + '/' + model)
+                simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
+                               0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
+                simpli.tilts = np.deg2rad(
+                    np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
+                              (tilt_angle, 180), (tilt_angle, 270)]))
+                simpli.add_crop_tilt_halo()
 
-                    # Setup Simpli
-                    simpli = fastpli.simulation.Simpli()
-                    warnings.filterwarnings("ignore", message="UserWarning: objects overlap")
-                    simpli.omp_num_threads = args.threads
-                    simpli.voxel_size = args.voxel_size
-                    simpli.pixel_size = res
-                    simpli.filter_rotations = np.deg2rad(
-                        [0, 30, 60, 90, 120, 150])
-                    simpli.interpolate = True
-                    simpli.wavelength = 525  # in nm
-                    simpli.optical_sigma = 0.71  # in pixel size
-                    simpli.verbose = 0
+                simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
+                    copy.deepcopy(fiber_bundles), rot)
+                simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
+                                                    (1.0, dn, 1, model)]
+                                                  ] * len(fiber_bundles)
 
-                    simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
-                                   0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
-                    simpli.tilts = np.deg2rad(
-                        np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
-                                  (tilt_angle, 180), (tilt_angle, 270)]))
-                    simpli.add_crop_tilt_halo()
+                logger.info(f"tissue_pipeline: model:{model}")
 
-                    simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
-                        copy.deepcopy(fiber_bundles), rot)
-                    simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
-                                                        (1.0, dn, 1, model)]
-                                                      ] * len(fiber_bundles)
-
-                    logger.info(f"tissue_pipeline: model:{model}")
-
-                    save = ['optic', 'epa', 'rofl']
+                save = ['optic', 'epa', 'rofl']
 #                     save += ['tissue'] if m == 0 and name == 'LAP' else []
-                    label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
-                        h5f=dset, save=save)
+                label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
+                    h5f=dset, save=save)
 
-                    # Simulate PLI Measurement
-                    logger.info(f"simulation_pipeline: model:{model}")
-                    # FIXME: LAP sigma ist bei einem pixel sinnfrei
+                # Simulate PLI Measurement
+                logger.info(f"simulation_pipeline: model:{model}")
+                # FIXME: LAP sigma ist bei einem pixel sinnfrei
 
-                    simpli.light_intensity = intensity  # a.u.
-                    simpli.sensor_gain = gain
+                simpli.light_intensity = intensity  # a.u.
+                simpli.sensor_gain = gain
 
-                    simpli.save_parameter_h5(h5f=dset)
+                simpli.save_parameter_h5(h5f=dset)
 
-                    # images = simpli.run_simulation(tissue, optical_axis, tissue_properties,
-                    #                    theta, phi)
-                    # images = self.rm_crop_tilt_halo(images)
-                    # dset['simulation/data/' + str(t)] = images
-                    # dset['simulation/data/' + str(t)].attrs['theta'] = theta
-                    # dset['simulation/data/' + str(t)].attrs['phi'] = phi
+                # images = simpli.run_simulation(tissue, optical_axis, tissue_properties,
+                #                    theta, phi)
+                # images = self.rm_crop_tilt_halo(images)
+                # dset['simulation/data/' + str(t)] = images
+                # dset['simulation/data/' + str(t)].attrs['theta'] = theta
+                # dset['simulation/data/' + str(t)].attrs['phi'] = phi
 
-                    if name == 'LAP':
-                        run_simulation_pipeline_n(simpli,
-                                                  label_field,
-                                                  vector_field,
-                                                  tissue_properties,
-                                                  int((PIXEL_LAP/PIXEL_PM)**2),
-                                                  h5f=dset,
-                                                  save=save,
-                                                  crop_tilt=True,
-                                                  mp_pool=mp_pool)
-                    else:
-                        simpli.run_simulation_pipeline(label_field,
-                                                       vector_field,
-                                                       tissue_properties,
-                                                       h5f=dset,
-                                                       save=save,
-                                                       crop_tilt=True,
-                                                       mp_pool=mp_pool)
+                if name == 'LAP':
+                    run_simulation_pipeline_n(simpli,
+                                              label_field,
+                                              vector_field,
+                                              tissue_properties,
+                                              int((PIXEL_LAP/PIXEL_PM)**2),
+                                              h5f=dset,
+                                              save=save,
+                                              crop_tilt=True,
+                                              mp_pool=mp_pool)
+                else:
+                    simpli.run_simulation_pipeline(label_field,
+                                                   vector_field,
+                                                   tissue_properties,
+                                                   h5f=dset,
+                                                   save=save,
+                                                   crop_tilt=True,
+                                                   mp_pool=mp_pool)
 
-                    dset.attrs['parameter/f0_inc'] = f0_inc
-                    dset.attrs['parameter/psi'] = psi
-                    dset.attrs['parameter/omega'] = omega
-                    dset.attrs['parameter/f1_rot'] = f1_rot
-                    dset.attrs[
-                        'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel()
+                dset.attrs['parameter/f0_inc'] = f0_inc
+                dset.attrs['parameter/psi'] = psi
+                dset.attrs['parameter/omega'] = omega
+                dset.attrs['parameter/f1_rot'] = f1_rot
+                dset.attrs[
+                    'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel()
 
-                    del label_field
-                    del vector_field
-                    del simpli
+                del label_field
+                del vector_field
+                del simpli
