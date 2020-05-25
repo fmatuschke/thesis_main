@@ -11,6 +11,7 @@ install: env fastpli
 env: $(VENV)/bin/python3
 	$(PIP) install wheel -q
 	$(PIP) install -r requirements.txt -q
+	$(PIP) install -e 0_core/. -q
 
 $(VENV)/bin/python3:
 	python3 -m venv $(VENV)/

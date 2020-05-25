@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 
-def hist2d_2_pgf_dat(h, x, y, file, info=""):
+def _hist2d_pgf_dat(h, x, y, file, info=""):
 
     x, y = np.meshgrid(x + (x[1] - x[0]) / 2, y + (y[1] - y[0]) / 2)
     h = h.T
@@ -24,21 +24,21 @@ def hist2d_2_pgf_dat(h, x, y, file, info=""):
             f.write("\n")
 
 
-def hist2d_2_tikz(h,
-                  x,
-                  y,
-                  file,
-                  y_label=None,
-                  path_to_data=None,
-                  standalone=False,
-                  info=""):
+def hist2d(h,
+           x,
+           y,
+           file,
+           y_label=None,
+           path_to_data=None,
+           standalone=False,
+           info=""):
 
     file_path = os.path.dirname(file)
     file_base = os.path.basename(file)
     file_name, _ = os.path.splitext(file_base)
     file_pre = os.path.join(file_path, file_name)
 
-    hist2d_2_pgf_dat(h, x, y, f"{file_pre}.dat", info)
+    _hist2d_pgf_dat(h, x, y, f"{file_pre}.dat", info)
 
     if path_to_data:
         file_name = path_to_data + "/" + file_name
