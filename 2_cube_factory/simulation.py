@@ -1,5 +1,4 @@
 import numpy as np
-import copy
 import h5py
 import argparse
 import logging
@@ -182,7 +181,7 @@ for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
                 simpli.add_crop_tilt_halo()
 
                 simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
-                    copy.deepcopy(fiber_bundles), rot)
+                    fiber_bundles, rot)
                 simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
                                                     (1.0, dn, 1, model)]
                                                   ] * len(fiber_bundles)

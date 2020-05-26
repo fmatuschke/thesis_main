@@ -11,63 +11,84 @@ import pandas as pd
 import tikzplotlib
 
 from tqdm import tqdm
+
 import helper.tikz
 import helper.circular
+import fastpli.io
+import fastpli.analysis
+import fastpli.tools
+import fastpli.objects
 
 out_file = "output/analysis/"
-df_pm = pd.read_pickle(os.path.join(out_file, "pm.pkl"))
-df_lap = pd.read_pickle(os.path.join(out_file, "lap.pkl"))
+for device in ["pm", "lap"]:
+    df = pd.read_pickle(os.path.join(out_file, f"{device}.pkl"))
 
-epa_dir = df_pm[(df_pm.f0 == 0.0) & pm.f1 == 0.0)].explode("epa_dir")
-epa_ret = df_pm[(df_pm.f0 == 0.0) & (df_pm.f1 == 0.0)].explode("epa_ret")
+    f0_inc = 0.0
+    f1_rot = 0.0
+    epa_dir = df[(df.f0 == f0_inc) & (df.f1 == f1_rot)].explode("epa_dir")
+    epa_ret = df[(df.f0 == f0_inc) & (df.f1 == f1_rot)].explode("epa_ret")
 
-tikzpicpara = ["trim axis left", "trim axis right", "baseline"]
+    tikzpicpara = ["trim axis left", "trim axis right", "baseline"]
 
-flag = False
-for i, omega in tqdm(enumerate(epa_dir.omega.unique())):
-    plt.clf()
-    sns.boxplot(x="psi",
-                y="epa_dir",
-                data=epa_dir[epa_dir.omega == omega],
-                orient='v',
-                color=sns.color_palette("dark", 10)[i])
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(
-        filepath=os.path.join(out_file, f"pm_omega_{omega}_psi_epa_dir.tikz"),
-        extra_tikzpicture_parameters=tikzpicpara,
-        encoding="utf-8",
-    )
+    flag = False
+    for i, omega in tqdm(enumerate(epa_dir.omega.unique())):
+        plt.clf()
+        sns.boxplot(x="psi",
+                    y="epa_dir",
+                    data=epa_dir[epa_dir.omega == omega],
+                    orient='v',
+                    color=sns.color_palette("dark", 10)[i])
+        tikzplotlib.clean_figure()
+        tikzplotlib.save(
+            filepath=os.path.join(out_file,
+                                  f"{device}_omega_{omega}_psi_epa_dir.tikz"),
+            extra_tikzpicture_parameters=tikzpicpara,
+            encoding="utf-8",
+        )
 
-    if not flag:
-        for psi in epa_dir.psi.unique():
-            data = epa_dir[(epa_dir.omega == omega) &
-                           (epa_dir.psi == psi)].epa_dir.to_numpy()
+        if not flag:
+            for psi in epa_dir.psi.unique():
+                data = epa_dir[(epa_dir.omega == omega) &
+                               (epa_dir.psi == psi)].epa_dir.to_numpy(
+                                   dtype=float)
 
-            data = helper.circular.remap(data, np.pi, 0)
+                data = helper.circular.remap(data, np.pi, 0)
 
-            h, x = np.histogram(data, 18, density=True)
+                h, x = np.histogram(data, 18, density=True)
 
-            x *= 180 / np.pi
+                helper.tikz.direction_hist(
+                    np.rad2deg(x[:-1] + x[1] - x[0]),
+                    h,
+                    os.path.join(
+                        out_file,
+                        f"{device}_omega_{omega}_psi_{psi}_epa_dir.tikz"),
+                    standalone=True)
 
-            # h = np.append(h, h[0])
-            # x = x + (x[1] - x[0]) / 2
-            helper.tikz.direction_hist(
-                x[:-1],
-                h,
-                os.path.join(out_file,
-                             f"pm_omega_{omega}_psi_{psi}_epa_dir.tikz"),
-                standalone=True)
-    flag = True
+                # ground truth
+                fbs = fastpli.io.fiber_bundles.load(
+                    f"../data/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.solved.h5"
+                )
+                rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
+                rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
+                rot = np.dot(rot_inc, rot_phi)
+                fbs = fastpli.objects.fiber_bundles.Rotate(fbs, rot)
+                phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs)
 
-    plt.clf()
-    sns.boxplot(x="psi",
-                y="epa_ret",
-                data=epa_ret[epa_ret.omega == omega],
-                orient='v',
-                color=sns.color_palette("dark", 10)[i])
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(
-        filepath=os.path.join(out_file, f"pm_omega_{omega}_psi_epa_ret.tikz"),
-        extra_tikzpicture_parameters=tikzpicpara,
-        encoding="utf-8",
-    )
+                ax = plt.subplot(111, projection='polar')
+
+        flag = True
+        sys.exit()
+
+        plt.clf()
+        sns.boxplot(x="psi",
+                    y="epa_ret",
+                    data=epa_ret[epa_ret.omega == omega],
+                    orient='v',
+                    color=sns.color_palette("dark", 10)[i])
+        tikzplotlib.clean_figure()
+        tikzplotlib.save(
+            filepath=os.path.join(out_file,
+                                  f"{device}_omega_{omega}_psi_epa_ret.tikz"),
+            extra_tikzpicture_parameters=tikzpicpara,
+            encoding="utf-8",
+        )
