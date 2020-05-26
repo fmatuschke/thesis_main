@@ -19,7 +19,7 @@ import fastpli.io
 from tqdm import tqdm
 
 from simulation_repeat import run_simulation_pipeline_n
-from MPIFileHandler import MPIFileHandler
+import helper.mpi
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
@@ -73,7 +73,7 @@ if os.path.isfile(log_file):
     print("Log file already exists")
     sys.exit(1)
 
-mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
+mh = helper.mpi.FileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 mh.setFormatter(formatter)

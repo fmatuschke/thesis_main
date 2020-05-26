@@ -12,8 +12,8 @@ import sys
 import os
 
 from tqdm import tqdm
+import helper.mpi
 
-from MPIFileHandler import MPIFileHandler
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 NUM_THREADS = 4
@@ -54,7 +54,7 @@ os.makedirs(args.output, exist_ok=True)
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 log_file = output_name + ".log"
-mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
+mh = helper.mpi.FileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 mh.setFormatter(formatter)

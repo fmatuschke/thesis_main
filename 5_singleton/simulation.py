@@ -14,7 +14,7 @@ import fastpli.io
 
 from tqdm import tqdm
 from mpi4py import MPI
-from MPIFileHandler import MPIFileHandler
+import helper.mpi
 comm = MPI.COMM_WORLD
 
 # reproducability
@@ -51,7 +51,7 @@ logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
 log_file = os.path.join(args.output, FILE_NAME) + ".log"
 os.makedirs(args.output, exist_ok=True)
-mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
+mh = helper.mpi.FileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 mh.setFormatter(formatter)

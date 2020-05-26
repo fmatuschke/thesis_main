@@ -1,22 +1,20 @@
-"""
-Created on Wed Feb 14 16:17:38 2018
-This handler is used to deal with logging with mpi4py in Python3.
-
-@author: cheng
-
-@reference: 
-    https://cvw.cac.cornell.edu/python/logging
-    https://groups.google.com/forum/#!topic/mpi4py/SaNzc8bdj6U
-    https://gist.github.com/JohnCEarls/8172807
-"""
-
-#%% mpi4py logging handler
 from mpi4py import MPI
 import logging
-from os.path import abspath
+import os
 
 
-class MPIFileHandler(logging.FileHandler):
+class FileHandler(logging.FileHandler):
+    """
+    Created on Wed Feb 14 16:17:38 2018
+    This handler is used to deal with logging with mpi4py in Python3.
+
+    @author: cheng
+
+    @reference: 
+        https://cvw.cac.cornell.edu/python/logging
+        https://groups.google.com/forum/#!topic/mpi4py/SaNzc8bdj6U
+        https://gist.github.com/JohnCEarls/8172807
+    """
 
     def __init__(self,
                  filename,
@@ -24,7 +22,7 @@ class MPIFileHandler(logging.FileHandler):
                  encoding='utf-8',
                  delay=False,
                  comm=MPI.COMM_WORLD):
-        self.baseFilename = abspath(filename)
+        self.baseFilename = os.path.abspath(filename)
         self.mode = mode
         self.encoding = encoding
         self.comm = comm
@@ -79,7 +77,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("rank[%i]" % comm.rank)
     logger.setLevel(logging.DEBUG)
 
-    mh = MPIFileHandler("logfile.log")
+    mh = FileHandler("logfile.log")
     formatter = logging.Formatter(
         '%(asctime)s:%(name)s:%(levelname)s:%(message)s')
     mh.setFormatter(formatter)
