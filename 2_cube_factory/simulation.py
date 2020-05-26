@@ -18,7 +18,7 @@ import fastpli.io
 
 from tqdm import tqdm
 
-from simulate_n import run_simulation_pipeline_n
+from simulation_repeat import run_simulation_pipeline_n
 from MPIFileHandler import MPIFileHandler
 
 from mpi4py import MPI
@@ -72,7 +72,7 @@ log_file = os.path.join(args.output, "simulation.log")
 if os.path.isfile(log_file):
     print("Log file already exists")
     sys.exit(1)
-    
+
 mh = MPIFileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
@@ -135,12 +135,12 @@ for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
     file_name = os.path.join(args.output, file_name)
     logger.info(f"input file: {file}")
     logger.info(f"output file: {file_name}")
-    
+
     with h5py.File(file, 'r') as h5f:
         fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
         psi = h5f['/'].attrs["psi"]
         omega = h5f['/'].attrs["omega"]
-    
+
     logger.info(f"omega: {omega}")
     logger.info(f"psi: {psi}")
     logger.info(f"inclination : {f0_inc}")
@@ -168,8 +168,7 @@ for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
                 simpli.omp_num_threads = args.threads
                 simpli.voxel_size = args.voxel_size
                 simpli.pixel_size = res
-                simpli.filter_rotations = np.deg2rad(
-                    [0, 30, 60, 90, 120, 150])
+                simpli.filter_rotations = np.deg2rad([0, 30, 60, 90, 120, 150])
                 simpli.interpolate = True
                 simpli.wavelength = 525  # in nm
                 simpli.optical_sigma = 0.71  # in pixel size
@@ -191,7 +190,7 @@ for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
                 logger.info(f"tissue_pipeline: model:{model}")
 
                 save = ['optic', 'epa', 'rofl']
-#                     save += ['tissue'] if m == 0 and name == 'LAP' else []
+                #                     save += ['tissue'] if m == 0 and name == 'LAP' else []
                 label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                     h5f=dset, save=save)
 
@@ -216,7 +215,7 @@ for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
                                               label_field,
                                               vector_field,
                                               tissue_properties,
-                                              int((PIXEL_LAP/PIXEL_PM)**2),
+                                              int((PIXEL_LAP / PIXEL_PM)**2),
                                               h5f=dset,
                                               save=save,
                                               crop_tilt=True,

@@ -18,7 +18,7 @@ out_file = "output/analysis/"
 df_pm = pd.read_pickle(os.path.join(out_file, "pm.pkl"))
 df_lap = pd.read_pickle(os.path.join(out_file, "lap.pkl"))
 
-epa_dir = df_pm[(df_pm.f0 == 0.0) & (df_pm.f1 == 0.0)].explode("epa_dir")
+epa_dir = df_pm[(df_pm.f0 == 0.0) & pm.f1 == 0.0)].explode("epa_dir")
 epa_ret = df_pm[(df_pm.f0 == 0.0) & (df_pm.f1 == 0.0)].explode("epa_ret")
 
 tikzpicpara = ["trim axis left", "trim axis right", "baseline"]

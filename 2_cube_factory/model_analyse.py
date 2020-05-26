@@ -6,7 +6,7 @@ import subprocess
 import fastpli.analysis
 import fastpli.io
 
-from helper import hist2d_2_tikz
+import helper.tikz
 
 from tqdm import tqdm
 from mpi4py import MPI
@@ -67,11 +67,11 @@ for file in tqdm(
     #     stdout=subprocess.DEVNULL,
     #     check=True)
 
-    hist2d_2_tikz(
+    helper.tikz.orientation_hist(
         h,
         np.rad2deg(x),
         np.rad2deg(y),
         f"{args.output}/{file_name}.tikz",
-        path_to_data="\currfiledir",
+        path_to_data="\\currfiledir",
         # standalone=True,
         info=[FILE_NAME])
