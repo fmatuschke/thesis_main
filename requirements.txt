@@ -7,3 +7,4 @@ pandas
 seaborn
 tikzplotlib
 mpi4py
+sknni
