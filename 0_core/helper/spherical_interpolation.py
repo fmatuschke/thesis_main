@@ -2,7 +2,7 @@ import numpy as np
 import sknni
 
 
-def data(phi, theta, data, phi_i, theta_i):
+def on_data(phi, theta, data, phi_i, theta_i):
     ''' https://github.com/PhTrempe/sknni
     '''
 
@@ -27,12 +27,12 @@ def data(phi, theta, data, phi_i, theta_i):
     return interpolator(interp_coords)[:, 2]
 
 
-def data_on_mesh(phi, theta, data, n_p, n_t):
+def on_mesh(phi, theta, data, n_p, n_t):
     '''
     phi = [0, 0]
     theta = [0, np.pi / 2]
     data = [20, 0]
-    x, y, z, data_i = interpolate_data_on_sphere_mesh(phi, theta, data, 10, 10)
+    x, y, z, data_i = spherical_interpolation.on_mesh(phi, theta, data, 10, 10)
 
     import matplotlib.pyplot as plt
     fig = plt.figure()
@@ -45,8 +45,7 @@ def data_on_mesh(phi, theta, data, n_p, n_t):
 
     theta_i, phi_i = np.meshgrid(np.linspace(np.pi, 0, n_t),
                                  np.linspace(0, 2 * np.pi, n_t))
-    data_i = interpolate_data_on_sphere(phi, theta, data, phi_i.ravel(),
-                                        theta_i.ravel())
+    data_i = on_data(phi, theta, data, phi_i.ravel(), theta_i.ravel())
 
     u = np.linspace(0, 2 * np.pi, n_p)
     v = np.linspace(np.pi, 0, n_t)
