@@ -11,8 +11,8 @@ import numpy as np
 
 
 def angular_correlation_coefficient(sh0, sh1):
-    return np.sum(np.product(sh0, sh1)) / np.sqrt(np.sum(np.product(sh0, sh0)),
-                                                  np.sum(np.product(sh1, sh1)))
+    return np.sum(np.multiply(sh0, sh1)) / np.sqrt(np.sum(np.multiply(
+        sh0, sh0))) * np.sqrt(np.sum(np.multiply(sh1, sh1)))
 
 
 def jensen_shannon_divergence(sh0, sh1):
