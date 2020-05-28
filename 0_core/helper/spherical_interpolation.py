@@ -44,7 +44,7 @@ def on_mesh(phi, theta, data, n_p, n_t):
     '''
 
     theta_i, phi_i = np.meshgrid(np.linspace(np.pi, 0, n_t),
-                                 np.linspace(0, 2 * np.pi, n_t))
+                                 np.linspace(0, 2 * np.pi, n_p))
     data_i = on_data(phi, theta, data, phi_i.ravel(), theta_i.ravel())
 
     u = np.linspace(0, 2 * np.pi, n_p)
@@ -52,6 +52,6 @@ def on_mesh(phi, theta, data, n_p, n_t):
     x = np.outer(np.cos(u), np.sin(v))
     y = np.outer(np.sin(u), np.sin(v))
     z = np.outer(np.ones(np.size(u)), np.cos(v))
-    data_i.shape = phi_i.shape
+    data_i.shape = x.shape
 
     return x, y, z, data_i
