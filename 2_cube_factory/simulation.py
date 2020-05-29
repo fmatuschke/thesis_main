@@ -122,8 +122,10 @@ for file, f0_inc in fiber_inc:
     if n_rot == 0:
         parameter.append((file, f0_inc, 0))
     else:
+        n_rot += (n_rot + 1) % 2
         n_rot = max(n_rot, 3)
-        for f_rot in np.linspace(0, 90, n_rot, True):
+        for f_rot in np.linspace(-90, 90, n_rot, True):
+            f_rot = np.round(f_rot, 2)
             parameter.append((file, f0_inc, f_rot))
 
 for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
@@ -193,44 +195,42 @@ for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
                 label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                     h5f=dset, save=save)
 
+                unique_elements, counts_elements = np.unique(label_field,
+                                                             return_counts=True)
+                dset.attrs['label_field_stats'] = np.asarray(
+                    (unique_elements, counts_elements))
+
                 # Simulate PLI Measurement
                 logger.info(f"simulation_pipeline: model:{model}")
-                # FIXME: LAP sigma ist bei einem pixel sinnfrei
+                # FIXME: LAP sigma ist bei einem pixel sinnfrei -> 20µm
 
                 simpli.light_intensity = intensity  # a.u.
                 simpli.sensor_gain = gain
 
                 simpli.save_parameter_h5(h5f=dset)
 
-                # images = simpli.run_simulation(tissue, optical_axis, tissue_properties,
-                #                    theta, phi)
-                # images = self.rm_crop_tilt_halo(images)
-                # dset['simulation/data/' + str(t)] = images
-                # dset['simulation/data/' + str(t)].attrs['theta'] = theta
-                # dset['simulation/data/' + str(t)].attrs['phi'] = phi
+                # if name == 'LAP':
+                #     run_simulation_pipeline_n(simpli,
+                #                               label_field,
+                #                               vector_field,
+                #                               tissue_properties,
+                #                               int((PIXEL_LAP / PIXEL_PM)**2),
+                #                               h5f=dset,
+                #                               save=save,
+                #                               crop_tilt=True,
+                #                               mp_pool=mp_pool)
+                # else:
+                simpli.run_simulation_pipeline(label_field,
+                                               vector_field,
+                                               tissue_properties,
+                                               h5f=dset,
+                                               save=save,
+                                               crop_tilt=True,
+                                               mp_pool=mp_pool)
 
-                if name == 'LAP':
-                    run_simulation_pipeline_n(simpli,
-                                              label_field,
-                                              vector_field,
-                                              tissue_properties,
-                                              int((PIXEL_LAP / PIXEL_PM)**2),
-                                              h5f=dset,
-                                              save=save,
-                                              crop_tilt=True,
-                                              mp_pool=mp_pool)
-                else:
-                    simpli.run_simulation_pipeline(label_field,
-                                                   vector_field,
-                                                   tissue_properties,
-                                                   h5f=dset,
-                                                   save=save,
-                                                   crop_tilt=True,
-                                                   mp_pool=mp_pool)
-
-                dset.attrs['parameter/f0_inc'] = f0_inc
                 dset.attrs['parameter/psi'] = psi
                 dset.attrs['parameter/omega'] = omega
+                dset.attrs['parameter/f0_inc'] = f0_inc
                 dset.attrs['parameter/f1_rot'] = f1_rot
                 dset.attrs[
                     'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel()
