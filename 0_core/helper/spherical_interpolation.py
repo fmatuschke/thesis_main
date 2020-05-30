@@ -2,18 +2,38 @@ import numpy as np
 import sknni
 
 
+def remap_rad(phi, theta):
+    phi = np.array(phi, copy=False)
+    theta = np.array(theta, copy=False)
+
+    phi %= 2 * np.pi
+    theta %= 2 * np.pi
+
+    phi[phi < 0] += 2 * np.pi
+    theta[theta < 0] += 2 * np.pi
+
+    phi[theta > np.pi] += np.pi
+    theta[theta > np.pi] -= np.pi
+
+    phi %= 2 * np.pi
+
+    return phi, theta
+
+
+def radii_to_lati_long(phi, theta):
+    phi, theta = remap_rad(phi, theta)
+    lati = 90 - np.rad2deg(theta)
+    long = np.rad2deg(phi)
+    long[long > 180] -= 360
+    return lati, long
+
+
 def on_data(phi, theta, data, phi_i, theta_i):
     ''' https://github.com/PhTrempe/sknni
     '''
 
-    # phi, theta to latitude, longitude
-    lati = 90 - np.rad2deg(theta)
-    long = np.rad2deg(phi)
-    long[long > 180] -= 360
-
-    lati_i = 90 - np.rad2deg(theta_i)
-    long_i = np.rad2deg(phi_i)
-    long_i[long_i > 180] -= 360
+    lati, long = radii_to_lati_long(phi, theta)
+    lati_i, long_i = radii_to_lati_long(phi_i, theta_i)
 
     observations = np.vstack((np.vstack(
         (np.atleast_2d(lati), np.atleast_2d(long))), np.atleast_2d(data))).T
@@ -29,10 +49,11 @@ def on_data(phi, theta, data, phi_i, theta_i):
 
 def on_mesh(phi, theta, data, n_p, n_t):
     '''
-    phi = [0, 0]
-    theta = [0, np.pi / 2]
-    data = [20, 0]
-    x, y, z, data_i = spherical_interpolation.on_mesh(phi, theta, data, 10, 10)
+    np.random.seed(43)
+    phi = np.random.uniform(0, 2 * np.pi, 10)
+    theta = np.random.uniform(0, np.pi, phi.size)
+    data = np.random.uniform(0, 1, phi.size)
+    x, y, z, data_i = on_mesh(phi, theta, data, 50, 25)
 
     import matplotlib.pyplot as plt
     fig = plt.figure()
@@ -40,6 +61,19 @@ def on_mesh(phi, theta, data, n_p, n_t):
     ax.plot_surface(x, y, z, facecolors=plt.cm.jet(data_i / data_i.max()))
     ax.set_xlabel('$X$')
     ax.set_ylabel('$Y$')
+
+    x = np.multiply(np.cos(phi), np.sin(theta)) * 1.1
+    y = np.multiply(np.sin(phi), np.sin(theta)) * 1.1
+    z = np.cos(theta) * 1.1
+    ax.scatter(x,
+            y,
+            z,
+            marker='o',
+            s=50,
+            c=plt.cm.jet(data / data.max()),
+            alpha=1,
+            cmap="jet")
+
     plt.show()
     '''
 
@@ -49,6 +83,7 @@ def on_mesh(phi, theta, data, n_p, n_t):
 
     u = np.linspace(0, 2 * np.pi, n_p)
     v = np.linspace(np.pi, 0, n_t)
+
     x = np.outer(np.cos(u), np.sin(v))
     y = np.outer(np.sin(u), np.sin(v))
     z = np.outer(np.ones(np.size(u)), np.cos(v))
