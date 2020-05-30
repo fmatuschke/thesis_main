@@ -17,7 +17,7 @@ import fastpli.io
 
 from tqdm import tqdm
 
-from simulation_repeat import run_simulation_pipeline_n
+# from simulation_repeat import run_simulation_pipeline_n
 import helper.mpi
 
 from mpi4py import MPI
@@ -85,7 +85,7 @@ PIXEL_PM = 1.25
 PIXEL_LAP = 20
 LENGTH = 60
 THICKNESS = 60
-FIBER_INCLINATION = np.linspace(0, 90, 10, True)
+FIBER_INCLINATION = np.linspace(-90, 90, 10, True)
 
 file_list = args.input
 
@@ -124,7 +124,7 @@ for file, f0_inc in fiber_inc:
     else:
         n_rot += (n_rot + 1) % 2
         n_rot = max(n_rot, 3)
-        for f_rot in np.linspace(-90, 90, n_rot, True):
+        for f_rot in np.linspace(-180, 180, n_rot, True):
             f_rot = np.round(f_rot, 2)
             parameter.append((file, f0_inc, f_rot))
 
