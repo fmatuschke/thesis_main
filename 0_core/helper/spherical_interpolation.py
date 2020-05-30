@@ -1,5 +1,5 @@
 import numpy as np
-import sknni
+from . import sknni
 
 
 def remap_rad(phi, theta):

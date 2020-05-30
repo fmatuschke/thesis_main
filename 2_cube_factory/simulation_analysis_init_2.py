@@ -63,20 +63,16 @@ for microscope, model in list(itertools.product(
                     sh1 = helper.spherical_harmonics.real_spherical_harmonics(
                         phi, theta, 6)
 
+                    acc = helper.schilling.angular_correlation_coefficient(
+                        sh0, sh1)
+
                     df_acc = df_acc.append(
                         {
-                            'f0_inc':
-                                f0_inc,
-                            'f1_rot':
-                                f1_rot,
-                            'omega':
-                                omega,
-                            'psi':
-                                psi,
-                            'acc':
-                                np.sum(np.multiply(sh0, sh1)) /
-                                (np.sqrt(np.sum(np.multiply(sh0, sh0))) *
-                                 np.sqrt(np.sum(np.multiply(sh1, sh1))))
+                            'f0_inc': f0_inc,
+                            'f1_rot': f1_rot,
+                            'omega': omega,
+                            'psi': psi,
+                            'acc': acc
                         },
                         ignore_index=True)
     df_acc.to_pickle(
