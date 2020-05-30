@@ -13,6 +13,10 @@ def _num_values(band):
 def real_spherical_harmonics(phi, theta, band):
     n = _num_values(band)
     real_sph_harm = np.zeros(n)
+    
+    if phi.size == 0:
+        return real_sph_harm
+    
     i = 0
     for l in np.arange(0, band + 1, 2):
         for m in np.arange(-l, l + 1, 1):
