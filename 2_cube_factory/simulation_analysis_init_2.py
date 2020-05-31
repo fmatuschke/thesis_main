@@ -28,53 +28,55 @@ for microscope, model in list(itertools.product(
         os.path.join(out_file,
                      f"cube_2pop_simulation_{microscope}_model_{model}_.pkl"))
 
-    df_acc = pd.DataFrame()
-    for f0_inc in tqdm(df.f0_inc.unique()):
-        for f1_rot in tqdm(df[df.f0_inc == f0_inc].f1_rot.unique(),
-                           leave=False):
-            hist_bin = lambda n_phi: np.linspace(
-                0, np.pi, n_phi + 1, endpoint=True)
+    df_acc = []
+    with tqdm(total=len(df[['psi', 'omega', 'f0_inc', 'f1_rot'
+                           ]].drop_duplicates().index)) as pbar:
+        for psi in df.psi.unique():
+            for omega in df[df.psi == psi].omega.unique():
+                df_sub = df[(df.psi == psi) & (df.omega == omega)]
+                df_org = pd.read_pickle(
+                    f"output/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.solved.pkl"
+                )
+                for f0_inc in df_sub.f0_inc.unique():
+                    for f1_rot in df_sub[df_sub.f0_inc ==
+                                         f0_inc].f1_rot.unique():
 
-            rofl_dir = df[(df.f0_inc == f0_inc) &
-                          (df.f1_rot == f1_rot)].explode("rofl_dir")
-            rofl_inc = df[(df.f0_inc == f0_inc) &
-                          (df.f1_rot == f1_rot)].explode("rofl_inc")
+                        # rofl
+                        sub = (df_sub.f0_inc == f0_inc) & (df_sub.f1_rot
+                                                           == f1_rot)
+                        phi = df_sub[sub].explode("rofl_dir").rofl_dir.to_numpy(
+                            dtype=float)
+                        theta = np.pi / 2 - df_sub[sub].explode(
+                            "rofl_inc").rofl_inc.to_numpy(dtype=float)
+                        sh0 = helper.spherical_harmonics.real_spherical_harmonics(
+                            phi, theta, 6)
 
-            for psi in rofl_dir.psi.unique():
-                for omega in rofl_dir[rofl_dir.psi == psi].omega.unique():
-                    # rofl
-                    phi = rofl_dir[(rofl_dir.omega == omega) &
-                                   (rofl_dir.psi == psi)].rofl_dir.to_numpy(
-                                       dtype=float)
-                    theta = np.pi / 2 - rofl_inc[
-                        (rofl_inc.omega == omega) &
-                        (rofl_inc.psi == psi)].rofl_inc.to_numpy(dtype=float)
-                    sh0 = helper.spherical_harmonics.real_spherical_harmonics(
-                        phi, theta, 6)
+                        # ground truth
+                        sub = (df_org.f0_inc == f0_inc) & (df_org.f1_rot
+                                                           == f1_rot)
+                        phi = df_org[sub].phi.explode().to_numpy(float)
+                        theta = df_org[sub].theta.explode().to_numpy(float)
+                        sh1 = helper.spherical_harmonics.real_spherical_harmonics(
+                            phi, theta, 6)
 
-                    # ground truth
-                    df_o = pd.read_pickle(
-                        f"../data/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.solved.pkl"
-                    )
-                    phi = df_o[(df_o.f0_inc == f0_inc) & (
-                        df_o.f1_rot == f1_rot)].phi.explode().to_numpy(float)
-                    theta = df_o[(df_o.f0_inc == f0_inc) & (
-                        df_o.f1_rot == f1_rot)].theta.explode().to_numpy(float)
-                    sh1 = helper.spherical_harmonics.real_spherical_harmonics(
-                        phi, theta, 6)
+                        # ACC
+                        acc = helper.schilling.angular_correlation_coefficient(
+                            sh0, sh1)
 
-                    acc = helper.schilling.angular_correlation_coefficient(
-                        sh0, sh1)
+                        df_acc.append(
+                            pd.DataFrame(
+                                {
+                                    'f0_inc': f0_inc,
+                                    'f1_rot': f1_rot,
+                                    'omega': omega,
+                                    'psi': psi,
+                                    'acc': acc
+                                },
+                                index=[0]))
 
-                    df_acc = df_acc.append(
-                        {
-                            'f0_inc': f0_inc,
-                            'f1_rot': f1_rot,
-                            'omega': omega,
-                            'psi': psi,
-                            'acc': acc
-                        },
-                        ignore_index=True)
+                        pbar.update()
+
+    df_acc = pd.concat(df_acc, ignore_index=True)
     df_acc.to_pickle(
         os.path.join(
             out_file,
