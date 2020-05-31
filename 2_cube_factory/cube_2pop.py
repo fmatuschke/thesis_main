@@ -16,7 +16,7 @@ import helper.mpi
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
-NUM_THREADS = 4
+NUM_THREADS = 1
 
 # reproducability
 np.random.seed(42)
@@ -44,6 +44,7 @@ parser.add_argument("-n",
 parser.add_argument("-r",
                     "--fiber_radius",
                     default=1,
+                    type=float,
                     help="mean value of fiber radius")
 
 args = parser.parse_args()
@@ -64,12 +65,11 @@ logger.info("args: " + " ".join(sys.argv[1:]))
 # Fiber Model
 LENGTH = 210  # to rotate a 120 um cube inside
 RADIUS_LOGMEAN = args.fiber_radius
-PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
+PSI = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
        0.9]  # fiber fraction: PSI * f0 + (1-PSI) * f1
 OMEGA = np.linspace(0, 90, 10, True)  # angle of opening (f0, f1)
 PSI, OMEGA = np.meshgrid(PSI, OMEGA)
 PARAMETER = list(zip(PSI.flatten(), OMEGA.flatten()))
-PARAMETER.append((0.0, 0.0))
 PARAMETER.append((1.0, 0.0))
 
 # solve
@@ -82,7 +82,7 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     solver.obj_min_radius = RADIUS_LOGMEAN * 5
     solver.omp_num_threads = NUM_THREADS
 
-    file_pref = output_name + f"_psi_{round(psi, 2)}_omega_{round(omega, 2)}_"
+    file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_rmean_{RADIUS_LOGMEAN:.2f}_length_{LENGTH:.0f}_"
     logger.info(f"file_pref: {file_pref}")
 
     seeds = fastpli.model.sandbox.seeds.triangular_grid(LENGTH * 2,
@@ -153,9 +153,15 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
             logger.info(
                 f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
             )
+            if i > 0:
+                solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
+                    solver.fiber_bundles, [
+                        -0.55 * np.array([LENGTH, LENGTH, LENGTH]),
+                        0.55 * np.array([LENGTH, LENGTH, LENGTH])
+                    ])
 
-        if overlap <= 0.01:
-            break
+        # if i > args.max_steps / 2 and overlap <= 0.001:
+        #     break
 
     overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
 
