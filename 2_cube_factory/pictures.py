@@ -36,6 +36,7 @@ for file in tqdm(args.input):
     solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
         fbs, [[-30] * 3, [30] * 3])
     solver.draw_scene()
-    solver.save_ppm(os.path.splitext(file)[0] + ".ppm")
+    solver.save_ppm(file + ".ppm")
     subprocess.run(
-        ["convert", file + ".ppm", file + ".png", "&&", "rm", file + ".ppm"])
+        f'convert {file + ".ppm"} {file + ".png"} && rm {file + ".ppm"}',
+        shell=True)
