@@ -2,7 +2,7 @@ import numpy as np
 from . import sknni
 
 
-def remap_rad(phi, theta):
+def remap_sph_angles(phi, theta):
     phi = np.array(phi, copy=False)
     theta = np.array(theta, copy=False)
 
@@ -13,7 +13,7 @@ def remap_rad(phi, theta):
     theta[theta < 0] += 2 * np.pi
 
     phi[theta > np.pi] += np.pi
-    theta[theta > np.pi] -= np.pi
+    theta[theta > np.pi] -= 2 * (theta[theta > np.pi] - np.pi)
 
     phi %= 2 * np.pi
 
@@ -21,7 +21,7 @@ def remap_rad(phi, theta):
 
 
 def radii_to_lati_long(phi, theta):
-    phi, theta = remap_rad(phi, theta)
+    phi, theta = remap_sph_angles(phi, theta)
     lati = 90 - np.rad2deg(theta)
     long = np.rad2deg(phi)
     long[long > 180] -= 360
