@@ -85,7 +85,7 @@ PIXEL_PM = 1.25
 PIXEL_LAP = 20
 LENGTH = 60
 THICKNESS = 60
-FIBER_INCLINATION = np.linspace(-90, 90, 10, True)
+FIBER_INCLINATION = np.linspace(0, 90, 10, True)
 
 file_list = args.input
 
