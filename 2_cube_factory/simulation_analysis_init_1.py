@@ -3,6 +3,7 @@
 '''
 
 import numpy as np
+import itertools
 import h5py
 import glob
 import gc
@@ -13,6 +14,8 @@ from tqdm import tqdm
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
+import random
+random.seed(42)
 
 import fastpli.io
 import fastpli.tools
@@ -23,10 +26,8 @@ import fastpli.analysis
 df = pd.read_pickle("output/analysis/cube_2pop_simulation_LAP_model_p_.pkl")
 f0_incs = df.f0_inc.unique()
 
-parameters = []
-for omega in df.omega.unique():
-    for psi in df[df.omega == omega].psi.unique():
-        parameters.append((omega, psi))
+parameters = list(itertools.product(df.omega.unique(), df.psi.unique()))
+random.shuffle(parameters)
 parameters = parameters[comm.Get_rank()::comm.Get_size()]
 
 with tqdm(total=len(parameters) * len(f0_incs)) as pbar:
@@ -53,14 +54,15 @@ with tqdm(total=len(parameters) * len(f0_incs)) as pbar:
                 phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
 
                 df_.append(
-                    pd.DataFrame({
-                        "omega": omega,
-                        "psi": psi,
-                        "f0_inc": f0_inc,
-                        "f1_rot": f1_rot,
-                        "phi": phi.astype(np.float32),
-                        "theta": theta.astype(np.float32)
-                    }))
+                    pd.DataFrame([[
+                        omega, psi, f0_inc, f1_rot,
+                        phi.astype(np.float32).ravel(),
+                        theta.astype(np.float32).ravel()
+                    ]],
+                                 columns=[
+                                     "omega", "psi", "f0_inc", "f1_rot", "phi",
+                                     "theta"
+                                 ]))
             pbar.update()
 
         df_ = pd.concat(df_, ignore_index=True)
