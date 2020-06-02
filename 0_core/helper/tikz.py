@@ -113,7 +113,6 @@ def _hist1d_pgf_dat(x, y, file, info=None):
 def direction_hist(x,
                    y,
                    file,
-                   y_label=None,
                    path_to_data=None,
                    standalone=False,
                    only_dat=False,
@@ -226,6 +225,116 @@ def direction_hist(x,
         f.write(f"    table [x=x, y=y, col sep=comma] {{{file_name}.dat}};\n")
         f.write("\\end{polaraxis}\n")
         f.write("\\end{tikzpicture}\n")
+        if standalone:
+            f.write("%\n")
+            f.write("\\end{document}\n")
+
+
+def _nx4_dat(x, y, z, data, file, info=None):
+
+    with open(file, 'w') as f:
+
+        if info:
+            if not isinstance(info, list):
+                info = [info]
+
+            for i in info:
+                f.write(f"%{i}\n")
+
+        f.write(f"x,y,z,c\n")
+
+        for ii in range(x.shape[0]):
+            for i, j, k, l in zip(x[ii, :], y[ii, :], z[ii, :], data[ii, :]):
+                f.write(f"{i:.3f},{j:.3f},{k:.3f},{l:.3f}\n")
+            if ii != x.shape[0] - 1:
+                f.write("\n")
+
+
+def sphere(x,
+           y,
+           z,
+           data,
+           file,
+           x2=None,
+           y2=None,
+           z2=None,
+           data2=None,
+           path_to_data=None,
+           standalone=False,
+           only_dat=False,
+           info=None):
+
+    # if x.size > 1:
+    #     data = np.vstack((x, y, z, data))
+    #     for i in range(3):
+    #         data = data[:, data[i, :].argsort()]
+    #     x, y, z, data = data[0, :], data[1, :], data[2, :], data[3, :]
+
+    file_path = os.path.dirname(file)
+    file_base = os.path.basename(file)
+    file_name, _ = os.path.splitext(file_base)
+    file_pre = os.path.join(file_path, file_name)
+
+    _nx4_dat(x, y, z, data, f"{file_pre}_0.dat", info)
+
+    if x2 is not None:
+        _nx4_dat(np.atleast_2d(x2), np.atleast_2d(y2), np.atleast_2d(z2),
+                 np.atleast_2d(data2), f"{file_pre}_1.dat", info)
+
+    if only_dat:
+        return
+
+    if path_to_data:
+        file_name = path_to_data + "/" + file_name
+
+    with open(file, 'w') as f:
+        if standalone:
+            f.write("" \
+                "\\documentclass[]{standalone}\n"\
+                "\\usepackage{pgfplots}\n" \
+                "\\pgfplotsset{compat=1.17}\n" \
+                "\\usepackage{siunitx}\n" \
+                "\\begin{document}\n" \
+                "%\n")
+        f.write("" \
+            "\\begin{tikzpicture}[trim axis left, baseline]\n" \
+            "\\begin{axis}[%\n" \
+            "    axis equal,\n" \
+            "    view/h=145,\n" \
+            "    clip=false, % hide axis,\n" \
+            "    ticks=none,axis line style={opacity=0.0},"
+            "    width=10cm,\n" \
+            "    height=10cm,\n" \
+            "    xmin=-1,xmax=1,\n" \
+            "    ymin=-1,ymax=1,\n" \
+            "    zmin=-1,zmax=1,\n" \
+            "    point meta min=0, point meta max=1,\n" \
+            "    colormap/viridis,\n" \
+            "]\n" \
+            "\\addplot3[\n" \
+            "    surf,\n" \
+            # "    opacity = 0.5,\n" \
+            "    z buffer=sort]\n" \
+            "    table[x=x,y=y,z=z,point meta=\\thisrow{c}, col sep=comma]\n" \
+            f"        {{{file_name}_0.dat}};\n"
+            )
+        if x2 is not None:
+            f.write("" \
+                "\\addplot3[\n" \
+                "    scatter, only marks,\n" \
+                "    z buffer=sort]\n" \
+                "    table[x=x,y=y,z=z,point meta=\\thisrow{c}, col sep=comma]\n" \
+                f"        {{{file_name}_1.dat}};\n" \
+                "\\addplot3[\n" \
+                "    thick, black,\n" \
+                "    z buffer=sort]\n" \
+                f"        coordinates {{ (0,0,0) ({x2[0]},{y2[0]},{z2[0]}) }};\n"
+                )
+        f.write("" \
+            "\end{axis}\n" \
+            "\\end{tikzpicture}\n" \
+            )
+
         if standalone:
             f.write("%\n")
             f.write("\\end{document}\n")
