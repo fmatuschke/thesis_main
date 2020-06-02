@@ -9,6 +9,7 @@ setuptools.setup(
       description='thesis core helper files',
       author='Felix Matuschke',
       author_email='f.matuschke@fz-juelich.de',
-      packages=setuptools.find_packages(''),
-      #package_dir={'': ''},
+      packages=['helper']
+      # package_dir={'': ''},
+      # packages=setuptools.find_packages('')
 )

@@ -8,10 +8,7 @@ PIP=$(VENV)/bin/pip3
 install: env fastpli
 
 # ENV
-env: $(VENV)/bin/python3
-	$(PIP) install wheel -q
-	$(PIP) install -r requirements.txt -q
-	$(PIP) install 0_core/. -q
+env: $(VENV)/bin/python3 env-update
 
 $(VENV)/bin/python3:
 	python3 -m venv $(VENV)/
@@ -19,6 +16,8 @@ $(VENV)/bin/python3:
 .PHONY: env-update
 env-update: env
 	$(PIP) install --upgrade pip -q
+	$(PIP) install -r requirements.txt -q
+	$(PIP) install 0_core/. -q
 
 # FASTPLI
 .PHONY: git-submodules
