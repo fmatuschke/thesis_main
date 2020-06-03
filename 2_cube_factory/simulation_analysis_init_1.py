@@ -2,6 +2,8 @@
     simulated rotations
 '''
 
+# TODO: volume = 60
+
 import numpy as np
 import itertools
 import h5py
