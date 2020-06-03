@@ -152,9 +152,9 @@ if __name__ == "__main__":
 
     sim_path = "output/simulation/*.h5"
     ana_file = "output/analysis/"
-    out_file = "output/images/spheres/"
+    out_path = "output/images/spheres/"
 
-    os.makedirs(out_file, exist_ok=True)
+    os.makedirs(out_path, exist_ok=True)
 
     for i, (microscope, model) in enumerate(
             list(itertools.product(["PM", "LAP"], ["r", "p"]))):
@@ -177,7 +177,7 @@ if __name__ == "__main__":
                 for f0_inc in df.f0_inc.unique():
 
                     file_name = f"sphere_{microscope}_model_{model}_psi_{psi:.1f}_f0_inc_{f0_inc:.1f}"
-                    # if os.path.isfile(f"{os.path.join(out_file,file_name)}.pdf"):
+                    # if os.path.isfile(f"{os.path.join(out_path,file_name)}.pdf"):
                     #     continue
 
                     sub = (df_acc.psi == psi) & (df_acc.f0_inc == f0_inc)
@@ -238,7 +238,7 @@ if __name__ == "__main__":
                                 y,
                                 z,
                                 data_i,
-                                f"{os.path.join(out_file,file_name)}.tikz",
+                                f"{os.path.join(out_path,file_name)}.tikz",
                                 x2,
                                 y2,
                                 z2,
@@ -247,7 +247,7 @@ if __name__ == "__main__":
                                 standalone=False)
 
                     # subprocess.run(
-                    #     f"cd {out_file} && pdflatex -interaction=nonstopmode {file_name}.tikz && rm {file_name}.aux {file_name}.log",
+                    #     f"cd {out_path} && pdflatex -interaction=nonstopmode {file_name}.tikz && rm {file_name}.aux {file_name}.log",
                     #     shell=True,
                     #     stdout=subprocess.DEVNULL,
                     #     check=True)

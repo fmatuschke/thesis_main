@@ -7,71 +7,68 @@
 \usepackage{amsmath, amssymb, mathtools}
 \usepackage{siunitx}
 \usepackage{currfile}
-% \usepackage{ifplatform}
-% \usepackage{pgffor}
-% 
 \usepackage{tikz}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.17}
 \usepgfplotslibrary{polar}
 \usetikzlibrary{external}
 \usetikzlibrary{calc}
-\tikzexternalize[prefix=./output/]
+\tikzexternalize[prefix=./output/tikz/tmp/]
 % 
 \begin{document}
 %
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.0_omega_0.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.0_omega_0.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.1_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.1_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.2_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.2_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.3_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.3_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.4_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.4_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.5_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.5_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.6_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.6_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.7_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.7_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.8_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.8_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_0.9_omega_\omega.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_0.9_omega_\omega.0.tikz}
 }}
 \\
 \resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/cube_2pop_psi_1.0_omega_0.0_.solved.tikz}
+   \input{output/images/models/cube_2pop_psi_1.0_omega_0.0.tikz}
 }}
 \end{document}
