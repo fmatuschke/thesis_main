@@ -1,0 +1,65 @@
+% \documentclass{minimal}
+% \usepackage[a4paper,margin=1cm,landscape]{geometry}
+\documentclass[varwidth]{standalone}
+% 
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{polar}
+\usetikzlibrary{external}
+\usetikzlibrary{calc}
+\tikzexternalize[prefix=./output/tikz/tmp/]
+% 
+\begin{document}
+%
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.0_f0_inc_0.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.1_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.2_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.3_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.4_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.5_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.6_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.7_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.8_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_LAP_model_r_psi_0.9_f0_inc_\fnull.0.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0,10,...,90} {
+   \input{output/images/spheres/sphere_PM_model_r_psi_1.0_f0_inc_\fnull.0.tikz}
+}}
+% \\
+\end{document}

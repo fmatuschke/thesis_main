@@ -243,7 +243,8 @@ if __name__ == "__main__":
                                 y2,
                                 z2,
                                 data_,
-                                standalone=True)
+                                path_to_data="\\currfiledir",
+                                standalone=False)
 
                     # subprocess.run(
                     #     f"cd {out_file} && pdflatex -interaction=nonstopmode {file_name}.tikz && rm {file_name}.aux {file_name}.log",
