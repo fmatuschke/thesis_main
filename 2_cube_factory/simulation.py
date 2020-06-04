@@ -88,7 +88,6 @@ THICKNESS = 60
 FIBER_INCLINATION = np.linspace(0, 90, 10, True)
 
 file_list = args.input
-df.loc[df['column_name'] == some_value]
 # print Memory
 simpli = fastpli.simulation.Simpli()
 simpli.voxel_size = args.voxel_size  # in mu meter
