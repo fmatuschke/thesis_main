@@ -63,13 +63,14 @@ logger.addHandler(mh)
 logger.info("args: " + " ".join(sys.argv[1:]))
 
 # Fiber Model
-LENGTH = 210  # to rotate a 120 um cube inside
+SIZE = 210  # to rotate a 120 um cube inside
 RADIUS_LOGMEAN = args.fiber_radius
-PSI = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
+PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
        0.9]  # fiber fraction: PSI * f0 + (1-PSI) * f1
 OMEGA = np.linspace(0, 90, 10, True)  # angle of opening (f0, f1)
 PSI, OMEGA = np.meshgrid(PSI, OMEGA)
 PARAMETER = list(zip(PSI.flatten(), OMEGA.flatten()))
+PARAMETER.append((0.0, 0.0))
 PARAMETER.append((1.0, 0.0))
 
 # solve
@@ -82,11 +83,12 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     solver.obj_min_radius = RADIUS_LOGMEAN * 5
     solver.omp_num_threads = NUM_THREADS
 
-    file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_rmean_{RADIUS_LOGMEAN:.2f}_length_{LENGTH:.0f}_"
+    file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
+                               "{RADIUS_LOGMEAN:.2f}_v0_{SIZE:.0f}_"
     logger.info(f"file_pref: {file_pref}")
 
-    seeds = fastpli.model.sandbox.seeds.triangular_grid(LENGTH * 2,
-                                                        LENGTH * 2,
+    seeds = fastpli.model.sandbox.seeds.triangular_grid(SIZE * 2,
+                                                        SIZE * 2,
                                                         2 * RADIUS_LOGMEAN,
                                                         center=True)
 
@@ -97,20 +99,20 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     rnd_radii_1 = RADIUS_LOGMEAN * np.random.lognormal(0, 0.1, seeds_1.shape[0])
 
     fiber_bundles = [
-        fastpli.model.sandbox.build.cuboid(
-            p=-0.5 * np.array([LENGTH, LENGTH, LENGTH]),
-            q=0.5 * np.array([LENGTH, LENGTH, LENGTH]),
-            phi=np.deg2rad(0),
-            theta=np.deg2rad(90),
-            seeds=seeds_0,
-            radii=rnd_radii_0),
-        fastpli.model.sandbox.build.cuboid(
-            p=-0.5 * np.array([LENGTH, LENGTH, LENGTH]),
-            q=0.5 * np.array([LENGTH, LENGTH, LENGTH]),
-            phi=np.deg2rad(omega),
-            theta=np.deg2rad(90),
-            seeds=seeds_1 + RADIUS_LOGMEAN,
-            radii=rnd_radii_1)
+        fastpli.model.sandbox.build.cuboid(p=-0.5 *
+                                           np.array([SIZE, SIZE, SIZE]),
+                                           q=0.5 * np.array([SIZE, SIZE, SIZE]),
+                                           phi=np.deg2rad(0),
+                                           theta=np.deg2rad(90),
+                                           seeds=seeds_0,
+                                           radii=rnd_radii_0),
+        fastpli.model.sandbox.build.cuboid(p=-0.5 *
+                                           np.array([SIZE, SIZE, SIZE]),
+                                           q=0.5 * np.array([SIZE, SIZE, SIZE]),
+                                           phi=np.deg2rad(omega),
+                                           theta=np.deg2rad(90),
+                                           seeds=seeds_1 + RADIUS_LOGMEAN,
+                                           radii=rnd_radii_1)
     ]
 
     solver.fiber_bundles = fiber_bundles
@@ -137,6 +139,11 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['omega'] = omega
+        print("OTHER META DATA?")
+        # h5f['/'].attrs['overlap'] = overlap
+        # h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
+        # h5f['/'].attrs['num_obj'] = solver.num_obj
+        h5f['/'].attrs['num_steps'] = 0
         h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
         h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
 
@@ -144,7 +151,7 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     # Run Solver
     logger.info(f"run solver")
-    for i in tqdm(range(args.max_steps)):
+    for i in tqdm(range(1, args.max_steps)):
         if solver.step():
             break
 
@@ -153,12 +160,11 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
             logger.info(
                 f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
             )
-            if i > 0:
-                solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
-                    solver.fiber_bundles, [
-                        -0.55 * np.array([LENGTH, LENGTH, LENGTH]),
-                        0.55 * np.array([LENGTH, LENGTH, LENGTH])
-                    ])
+            solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
+                solver.fiber_bundles, [
+                    -0.55 * np.array([SIZE, SIZE, SIZE]),
+                    0.55 * np.array([SIZE, SIZE, SIZE])
+                ])
 
         # if i > args.max_steps / 2 and overlap <= 0.001:
         #     break
@@ -174,7 +180,7 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
         h5f['/'].attrs['overlap'] = overlap
         h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
         h5f['/'].attrs['num_obj'] = solver.num_obj
-        h5f['/'].attrs['num_steps'] = solver.step_num
+        h5f['/'].attrs['num_steps'] = solver.num_steps
         h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
         h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
 
