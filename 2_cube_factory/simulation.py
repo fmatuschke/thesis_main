@@ -42,7 +42,7 @@ parser.add_argument("-o",
 
 parser.add_argument("-i",
                     "--input",
-                    nargs='*',
+                    nargs='+',
                     required=True,
                     help="input string.")
 
@@ -229,6 +229,7 @@ for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
 
                 dset.attrs['parameter/psi'] = psi
                 dset.attrs['parameter/omega'] = omega
+                dset.attrs['parameter/v'] = LENGTH
                 dset.attrs['parameter/f0_inc'] = f0_inc
                 dset.attrs['parameter/f1_rot'] = f1_rot
                 dset.attrs[
