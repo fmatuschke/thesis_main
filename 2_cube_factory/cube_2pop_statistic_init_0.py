@@ -2,32 +2,36 @@
 '''
 
 import numpy as np
-import itertools
+import multiprocessing as mp
+import argparse
+import warnings
 import h5py
 import glob
-import gc
 import os
 
 import pandas as pd
 from tqdm import tqdm
 
-from mpi4py import MPI
-comm = MPI.COMM_WORLD
-import random
-random.seed(42)
-
 import fastpli.io
-import fastpli.tools
 import fastpli.objects
 import fastpli.analysis
+import fastpli.simulation
 
-files = glob.glob("output/cube_stat/*.h5")
+parser = argparse.ArgumentParser()
+parser.add_argument("-i",
+                    "--input",
+                    type=str,
+                    required=True,
+                    help="Path of files.")
+parser.add_argument("-p",
+                    "--num_proc",
+                    default=1,
+                    type=int,
+                    help="Number of processes.")
+args = parser.parse_args()
 
-df = []
-for file in files:
 
-    file_name = file[:-3]
-
+def run(file):
     omega = float(file.split("_omega_")[1].split("_")[0])
     psi = float(file.split("_psi_")[1].split("_")[0])
     r = float(file.split("_r_")[1].split("_")[0])
@@ -36,44 +40,82 @@ for file in files:
     fr = float(file.split("_fr_")[1].split("_")[0])
     state = file.split(".")[-2].split(".")[-1]
 
-    print(omega, psi, r, v0, fl, fr, state)
+    fbs = fastpli.io.fiber_bundles.load(file)
 
-    # f"output/cube_stat/cube_2pop_statistic_psi_{psi:.2f}_omega_" \
-    #         f"{omega:.2f}_r_{omega:.2f}_v0_{omega:.2f}_fl_{omega:.1f}_fr_{omega:.1f}_.{state}"
+    if state != "init":
+        # Setup Simpli
+        simpli = fastpli.simulation.Simpli()
+        warnings.filterwarnings("ignore", message="objects overlap")
+        # simpli.omp_num_threads = 0
+        simpli.voxel_size = 0.1
+        simpli.set_voi([-30] * 3, [30] * 3)
+        simpli.fiber_bundles = fbs
+        simpli.fiber_bundles_properties = [[(1.0, 0, 0, 'p')]] * len(fbs)
 
-    if os.path.isfile(file_name + '.pkl'):
-        continue
+        if not run.flag:
+            print(f"Single Memory: {simpli.memory_usage():.0f} MB")
+            print(f"Total Memory: {simpli.memory_usage() * run.num_p:.0f} MB")
+            run.flag = True
 
-    fbs = fastpli.io.fiber_bundles.load(file_name + '.h5')
-    with h5py.File(file_name + ".h5", "r") as h5f:
-        meta = {
-            "obj_mean_length": h5f['/'].attrs['obj_mean_length'],
-            "obj_min_radius": h5f['/'].attrs['obj_min_radius']
-        }
+        tissue, _, _ = simpli.generate_tissue(only_tissue=True)
+        unique_elements, count_elements = np.unique(tissue, return_counts=True)
+    else:
+        unique_elements, count_elements = 0, 0
+
+    with h5py.File(file, "r") as h5f:
+
+        obj_mean_length = h5f['/'].attrs['obj_mean_length']
+        obj_min_radius = h5f['/'].attrs['obj_min_radius']
+        overlap = np.nan
+        num_col_obj = np.nan
+        num_obj = np.nan
+        num_steps = np.nan
+        time = np.nan
         if state != "init":
-            meta = {
-                **meta,
-                **{
-                    "overlap": h5f['/'].attrs['overlap'],
-                    "num_col_obj": h5f['/'].attrs['num_col_obj'],
-                    "num_obj": h5f['/'].attrs['num_obj'],
-                    "num_steps": h5f['/'].attrs['num_steps'],
-                }
-            }
+            overlap = h5f['/'].attrs['overlap']
+            num_col_obj = h5f['/'].attrs['num_col_obj']
+            num_obj = h5f['/'].attrs['num_obj']
+            num_steps = h5f['/'].attrs['num_steps']
+            time = h5f['/'].attrs['time']
 
     fbs_ = fbs.copy()
     fbs_ = fastpli.objects.fiber_bundles.Cut(fbs_, [[-30] * 3, [30] * 3])
     phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
 
-    df.append(
-        pd.DataFrame([[
-            omega, psi, r, v0, fl, fr, state, meta,
-            phi.astype(np.float32).ravel(),
-            theta.astype(np.float32).ravel()
-        ]],
-                     columns=[
-                         "omega", "psi", "r", "v0", "fl", "fr", "state", "meta",
-                         "phi", "theta"
-                     ]))
+    df = pd.DataFrame(columns=["phi", "theta"], dtype='object')
 
-df.to_pickle(file_name + '.pkl')
+    return pd.DataFrame([[
+        omega, psi, r, v0, fl, fr, state, overlap, num_col_obj, num_obj,
+        num_steps, time, unique_elements, count_elements,
+        phi.astype(np.float32).ravel(),
+        theta.astype(np.float32).ravel()
+    ]],
+                        columns=[
+                            "omega",
+                            "psi",
+                            "r",
+                            "v0",
+                            "fl",
+                            "fr",
+                            "state",
+                            "overlap",
+                            "num_col_obj",
+                            "num_obj",
+                            "num_steps",
+                            "time",
+                            "unique_elements",
+                            "count_elements",
+                            "phi",
+                            "theta",
+                        ])
+
+
+files = glob.glob(os.path.join(args.input, "*.h5"))
+
+run.flag = False
+run.num_p = args.num_proc
+with mp.Pool(processes=run.num_p) as pool:
+    df = [d for d in tqdm(pool.imap_unordered(run, files), total=len(files))]
+    df = pd.concat(df, ignore_index=True)
+
+df.to_pickle(os.path.join(args.input, "cube_stat.pkl"))

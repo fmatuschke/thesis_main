@@ -4,20 +4,18 @@ import fastpli.tools
 import fastpli.io
 
 import numpy as np
+import multiprocessing as mp
 import itertools
 import argparse
 import logging
+import datetime
 import time
 import h5py
 import sys
 import os
 
 from tqdm import tqdm
-import helper.mpi
-
-from mpi4py import MPI
-comm = MPI.COMM_WORLD
-NUM_THREADS = 1
+import helper.mplog
 
 # reproducability
 np.random.seed(42)
@@ -42,55 +40,40 @@ parser.add_argument("-n",
                     required=True,
                     help="Number of max_steps.")
 
+parser.add_argument("-p",
+                    "--num_proc",
+                    type=int,
+                    required=True,
+                    help="Number of processes.")
+
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
 os.makedirs(args.output, exist_ok=True)
 
 # logger
-logger = logging.getLogger("rank[%i]" % comm.rank)
-logger.setLevel(logging.DEBUG)
-log_file = output_name + ".log"
-mh = helper.mpi.FileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
-formatter = logging.Formatter(
-    '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
-mh.setFormatter(formatter)
-logger.addHandler(mh)
-logger.info("args: " + " ".join(sys.argv[1:]))
+FORMAT = '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s'
+logging.basicConfig(level=logging.INFO,
+                    format=FORMAT,
+                    filename=output_name +
+                    f'.{datetime.now().strftime("%d/%m/%Y-%H:%M:%S")}.log',
+                    filemode='w')
+logger = logging.getLogger()
+helper.mplog.install_mp_handler(logger)
 
-# Fiber Model
-SIZE = 90  # to create a 60 micro meter cube
-FIBER_RADII = [1.0]
-OBJ_MEAN_LENGTH_F = [0.5, 1.0, 2.0, 5.0, 10.0, 20.0]
-OBJ_MIN_RADIUS_F = [0.5, 1.0, 2.0, 5.0, 10.0, 20.0]
-PSI = [0.25, 0.5, 0.75]  # fiber fraction: PSI * f0 + (1-PSI) * f1
-OMEGA = [0, 30, 60, 90]  # angle of opening (f0, f1)
-PSI, OMEGA = np.meshgrid(PSI, OMEGA)
-PARAMETER = list(zip(PSI.flatten(), OMEGA.flatten()))
-PARAMETER.append((0.0, 0.0))
-PARAMETER.append((1.0, 0.0))
 
-parameters = list(
-    itertools.product(PARAMETER, FIBER_RADII, OBJ_MEAN_LENGTH_F,
-                      OBJ_MIN_RADIUS_F))
-parameters = parameters[comm.Get_rank()::comm.Get_size()]
-
-for (psi, omega), radius, mean_length_f, min_radius_f in tqdm(parameters):
-
-    logger.info(
-        f"psi:{psi}, omega:{omega}, radius:{radius}," \
-            " mean_length_f:{mean_length_f}, min_radius_f:{min_radius_f}"
-    )
-
-    # setup solver
-    solver = fastpli.model.solver.Solver()
-    solver.obj_mean_length = radius * mean_length_f
-    solver.obj_min_radius = radius * min_radius_f
-    solver.omp_num_threads = NUM_THREADS
+def run(parameters):
+    (psi, omega), radius, mean_length_f, min_radius_f = parameters
 
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
                                f"{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_" \
                                f"fr_{min_radius_f:.2f}_"
     logger.info(f"file_pref: {file_pref}")
+
+    # setup solver
+    solver = fastpli.model.solver.Solver()
+    solver.obj_mean_length = radius * mean_length_f
+    solver.obj_min_radius = radius * min_radius_f
+    solver.omp_num_threads = 1
 
     seeds = fastpli.model.sandbox.seeds.triangular_grid(SIZE * 2,
                                                         SIZE * 2,
@@ -139,7 +122,7 @@ for (psi, omega), radius, mean_length_f, min_radius_f in tqdm(parameters):
 
     # Save Data
     logger.debug(f"save init")
-    with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
+    with h5py.File(file_pref + '.init.h5', 'w') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['omega'] = omega
@@ -151,12 +134,16 @@ for (psi, omega), radius, mean_length_f, min_radius_f in tqdm(parameters):
         h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
         h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
 
-    # fastpli.io.fiber_bundles.save(file_pref + '.init.dat', solver.fiber_bundles)
-
     # Run Solver
     logger.info(f"run solver")
     start_time = time.time()
-    for i in tqdm(range(1, args.max_steps)):
+
+    times = []
+    steps = []
+    overlaps = []
+    num_objs = []
+    num_col_objs = []
+    for i in range(1, args.max_steps):
         if solver.step():
             break
 
@@ -169,8 +156,16 @@ for (psi, omega), radius, mean_length_f, min_radius_f in tqdm(parameters):
                 solver.fiber_bundles,
                 [-0.5 * np.array([SIZE] * 3), 0.5 * np.array([SIZE] * 3)])
 
-        # if i > args.max_steps / 2 and overlap <= 0.001:
-        #     break
+            times.append(time.time() - start_time)
+            steps.append(i)
+            overlaps.append(solver.overlap)
+            num_objs.append(solver.num_obj)
+            num_col_objs.append(solver.num_col_obj)
+
+        if i > args.max_steps / 2 and overlap <= 0.001:
+            overlap_0001 = (i, time.time() - start_time)
+
+        # print(solver.num_steps)
 
     end_time = time.time()
     overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
@@ -191,5 +186,43 @@ for (psi, omega), radius, mean_length_f, min_radius_f in tqdm(parameters):
         h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
         h5f['/'].attrs['time'] = end_time - start_time
 
-    # fastpli.io.fiber_bundles.save(file_pref + '.solved.dat',
-    #                               solver.fiber_bundles)
+        h5f['/'].attrs['times'] = np.array(times)
+        h5f['/'].attrs['steps'] = np.array(steps)
+        h5f['/'].attrs['overlaps'] = np.array(overlaps)
+        h5f['/'].attrs['overlaps'] = np.array(num_objs)
+        h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
+
+
+def check_file(p):
+    (psi, omega), radius, mean_length_f, min_radius_f = p
+    file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
+                            f"{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_" \
+                            f"fr_{min_radius_f:.2f}_"
+    return not os.path.isfile(file_pref + '.solved.h5')
+
+
+if __name__ == "__main__":
+    logger.info("args: " + " ".join(sys.argv[1:]))
+
+    # Fiber Model
+    SIZE = 90  # to create a 60 micro meter cube
+    FIBER_RADII = [1.0]
+    OBJ_MEAN_LENGTH_F = [0.5, 1.0, 2.0, 5.0, 10.0]
+    OBJ_MIN_RADIUS_F = [1.0, 2.0, 5.0, 10.0, 20.0]
+    PSI = [0.25, 0.5]  # fiber fraction: PSI * f0 + (1-PSI) * f1
+    OMEGA = [30, 60, 90]  # angle of opening (f0, f1)
+    PSI, OMEGA = np.meshgrid(PSI, OMEGA)
+    PARAMETER = list(zip(PSI.flatten(), OMEGA.flatten()))
+    PARAMETER.append((1.0, 0))
+
+    parameters = list(
+        itertools.product(PARAMETER, FIBER_RADII, OBJ_MEAN_LENGTH_F,
+                          OBJ_MIN_RADIUS_F))
+
+    parameters = list(filter(check_file, parameters))
+
+    with mp.Pool(processes=args.num_proc) as pool:
+        [
+            d for d in tqdm(pool.imap_unordered(run, parameters),
+                            total=len(parameters))
+        ]
