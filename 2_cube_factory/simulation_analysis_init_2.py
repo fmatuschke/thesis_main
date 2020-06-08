@@ -35,7 +35,7 @@ for microscope, model in list(itertools.product(
             for omega in df[df.psi == psi].omega.unique():
                 df_sub = df[(df.psi == psi) & (df.omega == omega)]
                 df_org = pd.read_pickle(
-                    f"output/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.solved.pkl"
+                    f"output/models/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.solved.pkl"
                 )
                 for f0_inc in df_sub.f0_inc.unique():
                     for f1_rot in df_sub[df_sub.f0_inc ==

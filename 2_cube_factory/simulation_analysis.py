@@ -66,7 +66,7 @@ for device in ["pm", "lap"]:
 
                 # ground truth
                 fbs = fastpli.io.fiber_bundles.load(
-                    f"../data/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.solved.h5"
+                    f"../data/models/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.solved.h5"
                 )
                 rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
                 rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))

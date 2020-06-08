@@ -125,7 +125,7 @@ if __name__ == "__main__":
         for j, omega in enumerate(np.linspace(0, 90, 10)):
             file = os.path.join(
                 model_path,
-                f"cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.init.pkl")
+                f"cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.init.pkl")
             if not os.path.isfile(file):
                 continue
             data = []
@@ -133,7 +133,7 @@ if __name__ == "__main__":
                 # init
                 file = os.path.join(
                     model_path,
-                    f"cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.{phase}.pkl")
+                    f"cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.{phase}.pkl")
                 df = pd.read_pickle(file)
                 sub = (df.f0_inc == 0) & (df.f1_rot == 0)
                 phi = df[sub].explode("phi").phi.to_numpy(float)
@@ -157,6 +157,6 @@ if __name__ == "__main__":
             to_tikz(data,
                     os.path.join(
                         out_path,
-                        f"cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}.tikz"),
+                        f"cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}.tikz"),
                     path_to_data="\\currfiledir",
                     standalone=False)

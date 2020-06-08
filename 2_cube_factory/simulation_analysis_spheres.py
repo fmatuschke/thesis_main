@@ -176,7 +176,7 @@ if __name__ == "__main__":
             for psi in df.psi.unique():
                 for f0_inc in df.f0_inc.unique():
 
-                    file_name = f"sphere_{microscope}_model_{model}_psi_{psi:.1f}_f0_inc_{f0_inc:.1f}"
+                    file_name = f"sphere_{microscope}_model_{model}_psi_{psi:.2f}_f0_inc_{f0_inc:.2f}"
                     # if os.path.isfile(f"{os.path.join(out_path,file_name)}.pdf"):
                     #     continue
 

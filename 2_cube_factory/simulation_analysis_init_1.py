@@ -36,22 +36,22 @@ parameters = parameters[comm.Get_rank()::comm.Get_size()]
 with tqdm(total=len(parameters) * len(f0_incs)) as pbar:
     for state, omega, psi in parameters:
         if os.path.isfile(
-                f"output/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.{state}.pkl"
+                f"output/models/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.{state}.pkl"
         ):
             pbar.update(len(f0_incs))
             continue
         if not os.path.isfile(
-                f"../data/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.{state}.h5"
+                f"../data/models/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.{state}.h5"
         ):
             pbar.update(len(f0_incs))
             continue
 
         fbs = fastpli.io.fiber_bundles.load(
-            f"../data/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.{state}.h5"
+            f"../data/models/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.{state}.h5"
         )
 
         with h5py.File(
-                f"../data/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.{state}.h5",
+                f"../data/models/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.{state}.h5",
                 "r") as h5f:
 
             meta = {
@@ -120,6 +120,6 @@ with tqdm(total=len(parameters) * len(f0_incs)) as pbar:
 
         df_ = pd.concat(df_, ignore_index=True)
         df_.to_pickle(
-            f"output/models/cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.{state}.pkl"
+            f"output/models/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.{state}.pkl"
         )
         gc.collect()
