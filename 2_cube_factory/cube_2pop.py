@@ -80,7 +80,7 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     # setup solver
     solver = fastpli.model.solver.Solver()
     solver.obj_mean_length = RADIUS_LOGMEAN * 2
-    solver.obj_min_radius = RADIUS_LOGMEAN * 5
+    solver.obj_min_radius = RADIUS_LOGMEAN * 2
     solver.omp_num_threads = NUM_THREADS
 
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \

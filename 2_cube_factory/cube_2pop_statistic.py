@@ -52,11 +52,12 @@ os.makedirs(args.output, exist_ok=True)
 
 # logger
 FORMAT = '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s'
-logging.basicConfig(level=logging.INFO,
-                    format=FORMAT,
-                    filename=output_name +
-                    f'.{datetime.now().strftime("%d/%m/%Y-%H:%M:%S")}.log',
-                    filemode='w')
+logging.basicConfig(
+    level=logging.INFO,
+    format=FORMAT,
+    filename=output_name +
+    f'.{datetime.datetime.now().strftime("%d:%m:%Y-%H:%M:%S")}.log',
+    filemode='w')
 logger = logging.getLogger()
 helper.mplog.install_mp_handler(logger)
 
@@ -207,8 +208,8 @@ if __name__ == "__main__":
     # Fiber Model
     SIZE = 90  # to create a 60 micro meter cube
     FIBER_RADII = [1.0]
-    OBJ_MEAN_LENGTH_F = [0.5, 1.0, 2.0, 5.0, 10.0]
-    OBJ_MIN_RADIUS_F = [1.0, 2.0, 5.0, 10.0, 20.0]
+    OBJ_MEAN_LENGTH_F = [0.5, 1.0, 2.0, 3.0, 4.0, 5.0]
+    OBJ_MIN_RADIUS_F = [1.0, 2.0, 3.0, 4.0, 5.0]
     PSI = [0.25, 0.5]  # fiber fraction: PSI * f0 + (1-PSI) * f1
     OMEGA = [30, 60, 90]  # angle of opening (f0, f1)
     PSI, OMEGA = np.meshgrid(PSI, OMEGA)
