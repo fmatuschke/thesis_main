@@ -1,16 +1,7 @@
 import numpy as np
-import itertools
 import os
-import sys
-import glob
-
-import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
-import tikzplotlib
-
 from tqdm import tqdm
-
 import helper.circular
 
 
@@ -33,7 +24,6 @@ def _nx2_dat(x, y, file, info=None):
 
 def to_tikz(data,
             file,
-            data2=None,
             path_to_data=None,
             standalone=False,
             only_dat=False,
@@ -45,7 +35,7 @@ def to_tikz(data,
     file_pre = os.path.join(file_path, file_name)
 
     for i, d in enumerate(data):
-        _nx2_dat(d[0, :], d[1, :], f"{file_pre}_{i}.dat", info)
+        _nx2_dat(d[0, :], d[1, :], f"{file_pre}{i}.dat", info)
 
     if only_dat:
         return
@@ -74,13 +64,15 @@ def to_tikz(data,
             "    xmin=-90, xmax=90,\n" \
             "    xtick={-90,-45,...,90},\n" \
             "    ytick=\empty,\n" \
-            "]\n" \
-            "\\addplot [thick, green!50!black]\n" \
-            f"    table [x=x, y=y, col sep=comma] {{{file_name}_0.dat}};\n" \
-            "\\addplot [thick, red, dashed]\n" \
-            f"    table [x=x, y=y, col sep=comma] {{{file_name}_2.dat}};\n" \
-            "\\end{polaraxis}\n"
-        )
+            "    cycle list name=mystyle,\n" \
+            "]\n"
+            )
+        for i in range(0, len(data), 2):
+            f.write("" \
+                "\\addplot+[mark=none]\n" \
+                f"    table [x=x, y=y, col sep=comma] {{{file_name}{i}.dat}};\n"
+            )
+        f.write("\\end{polaraxis}\n")
         f.write("%\n")
         f.write("" \
             "\\begin{scope}[shift={(-4,0)}]\n" \
@@ -91,11 +83,15 @@ def to_tikz(data,
             "    xtick={90,135,...,270},\n" \
             "    xticklabels={90, 45, 0, -45, -90},\n" \
             "    ytick=\empty,\n" \
-            "]\n" \
-            "\\addplot [thick, green!50!black]\n" \
-            f"    table [x=x, y=y, col sep=comma] {{{file_name}_1.dat}};\n" \
-            "\\addplot [thick, red, dashed]\n" \
-            f"    table [x=x, y=y, col sep=comma] {{{file_name}_3.dat}};\n" \
+            "    cycle list name=mystyle,\n" \
+            "]\n"
+        )
+        for i in range(1, len(data), 2):
+            f.write("" \
+                "\\addplot+[mark=none]\n" \
+                f"    table [x=x, y=y, col sep=comma] {{{file_name}{i}.dat}};\n"
+            )
+        f.write(""
             "\\end{polaraxis}\n"
             "\\end{scope}\n" \
         )
@@ -118,21 +114,20 @@ if __name__ == "__main__":
     df = pd.read_pickle(os.path.join(model_path, "cube_stat.pkl"))
 
     for psi in tqdm(sorted(df.psi.unique())):
-        for omega in tqdm(sorted(df[df.psi == psi].omega.unique()),
-                          leave=False):
-            df_ = df[(df.omega == omega) & (df.psi == psi)]
-            for i, fr in enumerate(sorted(df_.fr.unique())):
-                for j, fl in enumerate(sorted(df_[df_.fr == fr].fl.unique())):
-                    data = []
+        for i, fr in enumerate(tqdm(sorted(df.fr.unique()), leave=False)):
+            for j, fl in enumerate(
+                    tqdm(sorted(df[df.fr == fr].fl.unique()), leave=False)):
+                data = []
+                for omega in sorted(df[df.psi == psi].omega.unique()):
                     for phase in ["init", "solved"]:
-                        sub = (df_.fl == fl) & (df_.fr == fr) & (df_.state
-                                                                 == phase)
+                        sub = (df.fl == fl) & (df.fr == fr) & (
+                            df.state == phase) & (df.omega == omega)
 
-                        if len(df_[sub]) == 0:
+                        if len(df[sub]) == 0:
                             print("fooo", fl, fr, phase)
 
-                        phi = df_[sub].explode("phi").phi.to_numpy(float)
-                        theta = df_[sub].explode("theta").theta.to_numpy(float)
+                        phi = df[sub].explode("phi").phi.to_numpy(float)
+                        theta = df[sub].explode("theta").theta.to_numpy(float)
 
                         theta[phi > np.pi] = np.pi - theta[phi > np.pi]
                         phi = helper.circular.remap(phi, np.pi, 0)
@@ -155,11 +150,11 @@ if __name__ == "__main__":
                         # x = x[x > np.pi / 2]
                         data.append(np.vstack((np.rad2deg(x), h)))
 
-                    to_tikz(
-                        data,
-                        os.path.join(
-                            out_path,
-                            f"cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_fr_{fr:.1f}_fl_{fl:.1f}_phase_{phase}_.tikz"
-                        ),
-                        path_to_data="\\currfiledir",
-                        standalone=False)
+                to_tikz(
+                    data,
+                    os.path.join(
+                        out_path,
+                        f"cube_2pop_psi_{psi:.2f}_fr_{fr:.2f}_fl_{fl:.2f}_phase_{phase}_.tikz"
+                    ),
+                    path_to_data="\\currfiledir",
+                    standalone=False)
