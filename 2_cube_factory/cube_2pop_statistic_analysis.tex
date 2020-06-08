@@ -1,6 +1,6 @@
 % \documentclass{minimal}
 % \usepackage[a4paper,margin=1cm,landscape]{geometry}
-\documentclass[multi=page,varwidth]{standalone}
+\documentclass[multi=page,varwidth=20cm]{standalone}
 
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
@@ -18,8 +18,8 @@
 \pgfplotscreateplotcyclelist{mylist}{
    {red},
    {red,densely dashed},
-   {green!70!black},
-   {green!70!black,densely dashed},
+   {green!50!black},
+   {green!50!black,densely dashed},
    {blue},
    {blue,densely dashed}
 }
@@ -57,6 +57,7 @@
     hide axis,
     legend style={draw=white!15!black,legend cell align=left},
     cycle list name = mylist,
+    legend columns=6,
     % legend image post style={sharp plot}
     ]
     \addplot+[mark=none] coordinates {(0,0)};
