@@ -5,10 +5,10 @@ PYTHON=$(VENV)/bin/python3
 PIP=$(VENV)/bin/pip3
 
 .PHONY: install
-install: env fastpli
+install: env env-update fastpli
 
 # ENV
-env: $(VENV)/bin/python3 env-update
+env: $(VENV)/bin/python3
 
 $(VENV)/bin/python3:
 	python3 -m venv $(VENV)/
