@@ -1,6 +1,6 @@
 default: install
 
-VENV=env-$(shell hostname)
+VENV=env
 PYTHON=$(VENV)/bin/python3
 PIP=$(VENV)/bin/pip3
 
