@@ -17,8 +17,8 @@ import os
 from tqdm import tqdm
 import helper.mplog
 
-# reproducability
-np.random.seed(42)
+# reproducibility
+# np.random.seed(42)
 
 # path
 FILE_NAME = os.path.abspath(__file__)
@@ -63,11 +63,11 @@ helper.mplog.install_mp_handler(logger)
 
 
 def run(parameters):
-    (psi, omega), radius, mean_length_f, min_radius_f = parameters
+    (psi, omega), radius, mean_length_f, min_radius_f, n = parameters
 
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
                                f"{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_" \
-                               f"fr_{min_radius_f:.2f}_"
+                               f"fr_{min_radius_f:.2f}_n_{n}_"
     logger.info(f"file_pref: {file_pref}")
 
     # setup solver
@@ -195,10 +195,10 @@ def run(parameters):
 
 
 def check_file(p):
-    (psi, omega), radius, mean_length_f, min_radius_f = p
+    (psi, omega), radius, mean_length_f, min_radius_f, n = p
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
                             f"{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_" \
-                            f"fr_{min_radius_f:.2f}_"
+                            f"fr_{min_radius_f:.2f}_n_{n}_"
     return not os.path.isfile(file_pref + '.solved.h5')
 
 
@@ -206,19 +206,20 @@ if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
 
     # Fiber Model
+    N_REPEAT = range(5)
     SIZE = 90  # to create a 60 micro meter cube
     FIBER_RADII = [1.0]
     OBJ_MEAN_LENGTH_F = [0.5, 1.0, 2.0, 3.0, 4.0, 5.0]
     OBJ_MIN_RADIUS_F = [1.0, 2.0, 3.0, 4.0, 5.0]
     PSI = [0.25, 0.5]  # fiber fraction: PSI * f0 + (1-PSI) * f1
-    OMEGA = [30, 60, 90]  # angle of opening (f0, f1)
+    OMEGA = [45, 90]  # angle of opening (f0, f1)
     PSI, OMEGA = np.meshgrid(PSI, OMEGA)
     PARAMETER = list(zip(PSI.flatten(), OMEGA.flatten()))
     PARAMETER.append((1.0, 0))
 
     parameters = list(
         itertools.product(PARAMETER, FIBER_RADII, OBJ_MEAN_LENGTH_F,
-                          OBJ_MIN_RADIUS_F))
+                          OBJ_MIN_RADIUS_F, N_REPEAT))
 
     parameters = list(filter(check_file, parameters))
 
