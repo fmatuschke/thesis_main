@@ -2,6 +2,6 @@
 
 echo "source modules"
 source jureca_modules.sh
-make HOST=jureca install
+make install
 
 echo "... done"
