@@ -17,6 +17,8 @@ import fastpli.objects
 import fastpli.analysis
 import fastpli.simulation
 
+import helper.circular
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-i",
                     "--input",
@@ -31,6 +33,10 @@ parser.add_argument("-p",
 args = parser.parse_args()
 
 
+def hist_bin(n):
+    return np.linspace(0, np.pi, n + 1, endpoint=True)
+
+
 def run(file):
     omega = float(file.split("_omega_")[1].split("_")[0])
     psi = float(file.split("_psi_")[1].split("_")[0])
@@ -38,6 +44,7 @@ def run(file):
     v0 = float(file.split("_v0_")[1].split("_")[0])
     fl = float(file.split("_fl_")[1].split("_")[0])
     fr = float(file.split("_fr_")[1].split("_")[0])
+    n = float(file.split("_n_")[1].split("_")[0])
     state = file.split(".")[-2].split(".")[-1]
 
     fbs = fastpli.io.fiber_bundles.load(file)
@@ -82,13 +89,35 @@ def run(file):
     fbs_ = fastpli.objects.fiber_bundles.Cut(fbs_, [[-30] * 3, [30] * 3])
     phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
 
-    df = pd.DataFrame(columns=["phi", "theta"], dtype='object')
+    theta[phi > np.pi] = np.pi - theta[phi > np.pi]
+    phi = helper.circular.remap(phi, np.pi, 0)
+    phi_h, phi_x = np.histogram(phi.ravel(), hist_bin(180), density=True)
+    theta_h, theta_x = np.histogram(theta.ravel(), hist_bin(180), density=True)
+
+    # df = pd.DataFrame(columns=["phi", "theta"], dtype='object')
+    df = pd.DataFrame(columns=["phi_h", "phi_x", "theta_h", "theta_x"],
+                      dtype='object')
 
     return pd.DataFrame([[
-        omega, psi, r, v0, fl, fr, state, overlap, num_col_obj, num_obj,
-        num_steps, time, unique_elements, count_elements,
-        phi.astype(np.float32).ravel(),
-        theta.astype(np.float32).ravel()
+        omega,
+        psi,
+        r,
+        v0,
+        fl,
+        fr,
+        n,
+        state,
+        overlap,
+        num_col_obj,
+        num_obj,
+        num_steps,
+        time,
+        unique_elements,
+        count_elements,
+        phi_h,
+        phi_x,
+        theta_h,
+        theta_x,
     ]],
                         columns=[
                             "omega",
@@ -97,6 +126,7 @@ def run(file):
                             "v0",
                             "fl",
                             "fr",
+                            "n",
                             "state",
                             "overlap",
                             "num_col_obj",
@@ -105,8 +135,10 @@ def run(file):
                             "time",
                             "unique_elements",
                             "count_elements",
-                            "phi",
-                            "theta",
+                            "phi_h",
+                            "phi_x",
+                            "theta_h",
+                            "theta_x",
                         ])
 
 

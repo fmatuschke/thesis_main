@@ -163,9 +163,6 @@ def run(parameters):
             num_objs.append(solver.num_obj)
             num_col_objs.append(solver.num_col_obj)
 
-        if i > args.max_steps / 2 and overlap <= 0.001:
-            overlap_0001 = (i, time.time() - start_time)
-
         # print(solver.num_steps)
 
     end_time = time.time()
@@ -174,7 +171,7 @@ def run(parameters):
     logger.info(f"time: {end_time - start_time}")
     logger.info(
         f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}, {overlap}")
-    logger.debug(f"save solved")
+    logger.info(f"saveing solved")
     with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
@@ -190,8 +187,9 @@ def run(parameters):
         h5f['/'].attrs['times'] = np.array(times)
         h5f['/'].attrs['steps'] = np.array(steps)
         h5f['/'].attrs['overlaps'] = np.array(overlaps)
-        h5f['/'].attrs['overlaps'] = np.array(num_objs)
+        h5f['/'].attrs['num_objs'] = np.array(num_objs)
         h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
+    logger.info(f"done")
 
 
 def check_file(p):
