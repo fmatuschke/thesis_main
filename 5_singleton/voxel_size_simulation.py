@@ -61,9 +61,9 @@ helper.mplog.install_mp_handler(logger)
 
 # TODO: add noise and ref voxel size without noise
 
-PIXEL_SIZE = 1.25
+PIXEL_SIZE = 1.0
 THICKNESS = 60
-VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
+VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
 FIBER_RADII = [1.0]
 
 
@@ -223,6 +223,9 @@ def run(parameter):
                     dset['analysis/epa/' + str(t) + '/direction'] = np.rad2deg(
                         epa[1])
                     dset['analysis/epa/' + str(t) + '/retardation'] = epa[2]
+
+                del label_field
+                del vector_field
 
 
 if __name__ == "__main__":
