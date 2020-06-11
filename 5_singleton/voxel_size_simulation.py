@@ -62,7 +62,7 @@ helper.mplog.install_mp_handler(logger)
 # TODO: add noise and ref voxel size without noise
 
 PIXEL_SIZE = 1.25
-SIZE = PIXEL_SIZE * 2
+THICKNESS = 60
 VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 FIBER_RADII = [1.0]
 
@@ -86,9 +86,9 @@ def run(parameter):
     solver.obj_min_radius = radius * 2
     solver.omp_num_threads = 1
 
-    seeds = fastpli.model.sandbox.seeds.triangular_grid(SIZE * 2,
-                                                        SIZE * 2,
-                                                        2 * radius,
+    seeds = fastpli.model.sandbox.seeds.triangular_grid(THICKNESS * 2,
+                                                        THICKNESS * 2,
+                                                        1 * radius,
                                                         center=True)
 
     # pick random seeds for fiber population distribution
@@ -104,18 +104,24 @@ def run(parameter):
     vec = np.dot(rot, vec)
 
     fiber_bundles = [
-        fastpli.model.sandbox.build.cuboid(p=-0.5 * np.array([SIZE, SIZE, 75]),
-                                           q=0.5 * np.array([SIZE, SIZE, 75]),
-                                           phi=np.deg2rad(0),
-                                           theta=np.pi / 2 - np.deg2rad(f0_inc),
-                                           seeds=seeds_0,
-                                           radii=rnd_radii_0),
-        fastpli.model.sandbox.build.cuboid(p=-0.5 * np.array([SIZE, SIZE, 75]),
-                                           q=0.5 * np.array([SIZE, SIZE, 75]),
-                                           phi=np.arctan2(vec[1], vec[0]),
-                                           theta=np.arccos(vec[2]),
-                                           seeds=seeds_1 + radius,
-                                           radii=rnd_radii_1)
+        fastpli.model.sandbox.build.cuboid(
+            p=-0.5 *
+            np.array([PIXEL_SIZE * 4, PIXEL_SIZE * 4, THICKNESS * 1.25]),
+            q=0.5 *
+            np.array([PIXEL_SIZE * 4, PIXEL_SIZE * 4, THICKNESS * 1.25]),
+            phi=np.deg2rad(0),
+            theta=np.pi / 2 - np.deg2rad(f0_inc),
+            seeds=seeds_0,
+            radii=rnd_radii_0),
+        fastpli.model.sandbox.build.cuboid(
+            p=-0.5 *
+            np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
+            q=0.5 *
+            np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
+            phi=np.arctan2(vec[1], vec[0]),
+            theta=np.arccos(vec[2]),
+            seeds=seeds_1 + radius,
+            radii=rnd_radii_1)
     ]
 
     solver.fiber_bundles = fiber_bundles
@@ -136,12 +142,15 @@ def run(parameter):
     logger.info(f"run solver")
     start_time = time.time()
 
-    while (not solver.step()):
-        pass
+    for i in range(1000):
+        if solver.step():
+            break
+        # solver.draw_scene()
 
     end_time = time.time()
     fiber_bundles = solver.fiber_bundles
 
+    logger.info(f"steps: {i}")
     logger.info(f"time: {end_time - start_time}")
     logger.info(f"saveing solved")
     with h5py.File(file_pref + '.solved.h5', 'w') as h5f:
@@ -175,8 +184,8 @@ def run(parameter):
 
         for voxel_size in VOXEL_SIZES:
             simpli.voxel_size = voxel_size
-            simpli.set_voi(-0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, SIZE]),
-                           0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, SIZE]))
+            simpli.set_voi(-0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]),
+                           0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]))
 
             if simpli.memory_usage() > 1e3:
                 print(str(round(simpli.memory_usage(), 2)) + 'MB')
@@ -253,7 +262,7 @@ if __name__ == "__main__":
 
     # print(parameters[1])
 
-    # run(parameters[0])
+    # run(PSI_OMEGA_F0_F1[0])
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
