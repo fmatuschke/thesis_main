@@ -97,7 +97,7 @@ def run(parameter):
     rnd_radii_0 = radius * np.random.lognormal(0, 0.1, seeds_0.shape[0])
     rnd_radii_1 = radius * np.random.lognormal(0, 0.1, seeds_1.shape[0])
 
-    vec = np.array([0, 0, 1])
+    vec = np.array([1, 0, 0])
     rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
     rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
     rot = np.dot(rot_inc, rot_phi)
@@ -106,9 +106,9 @@ def run(parameter):
     fiber_bundles = [
         fastpli.model.sandbox.build.cuboid(
             p=-0.5 *
-            np.array([PIXEL_SIZE * 4, PIXEL_SIZE * 4, THICKNESS * 1.25]),
+            np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
             q=0.5 *
-            np.array([PIXEL_SIZE * 4, PIXEL_SIZE * 4, THICKNESS * 1.25]),
+            np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
             phi=np.deg2rad(0),
             theta=np.pi / 2 - np.deg2rad(f0_inc),
             seeds=seeds_0,
@@ -145,6 +145,19 @@ def run(parameter):
     for i in range(1000):
         if solver.step():
             break
+        if i % 50 == 0:
+            overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
+            logger.info(
+                f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
+            )
+            solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
+                solver.fiber_bundles, [
+                    -0.5 * np.array(
+                        [PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
+                    0.5 *
+                    np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25])
+                ])
+
         # solver.draw_scene()
 
     end_time = time.time()
@@ -156,13 +169,13 @@ def run(parameter):
     with h5py.File(file_pref + '.solved.h5', 'w') as h5f:
         dset = h5f.create_group(f'solver/')
         solver.save_h5(dset, script=open(os.path.abspath(__file__), 'r').read())
-        dset['/'].attrs['psi'] = psi
-        dset['/'].attrs['omega'] = omega
-        dset['/'].attrs['num_obj'] = solver.num_obj
-        dset['/'].attrs['num_steps'] = solver.num_steps
-        dset['/'].attrs['obj_mean_length'] = solver.obj_mean_length
-        dset['/'].attrs['obj_min_radius'] = solver.obj_min_radius
-        dset['/'].attrs['time'] = end_time - start_time
+        dset.attrs['psi'] = psi
+        dset.attrs['omega'] = omega
+        dset.attrs['num_obj'] = solver.num_obj
+        dset.attrs['num_steps'] = solver.num_steps
+        dset.attrs['obj_mean_length'] = solver.obj_mean_length
+        dset.attrs['obj_min_radius'] = solver.obj_min_radius
+        dset.attrs['time'] = end_time - start_time
 
         logger.info(f"generation done")
 
@@ -187,8 +200,9 @@ def run(parameter):
             simpli.set_voi(-0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]),
                            0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]))
 
-            if simpli.memory_usage() > 1e3:
+            if simpli.memory_usage() * args.num_proc > 200000:
                 print(str(round(simpli.memory_usage(), 2)) + 'MB')
+                return
 
             for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
                 dset = h5f.create_group(f'simpli/{voxel_size}/{model}')
@@ -220,8 +234,7 @@ def run(parameter):
                     # calculate modalities
                     epa = simpli.apply_epa(images)
                     dset['analysis/epa/' + str(t) + '/transmittance'] = epa[0]
-                    dset['analysis/epa/' + str(t) + '/direction'] = np.rad2deg(
-                        epa[1])
+                    dset['analysis/epa/' + str(t) + '/direction'] = epa[1]
                     dset['analysis/epa/' + str(t) + '/retardation'] = epa[2]
 
                 del label_field
