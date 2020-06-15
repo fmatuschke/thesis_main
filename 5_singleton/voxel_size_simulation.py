@@ -148,7 +148,7 @@ def run(parameter):
     logger.info(f"run solver")
     start_time = time.time()
 
-    for i in range(1000):
+    for i in range(1, 1000):
         if solver.step():
             break
 
@@ -165,7 +165,8 @@ def run(parameter):
                     np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25])
                 ])
 
-        # solver.draw_scene()
+    # solver.draw_scene()
+    # return
 
     end_time = time.time()
     fiber_bundles = solver.fiber_bundles
@@ -291,6 +292,7 @@ if __name__ == "__main__":
     parameters = list(filter(check_file, parameters))
 
     # run(parameters[0])
+    # run((1.0, 0, 90, 0))
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
