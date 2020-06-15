@@ -54,7 +54,7 @@ logging.basicConfig(
     level=logging.INFO,
     format=FORMAT,
     filename=output_name +
-    f'.{datetime.datetime.now().strftime("%d:%m:%Y-%H:%M:%S")}.log',
+    f'.{datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log',
     filemode='w')
 logger = logging.getLogger()
 helper.mplog.install_mp_handler(logger)
@@ -67,15 +67,21 @@ VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
 FIBER_RADII = [1.0]
 
 
+def get_file_pref(parameter):
+    psi, omega, f0_inc, f1_rot = parameter
+    radius = FIBER_RADII[0]
+    return output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_" \
+                               f"f0_inc_{f0_inc:.2f}_" \
+                               f"f1_rot_{f1_rot:.2f}_" \
+                               f"r_{radius:.2f}_p0_{PIXEL_SIZE:.2f}_"
+
+
 def run(parameter):
     psi, omega, f0_inc, f1_rot = parameter
     radius = FIBER_RADII[0]
 
     # generate model
-    file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_" \
-                               f"f0_inc_{f0_inc:.2f}_" \
-                               f"f1_rot_{f1_rot:.2f}_" \
-                               f"r_{radius:.2f}_p0_{PIXEL_SIZE:.2f}_"
+    file_pref = get_file_pref(parameter)
     logger.info(f"file_pref: {file_pref}")
 
     # setup solver
@@ -97,7 +103,7 @@ def run(parameter):
     rnd_radii_0 = radius * np.random.lognormal(0, 0.1, seeds_0.shape[0])
     rnd_radii_1 = radius * np.random.lognormal(0, 0.1, seeds_1.shape[0])
 
-    vec = np.array([1, 0, 0])
+    vec = np.array([np.cos(np.deg2rad(omega)), np.sin(np.deg2rad(omega)), 0])
     rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
     rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
     rot = np.dot(rot_inc, rot_phi)
@@ -135,7 +141,7 @@ def run(parameter):
             f[:, -1] *= np.random.lognormal(0, 0.05, f.shape[0])
 
     solver.fiber_bundles = fiber_bundles
-    fiber_bundles = solver.apply_boundary_conditions(100)
+    solver.apply_boundary_conditions(100)
     logger.info(f"rnd displacement: {solver.num_obj}/{solver.num_col_obj}")
 
     # Run Solver
@@ -145,6 +151,7 @@ def run(parameter):
     for i in range(1000):
         if solver.step():
             break
+
         if i % 50 == 0:
             overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
             logger.info(
@@ -166,6 +173,7 @@ def run(parameter):
     logger.info(f"steps: {i}")
     logger.info(f"time: {end_time - start_time}")
     logger.info(f"saveing solved")
+
     with h5py.File(file_pref + '.solved.h5', 'w') as h5f:
         dset = h5f.create_group(f'solver/')
         solver.save_h5(dset, script=open(os.path.abspath(__file__), 'r').read())
@@ -241,6 +249,12 @@ def run(parameter):
                 del vector_field
 
 
+def check_file(p):
+    file_pref = get_file_pref(p)
+    # print(p, not os.path.isfile(file_pref + '.solved.h5'))
+    return not os.path.isfile(file_pref + '.solved.h5')
+
+
 if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
 
@@ -255,7 +269,7 @@ if __name__ == "__main__":
     PSI_OMEGA.append((1.0, 0))
 
     FIBER_INCLINATION = np.linspace(0, 90, 10, True)
-    PSI_OMEGA_F0_F1 = []
+    parameters = []
     for (psi,
          omega), f0_inc in list(itertools.product(PSI_OMEGA,
                                                   FIBER_INCLINATION)):
@@ -265,23 +279,24 @@ if __name__ == "__main__":
                         (1 - np.cos(np.deg2rad(10))))))
 
         if n_rot == 0:
-            PSI_OMEGA_F0_F1.append((psi, omega, f0_inc, 0))
+            parameters.append((psi, omega, f0_inc, 0))
         else:
             n_rot += (n_rot + 1) % 2
             n_rot = max(n_rot, 3)
             for f1_rot in np.linspace(-180, 180, n_rot, True):
                 f1_rot = np.round(f1_rot, 2)
-                PSI_OMEGA_F0_F1.append((psi, omega, f0_inc, f1_rot))
+                parameters.append((psi, omega, f0_inc, f1_rot))
 
-    # parameters = list(
-    #     itertools.product(PSI_OMEGA_F0_F1, (VOXEL_SIZES), FIBER_RADII))
+    # filter
+    parameters = list(filter(check_file, parameters))
 
-    # print(parameters[1])
-
-    # run(PSI_OMEGA_F0_F1[0])
+    # run(parameters[0])
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
-            d for d in tqdm(pool.imap_unordered(run, PSI_OMEGA_F0_F1),
-                            total=len(PSI_OMEGA_F0_F1))
+            d for d in tqdm(pool.imap_unordered(run, parameters),
+                            total=len(parameters),
+                            smoothing=0)
         ]
+
+# sort -t- -k3.1,3.4
