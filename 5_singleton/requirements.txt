@@ -1,8 +1,0 @@
-yapf
-pylint
-tqdm
-matplotlib
-pandas
-seaborn
-tikzplotlib
-mpi4py
