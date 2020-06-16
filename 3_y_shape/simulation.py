@@ -110,7 +110,7 @@ with h5py.File(os.path.join(FILE_PATH, 'output/simulations/', h5_file_name),
                     [str(x)
                      for x in (name, gain, intensity, res, tilt_angle)])))
 
-            simpli.filter_rotations = np.deg2rad([0, 30, 60, 90, 120, 150])
+            simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
             simpli.light_intensity = intensity  # a.u.
             simpli.untilt_sensor_view = True
             simpli.wavelength = 525  # in nm

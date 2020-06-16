@@ -168,7 +168,7 @@ for file, f0_inc, f1_rot in tqdm(parameter[comm.Get_rank()::comm.Get_size()]):
                 simpli.omp_num_threads = args.threads
                 simpli.voxel_size = args.voxel_size
                 simpli.pixel_size = res
-                simpli.filter_rotations = np.deg2rad([0, 30, 60, 90, 120, 150])
+                simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
                 simpli.interpolate = True
                 simpli.wavelength = 525  # in nm
                 simpli.optical_sigma = 0.71  # in pixel size
