@@ -16,7 +16,6 @@ import helper.mpi
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
-NUM_THREADS = 1
 
 # reproducability
 np.random.seed(42)
@@ -46,6 +45,12 @@ parser.add_argument("-r",
                     default=1,
                     type=float,
                     help="mean value of fiber radius")
+
+parser.add_argument("-p",
+                    "--num_proc",
+                    type=int,
+                    required=True,
+                    help="Number of threads.")
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
@@ -81,7 +86,7 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     solver = fastpli.model.solver.Solver()
     solver.obj_mean_length = RADIUS_LOGMEAN * 2
     solver.obj_min_radius = RADIUS_LOGMEAN * 2
-    solver.omp_num_threads = NUM_THREADS
+    solver.omp_num_threads = args.num_proc
 
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
                                "{RADIUS_LOGMEAN:.2f}_v0_{SIZE:.0f}_"
