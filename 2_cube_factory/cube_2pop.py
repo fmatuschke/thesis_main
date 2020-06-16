@@ -92,10 +92,16 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
                                "{RADIUS_LOGMEAN:.2f}_v0_{SIZE:.0f}_"
     logger.info(f"file_pref: {file_pref}")
 
-    seeds = fastpli.model.sandbox.seeds.triangular_grid(SIZE * 2,
-                                                        SIZE * 2,
-                                                        2 * RADIUS_LOGMEAN,
-                                                        center=True)
+    seeds = np.random.uniform(-SIZE, SIZE, (int(
+        (2 * SIZE)**2 / (np.pi * RADIUS_LOGMEAN**2), 2)))
+    seeds = np.hstack((seeds, np.atleast_2d(np.zeros((seeds.shape[0], 1))),
+                       np.atleast_2d(RADIUS_LOGMEAN * np.ones(
+                           (seeds.shape[0], 1)))))
+
+    # seeds = fastpli.model.sandbox.seeds.triangular_grid(SIZE * 2,
+    #                                                     SIZE * 2,
+    #                                                     2 * RADIUS_LOGMEAN,
+    #                                                     center=True)
 
     # pick random seeds for fiber population distribution
     seeds_0 = seeds[np.random.rand(seeds.shape[0]) < psi, :]
