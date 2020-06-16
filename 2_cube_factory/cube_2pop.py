@@ -171,6 +171,20 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
                     0.55 * np.array([SIZE, SIZE, SIZE])
                 ])
 
+            logger.debug(f"tmp saving")
+            with h5py.File(file_pref + '.tmp.h5', 'w') as h5f:
+                solver.save_h5(h5f,
+                               script=open(os.path.abspath(__file__),
+                                           'r').read())
+                h5f['/'].attrs['psi'] = psi
+                h5f['/'].attrs['omega'] = omega
+                h5f['/'].attrs['overlap'] = overlap
+                h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
+                h5f['/'].attrs['num_obj'] = solver.num_obj
+                h5f['/'].attrs['num_steps'] = solver.num_steps
+                h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
+                h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
+
         # if i > args.max_steps / 2 and overlap <= 0.001:
         #     break
 
