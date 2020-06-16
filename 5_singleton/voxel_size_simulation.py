@@ -4,6 +4,7 @@ import itertools
 import argparse
 import logging
 import datetime
+import warnings
 import time
 import h5py
 import sys
@@ -32,6 +33,12 @@ FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
 # arguments
 parser = argparse.ArgumentParser()
+parser.add_argument("-i",
+                    "--input",
+                    nargs='+',
+                    required=True,
+                    help="input string.")
+
 parser.add_argument("-o",
                     "--output",
                     type=str,
@@ -62,147 +69,75 @@ helper.mplog.install_mp_handler(logger)
 # TODO: add noise and ref voxel size without noise
 
 PIXEL_SIZE = 1.0
-THICKNESS = 60
-VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
 FIBER_RADII = [1.0]
+THICKNESS = 60
+
+OMP_NUM_THREADS = 2
+VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+D_ROT = 10
+N_INC = 10
+
+# OMP_NUM_THREADS = 1
+# VOXEL_SIZES = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+# D_ROT = 30
+# N_INC = 4
 
 
 def get_file_pref(parameter):
-    psi, omega, f0_inc, f1_rot = parameter
-    radius = FIBER_RADII[0]
-    return output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_" \
-                               f"f0_inc_{f0_inc:.2f}_" \
-                               f"f1_rot_{f1_rot:.2f}_" \
-                               f"r_{radius:.2f}_p0_{PIXEL_SIZE:.2f}_"
+    file, f0_inc, f1_rot = parameter
+
+    base = os.path.basename(file)
+    pre = base.split("_psi_")[0]
+    omega = float(file.split("_omega_")[1].split("_")[0])
+    psi = float(file.split("_psi_")[1].split("_")[0])
+
+    return output_name + f"_{pre}_psi_{psi:.2f}_omega_{omega:.2f}_" \
+                            f"f0_inc_{f0_inc:.2f}_" \
+                            f"f1_rot_{f1_rot:.2f}_" \
+                            f"p0_{PIXEL_SIZE:.2f}_"
 
 
 def run(parameter):
-    psi, omega, f0_inc, f1_rot = parameter
+    file, f0_inc, f1_rot = parameter
     radius = FIBER_RADII[0]
 
     # generate model
     file_pref = get_file_pref(parameter)
     logger.info(f"file_pref: {file_pref}")
 
-    # setup solver
-    logger.info(f"prepair generation")
+    with h5py.File(file_pref + '.h5', 'w-') as h5f:
 
-    solver = fastpli.model.solver.Solver()
-    solver.obj_mean_length = radius * 2
-    solver.obj_min_radius = radius * 2
-    solver.omp_num_threads = 1
+        with h5py.File(file, 'r') as h5f_:
+            fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
+            # psi = h5f['/'].attrs["psi"] # FIXME
+            # omega = h5f['/'].attrs["omega"]
 
-    seeds = fastpli.model.sandbox.seeds.triangular_grid(THICKNESS * 2,
-                                                        THICKNESS * 2,
-                                                        1 * radius,
-                                                        center=True)
+        # h5f['/'].attrs['psi'] = psi
+        # h5f['/'].attrs['omega'] = omega
+        h5f['/'].attrs['f0_inc'] = f0_inc
+        h5f['/'].attrs['f1_rot'] = f1_rot
+        h5f['/'].attrs['pixel_size'] = PIXEL_SIZE
+        h5f['fiber_bundles'] = file
 
-    # pick random seeds for fiber population distribution
-    seeds_0 = seeds[np.random.rand(seeds.shape[0]) < psi, :]
-    seeds_1 = seeds[np.random.rand(seeds.shape[0]) < (1 - psi), :]
-    rnd_radii_0 = radius * np.random.lognormal(0, 0.1, seeds_0.shape[0])
-    rnd_radii_1 = radius * np.random.lognormal(0, 0.1, seeds_1.shape[0])
-
-    vec = np.array([np.cos(np.deg2rad(omega)), np.sin(np.deg2rad(omega)), 0])
-    rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
-    rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
-    rot = np.dot(rot_inc, rot_phi)
-    vec = np.dot(rot, vec)
-
-    fiber_bundles = [
-        fastpli.model.sandbox.build.cuboid(
-            p=-0.5 *
-            np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
-            q=0.5 *
-            np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
-            phi=np.deg2rad(0),
-            theta=np.pi / 2 - np.deg2rad(f0_inc),
-            seeds=seeds_0,
-            radii=rnd_radii_0),
-        fastpli.model.sandbox.build.cuboid(
-            p=-0.5 *
-            np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
-            q=0.5 *
-            np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
-            phi=np.arctan2(vec[1], vec[0]),
-            theta=np.arccos(vec[2]),
-            seeds=seeds_1 + radius,
-            radii=rnd_radii_1)
-    ]
-
-    solver.fiber_bundles = fiber_bundles
-    fiber_bundles = solver.apply_boundary_conditions(100)
-    logger.info(f"init: {solver.num_obj}/{solver.num_col_obj}")
-
-    # add rnd displacement
-    for fb in fiber_bundles:
-        for f in fb:
-            f[:, :-1] += np.random.normal(0, 0.05 * radius, (f.shape[0], 3))
-            f[:, -1] *= np.random.lognormal(0, 0.05, f.shape[0])
-
-    solver.fiber_bundles = fiber_bundles
-    solver.apply_boundary_conditions(100)
-    logger.info(f"rnd displacement: {solver.num_obj}/{solver.num_col_obj}")
-
-    # Run Solver
-    logger.info(f"run solver")
-    start_time = time.time()
-
-    for i in range(1, 1000):
-        if solver.step():
-            break
-
-        if i % 50 == 0:
-            overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
-            logger.info(
-                f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
-            )
-            solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
-                solver.fiber_bundles, [
-                    -0.5 * np.array(
-                        [PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25]),
-                    0.5 *
-                    np.array([PIXEL_SIZE * 3, PIXEL_SIZE * 3, THICKNESS * 1.25])
-                ])
-
-    # solver.draw_scene()
-    # return
-
-    end_time = time.time()
-    fiber_bundles = solver.fiber_bundles
-
-    logger.info(f"steps: {i}")
-    logger.info(f"time: {end_time - start_time}")
-    logger.info(f"saveing solved")
-
-    with h5py.File(file_pref + '.solved.h5', 'w') as h5f:
-        dset = h5f.create_group(f'solver/')
-        solver.save_h5(dset, script=open(os.path.abspath(__file__), 'r').read())
-        dset.attrs['psi'] = psi
-        dset.attrs['omega'] = omega
-        dset.attrs['num_obj'] = solver.num_obj
-        dset.attrs['num_steps'] = solver.num_steps
-        dset.attrs['obj_mean_length'] = solver.obj_mean_length
-        dset.attrs['obj_min_radius'] = solver.obj_min_radius
-        dset.attrs['time'] = end_time - start_time
-
-        logger.info(f"generation done")
+        rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
+        rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
+        rot = np.dot(rot_inc, rot_phi)
+        fiber_bundles = fastpli.objects.fiber_bundles.Rotate(fiber_bundles, rot)
 
         # Setup Simpli
         logger.info(f"prepair simulation")
         simpli = fastpli.simulation.Simpli()
-        simpli.omp_num_threads = 1
+        simpli.omp_num_threads = OMP_NUM_THREADS
         simpli.pixel_size = PIXEL_SIZE
-        simpli.sensor_gain = 0
-        simpli.optical_sigma = 0  # in voxel size
-        simpli.filter_rotations = np.deg2rad([0, 30, 60, 90, 120, 150])
+        simpli.sensor_gain = 1.5  # pm
+        simpli.optical_sigma = 0.71  # in voxel size
+        simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
         simpli.interpolate = True
         simpli.untilt_sensor_view = True
         simpli.wavelength = 525  # in nm
-
-        simpli.tilts = np.deg2rad(np.array([(0, 0)]))
-
+        simpli.light_intensity = 1  # a.u.
         simpli.fiber_bundles = fiber_bundles
+        simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
         for voxel_size in VOXEL_SIZES:
             simpli.voxel_size = voxel_size
@@ -214,20 +149,28 @@ def run(parameter):
                 return
 
             for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
+                logger.info(f"model: {model}")
                 dset = h5f.create_group(f'simpli/{voxel_size}/{model}')
 
                 simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
                                                     (1.0, dn, 0, model)]
                                                   ] * len(fiber_bundles)
 
-                label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
-                )
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", message="objects overlap")
+                    label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
+                    )
+
+                unique_elements, counts_elements = np.unique(label_field,
+                                                             return_counts=True)
+                dset.attrs['label_field_stats'] = np.asarray(
+                    (unique_elements, counts_elements))
 
                 # Simulate PLI Measurement
-                simpli.light_intensity = 1  # a.u.
                 simpli.save_parameter_h5(h5f=dset)
                 for t, tilt in enumerate(simpli._tilts):
                     theta, phi = tilt[0], tilt[1]
+                    logger.info(f"simulation: {theta}, {phi}")
                     images = simpli.run_simulation(label_field, vector_field,
                                                    tissue_properties, theta,
                                                    phi)
@@ -239,12 +182,16 @@ def run(parameter):
                     # apply optic to simulation
                     images = simpli.apply_optic(images)
                     dset['simulation/optic/' + str(t)] = images
+                    dset['simulation/optic/' + str(t)].attrs['theta'] = theta
+                    dset['simulation/optic/' + str(t)].attrs['phi'] = phi
 
                     # calculate modalities
                     epa = simpli.apply_epa(images)
                     dset['analysis/epa/' + str(t) + '/transmittance'] = epa[0]
                     dset['analysis/epa/' + str(t) + '/direction'] = epa[1]
                     dset['analysis/epa/' + str(t) + '/retardation'] = epa[2]
+                    dset['analysis/epa/' + str(t)].attrs['theta'] = theta
+                    dset['analysis/epa/' + str(t)].attrs['phi'] = phi
 
                 del label_field
                 del vector_field
@@ -252,41 +199,33 @@ def run(parameter):
 
 def check_file(p):
     file_pref = get_file_pref(p)
-    # print(p, not os.path.isfile(file_pref + '.solved.h5'))
-    return not os.path.isfile(file_pref + '.solved.h5')
+    return not os.path.isfile(file_pref + '.h5')
 
 
 if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
 
-    # VOXEL_SIZES = [
-    #     0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.12,
-    #     0.14, 0.16, 0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5
-    # ]
+    file_list = args.input
 
-    PSI = [0.25, 0.5]  # fiber fraction: PSI * f0 + (1-PSI) * f1
-    OMEGA = [45, 90]  # angle of opening (f0, f1)
-    PSI_OMEGA = list(itertools.product(PSI, OMEGA))
-    PSI_OMEGA.append((1.0, 0))
-
-    FIBER_INCLINATION = np.linspace(0, 90, 10, True)
+    inclinations = np.linspace(0, 90, N_INC, True)
     parameters = []
-    for (psi,
-         omega), f0_inc in list(itertools.product(PSI_OMEGA,
-                                                  FIBER_INCLINATION)):
+    for file, f0_inc in list(itertools.product(file_list, inclinations)):
+        omega = float(file.split("_omega_")[1].split("_")[0])
+        psi = float(file.split("_psi_")[1].split("_")[0])
+
         n_rot = int(
             np.round(
                 np.sqrt((1 - np.cos(2 * np.deg2rad(omega))) /
-                        (1 - np.cos(np.deg2rad(10))))))
+                        (1 - np.cos(np.deg2rad(D_ROT))))))  # TODO more angles
 
         if n_rot == 0:
-            parameters.append((psi, omega, f0_inc, 0))
+            parameters.append((file, f0_inc, 0))
         else:
             n_rot += (n_rot + 1) % 2
             n_rot = max(n_rot, 3)
             for f1_rot in np.linspace(-180, 180, n_rot, True):
                 f1_rot = np.round(f1_rot, 2)
-                parameters.append((psi, omega, f0_inc, f1_rot))
+                parameters.append((file, f0_inc, f1_rot))
 
     # filter
     parameters = list(filter(check_file, parameters))
