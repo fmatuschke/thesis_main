@@ -61,7 +61,7 @@ logging.basicConfig(
     level=logging.INFO,
     format=FORMAT,
     filename=output_name +
-    f'.{datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log',
+    f'.{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log',
     filemode='w')
 logger = logging.getLogger()
 helper.mplog.install_mp_handler(logger)
@@ -73,7 +73,7 @@ FIBER_RADII = [1.0]
 THICKNESS = 60
 
 OMP_NUM_THREADS = 2
-VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
 N_INC = 10
 
@@ -135,7 +135,7 @@ def run(parameter):
         simpli.interpolate = True
         simpli.untilt_sensor_view = True
         simpli.wavelength = 525  # in nm
-        simpli.light_intensity = 1  # a.u.
+        simpli.light_intensity = 50000  # a.u.
         simpli.fiber_bundles = fiber_bundles
         simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
@@ -143,6 +143,7 @@ def run(parameter):
             simpli.voxel_size = voxel_size
             simpli.set_voi(-0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]),
                            0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]))
+            simpli.dim_origin = [10, 10, -0.5 * THICKNESS]
 
             if simpli.memory_usage() * args.num_proc > 200000:
                 print(str(round(simpli.memory_usage(), 2)) + 'MB')

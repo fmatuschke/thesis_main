@@ -60,12 +60,10 @@ def run(file):
         for voxel_size in h5f['simpli']:
             for model in h5f[f'simpli/{voxel_size}']:
                 h5f_sub = h5f[f'simpli/{voxel_size}/{model}']
-
                 df.append(
                     pd.DataFrame([[
                         float(voxel_size), model, omega, psi, f0_inc, f1_rot,
-                        radius, pixel_size,
-                        h5f_sub['simulation/data/0'][...].ravel(),
+                        radius, pixel_size, h5f_sub['simulation/data/0'][...],
                         h5f_sub['simulation/optic/0'][...].ravel(),
                         h5f_sub['analysis/epa/0/transmittance'][...].ravel(),
                         h5f_sub['analysis/epa/0/direction'][...].ravel(),
