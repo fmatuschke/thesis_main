@@ -156,6 +156,8 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
 
     # Run Solver
     logger.info(f"run solver")
+    solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
+        solver.fiber_bundles, 0.55 * SIZE)
     for i in tqdm(range(1, args.max_steps)):
         if solver.step():
             break
@@ -165,11 +167,6 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
             logger.info(
                 f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
             )
-            solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
-                solver.fiber_bundles, [
-                    -0.55 * np.array([SIZE, SIZE, SIZE]),
-                    0.55 * np.array([SIZE, SIZE, SIZE])
-                ])
 
             logger.debug(f"tmp saving")
             with h5py.File(file_pref + '.tmp.h5', 'w') as h5f:
@@ -184,6 +181,9 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
                 h5f['/'].attrs['num_steps'] = solver.num_steps
                 h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
                 h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
+
+        solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
+            solver.fiber_bundles, 0.55 * SIZE)
 
         # if i > args.max_steps / 2 and overlap <= 0.001:
         #     break
