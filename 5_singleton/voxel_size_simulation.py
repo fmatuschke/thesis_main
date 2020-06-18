@@ -78,7 +78,7 @@ D_ROT = 10
 N_INC = 10
 
 # OMP_NUM_THREADS = 1
-# VOXEL_SIZES = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+# VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
 # D_ROT = 30
 # N_INC = 4
 
@@ -203,6 +203,27 @@ def check_file(p):
     return not os.path.isfile(file_pref + '.h5')
 
 
+def f0_incs(n=10):
+    return np.linspace(0, np.pi / 2, n, True)
+
+
+def omega_rotations(omega, dphi=np.deg2rad(10)):
+
+    rot = []
+
+    n_rot = int(np.round(np.sqrt((1 - np.cos(2 * omega)) / (1 - np.cos(dphi)))))
+    if n_rot == 0:
+        rot.append(0)
+    else:
+        n_rot += (n_rot + 1) % 2
+        n_rot = max(n_rot, 3)
+        for f_rot in np.linspace(-180, 180, n_rot, True):
+            f_rot = np.round(f_rot, 2)
+            rot.append(f_rot)
+
+    return rot
+
+
 if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
 
@@ -210,23 +231,11 @@ if __name__ == "__main__":
 
     inclinations = np.linspace(0, 90, N_INC, True)
     parameters = []
-    for file, f0_inc in list(itertools.product(file_list, inclinations)):
+    for file, f0_inc in list(itertools.product(file_list, f0_incs(10))):
         omega = float(file.split("_omega_")[1].split("_")[0])
-        psi = float(file.split("_psi_")[1].split("_")[0])
 
-        n_rot = int(
-            np.round(
-                np.sqrt((1 - np.cos(2 * np.deg2rad(omega))) /
-                        (1 - np.cos(np.deg2rad(D_ROT))))))  # TODO more angles
-
-        if n_rot == 0:
-            parameters.append((file, f0_inc, 0))
-        else:
-            n_rot += (n_rot + 1) % 2
-            n_rot = max(n_rot, 3)
-            for f1_rot in np.linspace(-180, 180, n_rot, True):
-                f1_rot = np.round(f1_rot, 2)
-                parameters.append((file, f0_inc, f1_rot))
+        for f1_rot in omega_rotations(omega):
+            parameters.append((file, f0_inc, f1_rot))
 
     # filter
     parameters = list(filter(check_file, parameters))
