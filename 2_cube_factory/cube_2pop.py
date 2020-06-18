@@ -46,6 +46,8 @@ parser.add_argument("-r",
                     type=float,
                     help="mean value of fiber radius")
 
+parser.add_argument("-v", "--volume", default=1, type=int, help="volume size")
+
 parser.add_argument("-p",
                     "--num_proc",
                     type=int,
@@ -68,7 +70,8 @@ logger.addHandler(mh)
 logger.info("args: " + " ".join(sys.argv[1:]))
 
 # Fiber Model
-SIZE = 105  # to rotate a 60 um cube inside 120*sqrt(3)
+SIZE = args.volume
+# SIZE = 105  # to rotate a 60 um cube inside 120*sqrt(3)
 # SIZE = 210  # to rotate a 120 um cube inside 120*sqrt(3)
 RADIUS_LOGMEAN = args.fiber_radius
 PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
