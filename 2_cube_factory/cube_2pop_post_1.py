@@ -19,13 +19,20 @@ parser.add_argument("-i",
                     type=str,
                     nargs='+',
                     required=True,
-                    help="input path path of solver.")
+                    help="input path of solver.")
 
 parser.add_argument("-o",
                     "--output",
                     type=str,
                     required=True,
-                    help="output path path of solver.")
+                    help="output path of images.")
+
+parser.add_argument("-v",
+                    "--volume",
+                    type=str,
+                    required=True,
+                    help="cutting volume size.")
+
 args = parser.parse_args()
 
 os.makedirs(args.output, exist_ok=True)
@@ -54,7 +61,8 @@ def run(file):
     #         fbs_ = fastpli.objects.fiber_bundles.Cut(fbs_,
     #                                                  [[-30] * 3, [30] * 3])
 
-    fbs = fastpli.objects.fiber_bundles.Cut(fbs, [[-30] * 3, [30] * 3])
+    fbs = fastpli.objects.fiber_bundles.Cut(
+        fbs, [[-args.output / 2] * 3, [args.output / 2] * 3])
 
     solver.fiber_bundles = fbs
     solver.draw_scene()
