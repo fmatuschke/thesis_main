@@ -52,7 +52,7 @@ def run(file):
         os.path.splitext(os.path.basename(file))[0] + ".pkl")
 
     if os.path.isfile(output_file):
-        warnings.warn("File already exsts")
+        warnings.warn("File already exits")
         return
 
     fbs = fastpli.io.fiber_bundles.load(file)
@@ -84,48 +84,28 @@ def run(file):
             }
 
     df = []
-    if state == "init":
-        f0_inc = 0
-        f1_rot = 0
+    for f0_inc in f0_incs():
+        for f1_rot in omega_rotations(omega):
+            rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
+            rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
+            rot = np.dot(rot_inc, rot_phi)
+            fbs_ = fastpli.objects.fiber_bundles.Rotate(fbs, rot)
 
-        fbs_ = fbs.copy()
-        for v in [120, 60]:  # ascending order!
-            fbs_ = fastpli.objects.fiber_bundles.Cut(
-                fbs_, [[-v / 2] * 3, [v / 2] * 3])
-            phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
+            for v in [120, 60]:  # ascending order!
+                fbs_ = fastpli.objects.fiber_bundles.Cut(
+                    fbs_, [[-v / 2] * 3, [v / 2] * 3])
+                phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
 
-            df.append(
-                pd.DataFrame(
-                    [[
+                df.append(
+                    pd.DataFrame([[
                         f0_inc, f1_rot, v, meta,
                         phi.astype(np.float32).ravel(),
                         theta.astype(np.float32).ravel()
                     ]],
-                    columns=["f0_inc", "f1_rot", "v", "meta", "phi", "theta"]))
-    else:
-        for f0_inc in f0_incs():
-            for f1_rot in omega_rotations(omega):
-                rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
-                rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
-                rot = np.dot(rot_inc, rot_phi)
-                fbs_ = fastpli.objects.fiber_bundles.Rotate(fbs, rot)
-
-                for v in [120, 60]:  # ascending order!
-                    fbs_ = fastpli.objects.fiber_bundles.Cut(
-                        fbs_, [[-v / 2] * 3, [v / 2] * 3])
-                    phi, theta = fastpli.analysis.orientation.fiber_bundles(
-                        fbs_)
-
-                    df.append(
-                        pd.DataFrame([[
-                            f0_inc, f1_rot, v, meta,
-                            phi.astype(np.float32).ravel(),
-                            theta.astype(np.float32).ravel()
-                        ]],
-                                     columns=[
-                                         "f0_inc", "f1_rot", "v", "meta", "phi",
-                                         "theta"
-                                     ]))
+                                 columns=[
+                                     "f0_inc", "f1_rot", "v", "meta", "phi",
+                                     "theta"
+                                 ]))
 
     df = pd.concat(df, ignore_index=True)
     df.to_pickle(output_file)
