@@ -20,7 +20,7 @@ sbatch cube_2pop_jureca.sh
 ```
 
 ```sh
-python3 cube_2pop_post_0.py -i ../data/models/1_rnd_seed/*.h5 -o output/models/1_rnd_seed/ -p 24 # 25min, 20Gb
+python3 cube_2pop_post_0.py -i ../data/models/1_rnd_seed/*.h5 -o output/models/1_rnd_seed/ -p 32 # 25min, 20Gb
 ```
 
 ## cube_2pop_statistic

@@ -6,6 +6,7 @@ import numpy as np
 import multiprocessing as mp
 import argparse
 import warnings
+import copy
 import h5py
 import glob
 import gc
@@ -83,13 +84,23 @@ def run(file):
                 }
             }
 
+    if state == "init":
+        f0_list = [0]
+        f1_list = [0]
+    else:
+        f0_list = f0_incs()
+        f1_list = omega_rotations(omega)
+
     df = []
-    for f0_inc in f0_incs():
-        for f1_rot in omega_rotations(omega):
-            rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
-            rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
-            rot = np.dot(rot_inc, rot_phi)
-            fbs_ = fastpli.objects.fiber_bundles.Rotate(fbs, rot)
+    for f0_inc in f0_list:
+        for f1_rot in f1_list:
+            if f0_inc != 0 or f1_rot != 0:
+                rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
+                rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
+                rot = np.dot(rot_inc, rot_phi)
+                fbs_ = fastpli.objects.fiber_bundles.Rotate(fbs, rot)
+            else:
+                fbs_ = copy.deepcopy(fbs)
 
             for v in [120, 60]:  # ascending order!
                 fbs_ = fastpli.objects.fiber_bundles.Cut(
