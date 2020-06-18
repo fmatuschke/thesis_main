@@ -29,7 +29,7 @@ parser.add_argument("-o",
 
 parser.add_argument("-v",
                     "--volume",
-                    type=str,
+                    type=float,
                     required=True,
                     help="cutting volume size.")
 
@@ -62,7 +62,7 @@ def run(file):
     #                                                  [[-30] * 3, [30] * 3])
 
     fbs = fastpli.objects.fiber_bundles.Cut(
-        fbs, [[-args.output / 2] * 3, [args.output / 2] * 3])
+        fbs, [[-args.volume / 2] * 3, [args.volume / 2] * 3])
 
     solver.fiber_bundles = fbs
     solver.draw_scene()
