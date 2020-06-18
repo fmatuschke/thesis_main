@@ -8,6 +8,7 @@ import argparse
 import sys
 import os
 import pandas as pd
+import multiprocessing as mp
 
 from tqdm import tqdm
 
@@ -30,11 +31,14 @@ args = parser.parse_args()
 os.makedirs(args.output, exist_ok=True)
 
 solver = fastpli.model.solver.Solver()
-# solver.toggle_axis()
 
-# df = pd.read_pickle("output/analysis/cube_2pop_simulation_LAP_model_p_.pkl")
 
-for file in tqdm(args.input):
+def run(file):
+    # solver.toggle_axis()
+
+    # df = pd.read_pickle("output/analysis/cube_2pop_simulation_LAP_model_p_.pkl")
+
+    # for file in tqdm(args.input):
     fbs = fastpli.io.fiber_bundles.load(file)
 
     # omega = float((file.split("omega_")[-1]).split("_")[0])
@@ -50,11 +54,21 @@ for file in tqdm(args.input):
     #         fbs_ = fastpli.objects.fiber_bundles.Cut(fbs_,
     #                                                  [[-30] * 3, [30] * 3])
 
+    fbs = fastpli.objects.fiber_bundles.Cut(fbs, [[-30] * 3, [30] * 3])
+
     solver.fiber_bundles = fbs
     solver.draw_scene()
 
-    file = os.path.join(args.output,
+    file = os.path.join(os.path.abspath(args.output),
                         os.path.splitext(os.path.basename(file))[0])
-    solver.save_ppm(os.path.splitext(file)[0] + ".ppm")
-    subprocess.run(
-        ["convert", file + ".ppm", file + ".png", "&&", "rm", file + ".ppm"])
+    solver.save_ppm(file + ".ppm")
+    subprocess.run(f"convert {file}.ppm {file}.png && rm {file}.ppm",
+                   shell=True,
+                   check=True)
+
+
+with mp.Pool(processes=4) as pool:
+    [
+        f for f in tqdm(pool.imap_unordered(run, args.input),
+                        total=len(args.input))
+    ]
