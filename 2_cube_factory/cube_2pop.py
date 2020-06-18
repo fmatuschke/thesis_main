@@ -68,7 +68,8 @@ logger.addHandler(mh)
 logger.info("args: " + " ".join(sys.argv[1:]))
 
 # Fiber Model
-SIZE = 210  # to rotate a 120 um cube inside
+SIZE = 105  # to rotate a 60 um cube inside 120*sqrt(3)
+# SIZE = 210  # to rotate a 120 um cube inside 120*sqrt(3)
 RADIUS_LOGMEAN = args.fiber_radius
 PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
        0.9]  # fiber fraction: PSI * f0 + (1-PSI) * f1
