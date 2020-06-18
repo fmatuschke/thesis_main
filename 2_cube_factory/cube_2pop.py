@@ -89,7 +89,7 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
     solver.omp_num_threads = args.num_proc
 
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
-                               "{RADIUS_LOGMEAN:.2f}_v0_{SIZE:.0f}_"
+                               f"{RADIUS_LOGMEAN:.2f}_v0_{SIZE:.0f}_"
     logger.info(f"file_pref: {file_pref}")
 
     seeds = np.random.uniform(-SIZE, SIZE, (int(
