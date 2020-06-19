@@ -5,6 +5,7 @@ import fastpli.io
 
 import numpy as np
 import argparse
+import datetime
 import logging
 import time
 import h5py
@@ -61,7 +62,7 @@ os.makedirs(args.output, exist_ok=True)
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
-log_file = output_name + ".log"
+log_file = output_name + f'.{datetime.datetime.now().strftime("%d:%m:%Y-%H:%M:%S")}.log'
 mh = helper.mpi.FileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')

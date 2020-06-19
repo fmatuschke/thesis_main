@@ -55,7 +55,6 @@ os.makedirs(args.output, exist_ok=True)
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
-log_file = output_name + f'.log'
 if comm.rank == 0:
     log_file = output_name + f'.{datetime.datetime.now().strftime("%d:%m:%Y-%H:%M:%S")}.log'
 else:
