@@ -19,7 +19,7 @@ parser.add_argument("-i",
                     type=str,
                     nargs='+',
                     required=True,
-                    help="input path of solver.")
+                    help="input files.")
 
 parser.add_argument("-o",
                     "--output",

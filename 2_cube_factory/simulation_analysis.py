@@ -18,6 +18,8 @@ import fastpli.io
 import fastpli.analysis
 import fastpli.tools
 import fastpli.objects
+''' OLD VISUALIZATION ???
+'''
 
 out_file = "output/analysis/"
 for device in ["pm", "lap"]:

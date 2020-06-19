@@ -145,6 +145,7 @@ if __name__ == "__main__":
             parameter[comm.Get_rank()::comm.Get_size()]):
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
+        file_name += f'_vs_{args.voxel_size:.4f}'
         file_name += f'_inc_{f0_inc:.2f}'
         file_name += f'_rot_{f1_rot:.2f}'
         file_name = os.path.join(args.output, file_name)

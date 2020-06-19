@@ -150,9 +150,9 @@ def tikz_sphere(x,
 
 if __name__ == "__main__":
 
-    sim_path = "output/simulation/*.h5"
-    ana_file = "output/analysis/"
-    out_path = "output/images/spheres/"
+    sim_path = "output/1_rnd_seed/simulation/*.h5"
+    ana_file = "output/1_rnd_seed/analysis/"
+    out_path = "output/1_rnd_seed/images/spheres/"
 
     os.makedirs(out_path, exist_ok=True)
 
