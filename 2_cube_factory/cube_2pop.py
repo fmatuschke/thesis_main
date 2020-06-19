@@ -148,6 +148,8 @@ for psi, omega in tqdm(PARAMETER[comm.Get_rank()::comm.Get_size()]):
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['omega'] = omega
+        h5f['/'].attrs['v0'] = SIZE
+        h5f['/'].attrs['r'] = RADIUS_LOGMEAN
         # print("OTHER META DATA?")
         # h5f['/'].attrs['overlap'] = overlap
         # h5f['/'].attrs['num_col_obj'] = solver.num_col_obj

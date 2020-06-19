@@ -19,31 +19,11 @@ from tqdm import tqdm
 
 # from simulation_repeat import run_simulation_pipeline_n
 import helper.mpi
+import fibers
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 import multiprocessing as mp
-
-
-def f0_incs(n=10):
-    return np.linspace(0, np.pi / 2, n, True)
-
-
-def omega_rotations(omega, dphi=np.deg2rad(10)):
-
-    rot = []
-
-    n_rot = int(np.round(np.sqrt((1 - np.cos(2 * omega)) / (1 - np.cos(dphi)))))
-    if n_rot == 0:
-        rot.append(0)
-    else:
-        n_rot += (n_rot + 1) % 2
-        n_rot = max(n_rot, 3)
-        for f_rot in np.linspace(-180, 180, n_rot, True):
-            f_rot = np.round(f_rot, 2)
-            rot.append(f_rot)
-
-    return rot
 
 
 if __name__ == "__main__":
@@ -131,14 +111,14 @@ if __name__ == "__main__":
 
     # simulation loop
     parameter = []
-    fiber_inc = [(f, i) for f in file_list for i in f0_incs()]
+    fiber_inc = [(f, i) for f in file_list for i in fibers.inclinations()]
     for file, f0_inc in fiber_inc:
         logger.info(f"input file: {file}")
 
         with h5py.File(file, 'r') as h5f:
             omega = h5f['/'].attrs["omega"]
 
-        for f1_rot in omega_rotations(omega):
+        for f1_rot in fibers.omega_rotations(omega):
             parameter.append((file, f0_inc, f1_rot))
 
     for file, f0_inc, f1_rot in tqdm(

@@ -6,7 +6,6 @@ import numpy as np
 import multiprocessing as mp
 import argparse
 import warnings
-import copy
 import h5py
 import glob
 import gc
@@ -21,8 +20,7 @@ import fastpli.objects
 import fastpli.analysis
 
 import helper.file
-from simulation import f0_incs
-from simulation import omega_rotations
+import fibers
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -55,8 +53,9 @@ def run(file):
     if os.path.isfile(output_file):
         warnings.warn("File already exits")
         return
-
     fbs = fastpli.io.fiber_bundles.load(file)
+    r = helper.file.value(file, "r")
+    v0 = helper.file.value(file, "v0")
     with h5py.File(file, "r") as h5f:
         omega = h5f['/'].attrs['omega']
         psi = h5f['/'].attrs['psi']
@@ -88,34 +87,24 @@ def run(file):
         f0_list = [0]
         f1_list = [0]
     else:
-        f0_list = f0_incs()
-        f1_list = omega_rotations(omega)
+        f0_list = fibers.inclinations()
+        f1_list = fibers.omega_rotations(omega)
 
     df = []
     for f0_inc in f0_list:
         for f1_rot in f1_list:
-            if f0_inc != 0 or f1_rot != 0:
-                rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
-                rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
-                rot = np.dot(rot_inc, rot_phi)
-                fbs_ = fastpli.objects.fiber_bundles.Rotate(fbs, rot)
-            else:
-                fbs_ = copy.deepcopy(fbs)
-
-            for v in [120, 60]:  # ascending order!
-                fbs_ = fastpli.objects.fiber_bundles.Cut(
-                    fbs_, [[-v / 2] * 3, [v / 2] * 3])
-                phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
+            # for v in [120, 60]:  # ascending order!
+            for v in [60]:  # ascending order!
+                phi, theta = fibers.ori_from_fbs(fbs, omega, f0_inc, f1_rot, v)
 
                 df.append(
                     pd.DataFrame([[
-                        f0_inc, f1_rot, v, meta,
-                        phi.astype(np.float32).ravel(),
-                        theta.astype(np.float32).ravel()
+                        f0_inc, f1_rot, v0, v, r, meta, phi, theta,
+                        os.path.abspath(file)
                     ]],
                                  columns=[
-                                     "f0_inc", "f1_rot", "v", "meta", "phi",
-                                     "theta"
+                                     "f0_inc", "f1_rot", "v0", "v", "r", "meta",
+                                     "phi", "theta", "file"
                                  ]))
 
     df = pd.concat(df, ignore_index=True)
