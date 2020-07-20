@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import argparse
 import h5py
 import os
 import sys
@@ -18,6 +19,14 @@ import fastpli.io
 import fastpli.tools
 import fastpli.objects
 import fastpli.analysis
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-i",
+                    "--input",
+                    type=str,
+                    required=True,
+                    help="Path of files.")
+args = parser.parse_args()
 
 
 def _nx2_dat(x, y, file, info=None):
@@ -118,7 +127,7 @@ if __name__ == "__main__":
     os.makedirs(out_path, exist_ok=True)
 
     hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
-    df = pd.read_pickle(os.path.join("output/vs__2/voxel_size_simulation.pkl"))
+    df = pd.read_pickle(args.input)
     for model in df.model.unique():
         fig, axs = plt.subplots(len(df.f0_inc.unique()),
                                 len(df.voxel_size.unique()),

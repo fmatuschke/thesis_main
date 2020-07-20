@@ -36,10 +36,11 @@ fastpli-pull:
 .ONESHELL:
 fastpli/setup: fastpli/
 	cd fastpli
+	rm -r build/
 	make fastpli
 
 .PHONY: fastpli
-fastpli: env git-submodules fastpli/setup
+fastpli: env env-update git-submodules fastpli/setup
 	$(PIP) uninstall fastpli -y -q
 	$(PIP) install fastpli/.
 
