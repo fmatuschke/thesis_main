@@ -68,19 +68,13 @@ helper.mplog.install_mp_handler(logger)
 
 # TODO: add noise and ref voxel size without noise
 
-PIXEL_SIZE = 1.0
-FIBER_RADII = [1.0]
-THICKNESS = 60
-
 OMP_NUM_THREADS = 16
 VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
 N_INC = 10
-
-# OMP_NUM_THREADS = 1
-# VOXEL_SIZES = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
-# D_ROT = 30
-# N_INC = 4
+PIXEL_SIZE = VOXEL_SIZES[-1]
+FIBER_RADII = [1.0]
+THICKNESS = 60
 
 
 def get_file_pref(parameter):
@@ -106,7 +100,7 @@ def run(parameter):
     logger.info(f"file_pref: {file_pref}")
 
     with h5py.File(file_pref + '.h5', 'w-') as h5f:
-        
+
         h5f['script'] = open(os.path.abspath(__file__), 'r').read()
 
         with h5py.File(file, 'r') as h5f_:
