@@ -72,8 +72,8 @@ PIXEL_SIZE = 1.0
 FIBER_RADII = [1.0]
 THICKNESS = 60
 
-OMP_NUM_THREADS = 2
-VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+OMP_NUM_THREADS = 16
+VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
 N_INC = 10
 
@@ -106,6 +106,8 @@ def run(parameter):
     logger.info(f"file_pref: {file_pref}")
 
     with h5py.File(file_pref + '.h5', 'w-') as h5f:
+        
+        h5f['script'] = open(os.path.abspath(__file__), 'r').read()
 
         with h5py.File(file, 'r') as h5f_:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
@@ -204,7 +206,7 @@ def check_file(p):
 
 
 def f0_incs(n=10):
-    return np.linspace(0, np.pi / 2, n, True)
+    return np.linspace(0, 90, n, True)
 
 
 def omega_rotations(omega, dphi=np.deg2rad(10)):
@@ -226,10 +228,10 @@ def omega_rotations(omega, dphi=np.deg2rad(10)):
 
 if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
+    logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
     file_list = args.input
 
-    inclinations = np.linspace(0, 90, N_INC, True)
     parameters = []
     for file, f0_inc in list(itertools.product(file_list, f0_incs(10))):
         omega = float(file.split("_omega_")[1].split("_")[0])
