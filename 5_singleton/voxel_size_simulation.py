@@ -84,13 +84,11 @@ logging.basicConfig(
 logger = logging.getLogger()
 helper.mplog.install_mp_handler(logger)
 
-# TODO: add noise and ref voxel size without noise
-
 VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
 N_INC = 10
-PIXEL_SIZE = VOXEL_SIZES[-1]
+PIXEL_SIZE = 1.25  # PM
 THICKNESS = 60
 
 
@@ -103,9 +101,9 @@ def get_file_pref(parameter):
     psi = float(file.split("_psi_")[1].split("_")[0])
 
     return output_name + f"_{pre}_psi_{psi:.2f}_omega_{omega:.2f}_" \
-                            f"f0_inc_{f0_inc:.2f}_" \
-                            f"f1_rot_{f1_rot:.2f}_" \
-                            f"p0_{PIXEL_SIZE:.2f}_"
+        f"f0_inc_{f0_inc:.2f}_" \
+        f"f1_rot_{f1_rot:.2f}_" \
+        f"p0_{PIXEL_SIZE:.2f}_"
 
 
 def run(parameter):
@@ -121,11 +119,11 @@ def run(parameter):
 
         with h5py.File(file, 'r') as h5f_:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
-            # psi = h5f['/'].attrs["psi"] # FIXME
-            # omega = h5f['/'].attrs["omega"]
+            psi = h5f_['/'].attrs["psi"]
+            omega = h5f_['/'].attrs["omega"]
 
-        # h5f['/'].attrs['psi'] = psi
-        # h5f['/'].attrs['omega'] = omega
+        h5f['/'].attrs['psi'] = psi
+        h5f['/'].attrs['omega'] = omega
         h5f['/'].attrs['f0_inc'] = f0_inc
         h5f['/'].attrs['f1_rot'] = f1_rot
         h5f['/'].attrs['pixel_size'] = PIXEL_SIZE
@@ -142,8 +140,8 @@ def run(parameter):
             simpli = fastpli.simulation.Simpli()
             simpli.omp_num_threads = args.num_threads
             simpli.pixel_size = PIXEL_SIZE
-            simpli.sensor_gain = 1.5  # pm
-            # simpli.optical_sigma = 0.71  # in voxel size
+            # simpli.sensor_gain = 1.5  # pm
+            simpli.optical_sigma = 0.71  # in voxel size
             simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
             simpli.interpolate = True
             simpli.untilt_sensor_view = True
@@ -199,9 +197,9 @@ def run(parameter):
 
                         for m in range(args.repeat_noise):
                             if m == 0:
-                                simpli.optical_sigma = 0  # in voxel size
+                                simpli.sensor_gain = 0
                             else:
-                                simpli.optical_sigma = 0.71  # in voxel size
+                                simpli.sensor_gain = 1.5
                             # apply optic to simulation
                             images_ = simpli.apply_optic(images)
                             dset[f'simulation/optic/{t}/{m}'] = images_
