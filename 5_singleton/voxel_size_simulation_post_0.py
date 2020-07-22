@@ -28,22 +28,22 @@ args = parser.parse_args()
 
 
 def run(file):
-    omega = float(file.split("_omega_")[1].split("_")[0])
-    psi = float(file.split("_psi_")[1].split("_")[0])
+    # omega = float(file.split("_omega_")[1].split("_")[0])
+    # psi = float(file.split("_psi_")[1].split("_")[0])
 
     df = []
     with h5py.File(file, 'r') as h5f:
-        # FIXME
-        # omega = h5f['/'].attrs['omega']
-        # psi = h5f['/'].attrs['psi']
+        omega = h5f['/'].attrs['omega']
+        psi = h5f['/'].attrs['psi']
         # radius = h5f['/'].attrs['radius']
         f0_inc = h5f['/'].attrs['f0_inc']
         f1_rot = h5f['/'].attrs['f1_rot']
         pixel_size = h5f['/'].attrs['pixel_size']
         with h5py.File(str(h5f['fiber_bundles'][...]), 'r') as h5f_:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
-            # psi = h5f['/'].attrs["psi"] # FIXME
-            # omega = h5f['/'].attrs["omega"]
+            if h5f['/'].attrs["psi"] != psi or omega == h5f['/'].attrs[
+                    "omega"] != omega:
+                raise ValueError("FAIL")
 
         rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
         rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
@@ -104,15 +104,15 @@ def run(file):
                                     "f_theta"
                                 ]))
 
-    return df
+    return pd.concat(df, ignore_index=True)
 
 
 files = glob.glob(os.path.join(args.input, "*.h5"))
 
 with mp.Pool(processes=args.num_proc) as pool:
     df = [
-        item for sub in tqdm(pool.imap_unordered(run, files), total=len(files))
-        for item in sub
+        sub for sub in tqdm(pool.imap_unordered(run, files), total=len(files))
+        # for item in sub
     ]
 df = pd.concat(df, ignore_index=True)
 df.to_pickle(os.path.join(args.input, "voxel_size_simulation.pkl"))
