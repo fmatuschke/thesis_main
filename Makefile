@@ -24,24 +24,28 @@ git-submodules:
 	git submodule update --init --recursive
 	cd fastpli
 	git checkout development
+	git pull
 	cd ..
 	cd fastpli_paper
 	git checkout master
+	git pull
 	cd ..
 	cd fastpli_wiki
 	git checkout master
+	git pull
 	cd ..
 	cd thesis
 	git checkout master
+	git pull
 	
 # FASTPLI
-.PHONY: fastpli-pull
-.Oneshell:
-fastpli-pull:
-	cd fastpli
-	git pull origin development
-	cd ..
-	git add fastpli
+# .PHONY: fastpli-pull
+# .Oneshell:
+# fastpli-pull:
+# 	cd fastpli
+# 	git pull origin development
+# 	cd ..
+# 	git add fastpli
 
 .PHONY: fastpli/setup
 .ONESHELL:
