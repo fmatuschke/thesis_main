@@ -19,11 +19,22 @@ env-update: env
 	$(PIP) install -r requirements.txt -q
 	$(PIP) install 0_core/. -q
 
-# FASTPLI
 .PHONY: git-submodules
 git-submodules:
 	git submodule update --init --recursive
-
+	cd fastpli
+	git checkout development
+	cd ..
+	cd fastpli_paper
+	git checkout master
+	cd ..
+	cd fastpli_wiki
+	git checkout master
+	cd ..
+	cd thesis
+	git checkout master
+	
+# FASTPLI
 .PHONY: fastpli-pull
 .Oneshell:
 fastpli-pull:
