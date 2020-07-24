@@ -118,11 +118,11 @@ def run(parameter):
             psi = h5f_['/'].attrs["psi"]
             omega = h5f_['/'].attrs["omega"]
 
-        h5f['/'].attrs['psi'] = psi
-        h5f['/'].attrs['omega'] = omega
-        h5f['/'].attrs['f0_inc'] = f0_inc
-        h5f['/'].attrs['f1_rot'] = f1_rot
-        h5f['/'].attrs['pixel_size'] = PIXEL_SIZE
+        h5f.attrs['psi'] = psi
+        h5f.attrs['omega'] = omega
+        h5f.attrs['f0_inc'] = f0_inc
+        h5f.attrs['f1_rot'] = f1_rot
+        h5f.attrs['pixel_size'] = PIXEL_SIZE
         h5f['fiber_bundles'] = file
 
         rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
@@ -180,7 +180,7 @@ def run(parameter):
                         (unique_elements, counts_elements))
 
                     # Simulate PLI Measurement
-                    simpli.save_parameter_h5(h5f=dset)
+                    # simpli.save_parameter_h5(h5f=dset)
                     for t, tilt in enumerate(simpli._tilts):
                         theta, phi = tilt[0], tilt[1]
                         logger.info(f"simulation: {theta}, {phi}")

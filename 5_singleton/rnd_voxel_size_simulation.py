@@ -85,10 +85,12 @@ logger = logging.getLogger()
 helper.mplog.install_mp_handler(logger)
 
 # VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
-VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+VOXEL_SIZES = [
+    0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25
+]
 D_ROT = 10
 N_INC = 10
-PIXEL_SIZE = 1.25  # PM
+# PIXEL_SIZE = 1.25  # PM
 THICKNESS = 60
 
 
@@ -103,7 +105,7 @@ def get_file_pref(parameter):
     return output_name + f"_{pre}_psi_{psi:.2f}_omega_{omega:.2f}_" \
         f"f0_inc_{f0_inc:.2f}_" \
         f"f1_rot_{f1_rot:.2f}_" \
-        f"p0_{PIXEL_SIZE:.2f}_"
+        f"vs_0_{VOXEL_SIZES[0]:.2f}_"
 
 
 def run(parameter):
@@ -119,14 +121,14 @@ def run(parameter):
 
         with h5py.File(file, 'r') as h5f_:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
-            psi = h5f_['/'].attrs["psi"]
-            omega = h5f_['/'].attrs["omega"]
+            psi = h5f_.attrs["psi"]
+            omega = h5f_.attrs["omega"]
 
         h5f.attrs['psi'] = psi
         h5f.attrs['omega'] = omega
         h5f.attrs['f0_inc'] = f0_inc
         h5f.attrs['f1_rot'] = f1_rot
-        h5f.attrs['pixel_size'] = PIXEL_SIZE
+        # h5f['/'].attrs['pixel_size'] = PIXEL_SIZE
         h5f['fiber_bundles'] = file
 
         rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
@@ -140,7 +142,6 @@ def run(parameter):
             logger.info(f"prepair simulation")
             simpli = fastpli.simulation.Simpli()
             simpli.omp_num_threads = args.num_threads
-            simpli.pixel_size = PIXEL_SIZE
             # simpli.sensor_gain = 1.5  # pm
             simpli.optical_sigma = 0.71  # in voxel size
             simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
@@ -151,78 +152,106 @@ def run(parameter):
             simpli.fiber_bundles = fiber_bundles
             simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
+            dim_origin = simpli.dim_origin = simpli.dim_origin + np.random.uniform(
+                -THICKNESS / 2, THICKNESS / 2, [3])
+            logger.info(f"dim_origin: {dim_origin}")
+
             for voxel_size in VOXEL_SIZES:
                 logger.info(f"voxel_size: {voxel_size}")
-                simpli.voxel_size = voxel_size
-                simpli.set_voi(
-                    -0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]),
-                    0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]))
-                simpli.dim_origin = simpli.dim_origin + np.random.uniform(
-                    -PIXEL_SIZE, PIXEL_SIZE, [3])
 
-                logger.info("memory: " + str(round(simpli.memory_usage(), 2)) +
-                            'MB')
-                if simpli.memory_usage() * args.num_proc > 230000:
-                    print(str(round(simpli.memory_usage(), 2)) + 'MB')
-                    return
+                for mode in ["ref", "norm"]:
+                    # normal
 
-                for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
-                    logger.info(f"model: {model}")
-                    dset = h5f.create_group(f'simpli/{voxel_size}/{model}/{n}')
+                    if mode == "ref":
+                        simpli.pixel_size = voxel_size
+                        simpli.voxel_size = 1 / 2 * voxel_size
+                    elif mode == "norm":
+                        simpli.pixel_size = voxel_size
+                        simpli.voxel_size = voxel_size
+                    else:
+                        raise ValueError("FOO")
+                    simpli.set_voi(
+                        -0.5 * np.array(
+                            [simpli.pixel_size, simpli.pixel_size, THICKNESS]),
+                        0.5 * np.array(
+                            [simpli.pixel_size, simpli.pixel_size, THICKNESS]))
+                    simpli.dim_origin = dim_origin
 
-                    simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
-                                                        (1.0, dn, 0, model)]
-                                                      ] * len(fiber_bundles)
+                    logger.info("memory: " +
+                                str(round(simpli.memory_usage(), 2)) + 'MB')
+                    if simpli.memory_usage() * args.num_proc > 200000:
+                        print(str(round(simpli.memory_usage(), 2)) + 'MB')
+                        exit(1)
 
-                    with warnings.catch_warnings():
-                        warnings.filterwarnings("ignore",
-                                                message="objects overlap")
-                        label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
-                        )
+                    for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
+                        logger.info(f"model: {model}")
+                        dset = h5f.create_group(
+                            f'simpli/{voxel_size}/{model}/{n}/{mode}')
+                        dset.attrs['voxel_size'] = simpli.voxel_size
+                        dset.attrs['pixel_size'] = simpli.pixel_size
+                        dset.attrs['model'] = model
+                        dset.attrs['mode'] = mode
+                        dset.attrs['n'] = n
+                        dset.attrs['dim_origin'] = simpli.dim_origin
+                        dset.attrs['voi_min'] = simpli.get_voi()[0]
+                        dset.attrs['voi_max'] = simpli.get_voi()[1]
 
-                    unique_elements, counts_elements = np.unique(
-                        label_field, return_counts=True)
-                    dset.attrs['label_field_stats'] = np.asarray(
-                        (unique_elements, counts_elements))
+                        simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
+                                                            (1.0, dn, 0, model)]
+                                                          ] * len(fiber_bundles)
 
-                    # Simulate PLI Measurement
-                    # simpli.save_parameter_h5(h5f=dset)
-                    for t, tilt in enumerate(simpli._tilts):
-                        theta, phi = tilt[0], tilt[1]
-                        logger.info(f"simulation: {theta}, {phi}")
-                        images = simpli.run_simulation(label_field,
-                                                       vector_field,
-                                                       tissue_properties, theta,
-                                                       phi)
+                        with warnings.catch_warnings():
+                            warnings.filterwarnings("ignore",
+                                                    message="objects overlap")
+                            label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
+                            )
 
-                        dset['simulation/data/' + str(t)] = images
-                        dset['simulation/data/' + str(t)].attrs['theta'] = theta
-                        dset['simulation/data/' + str(t)].attrs['phi'] = phi
+                        unique_elements, counts_elements = np.unique(
+                            label_field, return_counts=True)
+                        dset.attrs['label_field_stats'] = np.asarray(
+                            (unique_elements, counts_elements))
 
-                        for m in range(args.repeat_noise):
-                            logger.info(f"m_repeat_noise: {m}")
-                            if m == 0:
-                                simpli.sensor_gain = 0
-                            else:
-                                simpli.sensor_gain = 1.5
-                            # apply optic to simulation
-                            logger.info(f"apply_optic")
-                            images_ = simpli.apply_optic(images)
-                            dset[f'simulation/optic/{t}/{m}'] = images_
-                            # calculate modalities
-                            logger.info(f"epa")
-                            epa = simpli.apply_epa(images_)
-                            dset[f'analysis/epa/{t}/transmittance/{m}'] = epa[0]
-                            dset[f'analysis/epa/{t}/direction/{m}'] = epa[1]
-                            dset[f'analysis/epa/{t}/retardation/{m}'] = epa[2]
+                        # Simulate PLI Measurement
+                        # simpli.save_parameter_h5(h5f=dset)
+                        for t, tilt in enumerate(simpli._tilts):
+                            theta, phi = tilt[0], tilt[1]
+                            logger.info(f"simulation: {theta}, {phi}")
+                            images = simpli.run_simulation(
+                                label_field, vector_field, tissue_properties,
+                                theta, phi)
 
-                        dset[f'simulation/optic/{t}'].attrs['theta'] = theta
-                        dset[f'simulation/optic/{t}'].attrs['phi'] = phi
-                        dset[f'analysis/epa/{t}'].attrs['theta'] = theta
-                        dset[f'analysis/epa/{t}'].attrs['phi'] = phi
+                            dset['simulation/data/' + str(t)] = images
+                            dset['simulation/data/' +
+                                 str(t)].attrs['theta'] = theta
+                            dset['simulation/data/' + str(t)].attrs['phi'] = phi
 
-                    del label_field
-                    del vector_field
+                            for m in range(args.repeat_noise):
+                                logger.info(f"m_repeat_noise: {m}")
+                                if m == 0:
+                                    simpli.sensor_gain = 0
+                                else:
+                                    simpli.sensor_gain = 1.5
+                                # apply optic to simulation
+                                logger.info(f"apply_optic")
+                                images_ = simpli.apply_optic(images)
+                                dset[f'simulation/optic/{t}/{m}'] = images_
+                                # calculate modalities
+                                logger.info(f"epa")
+                                epa = simpli.apply_epa(images_)
+                                dset[
+                                    f'analysis/epa/{t}/transmittance/{m}'] = epa[
+                                        0]
+                                dset[f'analysis/epa/{t}/direction/{m}'] = epa[1]
+                                dset[f'analysis/epa/{t}/retardation/{m}'] = epa[
+                                    2]
+
+                            dset[f'simulation/optic/{t}'].attrs['theta'] = theta
+                            dset[f'simulation/optic/{t}'].attrs['phi'] = phi
+                            dset[f'analysis/epa/{t}'].attrs['theta'] = theta
+                            dset[f'analysis/epa/{t}'].attrs['phi'] = phi
+
+                        del label_field
+                        del vector_field
 
 
 def check_file(p):

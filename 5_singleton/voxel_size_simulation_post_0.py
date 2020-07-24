@@ -41,7 +41,7 @@ def run(file):
         pixel_size = h5f['/'].attrs['pixel_size']
         with h5py.File(str(h5f['fiber_bundles'][...]), 'r') as h5f_:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
-            if h5f['/'].attrs["psi"] != psi or omega == h5f['/'].attrs[
+            if h5f_['/'].attrs["psi"] != psi or omega == h5f_['/'].attrs[
                     "omega"] != omega:
                 raise ValueError("FAIL")
 
