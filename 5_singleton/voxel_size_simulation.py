@@ -78,14 +78,14 @@ FORMAT = '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s'
 logging.basicConfig(
     level=logging.INFO,
     format=FORMAT,
-    filename=output_name +
-    f'.{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log',
-    filemode='w')
+    filename=output_name,
+    # + f'.{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log',
+    filemode='a')
 logger = logging.getLogger()
 helper.mplog.install_mp_handler(logger)
 
-VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
-# VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+# VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
 N_INC = 10
 PIXEL_SIZE = 1.25  # PM
@@ -158,6 +158,8 @@ def run(parameter):
                 simpli.dim_origin = simpli.dim_origin + np.random.uniform(
                     -PIXEL_SIZE, PIXEL_SIZE, [3])
 
+                logger.info("memory: " + str(round(simpli.memory_usage(), 2)) +
+                            'MB')
                 if simpli.memory_usage() * args.num_proc > 200000:
                     print(str(round(simpli.memory_usage(), 2)) + 'MB')
                     return
@@ -258,7 +260,9 @@ if __name__ == "__main__":
             parameters.append((file, f0_inc, f1_rot))
 
     # filter
+    logger.info("parameters before filter: " + str(parameters))
     parameters = list(filter(check_file, parameters))
+    logger.info("parameters after filter: " + str(parameters))
 
     # run(parameters[0])
     # run((1.0, 0, 90, 0))
