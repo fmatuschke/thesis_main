@@ -13,4 +13,4 @@
 
 # source ../jureca_modules.sh
 
-srun -n 336 /p/home/jusers/matuschke1/jureca/private/thesis/env/bin/python -m mpi4py cube_2pop_statistic_jureca.py -o /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_stat -n 10000
+srun -n 336 /p/home/jusers/matuschke1/jureca/private/thesis/env-jureca/bin/python -m mpi4py cube_2pop_statistic_jureca.py -o /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_stat -n 10000

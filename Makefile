@@ -1,17 +1,17 @@
 default: install
 
-VENV=env
+VENV := $(if $(venv),$(venv),env)
 PYTHON=$(VENV)/bin/python3
-PIP=$(VENV)/bin/pip3
+PIP=$(VENV)/bin/python3 -m pip
 
 .PHONY: install
-install: env env-update fastpli jupyter
+install: env env-update fastpli
 
 # ENV
 env: $(VENV)/bin/python3
 
 $(VENV)/bin/python3:
-	python3 -m venv $(VENV)/
+	python3 -m venv $(VENV)
 
 .PHONY: env-update
 env-update: env
@@ -22,6 +22,9 @@ env-update: env
 .PHONY: git-submodules
 git-submodules:
 	git submodule update --init --recursive
+
+.PHONY: git-submodules-pull
+git-submodules-pull:	
 	cd fastpli
 	git checkout development
 	git pull
@@ -38,15 +41,6 @@ git-submodules:
 	git checkout master
 	git pull
 	
-# FASTPLI
-# .PHONY: fastpli-pull
-# .Oneshell:
-# fastpli-pull:
-# 	cd fastpli
-# 	git pull origin development
-# 	cd ..
-# 	git add fastpli
-
 .PHONY: fastpli/setup
 .ONESHELL:
 fastpli/setup: fastpli/

@@ -2,6 +2,6 @@
 
 echo "source modules"
 source jureca_modules.sh
-make install
-
+make clean
+make VENV=env-jureca install
 echo "... done"
