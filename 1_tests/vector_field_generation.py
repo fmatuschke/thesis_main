@@ -41,6 +41,40 @@ def VectorOrientationDiffNorm(v, u):
     return r
 
 
+@njit(cache=True, parallel=True)
+def VectorOrientationDiffAngle(v, u):
+    r = np.empty(v.shape[:-1])
+    for i in prange(v.shape[0]):
+        for j in range(v.shape[1]):
+            for k in range(v.shape[2]):
+                x = v[i, j, k, :]
+                y = u[i, j, k, :]
+                if np.array_equal(x, y):
+                    r[i, j, k] = 0
+                    continue
+                if x[0] == 0 and x[1] == 0 and x[2] == 0:
+                    r[i, j, k] = np.pi / 2
+                    continue
+                if y[0] == 0 and y[1] == 0 and y[2] == 0:
+                    r[i, j, k] = np.pi / 2
+                    continue
+                if np.dot(x, y) < 0:
+                    y = -y
+                # if np.linalg.norm(x - y) < 1e-12:
+                #     r[i, j, k] = 0
+                #     continue
+
+                t = np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
+                if t > 1.000001:
+                    print("FOOOOO")
+                if t > 1:
+                    r[i, j, k] = 0
+                    continue
+
+                r[i, j, k] = np.arccos(t)
+    return r
+
+
 # @njit(cache=True, parallel=True)
 # def GetTissuePartsMask(tissue_high, vf_diff):
 #     mask = np.empty(vf_diff.shape, np.uint8)

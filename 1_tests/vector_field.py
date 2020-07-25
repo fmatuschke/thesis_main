@@ -36,8 +36,8 @@ for voxel_size in [1, 0.5, 0.2, 0.1]:
     simpli.omp_num_threads = NUM_PROC
     print(FILE_PATH)
     simpli.fiber_bundles = fastpli.io.fiber_bundles.load(
-        os.path.join(FILE_PATH, '..', 'data', 'models',
-                     'cube_2pop_psi_0.5_omega_0.0_.solved.h5'))
+        os.path.join(FILE_PATH, '..', 'data', 'models', '1_rnd_seed',
+                     'cube_2pop_psi_1.00_omega_0.00_r_1.00_v0_210_.solved.h5'))
 
     simpli.voxel_size = voxel_size  # in µm meter
     simpli.set_voi([-30] * 3, [30] * 3)  # in µm meter

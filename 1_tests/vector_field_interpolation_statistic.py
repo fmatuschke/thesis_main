@@ -23,6 +23,8 @@ from skimage.external import tifffile as tif
 
 from vector_field_generation import *
 
+# OLD?
+
 np.random.seed(42)
 
 print(fastpli.__version__)

@@ -5,7 +5,7 @@ PYTHON=$(VENV)/bin/python3
 PIP=$(VENV)/bin/python3 -m pip
 
 .PHONY: install
-install: env env-update fastpli
+install: env env-update requirements git-submodules fastpli
 
 # ENV
 env: $(VENV)/bin/python3
@@ -16,6 +16,9 @@ $(VENV)/bin/python3:
 .PHONY: env-update
 env-update: env
 	$(PIP) install --upgrade pip -q
+
+.PHONY: requirements
+requirements: env	
 	$(PIP) install -r requirements.txt -q
 	$(PIP) install 0_core/. -q
 
@@ -49,7 +52,7 @@ fastpli/setup: fastpli/
 	make fastpli
 
 .PHONY: fastpli
-fastpli: env env-update git-submodules fastpli/setup
+fastpli: env env-update fastpli/setup
 	$(PIP) uninstall fastpli -y -q
 	$(PIP) install fastpli/.
 
