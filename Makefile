@@ -3,6 +3,7 @@ default: install
 VENV := $(if $(venv),$(venv),env)
 PYTHON=$(VENV)/bin/python3
 PIP=$(VENV)/bin/python3 -m pip
+BUILD=release
 
 .PHONY: install
 install: env env-update requirements git-submodules fastpli
@@ -48,13 +49,13 @@ git-submodules-pull:
 .ONESHELL:
 fastpli/setup: fastpli/
 	cd fastpli
-	rm -r build/
-	make fastpli
+	# rm -r build/
+	make BUILD=$(BUILD) fastpli 
 
 .PHONY: fastpli
-fastpli: env env-update fastpli/setup
+fastpli: env fastpli/setup
 	$(PIP) uninstall fastpli -y -q
-	$(PIP) install fastpli/.
+	$(PIP) install -e fastpli/.
 
 .PHONY: jupyter
 jupyter: env
@@ -68,14 +69,13 @@ jupyter: env
 		cp custom.css ~/.jupyter/custom/custom.css; \
 	fi
 
-
 # CLEANING
 .PHONY: clean
 clean:
 	rm -rf env-*
 
-#.PHONY: clean-fastpli
-#.ONESHELL:
-#clean-fastpli:
-#	cd fastpli
-#	make clean
+.PHONY: clean-fastpli
+.ONESHELL:
+clean-fastpli:
+	cd fastpli
+	make clean
