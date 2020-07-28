@@ -88,8 +88,6 @@ helper.mplog.install_mp_handler(logger)
 VOXEL_SIZES = [
     0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25
 ]
-D_ROT = 10
-N_INC = 10
 # PIXEL_SIZE = 1.25  # PM
 THICKNESS = 60
 
@@ -145,7 +143,7 @@ def run(parameter):
             # simpli.sensor_gain = 1.5  # pm
             simpli.optical_sigma = 0.71  # in voxel size
             simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
-            simpli.interpolate = True
+            simpli.interpolate = "Slerp"
             simpli.untilt_sensor_view = True
             simpli.wavelength = 525  # in nm
             simpli.light_intensity = 50000  # a.u.
@@ -179,9 +177,9 @@ def run(parameter):
 
                     logger.info("memory: " +
                                 str(round(simpli.memory_usage(), 2)) + 'MB')
-                    if simpli.memory_usage() * args.num_proc > 200000:
+                    if simpli.memory_usage() * args.num_proc > 100000:
                         print(str(round(simpli.memory_usage(), 2)) + 'MB')
-                        exit(1)
+                        sys.exit(1)
 
                     for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
                         logger.info(f"model: {model}")
