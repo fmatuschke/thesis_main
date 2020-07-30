@@ -27,6 +27,10 @@ python3 cube_2pop_post_0.py -i ../data/models/1_rnd_seed/*.h5 -o output/models/1
 
 analyse, welche parameter für *cube_2pop* verwendet werden sollen
 
+```sh
+python3 cube_2pop_statistic_post_0.py -i output/cube_stat/ -p 24 # 10min, 43gb
+```
+
 ## simulation
 
 simulation der *cube_2pop* modelle

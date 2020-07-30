@@ -42,6 +42,11 @@ parser.add_argument("-n",
                     required=True,
                     help="Number of max_steps.")
 
+parser.add_argument("--start",
+                    type=int,
+                    required=True,
+                    help="start of parameter list.")
+
 # parser.add_argument("-p",
 #                     "--num_proc",
 #                     type=int,
@@ -69,7 +74,7 @@ logger.addHandler(mh)
 
 
 def run(parameters):
-    (psi, omega), radius, mean_length_f, min_radius_f, n = parameters
+    radius, mean_length_f, min_radius_f, (psi, omega), n = parameters
 
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
                                f"{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_" \
@@ -202,7 +207,7 @@ def run(parameters):
 
 
 def check_file(p):
-    (psi, omega), radius, mean_length_f, min_radius_f, n = p
+    radius, mean_length_f, min_radius_f, (psi, omega), n = p
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
                             f"{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_" \
                             f"fr_{min_radius_f:.2f}_n_{n}_"
@@ -215,19 +220,17 @@ if __name__ == "__main__":
     # Fiber Model
     N_REPEAT = range(5)
     SIZE = 90  # to create a 60 micro meter cube
-    FIBER_RADII = [1.0]
-    OBJ_MEAN_LENGTH_F = [0.5, 1.0, 2.0, 3.0, 4.0, 5.0]
-    OBJ_MIN_RADIUS_F = [1.0, 2.0, 3.0, 4.0, 5.0]
-    PSI = [0.25, 0.5]  # fiber fraction: PSI * f0 + (1-PSI) * f1
-    OMEGA = [45, 90]  # angle of opening (f0, f1)
-    PSI, OMEGA = np.meshgrid(PSI, OMEGA)
-    PARAMETER = list(zip(PSI.flatten(), OMEGA.flatten()))
+    FIBER_RADII = [0.5, 1.0, 2.0, 5.0, 10]
+    OBJ_MEAN_LENGTH_F = [0.5, 1.0, 2.0, 4.0, 8.0]
+    OBJ_MIN_RADIUS_F = [0.5, 1.0, 2.0, 4.0, 8.0]
+    PARAMETER = []
     PARAMETER.append((1.0, 0))
+    PARAMETER.append((0.5, 90))
 
     parameters = list(
-        itertools.product(PARAMETER, FIBER_RADII, OBJ_MEAN_LENGTH_F,
-                          OBJ_MIN_RADIUS_F, N_REPEAT))
+        itertools.product(FIBER_RADII, OBJ_MEAN_LENGTH_F, OBJ_MIN_RADIUS_F,
+                          PARAMETER, N_REPEAT))
 
+    parameters = parameters[args.start + comm.Get_rank()::comm.Get_size()]
     parameters = list(filter(check_file, parameters))
-    parameters = parameters[comm.Get_rank()::comm.Get_size()]
     [run(p) for p in parameters]

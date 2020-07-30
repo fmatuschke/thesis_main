@@ -60,8 +60,10 @@ def run(file):
         simpli.fiber_bundles_properties = [[(1.0, 0, 0, 'p')]] * len(fbs)
 
         if not run.flag:
-            print(f"Single Memory: {simpli.memory_usage():.0f} MB")
-            print(f"Total Memory: {simpli.memory_usage() * run.num_p:.0f} MB")
+            print(f"Single Memory: {simpli.memory_usage(item='tissue'):.0f} MB")
+            print(
+                f"Total Memory: {simpli.memory_usage(item='tissue') * run.num_p:.0f} MB"
+            )
             run.flag = True
 
         tissue, _, _ = simpli.generate_tissue(only_tissue=True)

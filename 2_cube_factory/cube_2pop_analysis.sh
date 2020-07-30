@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 mkdir -p output/tikz/tmp
 mkdir -p output/tikz/output/tikz/tmp
 
