@@ -8,3 +8,4 @@ seaborn
 tikzplotlib
 mpi4py
 pyyaml
+clang-format

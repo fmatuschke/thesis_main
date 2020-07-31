@@ -3,7 +3,7 @@ default: install
 VENV := $(if $(venv),$(venv),env)
 PYTHON=$(VENV)/bin/python3
 PIP=$(VENV)/bin/python3 -m pip
-BUILD=release
+BUILD=thesis
 
 .PHONY: install
 install: env env-update requirements git-submodules fastpli
@@ -55,7 +55,10 @@ fastpli/setup: fastpli/
 .PHONY: fastpli
 fastpli: env fastpli/setup
 	$(PIP) uninstall fastpli -y -q
-	$(PIP) install -e fastpli/.
+	$(PIP) install fastpli/.
+
+.PHONY: fastpli-
+fastpli-: clean-fastpli fastpli
 
 .PHONY: jupyter
 jupyter: env
