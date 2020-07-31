@@ -1,17 +1,23 @@
 #!/bin/bash
-set -e
+set -ev
 
-echo "source modules"
 source jureca_modules.sh
 
-mkdir ${PWD}/pip
+if [ -d "env" ]; then
+   rm -rf env
+fi
 
-pip3 uninstall fastpli
 (
    cd fastpli
    make clean
    make fastpli
 )
-pip3 install --install-option="--prefix=${PWD}/pip" fastpli/.
-pip3 install --install-option="--prefix=${PWD}/pip" -r requirements.txt
+
+python3 -m venv env
+source env/bin/activate
+#pip3 install --upgrade pip
+pip3 install fastpli/.
+pip3 install -r requirements.txt
+pip3 install 0_core/.
+
 echo "... done"
