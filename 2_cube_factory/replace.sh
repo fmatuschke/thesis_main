@@ -7,7 +7,7 @@ for var in "$@"; do
       ((c++))
       continue
    fi
-   file=$(sed 's/$'"$c"'/'"$var"'/g' <<<$file)
+   file=$(sed 's/$'"$c"'/'"$var"'/g' <<<"$file")
 
    ((c++))
 done
@@ -15,5 +15,5 @@ done
 echo "$file" >$1.run
 echo "$file"
 
-# ./run_sbatch.sh $1.run
+/p/project/cjinm11/Private/matuschke1/run_sbatch.sh $1.run
 # rm $1.run
