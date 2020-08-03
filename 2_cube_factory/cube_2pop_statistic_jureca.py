@@ -60,13 +60,13 @@ os.makedirs(args.output, exist_ok=True)
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
-if comm.rank == 0:
-    log_file = output_name + f'.{datetime.datetime.now().strftime("%d:%m:%Y-%H:%M:%S")}.log'
-else:
-    log_file = None
-log_file = comm.bcast(log_file, root=0)
+log_file = output_name + f'_{args.start}_{comm.Get_size()}.log'
 
-mh = helper.mpi.FileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
+mh = helper.mpi.FileHandler(
+    log_file,
+    mode=MPI.MODE_WRONLY | MPI.MODE_CREATE  #| MPI.MODE_APPEND
+)
+
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 mh.setFormatter(formatter)
@@ -87,6 +87,7 @@ def run(parameters):
     solver.obj_min_radius = radius * min_radius_f
     solver.omp_num_threads = 1
 
+    logger.info(f"seed")
     seeds = fastpli.model.sandbox.seeds.triangular_grid(SIZE * 2,
                                                         SIZE * 2,
                                                         2 * radius,
@@ -98,6 +99,7 @@ def run(parameters):
     rnd_radii_0 = radius * np.random.lognormal(0, 0.1, seeds_0.shape[0])
     rnd_radii_1 = radius * np.random.lognormal(0, 0.1, seeds_1.shape[0])
 
+    logger.info(f"creating fiber_bundles")
     fiber_bundles = [
         fastpli.model.sandbox.build.cuboid(p=-0.5 *
                                            np.array([SIZE, SIZE, SIZE]),
@@ -248,6 +250,9 @@ if __name__ == "__main__":
         itertools.product(FIBER_RADII, OBJ_MEAN_LENGTH_F, OBJ_MIN_RADIUS_F,
                           PARAMETER, N_REPEAT))
 
-    parameters = parameters[args.start + comm.Get_rank()::comm.Get_size()]
-    parameters = list(filter(check_file, parameters))
-    [run(p) for p in parameters]
+    parameters.reverse()
+    parameter = parameters[args.start + comm.Get_rank()]
+    if check_file(parameter):
+        run(parameter)
+    else:
+        logger.info(f"parameter: {parameter} already exist")
