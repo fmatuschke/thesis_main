@@ -175,7 +175,7 @@ def run(parameters):
             num_objs.append(solver.num_obj)
             num_col_objs.append(solver.num_col_obj)
 
-        if (end_time - start_time) < 0.9 * args.time * 60 * 60:
+        if (time.time() - start_time) < 0.9 * args.time * 60 * 60:
             if i % 100 == 0:
                 with h5py.File(file_pref + '.time.h5', 'w') as h5f:
                     solver.save_h5(h5f,
