@@ -47,11 +47,11 @@ parser.add_argument("--start",
                     required=True,
                     help="start of parameter list.")
 
-# parser.add_argument("-p",
-#                     "--num_proc",
-#                     type=int,
-#                     required=True,
-#                     help="Number of processes.")
+parser.add_argument("-t",
+                    "--time",
+                    type=float,
+                    required=True,
+                    help="allocation time in hours.")
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
@@ -159,10 +159,9 @@ def run(parameters):
         if solver.step():
             break
 
-        overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
         if i % 50 == 0:
             logger.info(
-                f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
+                f"step: {i}, {solver.num_obj}/{solver.num_col_obj}, {solver.overlap}"
             )
             solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
                 solver.fiber_bundles,
@@ -174,23 +173,41 @@ def run(parameters):
             num_objs.append(solver.num_obj)
             num_col_objs.append(solver.num_col_obj)
 
-        if i > args.max_steps / 2 and overlap <= 0.001:
-            overlap_0001 = (i, time.time() - start_time)
+        if (end_time - start_time) < 0.9 * args.time * 60 * 60:
+            if i % 100 == 0:
+                with h5py.File(file_pref + '.time.h5', 'w') as h5f:
+                    solver.save_h5(h5f,
+                                   script=open(os.path.abspath(__file__),
+                                               'r').read())
+                    h5f['/'].attrs['psi'] = psi
+                    h5f['/'].attrs['omega'] = omega
+                    h5f['/'].attrs['overlap'] = solver.overlap
+                    h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
+                    h5f['/'].attrs['num_obj'] = solver.num_obj
+                    h5f['/'].attrs['num_steps'] = solver.num_steps
+                    h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
+                    h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
+                    h5f['/'].attrs['time'] = end_time - start_time
+
+                    h5f['/'].attrs['times'] = np.array(times)
+                    h5f['/'].attrs['steps'] = np.array(steps)
+                    h5f['/'].attrs['overlaps'] = np.array(overlaps)
+                    h5f['/'].attrs['num_objs'] = np.array(num_objs)
+                    h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
 
         # print(solver.num_steps)
 
     end_time = time.time()
-    overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
 
     logger.info(f"time: {end_time - start_time}")
     logger.info(
-        f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}, {overlap}")
+        f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}, {solver.overlap}")
     logger.info(f"saveing solved")
     with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['omega'] = omega
-        h5f['/'].attrs['overlap'] = overlap
+        h5f['/'].attrs['overlap'] = solver.overlap
         h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
         h5f['/'].attrs['num_obj'] = solver.num_obj
         h5f['/'].attrs['num_steps'] = solver.num_steps
@@ -201,7 +218,7 @@ def run(parameters):
         h5f['/'].attrs['times'] = np.array(times)
         h5f['/'].attrs['steps'] = np.array(steps)
         h5f['/'].attrs['overlaps'] = np.array(overlaps)
-        h5f['/'].attrs['overlaps'] = np.array(num_objs)
+        h5f['/'].attrs['num_objs'] = np.array(num_objs)
         h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
     logger.info(f"done")
 
