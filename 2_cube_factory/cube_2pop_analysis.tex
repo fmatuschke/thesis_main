@@ -1,74 +1,21 @@
-% \documentclass{minimal}
-% \usepackage[a4paper,margin=1cm,landscape]{geometry}
 \documentclass[varwidth]{standalone}
-
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
-\usepackage{amsmath, amssymb, mathtools}
-\usepackage{siunitx}
-\usepackage{currfile}
 \usepackage{tikz}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.17}
-\usepgfplotslibrary{polar}
-\usetikzlibrary{external}
-\usetikzlibrary{calc}
-\tikzexternalize[prefix=./output/tikz/tmp/]
-% 
 \begin{document}
-%
-\resizebox{\textwidth}{!}{
 \foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.0_omega_0.0.tikz}
-}}
-\\
 \resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.1_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.2_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.3_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.4_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.5_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.6_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.7_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.8_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_0.9_omega_\omega.0.tikz}
-}}
-\\
-\resizebox{\textwidth}{!}{
-\foreach \omega in {0,10,...,90} {
-   \input{output/images/models/cube_2pop_psi_1.0_omega_0.0.tikz}
-}}
+   \begin{tikzpicture}
+      \node[inner sep=0pt] at (0,0) {\includegraphics[trim=100 10 50 65 width=3cm]{output/images/models/cube_2pop_psi_0.00_omega_0.00_r_0.50_v0_105_.solved.png}};
+   \end{tikzpicture}
+\foreach \psi in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
+   \begin{tikzpicture}
+      \node[inner sep=0pt] at (0,0) {\includegraphics[trim=100 10 50 65 width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.solved.png}};
+   \end{tikzpicture}
+}
+   \begin{tikzpicture}
+      \node[inner sep=0pt] at (0,0) {\includegraphics[trim=100 10 50 65 width=3cm]{output/images/models/cube_2pop_psi_1.00_omega_0.00_r_0.50_v0_105_.solved.png}};
+   \end{tikzpicture}
+   }
+}
 \end{document}

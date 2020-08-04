@@ -38,3 +38,9 @@ simulation der *cube_2pop* modelle
 ### spheres
 
 schiller metrik zwischen simulations orientierungs ergebnissen und ground truth
+
+### Bilder
+
+```sh
+python3 cube_2pop_post_1.py -i ../data/models/1_rnd_seed/cube_2pop*.solved.h5 -o output/images/models -v 60
+```

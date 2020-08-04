@@ -115,48 +115,42 @@ def to_tikz(data,
 
 
 if __name__ == "__main__":
-    model_path = "output/models/"
+    model_path = "output/1_rnd_seed/models"
     out_path = "output/images/models"
     os.makedirs(out_path, exist_ok=True)
 
     hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
 
-    for i, psi in enumerate(tqdm(np.linspace(0, 1, 11))):
-        for j, omega in enumerate(np.linspace(0, 90, 10)):
-            file = os.path.join(
-                model_path,
-                f"cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.init.pkl")
-            if not os.path.isfile(file):
-                continue
-            data = []
-            for phase, color in [("init", "g"), ("solved", "r")]:
-                # init
-                file = os.path.join(
-                    model_path,
-                    f"cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.{phase}.pkl")
-                df = pd.read_pickle(file)
-                sub = (df.f0_inc == 0) & (df.f1_rot == 0)
-                phi = df[sub].explode("phi").phi.to_numpy(float)
-                theta = df[sub].explode("theta").theta.to_numpy(float)
+    for file in tqdm(glob.glob(os.path.join(model_path, "*solved.pkl"))):
+        file_pre = file.split(".solved.pkl")[0]
 
-                theta[phi > np.pi] = np.pi - theta[phi > np.pi]
-                phi = helper.circular.remap(phi, np.pi, 0)
+        data = []
+        for phase, color in [("init", "g"), ("solved", "r")]:
+            df = pd.read_pickle(file_pre + f".{phase}.pkl")
+            sub = (df.f0_inc == 0) & (df.f1_rot == 0)
 
-                h, x = np.histogram(phi, hist_bin(180), density=True)
-                x = x[:-1] + (x[1] - x[0]) / 2
-                x = np.append(np.concatenate((x, x + np.pi), axis=0), x[0])
-                h = np.append(np.concatenate((h, h), axis=0), h[0])
-                h = h / np.max(h)
-                data.append(np.vstack((np.rad2deg(x), h)))
+            if len(df[sub]) != 1:
+                sys.exit(1)
 
-                h, x = np.histogram(theta, hist_bin(180), density=True)
-                x = np.pi - (np.pi / 2 - x[:-1] +
-                             (x[1] - x[0]) / 2)  # np/2 for incl, - for plot
-                h = h / np.max(h)
-                data.append(np.vstack((np.rad2deg(x), h)))
-            to_tikz(data,
-                    os.path.join(
-                        out_path,
-                        f"cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}.tikz"),
-                    path_to_data="\\currfiledir",
-                    standalone=False)
+            phi = df[sub].explode("phi").phi.to_numpy(float)
+            theta = df[sub].explode("theta").theta.to_numpy(float)
+
+            theta[phi > np.pi] = np.pi - theta[phi > np.pi]
+            phi = helper.circular.remap(phi, np.pi, 0)
+
+            h, x = np.histogram(phi, hist_bin(180), density=True)
+            x = x[:-1] + (x[1] - x[0]) / 2
+            x = np.append(np.concatenate((x, x + np.pi), axis=0), x[0])
+            h = np.append(np.concatenate((h, h), axis=0), h[0])
+            h = h / np.max(h)
+            data.append(np.vstack((np.rad2deg(x), h)))
+
+            h, x = np.histogram(theta, hist_bin(180), density=True)
+            x = np.pi - (np.pi / 2 - x[:-1] +
+                         (x[1] - x[0]) / 2)  # np/2 for incl, - for plot
+            h = h / np.max(h)
+            data.append(np.vstack((np.rad2deg(x), h)))
+        to_tikz(data,
+                os.path.join(out_path, f"{os.path.basename(file_pre)}.tikz"),
+                path_to_data="\\currfiledir",
+                standalone=False)
