@@ -3,7 +3,7 @@
 #SBATCH --ntasks=$1
 #SBATCH --tasks-per-node=24
 #SBATCH --cpus-per-task=1
-#SBATCH --time=10:00:00
+#SBATCH --time=$3:00:00
 #SBATCH --partition=gpus
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=thesis-cube_2pop_stat

@@ -6,7 +6,7 @@ PIP=$(VENV)/bin/python3 -m pip
 BUILD=thesis
 
 .PHONY: install
-install: env env-update requirements git-submodules fastpli
+install: env env-update requirements git-submodules clean-fastpli fastpli
 
 # ENV
 env: $(VENV)/bin/python3

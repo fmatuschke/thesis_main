@@ -189,7 +189,7 @@ def run(parameters):
                     h5f['/'].attrs['num_steps'] = solver.num_steps
                     h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
                     h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
-                    h5f['/'].attrs['time'] = end_time - start_time
+                    h5f['/'].attrs['time'] = time.time() - start_time
 
                     h5f['/'].attrs['times'] = np.array(times)
                     h5f['/'].attrs['steps'] = np.array(steps)
