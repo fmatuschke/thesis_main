@@ -1,4 +1,5 @@
 import numpy as np
+import multiprocessing as mp
 import itertools
 import h5py
 import os
@@ -64,6 +65,7 @@ def to_tikz(data,
             f.write("" \
                 "\\documentclass[]{standalone}\n"\
                 "\\usepackage{pgfplots}\n" \
+                "\\usepgfplotslibrary{colorbrewer}\n" \
                 "\\usepgfplotslibrary{polar}\n" \
                 "\\pgfplotsset{compat=1.17}\n" \
                 "\\usepackage{siunitx}\n" \
@@ -71,7 +73,7 @@ def to_tikz(data,
                 "\\tikzset{>=latex}\n" \
                 "%\n" )
         f.write("" \
-            "\\begin{tikzpicture}\n"
+            "\\begin{tikzpicture}\n" \
         )
         f.write("" \
             "\\begin{polaraxis}[\n" \
@@ -80,10 +82,11 @@ def to_tikz(data,
             "    xmin=-90, xmax=90,\n" \
             "    xtick={-90,-45,...,90},\n" \
             "    ytick=\empty,\n" \
+            "    cycle list/Set1,\n" \
             "]\n" \
-            "\\addplot [thick, green!50!black]\n" \
+            "\\addplot+[very thick,]\n" \
             f"    table [x=x, y=y, col sep=comma] {{{file_name}_0.dat}};\n" \
-            "\\addplot [thick, red, dashed]\n" \
+            "\\addplot+[very thick,dashed]\n" \
             f"    table [x=x, y=y, col sep=comma] {{{file_name}_2.dat}};\n" \
             "\\end{polaraxis}\n"
         )
@@ -97,10 +100,11 @@ def to_tikz(data,
             "    xtick={90,135,...,270},\n" \
             "    xticklabels={90, 45, 0, -45, -90},\n" \
             "    ytick=\empty,\n" \
+            "    cycle list/Dark2,\n" \
             "]\n" \
-            "\\addplot [thick, green!50!black]\n" \
+            "\\addplot+[very thick,]\n" \
             f"    table [x=x, y=y, col sep=comma] {{{file_name}_1.dat}};\n" \
-            "\\addplot [thick, red, dashed]\n" \
+            "\\addplot+[very thick,dashed]\n" \
             f"    table [x=x, y=y, col sep=comma] {{{file_name}_3.dat}};\n" \
             "\\end{polaraxis}\n"
             "\\end{scope}\n" \
@@ -114,43 +118,52 @@ def to_tikz(data,
             f.write("\\end{document}\n")
 
 
-if __name__ == "__main__":
-    model_path = "output/1_rnd_seed/models"
-    out_path = "output/images/models"
-    os.makedirs(out_path, exist_ok=True)
+# if __name__ == "__main__":
+model_path = "output/1_rnd_seed/models"
+out_path = "output/images/models"
+os.makedirs(out_path, exist_ok=True)
 
-    hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
+hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
 
-    for file in tqdm(glob.glob(os.path.join(model_path, "*solved.pkl"))):
-        file_pre = file.split(".solved.pkl")[0]
+files = glob.glob(os.path.join(model_path, "*solved.pkl"))
 
-        data = []
-        for phase, color in [("init", "g"), ("solved", "r")]:
-            df = pd.read_pickle(file_pre + f".{phase}.pkl")
-            sub = (df.f0_inc == 0) & (df.f1_rot == 0)
+# for file in tqdm(glob.glob(os.path.join(model_path, "*solved.pkl"))):
 
-            if len(df[sub]) != 1:
-                sys.exit(1)
 
-            phi = df[sub].explode("phi").phi.to_numpy(float)
-            theta = df[sub].explode("theta").theta.to_numpy(float)
+def run(file):
+    file_pre = file.split(".solved.pkl")[0]
 
-            theta[phi > np.pi] = np.pi - theta[phi > np.pi]
-            phi = helper.circular.remap(phi, np.pi, 0)
+    data = []
+    for phase, color in [("init", "g"), ("solved", "r")]:
+        df = pd.read_pickle(file_pre + f".{phase}.pkl")
+        sub = (df.f0_inc == 0) & (df.f1_rot == 0)
 
-            h, x = np.histogram(phi, hist_bin(180), density=True)
-            x = x[:-1] + (x[1] - x[0]) / 2
-            x = np.append(np.concatenate((x, x + np.pi), axis=0), x[0])
-            h = np.append(np.concatenate((h, h), axis=0), h[0])
-            h = h / np.max(h)
-            data.append(np.vstack((np.rad2deg(x), h)))
+        if len(df[sub]) != 1:
+            sys.exit(1)
 
-            h, x = np.histogram(theta, hist_bin(180), density=True)
-            x = np.pi - (np.pi / 2 - x[:-1] +
-                         (x[1] - x[0]) / 2)  # np/2 for incl, - for plot
-            h = h / np.max(h)
-            data.append(np.vstack((np.rad2deg(x), h)))
-        to_tikz(data,
-                os.path.join(out_path, f"{os.path.basename(file_pre)}.tikz"),
-                path_to_data="\\currfiledir",
-                standalone=False)
+        phi = df[sub].explode("phi").phi.to_numpy(float)
+        theta = df[sub].explode("theta").theta.to_numpy(float)
+
+        theta[phi > np.pi] = np.pi - theta[phi > np.pi]
+        phi = helper.circular.remap(phi, np.pi, 0)
+
+        h, x = np.histogram(phi, hist_bin(180), density=True)
+        x = x[:-1] + (x[1] - x[0]) / 2
+        x = np.append(np.concatenate((x, x + np.pi), axis=0), x[0])
+        h = np.append(np.concatenate((h, h), axis=0), h[0])
+        h = h / np.max(h)
+        data.append(np.vstack((np.rad2deg(x), h)))
+
+        h, x = np.histogram(theta, hist_bin(180), density=True)
+        x = np.pi - (np.pi / 2 - x[:-1] +
+                     (x[1] - x[0]) / 2)  # np/2 for incl, - for plot
+        h = h / np.max(h)
+        data.append(np.vstack((np.rad2deg(x), h)))
+    to_tikz(data,
+            os.path.join(out_path, f"{os.path.basename(file_pre)}.tikz"),
+            path_to_data="\\currfiledir",
+            standalone=False)
+
+
+with mp.Pool(processes=8) as pool:
+    [_ for _ in tqdm(pool.imap_unordered(run, files), total=len(files))]

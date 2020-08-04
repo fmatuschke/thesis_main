@@ -7,6 +7,7 @@
 \usepackage{ifthen}
 \pgfplotsset{compat=1.17}
 \usepgfplotslibrary{polar}
+\usepgfplotslibrary{colorbrewer}
 \usetikzlibrary{calc}
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
@@ -14,6 +15,7 @@
 \begin{document}
 % 
 \begin{page}
+% \input{output/images/models/cube_2pop_psi_0.00_omega_0.00_r_0.50_v0_105_.tikz} \unskip
 \foreach \omega [count=\i] in {0,30,60,90} {
 \foreach \psi [count=\j] in {0.1,0.3,0.5,0.7} {
    \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.tikz} \unskip
