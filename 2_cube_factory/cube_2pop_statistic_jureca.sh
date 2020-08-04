@@ -4,8 +4,7 @@
 #SBATCH --tasks-per-node=24
 #SBATCH --cpus-per-task=1
 #SBATCH --time=$4
-#SBATCH --partition=gpus
-#SBATCH --gres=gpu:1
+#SBATCH --partition=batch
 #SBATCH --job-name=thesis-cube_2pop_stat
 #SBATCH --output=mpi.%j.out
 #SBATCH --error=mpi.%j.err
