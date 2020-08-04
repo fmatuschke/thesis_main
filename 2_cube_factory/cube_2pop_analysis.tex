@@ -1,53 +1,60 @@
-\documentclass[varwidth]{standalone}
+\documentclass[varwidth=100cm, multi=page]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
-\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{polar}
+\usetikzlibrary{calc}
+% \usetikzlibrary{external}
+% \tikzexternalize[prefix=./output/tmp/]
+% 
 \begin{document}
-% \foreach \omega in {0,10,...,90} {
-% \resizebox{\textwidth}{!}{
-%    \begin{tikzpicture}
-%       \node[inner sep=0pt] at (0,0) {\includegraphics[trim=100 10 50 65 width=3cm]{output/images/models/cube_2pop_psi_0.00_omega_0.00_r_0.50_v0_105_.solved.png}};
-%    \end{tikzpicture}
-% \foreach \psi in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
-%    \begin{tikzpicture}
-%       \node[inner sep=0pt] at (0,0) {\includegraphics[trim=100 10 50 65 width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.solved.png}};
-%    \end{tikzpicture}
-% }
-%    \begin{tikzpicture}
-%       \node[inner sep=0pt] at (0,0) {\includegraphics[trim=100 10 50 65 width=3cm]{output/images/models/cube_2pop_psi_1.00_omega_0.00_r_0.50_v0_105_.solved.png}};
-%    \end{tikzpicture}
-%    }
-% }
-% \foreach \omega in {0,30,60,90} {
-% \resizebox{\textwidth}{!}{
-%    % \begin{tikzpicture}
-%    %    \node[inner sep=0pt] at (0,0) {\includegraphics[trim=150 150 150 150  width=3cm]{output/images/models/cube_2pop_psi_0.00_omega_0.00_r_0.50_v0_105_.solved.png}};
-%    % \end{tikzpicture}
-% \foreach \psi in {0.3,0.6,0.9} {
-%    \begin{tikzpicture}
-%       \node[inner sep=0pt] at (0,0) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.solved.png}};
-%    \end{tikzpicture}
-%    \hspace{-10pt}
-% }
-%    % \begin{tikzpicture}
-%    %    \node[inner sep=0pt] at (0,0) {\includegraphics[trim=100 10 50 65 width=3cm]{output/images/models/cube_2pop_psi_1.00_omega_0.00_r_0.50_v0_105_.solved.png}};
-%    % \end{tikzpicture}
-% }
-% }
-\foreach \omega in {0,30,60,90} {
-\resizebox{\textwidth}{!}{
-   % \begin{tikzpicture}
-   %    \node[inner sep=0pt] at (0,0) {\includegraphics[trim=150 150 150 150  width=3cm]{output/images/models/cube_2pop_psi_0.00_omega_0.00_r_0.50_v0_105_.solved.png}};
-   % \end{tikzpicture}
-\foreach \psi in {0.3,0.6,0.9} {
-   \begin{tikzpicture}
-      \node[inner sep=0pt] at (0,0) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.solved.png}};
-   \end{tikzpicture}
-   \hspace{-10pt}
+% 
+\begin{page}
+\foreach \omega [count=\i] in {0,30,60,90} {
+\foreach \psi [count=\j] in {0.1,0.3,0.5,0.7} {
+   \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.tikz} \unskip
 }
-   % \begin{tikzpicture}
-   %    \node[inner sep=0pt] at (0,0) {\includegraphics[trim=100 10 50 65 width=3cm]{output/images/models/cube_2pop_psi_1.00_omega_0.00_r_0.50_v0_105_.solved.png}};
-   % \end{tikzpicture}
+\\
 }
+\end{page}
+% 
+\begin{page}
+\foreach \omega [count=\i] in {0,30,60,90} {
+\foreach \psi [count=\j] in {0.1,0.3,0.5,0.7} {
+   \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.tikz} \unskip
 }
+\\
+}
+\end{page}
+% 
+% FULL DATA
+% 
+\begin{page}
+\foreach \omega [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
+\foreach \psi [count=\j] in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
+\ifthenelse{\i=1}{
+   \input{output/images/models/cube_2pop_psi_0.00_omega_\omega.00_r_0.50_v0_105_.tikz} \unskip
+}{
+   \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.tikz} \unskip
+}}
+\\
+}
+\end{page}
+% 
+\begin{page}
+\foreach \omega [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
+\foreach \psi [count=\j] in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
+\ifthenelse{\i=1}{
+   \input{output/images/models/cube_2pop_psi_0.00_omega_\omega.00_r_1.00_v0_210_.tikz} \unskip
+}{
+   \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.tikz} \unskip
+}}
+\\
+}
+\end{page}
+% 
 \end{document}
