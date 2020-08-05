@@ -3,7 +3,7 @@
 #SBATCH --ntasks=$1
 #SBATCH --tasks-per-node=24
 #SBATCH --cpus-per-task=1
-#SBATCH --time=$4
+#SBATCH --time=$4:00:00
 #SBATCH --partition=batch
 #SBATCH --job-name=thesis-cube_2pop_stat
 #SBATCH --output=mpi.%j.out
@@ -18,4 +18,4 @@ srun -n $1 /p/home/jusers/matuschke1/jureca/private/thesis/env/bin/python3 \
    -o /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_stat_ \
    -n 10000 \
    --start $3 \
-   --time 10
+   --time $4
