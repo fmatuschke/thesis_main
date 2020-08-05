@@ -11,8 +11,12 @@
 \begin{tikzpicture}
 \foreach \omega [count=\i] in {0,30,60,90} {
 \foreach \psi [count=\j] in {0.1,0.3,0.5,0.7} {
-      \node[inner sep=0pt] at (\j*2.95,\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.solved.png}};
+      \node[inner sep=0pt] (\i\j) at (\j*2.95,-\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.solved.png}};
+      \ifthenelse{\j=1}{ 
+            \node[xshift=-1em] at (\i\j.west) {$\omega$};}{}
+      \ifthenelse{\i=1}{\node[yshift=1em] at (\i\j.north) {$\psi$};}{}
 }}
+\path[use as bounding box] (11.north west) rectangle (44.south east);
 \end{tikzpicture}
 \end{page}
 % 
@@ -20,8 +24,11 @@
 \begin{tikzpicture}
 \foreach \omega [count=\i] in {0,30,60,90} {
 \foreach \psi [count=\j] in {0.1,0.3,0.5,0.7} {
-      \node[inner sep=0pt] at (\j*2.95,\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
+      \node[inner sep=0pt] (\i\j) at (\j*2.95,-\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
+      \ifthenelse{\j=1}{\node[xshift=-1em] at (\i\j.west) {$\omega$};}{}
+      \ifthenelse{\i=1}{\node[yshift=1em] at (\i\j.north) {$\psi$}; }{}
 }}
+\path[use as bounding box] (11.north west) rectangle (44.south east);
 \end{tikzpicture}
 \end{page}
 % 
@@ -32,10 +39,14 @@
 \foreach \omega [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
 \foreach \psi [count=\j] in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
 \ifthenelse{\i=1}{
-      \node[inner sep=0pt] at (\j*2.95,\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_0.00_omega_\omega.00_r_0.50_v0_105_.solved.png}};
+      \node[inner sep=0pt] (\i\j) at (\j*2.95,-\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_0.00_omega_\omega.00_r_0.50_v0_105_.solved.png}};
 }{
-      \node[inner sep=0pt] at (\j*2.95,\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.solved.png}};
-}}}
+      \node[inner sep=0pt] (\i\j) at (\j*2.95,-\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.solved.png}};
+}
+\ifthenelse{\j=1}{\node[xshift=-1em] at (\i\j.west) {$\omega$};}{}
+\ifthenelse{\i=1}{\node[yshift=1em] at (\i\j.north) {$\psi$};}{}
+}}
+\path[use as bounding box] (11.north west) rectangle (109.south east);
 \end{tikzpicture}
 \end{page}
 % 
@@ -44,10 +55,14 @@
 \foreach \omega [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
 \foreach \psi [count=\j] in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
 \ifthenelse{\i=1}{
-      \node[inner sep=0pt] at (\j*2.95,\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_0.00_omega_\omega.00_r_1.00_v0_210_.solved.png}};
+      \node[inner sep=0pt] (\i\j) at (\j*2.95,-\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_0.00_omega_\omega.00_r_1.00_v0_210_.solved.png}};
 }{
-      \node[inner sep=0pt] at (\j*2.95,\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
-}}}
+      \node[inner sep=0pt] (\i\j) at (\j*2.95,-\i*3.10) {\includegraphics[trim=120 55 90 130, clip, width=3cm]{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
+}
+\ifthenelse{\j=1}{\node[xshift=-1em] at (\i\j.west) {$\omega$};}{}
+\ifthenelse{\i=1}{\node[yshift=1em] at (\i\j.north) {$\psi$};}{}
+}}
+\path[use as bounding box] (11.north west) rectangle (109.south east);
 \end{tikzpicture}
 \end{page}
 % 

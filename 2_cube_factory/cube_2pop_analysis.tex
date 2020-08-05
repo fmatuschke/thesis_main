@@ -1,4 +1,4 @@
-\documentclass[varwidth=100cm, multi=page]{standalone}
+\documentclass[varwidth=160cm, multi=page]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
 \usepackage{pgfplots}
@@ -13,50 +13,114 @@
 % \tikzexternalize[prefix=./output/tmp/]
 % 
 \begin{document}
+%
+\def\delta{9}
 % 
+% \foreach \radius/\volume in {0.50/105, 1.00/210} {
 \begin{page}
-% \input{output/images/models/cube_2pop_psi_0.00_omega_0.00_r_0.50_v0_105_.tikz} \unskip
+\begin{tikzpicture}
 \foreach \omega [count=\i] in {0,30,60,90} {
 \foreach \psi [count=\j] in {0.1,0.3,0.5,0.7} {
-   \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.tikz} \unskip
-}
-\\
-}
+   \begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
+   % 
+   \begin{polaraxis}[
+      domain=-90:90,
+      ymin=0, ymax=1,
+      xmin=-90, xmax=90,
+      xtick={-90,-45,...,90},
+      ytick=\empty,
+      cycle list/Set1,
+   ]
+   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+   \addplot+[very thick,]
+      table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__0.dat};
+   \addplot+[very thick,dashed]
+      table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__2.dat};
+   }
+   \end{polaraxis}
+   %
+   \begin{scope}[shift={(-4,0)}]
+   \begin{polaraxis}[
+      domain=90:270,
+      ymin=0, ymax=1,
+      xmin=90, xmax=270,
+      xtick={90,135,...,270},
+      xticklabels={90, 45, 0, -45, -90},
+      ytick=\empty,
+      cycle list/Dark2,
+   ]
+   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+   \addplot+[very thick,]
+      table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__1.dat};
+   \addplot+[very thick,dashed]
+      table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__3.dat};
+   }
+   \end{polaraxis}
+   \end{scope}
+   \end{scope}
+   \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
+   \ifthenelse{\i=4 \AND \j=4}{\coordinate (B) at (\i\j.south east);}{}
+   \ifthenelse{\j=1}{\node[left] at (\i\j.west) {$\omega$};}{}
+   \ifthenelse{\i=1}{\node[above] at (\i\j.north) {$\psi$};}{}
+}}
+\path[use as bounding box] (A) rectangle (B);
+\end{tikzpicture}
 \end{page}
-% 
+% % }
+% % % 
+% % % FULL DATA
+% % % 
+% % 
+% \foreach \radius/\volume in {0.50/105, 1.00/210} {
 \begin{page}
-\foreach \omega [count=\i] in {0,30,60,90} {
-\foreach \psi [count=\j] in {0.1,0.3,0.5,0.7} {
-   \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.tikz} \unskip
-}
-\\
-}
-\end{page}
-% 
-% FULL DATA
-% 
-\begin{page}
+\begin{tikzpicture}
 \foreach \omega [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
 \foreach \psi [count=\j] in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
-\ifthenelse{\i=1}{
-   \input{output/images/models/cube_2pop_psi_0.00_omega_\omega.00_r_0.50_v0_105_.tikz} \unskip
-}{
-   \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_0.50_v0_105_.tikz} \unskip
+   \begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
+   % 
+   \begin{polaraxis}[
+      domain=-90:90,
+      ymin=0, ymax=1,
+      xmin=-90, xmax=90,
+      xtick={-90,-45,...,90},
+      ytick=\empty,
+      cycle list/Set1,
+   ]
+   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+   \addplot+[very thick,]
+      table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__0.dat};
+   \addplot+[very thick,dashed]
+      table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__2.dat};
+   }
+   \end{polaraxis}
+   %
+   \begin{scope}[shift={(-4,0)}]
+   \begin{polaraxis}[
+      domain=90:270,
+      ymin=0, ymax=1,
+      xmin=90, xmax=270,
+      xtick={90,135,...,270},
+      xticklabels={90, 45, 0, -45, -90},
+      ytick=\empty,
+      cycle list/Dark2,
+   ]
+   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+   \addplot+[very thick,]
+      table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__1.dat};
+   \addplot+[very thick,dashed]
+      table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__3.dat};
+   }
+   \end{polaraxis}
+   \end{scope}
+   \end{scope}
+   \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
+   \ifthenelse{\i=10 \AND \j=9}{\coordinate (B) at (\i\j.south east);}{}
+   \ifthenelse{\j=1}{\node[left] at (\i\j.west) {$\omega$};}{}
+   \ifthenelse{\i=1}{\node[above] at (\i\j.north) {$\psi$};}{}
 }}
-\\
-}
+\path[use as bounding box] (A) rectangle (B);
+\end{tikzpicture}
 \end{page}
-% 
-\begin{page}
-\foreach \omega [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
-\foreach \psi [count=\j] in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
-\ifthenelse{\i=1}{
-   \input{output/images/models/cube_2pop_psi_0.00_omega_\omega.00_r_1.00_v0_210_.tikz} \unskip
-}{
-   \input{output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.tikz} \unskip
-}}
-\\
-}
-\end{page}
+% }
 % 
 \end{document}
