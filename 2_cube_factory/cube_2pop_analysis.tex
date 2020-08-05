@@ -9,8 +9,8 @@
 \usepgfplotslibrary{polar}
 \usepgfplotslibrary{colorbrewer}
 \usetikzlibrary{calc}
-% \usetikzlibrary{external}
-% \tikzexternalize[prefix=./output/tmp/]
+\usetikzlibrary{external}
+\tikzexternalize[prefix=./output/tmp/]
 % 
 \begin{document}
 %
@@ -37,8 +37,9 @@
    \addplot+[very thick,dashed]
       table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__2.dat};
    }
+   \coordinate (AA) at (axis cs:90,1);
    \end{polaraxis}
-   %
+   % 
    \begin{scope}[shift={(-4,0)}]
    \begin{polaraxis}[
       domain=90:270,
@@ -48,6 +49,7 @@
       xticklabels={90, 45, 0, -45, -90},
       ytick=\empty,
       cycle list/Dark2,
+      clip=false,
    ]
    \foreach \radius/\volume in {0.50/105, 1.00/210} {
    \addplot+[very thick,]
@@ -55,21 +57,24 @@
    \addplot+[very thick,dashed]
       table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__3.dat};
    }
+   \coordinate (BB) at (axis cs:90,1);
+   \ifthenelse{\j=1}{\node[left] at (axis description cs:-0.25,0.5) {$\omega$};}{}
    \end{polaraxis}
    \end{scope}
+   \node[inner sep=0pt] at ($(\i\j.south east) + (-1,1) $)
+      {\includegraphics[trim=120 55 90 130, clip, width=3cm]
+      {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
    \end{scope}
    \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
    \ifthenelse{\i=4 \AND \j=4}{\coordinate (B) at (\i\j.south east);}{}
-   \ifthenelse{\j=1}{\node[left] at (\i\j.west) {$\omega$};}{}
-   \ifthenelse{\i=1}{\node[above] at (\i\j.north) {$\psi$};}{}
+   \ifthenelse{\i=1}{\path (AA) -- (BB) node[above, midway, yshift=2em] {$\psi$};}{}
 }}
 \path[use as bounding box] (A) rectangle (B);
 \end{tikzpicture}
 \end{page}
-% % }
-% % % 
-% % % FULL DATA
-% % % 
+% }
+% % 
+% % FULL DATA
 % % 
 % \foreach \radius/\volume in {0.50/105, 1.00/210} {
 \begin{page}
@@ -92,6 +97,7 @@
    \addplot+[very thick,dashed]
       table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__2.dat};
    }
+   \coordinate (AA) at (axis cs:90,1);
    \end{polaraxis}
    %
    \begin{scope}[shift={(-4,0)}]
@@ -103,6 +109,7 @@
       xticklabels={90, 45, 0, -45, -90},
       ytick=\empty,
       cycle list/Dark2,
+      clip=false
    ]
    \foreach \radius/\volume in {0.50/105, 1.00/210} {
    \addplot+[very thick,]
@@ -110,17 +117,21 @@
    \addplot+[very thick,dashed]
       table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__3.dat};
    }
+   \coordinate (BB) at (axis cs:90,1);
+   \ifthenelse{\j=1}{\node[left] at (axis description cs:-0.25,0.5) {$\omega$};}{}
    \end{polaraxis}
    \end{scope}
+   \node[inner sep=0pt] (\i\j) at ($(\i\j.south east) + (-1,1) $)
+      {\includegraphics[trim=120 55 90 130, clip, width=3cm]
+      {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
    \end{scope}
    \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
    \ifthenelse{\i=10 \AND \j=9}{\coordinate (B) at (\i\j.south east);}{}
-   \ifthenelse{\j=1}{\node[left] at (\i\j.west) {$\omega$};}{}
-   \ifthenelse{\i=1}{\node[above] at (\i\j.north) {$\psi$};}{}
+   \ifthenelse{\i=1}{\path (AA) -- (BB) node[above, midway, yshift=2em] {$\psi$};}{}
 }}
 \path[use as bounding box] (A) rectangle (B);
 \end{tikzpicture}
 \end{page}
-% }
+% % }
 % 
 \end{document}
