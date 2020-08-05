@@ -22,7 +22,7 @@ FILE_BASE = os.path.basename(FILE_NAME)
 os.makedirs(os.path.join(FILE_PATH, 'output'), exist_ok=True)
 FILE_OUT = os.path.join(FILE_PATH, 'output', f'fastpli.example.{FILE_BASE}')
 
-fbs = fastpli.io.fiber_bundles.load("output/model.dat")
+fbs = fastpli.io.fiber_bundles.load("output/model_480.0_480.0.tmp.dat")
 
 
 def run(z, s):
@@ -70,7 +70,7 @@ def run(z, s):
             images = simpli.run_simulation(tissue, optical_axis,
                                            tissue_properties, theta, phi)
 
-            h5f['simulation/data/' + str(t)] = images
+            # h5f['simulation/data/' + str(t)] = images
 
             # apply optic to simulation
             images = simpli.apply_optic(images, mp_pool=mp_pool)
