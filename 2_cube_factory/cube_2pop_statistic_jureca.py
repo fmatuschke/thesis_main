@@ -53,6 +53,11 @@ parser.add_argument("-t",
                     required=True,
                     help="allocation time in hours.")
 
+parser.add_argument("--overwrite",
+                    action='store_true',
+                    default=False,
+                    help="overwrite.")
+
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
 os.makedirs(args.output, exist_ok=True)
@@ -254,7 +259,7 @@ if __name__ == "__main__":
 
     parameters.reverse()
     parameter = parameters[args.start + comm.Get_rank()]
-    if check_file(parameter):
+    if check_file(parameter) or args.overwrite:
         run(parameter)
     else:
         logger.info(f"parameter: {parameter} already exist")
