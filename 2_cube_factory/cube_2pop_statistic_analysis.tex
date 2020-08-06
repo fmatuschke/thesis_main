@@ -1,79 +1,108 @@
-% \documentclass{minimal}
-% \usepackage[a4paper,margin=1cm,landscape]{geometry}
-\documentclass[multi=page,varwidth=20cm]{standalone}
-
+\documentclass[varwidth=160cm, multi=page]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
-\usepackage{amsmath, amssymb, mathtools}
+\usepackage{pgfplots}
 \usepackage{siunitx}
 \usepackage{currfile}
-\usepackage{tikz}
-\usepackage{pgfplots}
+\usepackage{ifthen}
 \pgfplotsset{compat=1.17}
 \usepgfplotslibrary{polar}
-\usetikzlibrary{external}
+\usepgfplotslibrary{colorbrewer}
 \usetikzlibrary{calc}
-\tikzexternalize[prefix=./output/tmp/tikz]
+% \usetikzlibrary{external}
+% \tikzexternalize[prefix=./output/tmp/]
 % 
-\pgfplotscreateplotcyclelist{mylist}{
-   {red},
-   {red,densely dashed},
-   {green!50!black},
-   {green!50!black,densely dashed},
-   {blue},
-   {blue,densely dashed}
-}
+% \pgfplotscreateplotcyclelist{mylist}{
+%    {red},
+%    {red,densely dashed},
+%    {green!50!black},
+%    {green!50!black,densely dashed},
+%    {blue},
+%    {blue,densely dashed}
+% }
+% 
+\def\delta{9}
 % 
 \begin{document}
 % 
+% {0,10,20,30,40,50,60,70,80,90}
+% {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}
+\foreach \omegas/\psis [count=\pp] in {{0,30,60,90}/{0.1,0.3,0.6,0.9},{0,10,20,30,40,50,60,70,80,90}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
 \begin{page}
-\foreach \fr in {1.00, 2.00, 5.00, 10.00, 20.00} {
-\resizebox{\textwidth}{!}{
-\foreach \fl in {0.50, 1.00, 2.00, 5.00, 10.00} {
-   \input{output/cube_stat/images/cube_2pop_psi_1.00_fr_\fr_fl_\fl_phase_solved_.tikz}
-}}}
+\begin{tikzpicture}
+\foreach \omega [count=\i] in \omegas {
+\foreach \psi [count=\j] in \psis {
+   \begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
+   % 
+   \begin{polaraxis}[
+      domain=-90:90,
+      ymin=0, ymax=1,
+      xmin=-90, xmax=90,
+      xtick={-90,-45,...,90},
+      ytick=\empty,
+      cycle list/Set1,
+      cycle multiindex* list={
+         Set1\nextlist
+         linestyles*\nextlist}
+   ]
+   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+      \foreach \state in {init, solved} {
+      \addplot+[very thick,]
+         table [x=\state_phi_x, y=\state_phi_h, col sep=comma]
+         {output/images/init_vs_solved/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume_.csv} \closedcycle;
+   }}
+   \coordinate (AA) at (axis cs:90,1);
+   \end{polaraxis}
+   % 
+   \begin{scope}[shift={(-4,0)}]
+   \begin{polaraxis}[
+      domain=90:270,
+      ymin=0, ymax=1,
+      xmin=90, xmax=270,
+      xtick={90,135,...,270},
+      xticklabels={90, 45, 0, -45, -90},
+      ytick=\empty,
+      cycle list/Dark2,
+      cycle multiindex* list={
+         Dark2\nextlist
+         linestyles*\nextlist},
+      clip=false,
+      % \ifthenelse{\i=1 \AND \j=1}{
+      legend to name={legend},
+      legend style={text = black},
+      legend columns=4,
+      % legend transposed=true,
+      legend entries = {
+         {init $0.50/105$},
+         {solved $0.50/105$},
+         {init $1.00/210$},
+         {solved $1.00/210$},
+      },
+      % }{}
+   ]
+   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+      \foreach \state in {init, solved} {
+      \addplot+[very thick,]
+         table [x expr=\thisrow{\state_incl_x}+180, y=\state_incl_h, col sep=comma] {output/images/init_vs_solved/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume_.csv} \closedcycle;
+   }}
+   \coordinate (BB) at (axis cs:90,1);
+   \ifthenelse{\j=1}{\node[left] at (axis description cs:-0.25,0.5) {$\omega$};}{}
+   \end{polaraxis}
+   \end{scope}
+   \end{scope}
+   \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
+   \ifthenelse{\i=4 \AND \j=4}{\coordinate (B) at (\i\j.south east);}{}
+   \ifthenelse{\i=10 \AND \j=9}{\coordinate (B) at (\i\j.south east);}{}
+   \ifthenelse{\i=1}{\path (AA) -- (BB) node[above, midway, yshift=2em] {$\psi$};}{}
+}}
+\ifthenelse{\pp=1}{
+\path[] let \p1=(A), \p2=(B) in (A) -- (\x2,\y1) node[midway,scale=1, yshift=4.5em] {\ref{legend}};
+}{
+\path[] let \p1=(A), \p2=(B) in (A) -- (\x2,\y1) node[midway,scale=1.5, yshift=4em] {\ref{legend}};
+}
+\path[use as bounding box] (A) rectangle (B);
+\end{tikzpicture}
 \end{page}
-% %
-% \begin{page}
-% \foreach \fr in {1.00, 2.00, 5.00, 10.00, 20.00} {
-% \resizebox{\textwidth}{!}{
-% \foreach \fl in {0.50, 1.00, 2.00, 5.00, 10.00} {
-%    \input{output/cube_stat/images/cube_2pop_psi_0.50_fr_\fr_fl_\fl_phase_solved_.tikz}
-% }}}
-% \end{page}
-% %
-% \begin{page}
-% \foreach \fr in {1.00, 2.00, 5.00, 10.00, 20.00} {
-% \resizebox{\textwidth}{!}{
-% \foreach \fl in {0.50, 1.00, 2.00, 5.00, 10.00} {
-%    \input{output/cube_stat/images/cube_2pop_psi_0.25_fr_\fr_fl_\fl_phase_solved_.tikz}
-% }}}
-% \end{page}
-% % 
-% \begin{page}
-% \begin{tikzpicture} 
-%     \begin{axis}[%
-%     scale only axis,width=1mm, % make axis really small (smaller than legend)
-%     hide axis,
-%     legend style={draw=white!15!black,legend cell align=left},
-%     cycle list name = mylist,
-%     legend columns=6,
-%     % legend image post style={sharp plot}
-%     ]
-%     \addplot+[mark=none] coordinates {(0,0)};
-%     \addlegendentry{init, $\Omega=30$};
-%     \addplot+[mark=none] coordinates {(0,0)};
-%     \addlegendentry{solved, $\Omega=30$};
-%     \addplot+[mark=none] coordinates {(0,0)};
-%     \addlegendentry{init, $\Omega=60$};
-%     \addplot+[mark=none] coordinates {(0,0)};
-%     \addlegendentry{solved, $\Omega=60$};
-%     \addplot+[mark=none] coordinates {(0,0)};
-%     \addlegendentry{init, $\Omega=90$};
-%     \addplot+[mark=none] coordinates {(0,0)};
-%     \addlegendentry{solved, $\Omega=90$};
-%     \end{axis}
-% \end{tikzpicture}
-% \end{page}
+}
 % 
 \end{document}
