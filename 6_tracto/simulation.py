@@ -18,7 +18,9 @@ from load_fbs_plivis import read
 
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
-FILE_BASE = os.path.basename(FILE_NAME)
+# FILE_BASE = os.path.basename(FILE_NAME)
+FILE_BASE = "run.py"  # FIXME
+print("FIXME")
 os.makedirs(os.path.join(FILE_PATH, 'output'), exist_ok=True)
 FILE_OUT = os.path.join(FILE_PATH, 'output', f'fastpli.example.{FILE_BASE}')
 
@@ -27,12 +29,11 @@ fbs = fastpli.io.fiber_bundles.load("output/model_480.0_480.0.tmp.dat")
 
 def run(z, s):
     if os.path.isfile(f'{FILE_OUT}_{s}.h5'):
-        print(f'{FILE_OUT}_{s}.h5 --- EXISTS')
+        tqdm.tqdm.write(f'{FILE_OUT}_{s}.h5 --- EXISTS')
         return
     with h5py.File(f'{FILE_OUT}_{s}.h5', 'w-') as h5f:
         simpli = fastpli.simulation.Simpli()
         simpli.omp_num_threads = 24
-        mp_pool = mp.Pool(simpli.omp_num_threads)
         simpli.voxel_size = 10  # in micro meter
         simpli.set_voi(
             np.array([220, 175, z]) * 60,
@@ -73,7 +74,7 @@ def run(z, s):
             # h5f['simulation/data/' + str(t)] = images
 
             # apply optic to simulation
-            images = simpli.apply_optic(images, mp_pool=mp_pool)
+            images = simpli.apply_optic(images)
             h5f['simulation/optic/' + str(t)] = images
 
             # calculate modalities
@@ -86,14 +87,15 @@ def run(z, s):
 
         # save mask for analysis
         mask = np.sum(tissue, 2) > 0
-        mask = simpli.apply_optic_resample(1.0 * mask, mp_pool=mp_pool) > 0.1
+        mask = simpli.apply_optic_resample(1.0 * mask) > 0.1
         h5f['simulation/optic/mask'] = np.uint8(mask)
-        mask = None  # keep analysing all pixels
+        # mask = None  # keep analysing all pixels
 
         # print('Run ROFL analysis:')
         # tqdm.tqdm.write("ROFL")
-        rofl_direction, rofl_incl, rofl_t_rel, _ = simpli.apply_rofl(
-            tilting_stack, mask=mask, mp_pool=mp_pool)
+        with mp.Pool(simpli.omp_num_threads) as mp_pool:
+            rofl_direction, rofl_incl, rofl_t_rel, _ = simpli.apply_rofl(
+                tilting_stack, mask=mask, mp_pool=mp_pool)
 
         h5f['analysis/rofl/direction'] = np.rad2deg(rofl_direction)
         h5f['analysis/rofl/inclination'] = np.rad2deg(rofl_incl)
