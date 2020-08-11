@@ -9,9 +9,24 @@
 \usepgfplotslibrary{polar}
 \usepgfplotslibrary{colorbrewer}
 \usetikzlibrary{calc}
-\usetikzlibrary{external}
-\tikzexternalize[prefix=./output/tmp/]
+\usetikzlibrary{matrix}
+\pgfplotsset{cycle list/Set1}
+% \usetikzlibrary{external}
+% \tikzexternalize[prefix=./output/tmp/]
 %
+\newenvironment{customlegend}[1][]{%
+    \begingroup
+    % inits/clears the lists (which might be populated from previous
+    % axes):
+    \csname pgfplots@init@cleared@structures\endcsname
+    \pgfplotsset{#1}%
+}{%
+    % draws the legend:
+    \csname pgfplots@createlegend\endcsname
+    \endgroup
+}%
+\def\addlegendimage{\csname pgfplots@addlegendimage\endcsname}
+% 
 \def\delta{9}
 % 
 \begin{document}
@@ -31,11 +46,13 @@
       ytick=\empty,
       cycle list/Set1,
    ]
-   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+   \foreach \radius/\volume [count=\t] in {0.50/105, 1.00/210} {
    \addplot+[very thick,]
       table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__0.dat};
+      % \label{plots:1\t}
    \addplot+[very thick,dashed]
       table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__2.dat};
+      % \label{plots:2\t}
    }
    \coordinate (AA) at (axis cs:90,1);
    \end{polaraxis}
@@ -51,11 +68,13 @@
       cycle list/Dark2,
       clip=false,
    ]
-   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+   \foreach \radius/\volume [count=\t] in {0.50/105, 1.00/210} {
    \addplot+[very thick,]
       table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__1.dat};
+      % \label{plots:3\t}
    \addplot+[very thick,dashed]
       table [x=x, y=y, col sep=comma] {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume__3.dat};
+      % \label{plots:4\t}
    }
    \coordinate (BB) at (axis cs:90,1);
    \ifthenelse{\j=1}{\node[left] at (axis description cs:-0.25,0.5) {$\omega$};}{}
@@ -69,11 +88,37 @@
    \ifthenelse{\i=4 \AND \j=4}{\coordinate (B) at (\i\j.south east);}{}
    \ifthenelse{\i=1}{\path (AA) -- (BB) node[above, midway, yshift=2em] {$\psi$};}{}
 }}
+% 
 \path[use as bounding box] (A) rectangle (B);
+% 
+\begin{scope}[shift={(current bounding box.north)}]
+\node[anchor=south] {
+% 
+\begin{axis}[%
+   legend columns=4,
+   scale only axis,width=1mm,
+   hide axis,
+   legend image post style={sharp plot},
+   cycle multiindex* list={Set1 \nextlist
+                           solid, dashed\nextlist},
+   ]
+   \pgfplotsinvokeforeach{1,...,4}{\addplot coordinates {(0,0)};} % make six dummy plots
+   \addlegendentry{$0.50/105$ init};
+   \addlegendentry{$0.50/105$ solved};
+   \addlegendentry{$1.00/210$ init};
+   \addlegendentry{$1.00/210$ solved};
+   % 
+\end{axis}
+};
+\end{scope}
+% 
+% \pgfresetboundingbox
+% \path [use as bounding box] (A) rectangle (B);
+% 
 \end{tikzpicture}
 \end{page}
 % }
-% % 
+% %
 % % FULL DATA
 % % 
 % \foreach \radius/\volume in {0.50/105, 1.00/210} {
