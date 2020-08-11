@@ -1,0 +1,160 @@
+\documentclass[tikz, border={2.25cm 0pt 0mm 0pt}, varwidth=30cm, multi=page]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{statistics}
+% 
+\begin{document}
+% 
+% \pgfplotsset{
+% only if 3/.style args={#1 is #2 and #3 is #4 and #5 is #6}{
+%     /pgfplots/boxplot/data filter/.code={
+%         \edef\tempa{\thisrow{#1}}
+%         \edef\tempb{#2}
+%         \edef\tempc{\thisrow{#3}}
+%         \edef\tempd{#4}
+%         \edef\tempe{\thisrow{#5}}
+%         \edef\tempf{#6}
+%         \ifx\tempa\tempb
+%             \ifx\tempc\tempd
+%                 \ifx\tempe\tempf
+%                 \else
+%                 \def\pgfmathresult{}
+%                 \fi
+%             \else
+%             \def\pgfmathresult{}
+%             \fi
+%         \else
+%         \def\pgfmathresult{}
+%         \fi
+%     }
+% }}
+% 
+\pgfmathsetmacro{\ng}{10}
+\pgfmathsetmacro{\dx}{0.75}
+% 
+\pgfplotsset{
+    Boxplot/.style={
+        height=7cm,
+        width=20cm,
+        cycle list/Paired-10,
+        xmin=0.42,
+        xmax=5.58,
+        axis x line=none,
+        axis y line = left,
+        enlarge y limits,
+        ymajorgrids,
+        clip=false,
+        y label style={at={(axis description cs:-0.075,.5)},rotate=0,anchor=south},
+      %   ylabel style={overlay},
+      %   yticklabel style={overlay},
+        boxplot={
+            draw position={1-\dx/2+floor(\plotnumofactualtype/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
+            box extend=\dx/(\ng+1),
+            mark size=0.42pt,
+        },
+        boxplot/draw direction=y,
+    },
+}
+%
+\newcommand{\xachse}{
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$0.5$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$1$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$2$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$4$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:4.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:5.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$8$};
+}
+% 
+\newcommand{\Loop}[1]{
+\foreach \fl in {0.5,1.0,2.0,4.0,8.0} {
+\foreach \fr in {0.5,1.0,2.0,4.0,8.0} {
+\foreach \psi in {1.0,0.5} {#1}}}}
+% 
+% \tikzexternaldisable 
+% 
+\foreach \fiberradius [count=\i] in {0.5,1.0,2.0,5.0,10.0} {
+\begin{page}
+\begin{tabular}{@{}c@{}}
+% 
+\begin{tikzpicture}[trim axis left, % trim axis right, baseline]
+]
+\begin{scope}[shift={(1,0)}]
+% \pgfplotstableread[col sep=comma, row sep=newline,header=true]{output/cube_2pop_stat_/cube_stat_r_1.0.csv}{\datatable}
+\begin{axis}[Boxplot, ylabel={$t$ in $\si{\second}$}, ymode={log},
+  legend to name={legend\i},
+  legend entries = {
+  {$(0.5,\mathbin{\|})$},
+  {$(0.5,\times)$},
+  {$(1.0,\mathbin{\|})$},
+  {$(1.0,\times)$},
+  {$(2.0,\mathbin{\|})$},
+  {$(2.0,\times)$},
+  {$(4.0,\mathbin{\|})$},
+  {$(4.0,\times)$},
+  {$(8.0,\mathbin{\|})$},
+  {$(8.0,\times)$}
+  },
+  legend style={text = black},
+  legend image post style={mark=square*},
+  legend columns=2,
+  clip=false,
+  legend image post style={scale=5},
+  legend transposed=true,
+]
+\Loop{
+    \addplot+[fill, draw=black] table[
+        y={time}, col sep=comma, row sep=newline,
+        ]{output/cube_2pop_stat_/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
+}
+\node[above] (leg) at (axis description cs:0.5,1.0) {\ref{legend\i}};
+\xachse
+\end{axis}
+\end{scope}
+\end{tikzpicture}
+% 
+\\[2em]
+% 
+\begin{tikzpicture}[trim axis left, % trim axis right, baseline]
+]
+\begin{scope}[shift={(1,0)}]
+\begin{axis}[Boxplot, ylabel={$n_\text{col\_obj}/n_\text{obj}$},]
+
+\Loop{
+    \addplot+[fill, draw=black] table[
+        y={frac_num_col_obj}, col sep=comma, row sep=newline,
+        ]{output/cube_2pop_stat_/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
+}
+\xachse
+\end{axis}
+\end{scope}
+\end{tikzpicture}
+% 
+\\[2em]
+% 
+\begin{tikzpicture}[trim axis left, % trim axis right, baseline]
+]
+\begin{scope}[shift={(1,0)}]
+\begin{axis}[Boxplot, ylabel={$V/V_0$},]
+\Loop{
+    \addplot+[fill, draw=black] table[
+        y={volume}, col sep=comma, row sep=newline,
+        ]{output/cube_2pop_stat_/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
+}
+\xachse
+\end{axis}
+\end{scope}
+\end{tikzpicture}
+\end{tabular}
+\end{page}
+}
+% 
+\end{document}
