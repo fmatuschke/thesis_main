@@ -97,8 +97,8 @@ def run(file):
     theta_h, theta_x = np.histogram(theta.ravel(), hist_bin(180), density=True)
 
     # df = pd.DataFrame(columns=["phi", "theta"], dtype='object')
-    df = pd.DataFrame(columns=["phi_h", "phi_x", "theta_h", "theta_x"],
-                      dtype='object')
+    # df = pd.DataFrame(columns=["phi_h", "phi_x", "theta_h", "theta_x"],
+    #                   dtype='object')
 
     return pd.DataFrame([[
         omega,
@@ -149,7 +149,10 @@ files = glob.glob(os.path.join(args.input, "*.h5"))
 run.flag = False
 run.num_p = args.num_proc
 with mp.Pool(processes=run.num_p) as pool:
-    df = [d for d in tqdm(pool.imap_unordered(run, files), total=len(files))]
+    df = [
+        d for d in tqdm(
+            pool.imap_unordered(run, files), total=len(files), smoothing=0)
+    ]
     df = pd.concat(df, ignore_index=True)
 
 df.to_pickle(os.path.join(args.input, "cube_stat.pkl"))
