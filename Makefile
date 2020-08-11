@@ -12,7 +12,7 @@ install: env env-update requirements git-submodules clean-fastpli fastpli
 env: $(VENV)/bin/python3
 
 $(VENV)/bin/python3:
-	python3 -m venv $(VENV)
+	python3 -m venv --system-site-packages $(VENV)
 
 .PHONY: env-update
 env-update: env
@@ -20,7 +20,8 @@ env-update: env
 
 .PHONY: requirements
 requirements: env	
-	$(PIP) install -r requirements.txt -q
+	# $(PIP) install -r requirements.txt -q
+	$(PIP) install -r requirements-sc.txt -q
 	$(PIP) install 0_core/. -q
 
 .PHONY: git-submodules
