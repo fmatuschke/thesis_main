@@ -97,8 +97,8 @@ def run(file):
     theta_h, theta_x = np.histogram(theta.ravel(), hist_bin(180), density=True)
 
     # df = pd.DataFrame(columns=["phi", "theta"], dtype='object')
-    df = pd.DataFrame(columns=["phi_h", "phi_x", "theta_h", "theta_x"],
-                      dtype='object')
+    # df = pd.DataFrame(columns=["phi_h", "phi_x", "theta_h", "theta_x"],
+    #                   dtype='object')
 
     return pd.DataFrame([[
         omega,

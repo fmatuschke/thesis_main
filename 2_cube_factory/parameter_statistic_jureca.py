@@ -203,15 +203,13 @@ def run(parameters):
                     h5f['/'].attrs['num_objs'] = np.array(num_objs)
                     h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
 
-    times.append(time.time() - start_time)
+    end_time = time.time()
+
+    times.append(end_time - start_time)
     steps.append(i)
     overlaps.append(solver.overlap)
     num_objs.append(solver.num_obj)
     num_col_objs.append(solver.num_col_obj)
-
-    # print(solver.num_steps)
-
-    end_time = time.time()
 
     logger.info(f"time: {end_time - start_time}")
     logger.info(
