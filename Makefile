@@ -9,7 +9,7 @@ BUILD=thesis
 install: env env-update requirements git-submodules clean-fastpli fastpli
 
 .PHONY: install-sc
-install: env env-update requirements-sc git-submodules clean-fastpli fastpli
+install-sc: env env-update requirements-sc git-submodules clean-fastpli fastpli
 
 env: $(VENV)/bin/python3
 
@@ -26,7 +26,7 @@ requirements: env
 	$(PIP) install 0_core/. -q
 
 .PHONY: requirements-sc
-requirements: env	
+requirements-sc: env	
 	$(PIP) install -r requirements-sc.txt -q
 	$(PIP) install 0_core/. -q	
 
