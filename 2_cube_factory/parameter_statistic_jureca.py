@@ -77,6 +77,9 @@ formatter = logging.Formatter(
 mh.setFormatter(formatter)
 logger.addHandler(mh)
 
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(formatter)
+logger.addHandler(consoleHandler)
 
 def run(parameters):
     radius, mean_length_f, min_radius_f, (psi, omega), n = parameters
