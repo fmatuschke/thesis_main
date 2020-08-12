@@ -19,7 +19,7 @@ env-update: env
 	$(PIP) install --upgrade pip -q
 
 .PHONY: requirements
-requirements: env	
+requirements: env
 	$(PIP) install -r requirements.txt -q
 	$(PIP) install 0_core/. -q
 
@@ -28,7 +28,7 @@ git-submodules:
 	git submodule update --init --recursive
 
 .PHONY: git-submodules-pull
-git-submodules-pull:	
+git-submodules-pull:
 	cd fastpli
 	git checkout development
 	git pull
@@ -44,13 +44,13 @@ git-submodules-pull:
 	cd thesis
 	git checkout master
 	git pull
-	
+
 .PHONY: fastpli/setup
 .ONESHELL:
 fastpli/setup: fastpli/
 	cd fastpli
 	# rm -r build/
-	make BUILD=$(BUILD) fastpli 
+	make BUILD=$(BUILD) fastpli
 
 .PHONY: fastpli
 fastpli: env fastpli/setup
