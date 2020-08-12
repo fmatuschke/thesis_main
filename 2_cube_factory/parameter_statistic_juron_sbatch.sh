@@ -3,7 +3,7 @@
 set -e
 
 N=1250
-num_p=24
+num_p=40
 sum=0
 dt=1
 
@@ -15,11 +15,11 @@ do
    if [ $(($i+$num_p)) -gt $(($N-1)) ]
    then
       num_p=$((1250-$i))
-      ./juron_replace.sh cube_2pop_statistic_juron.sh $num_p 1 $i $dt
+      ./juron_replace.sh parameter_statistic_juron.sh $num_p 1 $i $dt
       ((sum+=num_p))
       break
    fi
-   ./juron_replace.sh cube_2pop_statistic_juron.sh $num_p 1 $i $dt
+   ./juron_replace.sh parameter_statistic_juron.sh $num_p 1 $i $dt
    ((sum+=num_p))
 done
 

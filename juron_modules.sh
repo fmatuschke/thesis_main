@@ -6,3 +6,4 @@ module load scipy/1.2.1
 module load mpi4py/3.0.0-openmpi_2.1.2
 module load gcc/8.1.0
 module load cmake/3.15.5
+module load cuda/8.0.61
