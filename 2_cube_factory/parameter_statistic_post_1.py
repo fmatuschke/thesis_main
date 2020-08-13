@@ -26,6 +26,8 @@ df = df[df.state == "solved"]
 # df = df[df.psi == 0.5]
 # df = df[df.fl <= 6]
 
+print(df.fl.unique())
+
 df['volume'] = df.count_elements.map(
     lambda x: np.sum(x[1:])) / df.count_elements.map(np.sum)
 df['frac_num_col_obj'] = df.num_col_obj / df.num_obj
@@ -41,18 +43,17 @@ for r in df.r.unique():
                                 df.query(
                                     "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
                                 )):
-                            print(r, omega, psi, fr, fl, n)
                             time = 60 * 60 * 11
                             frac_num_col_obj = 0.5
                             volume = 0.5
                             ["time", "frac_num_col_obj", "volume"]
                             df = df.append(
                                 {
-                                    # "r": r,
-                                    # "psi": psi,
-                                    # "omega": omega,
-                                    # "fr": fr,
-                                    # "fl": fl,
+                                    "r": r,
+                                    "psi": psi,
+                                    "omega": omega,
+                                    "fr": fr,
+                                    "fl": fl,
                                     "time": time,
                                     "n": n,
                                     "frac_num_col_obj": frac_num_col_obj,

@@ -47,7 +47,11 @@ def run(file):
     n = float(file.split("_n_")[1].split("_")[0])
     state = file.split(".")[-2].split(".")[-1]
 
-    fbs = fastpli.io.fiber_bundles.load(file)
+    try:
+        fbs = fastpli.io.fiber_bundles.load(file)
+    except:
+        print(f"failed to open file: {file}")
+        return pd.DataFrame()
 
     if state != "init":
         # Setup Simpli
