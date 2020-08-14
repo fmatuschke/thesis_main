@@ -85,7 +85,7 @@ def run(file):
             num_obj = h5f['/'].attrs['num_obj']
             num_steps = h5f['/'].attrs['num_steps']
             time = h5f['/'].attrs['time']
-        else    
+        else:
             overlap = np.nan
             num_col_obj = np.nan
             num_obj = np.nan
