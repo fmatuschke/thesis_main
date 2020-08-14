@@ -10,9 +10,9 @@ dt=1
 
 for ((i=0; i<$N; i=i+$num_p))
 do
-   if [ $i -gt ((N/n*0)) ]; then dt=1; fi
-   if [ $i -gt ((N/n*3)) ]; then dt=6; fi
-   if [ $i -gt ((N/n*4)) ]; then dt=24; fi
+   if [ $i -gt $((N/n*0)) ]; then dt=1; fi
+   if [ $i -gt $((N/n*3)) ]; then dt=6; fi
+   if [ $i -gt $((N/n*4)) ]; then dt=24; fi
 
    if [ $(($i+$num_p)) -gt $(($N-1)) ]
    then
