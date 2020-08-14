@@ -47,11 +47,11 @@ def run(file):
     n = float(file.split("_n_")[1].split("_")[0])
     state = file.split(".")[-2].split(".")[-1]
 
-    try:
-        fbs = fastpli.io.fiber_bundles.load(file)
-    except:
-        print(f"failed to open file: {file}")
-        return pd.DataFrame()
+    # try:
+    fbs = fastpli.io.fiber_bundles.load(file)
+    # except:
+    #     print(f"failed to open file: {file}")
+    #     return pd.DataFrame()
 
     if state != "init":
         # Setup Simpli
@@ -91,8 +91,12 @@ def run(file):
             num_steps = h5f['/'].attrs['num_steps']
             time = h5f['/'].attrs['time']
 
-    fbs_ = fbs.copy()
-    fbs_ = fastpli.objects.fiber_bundles.Cut(fbs_, [[-30] * 3, [30] * 3])
+    fbs_ = fastpli.objects.fiber_bundles.Cut(fbs, [[-30] * 3, [30] * 3])
+
+    if len(fbs_[0]) == 0:
+        print(omega, psi, r, v0, fl, fr, n, state)
+        raise ValueError("FOO")
+
     phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
 
     theta[phi > np.pi] = np.pi - theta[phi > np.pi]
