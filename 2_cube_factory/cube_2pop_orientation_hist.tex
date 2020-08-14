@@ -9,24 +9,15 @@
 \usepgfplotslibrary{polar}
 \usepgfplotslibrary{colorbrewer}
 \usetikzlibrary{calc}
+\pgfplotsset{cycle list/Set1}
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
-% 
-% \pgfplotscreateplotcyclelist{mylist}{
-%    {red},
-%    {red,densely dashed},
-%    {green!50!black},
-%    {green!50!black,densely dashed},
-%    {blue},
-%    {blue,densely dashed}
-% }
 % 
 \def\delta{9}
 % 
 \begin{document}
 % 
-% {0,10,20,30,40,50,60,70,80,90}
-% {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}
+% \foreach \omegas/\psis [count=\pp] in {{0,30,60,90}/{0.1,0.3,0.6,0.9}}{
 \foreach \omegas/\psis [count=\pp] in {{0,30,60,90}/{0.1,0.3,0.6,0.9},{0,10,20,30,40,50,60,70,80,90}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
 \begin{page}
 \begin{tikzpicture}
@@ -40,7 +31,6 @@
       xmin=-90, xmax=90,
       xtick={-90,-45,...,90},
       ytick=\empty,
-      cycle list/Set1,
       cycle multiindex* list={
          Set1\nextlist
          linestyles*\nextlist}
@@ -62,23 +52,10 @@
       xtick={90,135,...,270},
       xticklabels={90, 45, 0, -45, -90},
       ytick=\empty,
-      cycle list/Dark2,
       cycle multiindex* list={
-         Dark2\nextlist
+         Set1\nextlist
          linestyles*\nextlist},
       clip=false,
-      % \ifthenelse{\i=1 \AND \j=1}{
-      legend to name={legend},
-      legend style={text = black},
-      legend columns=4,
-      % legend transposed=true,
-      legend entries = {
-         {init $0.50/105$},
-         {solved $0.50/105$},
-         {init $1.00/210$},
-         {solved $1.00/210$},
-      },
-      % }{}
    ]
    \foreach \radius/\volume in {0.50/105, 1.00/210} {
       \foreach \state in {init, solved} {
@@ -89,18 +66,43 @@
    \ifthenelse{\j=1}{\node[left] at (axis description cs:-0.25,0.5) {$\omega$};}{}
    \end{polaraxis}
    \end{scope}
+   \node[inner sep=0pt] at ($(\i\j.south east) + (-1,1) $)
+      {\includegraphics[trim=120 55 90 130, clip, width=3cm]
+      {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
    \end{scope}
    \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
    \ifthenelse{\i=4 \AND \j=4}{\coordinate (B) at (\i\j.south east);}{}
    \ifthenelse{\i=10 \AND \j=9}{\coordinate (B) at (\i\j.south east);}{}
    \ifthenelse{\i=1}{\path (AA) -- (BB) node[above, midway, yshift=2em] {$\psi$};}{}
 }}
-\ifthenelse{\pp=1}{
-\path[] let \p1=(A), \p2=(B) in (A) -- (\x2,\y1) node[midway,scale=1, yshift=4.5em] {\ref{legend}};
-}{
-\path[] let \p1=(A), \p2=(B) in (A) -- (\x2,\y1) node[midway,scale=1.5, yshift=4em] {\ref{legend}};
-}
-\path[use as bounding box] (A) rectangle (B);
+% 
+% LEGEND
+\path[use as bounding box] ($(A) + (0,+1.5)$) rectangle (B);
+\coordinate (P) at (current bounding box.north);
+% \path[use as bounding box] ($(A) + (0,+2)$) rectangle (B);
+\begin{axis}[%
+   legend to name=legend1,
+   legend cell align=left,
+   legend columns=4,
+   scale only axis, 
+   width=1mm,
+   hide axis,
+   legend image post style={sharp plot},
+   legend style={font=\vphantom{hg},draw=white!15!black,legend cell align=left, 
+                 /tikz/every even column/.append style={column sep=1ex}},
+   cycle multiindex* list={Set1 \nextlist
+                           solid, dashed\nextlist},
+   ]
+   \pgfplotsinvokeforeach{1,...,4}{\addplot coordinates {(0,0)};} % make dummy plots
+   \addlegendentry{$0.50/105$ init};
+   \addlegendentry{$0.50/105$ solved};
+   \addlegendentry{$1.00/210$ init};
+   \addlegendentry{$1.00/210$ solved};
+   % 
+\end{axis}
+\node[anchor=north] (test) at (P) {\ref{legend1}};
+% \draw[] (test.north east) rectangle (test.south west);
+% \path[use as bounding box] (A) rectangle (B);
 \end{tikzpicture}
 \end{page}
 }

@@ -21,7 +21,7 @@ import fastpli.objects
 import fastpli.analysis
 
 model_path = "output/1_rnd_seed/models"
-out_path = "output/images/init_vs_solved"
+out_path = "output/orientation_hist"
 os.makedirs(out_path, exist_ok=True)
 
 hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
@@ -66,11 +66,6 @@ def run(file):
         h = h[np.logical_and(x >= -np.pi / 2, x < np.pi / 2)]
         x = x[np.logical_and(x >= -np.pi / 2, x < np.pi / 2)]
 
-        # np.set_printoptions(suppress=True)
-        # np.set_printoptions(precision=2)
-        # print(np.rad2deg(x))
-        # print(h)
-
         # append 0 line
         df.loc[len(df)] = 0
 
@@ -88,5 +83,5 @@ def run(file):
                 float_format='%.3f')
 
 
-with mp.Pool(processes=8) as pool:
+with mp.Pool(processes=24) as pool:
     [_ for _ in tqdm(pool.imap_unordered(run, files), total=len(files))]

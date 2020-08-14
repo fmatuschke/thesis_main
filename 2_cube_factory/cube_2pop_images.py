@@ -75,6 +75,8 @@ def run(file):
                    check=True)
 
 
+# run(args.input[1])
+
 with mp.Pool(processes=4) as pool:
     [
         f for f in tqdm(pool.imap_unordered(run, args.input),
