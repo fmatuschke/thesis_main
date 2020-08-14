@@ -47,11 +47,11 @@ def run(file):
     n = float(file.split("_n_")[1].split("_")[0])
     state = file.split(".")[-2].split(".")[-1]
 
-    # try:
-    fbs = fastpli.io.fiber_bundles.load(file)
-    # except:
-    #     print(f"failed to open file: {file}")
-    #     return pd.DataFrame()
+    try:
+        fbs = fastpli.io.fiber_bundles.load(file)
+    except:
+        print(f"failed to open file: {file}")
+        raise ValueError("FOO")
 
     if state != "init":
         # Setup Simpli
@@ -79,17 +79,18 @@ def run(file):
 
         obj_mean_length = h5f['/'].attrs['obj_mean_length']
         obj_min_radius = h5f['/'].attrs['obj_min_radius']
-        overlap = np.nan
-        num_col_obj = np.nan
-        num_obj = np.nan
-        num_steps = np.nan
-        time = np.nan
-        if state != "init":
+        if state == "solved":
             overlap = h5f['/'].attrs['overlap']
             num_col_obj = h5f['/'].attrs['num_col_obj']
             num_obj = h5f['/'].attrs['num_obj']
             num_steps = h5f['/'].attrs['num_steps']
             time = h5f['/'].attrs['time']
+        else    
+            overlap = np.nan
+            num_col_obj = np.nan
+            num_obj = np.nan
+            num_steps = np.nan
+            time = np.nan
 
     fbs_ = fastpli.objects.fiber_bundles.Cut(fbs, [[-30] * 3, [30] * 3])
 

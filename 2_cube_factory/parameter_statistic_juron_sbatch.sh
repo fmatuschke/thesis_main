@@ -3,14 +3,16 @@
 set -e
 
 N=800
+n=5
 num_p=40
 sum=0
 dt=1
 
 for ((i=0; i<$N; i=i+$num_p))
 do
-   if [ $i -gt 200 ]; then dt=2; fi
-   if [ $i -gt 400 ]; then dt=24; fi
+   if [ $i -gt ((N/n*0)) ]; then dt=1; fi
+   if [ $i -gt ((N/n*3)) ]; then dt=6; fi
+   if [ $i -gt ((N/n*4)) ]; then dt=24; fi
 
    if [ $(($i+$num_p)) -gt $(($N-1)) ]
    then

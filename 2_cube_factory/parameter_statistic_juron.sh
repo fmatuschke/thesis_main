@@ -9,7 +9,7 @@
 source /p/home/jusers/matuschke1/juron/private/thesis/juron_modules.sh
 
 mpirun /p/home/jusers/matuschke1/juron/private/thesis/env-juron/bin/python3 \
-				-m mpi4py parameter_statistic_jureca.py \
+				-m mpi4py parameter_statistic.py \
 				-o /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_stat_juron_ \
 			   -n 10000 \
 				--start $3 \

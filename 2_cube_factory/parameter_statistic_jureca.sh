@@ -14,7 +14,7 @@
 source /p/home/jusers/matuschke1/jureca/private/thesis/jureca_modules.sh
 
 srun -n $1 /p/home/jusers/matuschke1/jureca/private/thesis/env-jureca/bin/python3 \
-   -m mpi4py parameter_statistic_jureca.py \
+   -m mpi4py parameter_statistic.py \
    -o /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_stat_ \
    -n 10000 \
    --start $3 \
