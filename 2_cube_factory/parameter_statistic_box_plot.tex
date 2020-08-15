@@ -13,19 +13,11 @@
 \usepgfplotslibrary{colorbrewer}
 \usepgfplotslibrary{statistics}
 % 
-\pgfmathdeclarefunction{fpumod}{2}{%
-    \pgfmathfloatdivide{#1}{#2}%
-    \pgfmathfloatint{\pgfmathresult}%
-    \pgfmathfloatmultiply{\pgfmathresult}{#2}%
-    \pgfmathfloatsubtract{#1}{\pgfmathresult}%
-    % replaced `0' by `5' to make it work for this problem
-    \pgfmathfloatifapproxequalrel{\pgfmathresult}{#2}{\def\pgfmathresult{4}}{}%
-}
-% 
 % \pgfplotscreateplotcyclelist{my pair}{
 %     every mark/.append style={fill=gray}\\
 %     every mark/.append style={fill=gray},mark=*\\
 % }
+\def\datapath{output/cube_2pop_stat_juron__}
 % 
 \begin{document}
 % 
@@ -103,7 +95,7 @@
 \begin{tikzpicture}[trim axis left, % trim axis right, baseline]
 ]
 \begin{scope}[shift={(1,0)}]
-% \pgfplotstableread[col sep=comma, row sep=newline,header=true]{output/cube_2pop_stat_juron_/cube_stat_r_1.0.csv}{\datatable}
+% \pgfplotstableread[col sep=comma, row sep=newline,header=true]{\datapath/cube_stat_r_1.0.csv}{\datatable}
 \begin{axis}[Boxplot, ylabel={$t$ in $\si{\second}$}, ymode={log},
   legend to name={legend\i},
   legend entries = {
@@ -130,7 +122,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[
         y={time}, col sep=comma, row sep=newline,
-        ]{output/cube_2pop_stat_juron_/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
+        ]{\datapath/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
 }
 \node[above] (leg) at (axis description cs:0.5,1.0) {\ref{legend\i}};
 % \node[above, rotate=90, anchor=west] (leg) at (axis description cs:0.5,1.0) {\ref{legend\i}};
@@ -149,7 +141,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[
         y={frac_num_col_obj}, col sep=comma, row sep=newline,
-        ]{output/cube_2pop_stat_juron_/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
+        ]{\datapath/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
 }
 \xachse
 \end{axis}
@@ -165,7 +157,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[
         y={volume}, col sep=comma, row sep=newline,
-        ]{output/cube_2pop_stat_juron_/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
+        ]{\datapath/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
 }
 \xachse
 \end{axis}
