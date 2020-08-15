@@ -63,12 +63,16 @@ def run(file):
         simpli.fiber_bundles = fbs
         simpli.fiber_bundles_properties = [[(1.0, 0, 0, 'p')]] * len(fbs)
 
-        if not run.flag:
-            print(f"Single Memory: {simpli.memory_usage(item='tissue'):.0f} MB")
-            print(
-                f"Total Memory: {simpli.memory_usage(item='tissue') * run.num_p:.0f} MB"
-            )
-            run.flag = True
+        if run.flag.value == 0:
+            with run.lock:
+                if run.flag.value == 0:
+                    print(
+                        f"Single Memory: {simpli.memory_usage(item='tissue'):.0f} MB"
+                    )
+                    print(
+                        f"Total Memory: {simpli.memory_usage(item='tissue') * run.num_p:.0f} MB"
+                    )
+                    run.flag.value = 1
 
         tissue, _, _ = simpli.generate_tissue(only_tissue=True)
         unique_elements, count_elements = np.unique(tissue, return_counts=True)
@@ -155,7 +159,8 @@ def run(file):
 
 files = glob.glob(os.path.join(args.input, "*.h5"))
 
-run.flag = False
+run.flag = mp.Value('i', 0)
+run.lock = mp.Lock()
 run.num_p = args.num_proc
 with mp.Pool(processes=run.num_p) as pool:
     df = [
@@ -164,4 +169,4 @@ with mp.Pool(processes=run.num_p) as pool:
     ]
     df = pd.concat(df, ignore_index=True)
 
-df.to_pickle(os.path.join(args.input, "cube_stat.pkl"))
+df.to_pickle(os.path.join(args.input, "parameter_statistic.pkl"))

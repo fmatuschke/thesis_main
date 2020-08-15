@@ -20,7 +20,7 @@ parser.add_argument("-i",
                     help="Path of file.")
 args = parser.parse_args()
 
-df = pd.read_pickle(os.path.join(args.input, "cube_stat.pkl"))
+df = pd.read_pickle(os.path.join(args.input, "parameter_statistic.pkl"))
 df = df[df.state == "solved"]
 # df = df[df.omega == 90.0]
 # df = df[df.psi == 0.5]
