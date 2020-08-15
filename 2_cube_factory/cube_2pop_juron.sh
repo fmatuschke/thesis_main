@@ -1,6 +1,5 @@
 #!/bin/bash -x
 #BSUB -n 100
-#BSUB -nnodes 4
 #BSUB -R "span[ptile=25]"
 #BSUB -W 24:00
 #BSUB -q normal
@@ -9,7 +8,6 @@
 #BSUB -e "stderr.%J.out"
 
 source /p/home/jusers/matuschke1/juron/private/thesis/juron_modules.sh
-export OMP_NUM_THREADS=4
 
 srun -n 100 /p/project/cjinm11/Private/matuschke1/thesis/env-juron/bin/python3 \
    -u -m mpi4py cube_2pop.py \
