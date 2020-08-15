@@ -78,8 +78,7 @@ RADIUS_LOGMEAN = args.fiber_radius
 PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
        0.9]  # fiber fraction: PSI * f0 + (1-PSI) * f1
 OMEGA = np.linspace(0, 90, 10, True)  # angle of opening (f0, f1)
-PSI, OMEGA = np.meshgrid(PSI, OMEGA)
-PARAMETER = list(zip(PSI.flatten(), OMEGA.flatten()))
+PARAMETER = list(itertools.product(PSI, OMEGA))
 PARAMETER.append((0.0, 0.0))
 PARAMETER.append((1.0, 0.0))
 
