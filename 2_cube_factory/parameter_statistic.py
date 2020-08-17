@@ -53,6 +53,12 @@ parser.add_argument("-t",
                     required=True,
                     help="allocation time in hours.")
 
+parser.add_argument("-p",
+                    "--num_proc",
+                    type=int,
+                    required=True,
+                    help="Number of threads.")
+
 parser.add_argument("--overwrite",
                     action='store_true',
                     default=False,
@@ -94,7 +100,7 @@ def run(parameters):
     solver = fastpli.model.solver.Solver()
     solver.obj_mean_length = radius * mean_length_f
     solver.obj_min_radius = radius * min_radius_f
-    solver.omp_num_threads = 1
+    solver.omp_num_threads = args.num_proc
 
     logger.info(f"seed")
     seeds = fastpli.model.sandbox.seeds.triangular_grid(SIZE * 2,

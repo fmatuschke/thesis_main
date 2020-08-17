@@ -4,7 +4,7 @@ set -e
 
 N=800
 n=5
-num_p=40
+num_p=20
 sum=0
 dt=1
 
