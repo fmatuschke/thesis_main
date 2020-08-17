@@ -2,7 +2,7 @@
 #BSUB -n 80
 #BSUB -x
 #BSUB -R "span[ptile=20]"
-#BSUB -W 1:00
+#BSUB -W 24:00
 #BSUB -q normal
 #BSUB -J thesis-cube_2pop
 #BSUB -o "stdout.%J.out"
