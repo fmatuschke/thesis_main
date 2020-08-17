@@ -81,6 +81,7 @@ consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(formatter)
 logger.addHandler(consoleHandler)
 
+
 def run(parameters):
     radius, mean_length_f, min_radius_f, (psi, omega), n = parameters
 
@@ -173,15 +174,16 @@ def run(parameters):
             logger.info(
                 f"step: {i}, {solver.num_obj}/{solver.num_col_obj}, {solver.overlap}"
             )
-            solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
-                solver.fiber_bundles,
-                [-0.5 * np.array([SIZE] * 3), 0.5 * np.array([SIZE] * 3)])
 
             times.append(time.time() - start_time)
             steps.append(i)
             overlaps.append(solver.overlap)
             num_objs.append(solver.num_obj)
             num_col_objs.append(solver.num_col_obj)
+
+            solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
+                solver.fiber_bundles,
+                [-0.5 * np.array([SIZE] * 3), 0.5 * np.array([SIZE] * 3)])
 
         if (time.time() - start_time) < 0.9 * args.time * 60 * 60:
             if i % 100 == 0:
@@ -231,11 +233,11 @@ def run(parameters):
         h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
         h5f['/'].attrs['time'] = end_time - start_time
 
-        h5f['/'].attrs['times'] = np.array(times)
-        h5f['/'].attrs['steps'] = np.array(steps)
-        h5f['/'].attrs['overlaps'] = np.array(overlaps)
-        h5f['/'].attrs['num_objs'] = np.array(num_objs)
-        h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
+        h5f['/'].attrs['times'] = times
+        h5f['/'].attrs['steps'] = steps
+        h5f['/'].attrs['overlaps'] = overlaps
+        h5f['/'].attrs['num_objs'] = num_objs
+        h5f['/'].attrs['num_col_objs'] = num_col_objs
     logger.info(f"done")
 
 
