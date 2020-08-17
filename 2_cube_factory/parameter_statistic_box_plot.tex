@@ -50,10 +50,10 @@
 % 
 \pgfplotsset{
     Boxplot/.style={
-        height=5.59269cm, %22.37076cm/4
+        height=3.7cm, %22.37076cm/5
         width=13.87303cm,
         % cycle list/Dark2-8,
-        cycle list/Paired-10,
+        cycle list/Paired-8,
         xmin=0.42,
         xmax=4.58,
         axis x line=none,
@@ -131,7 +131,7 @@
 \end{scope}
 \end{tikzpicture}
 % 
-\\[2em]
+\\[1em]
 % 
 \begin{tikzpicture}[trim axis left, % trim axis right, baseline]
 ]
@@ -148,7 +148,7 @@
 \end{scope}
 \end{tikzpicture}
 % 
-\\[2em]
+\\[1em]
 % 
 \begin{tikzpicture}[trim axis left, % trim axis right, baseline]
 ]
@@ -163,6 +163,39 @@
 \end{axis}
 \end{scope}
 \end{tikzpicture}
+% 
+\\[1em]
+% 
+\begin{tikzpicture}[trim axis left, % trim axis right, baseline]
+]
+\begin{scope}[shift={(1,0)}]
+\begin{axis}[Boxplot, ylabel={$n$},]
+\Loop{
+    \addplot+[fill, draw=black] table[
+        y={num_steps}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
+}
+\xachse
+\end{axis}
+\end{scope}
+\end{tikzpicture}
+% 
+\\[1em]
+% 
+\begin{tikzpicture}[trim axis left, % trim axis right, baseline]
+]
+\begin{scope}[shift={(1,0)}]
+\begin{axis}[Boxplot, ylabel={$frac_{overlap}$},]
+\Loop{
+    \addplot+[fill, draw=black] table[
+        y={frac_overlap}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stat_r_\fiberradius_psi_\psi_fr_\fr_fl_\fl_.csv};
+}
+\xachse
+\end{axis}
+\end{scope}
+\end{tikzpicture}
+% 
 \end{tabular}
 \end{page}
 }

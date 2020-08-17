@@ -1,0 +1,37 @@
+\documentclass[tikz, border={2.25cm 0pt 0mm 0pt}, varwidth=30cm, multi=page]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{statistics}
+% 
+\def\datapath{output/cube_2pop_stat_juron__}
+% 
+\begin{document}
+% 
+\foreach \name in {times_,overlaps_,num_col_objs_}{
+\begin{tikzpicture}[trim axis left, % trim axis right, baseline]
+]
+\begin{axis}[%
+   cycle list/Dark2-8,
+   ]
+   \foreach \i in {0,1,2,3,4}{
+    \addplot+[mark=none] table[
+        x={steps_\i}, y={\name\i}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stat_time_evol_r_0.5_psi_0.5_fr_1.0_fl_4.0_.csv};
+        \addlegendentry{\i}
+   }
+% 
+\end{axis}
+\end{tikzpicture}
+}
+% 
+\end{document}

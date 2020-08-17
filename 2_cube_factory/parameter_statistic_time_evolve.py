@@ -95,3 +95,49 @@ with mp.Pool(processes=run.num_p) as pool:
     df = pd.concat(df, ignore_index=True)
 
 df.to_pickle(os.path.join(args.input, "cube_stat_evolve.pkl"))
+
+ys = ["times", "steps", "overlaps", "num_col_objs"]
+for r in df.r.unique():
+    for omega in df.omega.unique():
+        for psi in df[df.omega == omega].psi.unique():
+            for fr in df.fr.unique():
+                for fl in df.fl.unique():
+                    df_ = pd.DataFrame()
+                    names = []
+                    for n in df.n.unique():
+                        times = df.query(
+                            "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                        ).times.iloc[0]
+                        steps = df.query(
+                            "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                        ).steps.iloc[0]
+                        overlaps = df.query(
+                            "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                        ).overlaps.iloc[0]
+                        num_col_objs = df.query(
+                            "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                        ).num_col_objs.iloc[0]
+
+                        df__ = pd.DataFrame({
+                            f'steps_{n}': steps,
+                            f'times_{n}': times,
+                            f'overlaps_{n}': overlaps,
+                            f'num_col_objs_{n}': num_col_objs,
+                        })
+
+                        names.append(f"steps_{int(n)}")
+                        names.append(f"times_{int(n)}")
+                        names.append(f"overlaps_{int(n)}")
+                        names.append(f"num_col_objs_{int(n)}")
+
+                        df_ = pd.concat([df_, df__], ignore_index=True, axis=1)
+
+                    df_.columns = names
+
+                    df_.to_csv(
+                        os.path.join(
+                            args.input,
+                            f'cube_stat_time_evol_r_{r}_psi_{psi}_fr_{fr}_fl_{fl}_.csv'
+                        ),
+                        index=False,
+                    )

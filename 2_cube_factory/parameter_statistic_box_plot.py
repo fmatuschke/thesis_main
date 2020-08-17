@@ -31,6 +31,8 @@ print(df.fl.unique())
 df['volume'] = df.count_elements.map(
     lambda x: np.sum(x[1:])) / df.count_elements.map(np.sum)
 df['frac_num_col_obj'] = df.num_col_obj / df.num_obj
+df['frac_overlap'] = df.overlap / df.num_col_obj
+df = df.replace([np.inf, np.nan], 0)
 
 # missing members
 for r in df.r.unique():
@@ -43,26 +45,30 @@ for r in df.r.unique():
                                 df.query(
                                     "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
                                 )):
-                            time = 60 * 60 * 11
-                            frac_num_col_obj = 0.5
-                            volume = 0.5
-                            ["time", "frac_num_col_obj", "volume"]
-                            df = df.append(
-                                {
-                                    "r": r,
-                                    "psi": psi,
-                                    "omega": omega,
-                                    "fr": fr,
-                                    "fl": fl,
-                                    "time": time,
-                                    "n": n,
-                                    "frac_num_col_obj": frac_num_col_obj,
-                                    "volume": volume
-                                },
-                                ignore_index=True)
+                            raise ValueError("FOO")
+                            # time = 60 * 60 * 11
+                            # frac_num_col_obj = 0.5
+                            # volume = 0.5
+                            # ["time", "frac_num_col_obj", "volume"]
+                            # df = df.append(
+                            #     {
+                            #         "r": r,
+                            #         "psi": psi,
+                            #         "omega": omega,
+                            #         "fr": fr,
+                            #         "fl": fl,
+                            #         "time": time,
+                            #         "n": n,
+                            #         "frac_num_col_obj": frac_num_col_obj,
+                            #         "volume": volume
+                            #     },
+                            #     ignore_index=True)
 
-                    # ys = ["time", "overlap", "frac_num_col_obj", "volume", "num_steps"]
-                    ys = ["time", "frac_num_col_obj", "volume"]
+                    ys = [
+                        "time", "overlap", "frac_overlap", "frac_num_col_obj",
+                        "volume", "num_steps"
+                    ]
+                    # ys = ["time", "frac_num_col_obj", "volume"]
                     df_ = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     )
