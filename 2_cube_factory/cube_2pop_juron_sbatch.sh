@@ -11,31 +11,44 @@ sum=0
 # do
 for ((i=0; i<$N; i=i+$num_p))
 do
-   if [ $(($i+$num_p)) -gt $(($N-1)) ]
+   if [ $(($i+$num_p)) -gt $(($N)) ]
    then
-      num_p=$(($N-$i+1))
-      ./juron_replace.sh parameter_statistic_juron.sh $num_p $i 1 210
+      num_p=$(($N-$i))
+      ./juron_replace.sh cube_2pop_juron.sh $num_p $i 1 210
       ((sum+=num_p))
       break
    fi
-   ./juron_replace.sh parameter_statistic_juron.sh $num_p $i 1 210
+   ./juron_replace.sh cube_2pop_juron.sh $num_p $i 1 210
    ((sum+=num_p))
+   echo ""
 done
 # done
 
+echo ""
+echo $sum
+echo ""
+
+N=92
+n=20
+num_p=80
+sum=0
+
 for ((i=0; i<$N; i=i+$num_p))
 do
-   if [ $(($i+$num_p)) -gt $(($N-1)) ]
+   if [ $(($i+$num_p)) -gt $(($N)) ]
    then
-      num_p=$(($N-$i+1))
-      ./juron_replace.sh parameter_statistic_juron.sh $num_p $i 0.5 105
+      num_p=$(($N-$i))
+      ./juron_replace.sh cube_2pop_juron.sh $num_p $i 0.5 105
       ((sum+=num_p))
       break
    fi
-   ./juron_replace.sh parameter_statistic_juron.sh $num_p $i 0.5 105
+   ./juron_replace.sh cube_2pop_juron.sh $num_p $i 0.5 105
    ((sum+=num_p))
+   echo ""
 done
 
+echo ""
 echo $sum
+echo ""
 
 bhist -u matuschke1
