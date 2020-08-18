@@ -13,9 +13,9 @@
 srun -n 96 /p/project/cjinm11/Private/matuschke1/thesis/env/bin/python3 \
    -u -m mpi4py cube_2pop_sc.py \
    -o /p/scratch/cjinm11/matuschke1/thesis/2/output/cube_2pop_2/ \
-   -r 1.0 -v 210 -n 10000 -p 4
+   -r 1.0 -v 100 -n 10000 -p 4
 
 # srun -n 96 /p/project/cjinm11/Private/matuschke1/thesis/env/bin/python3 \
 #    -u -m mpi4py cube_2pop.py \
 #    -o /p/scratch/cjinm11/matuschke1/thesis/2/output/cube_2pop_2/ \
-#    -r 0.5 -v 105 -n 10000 -p 4   
+#    -r 0.5 -v 100 -n 10000 -p 4   

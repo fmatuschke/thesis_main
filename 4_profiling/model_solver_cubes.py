@@ -159,11 +159,6 @@ if __name__ == "__main__":
             },
                            ignore_index=True)
 
-            # df_ = pd.melt(df,
-            #               id_vars=["i", "p"],
-            #               value_vars=["tn", "tm"],
-            #               var_name='method',
-            #               value_name='time')
             df.to_csv(
                 f"{args.output}.csv",
                 index=False,

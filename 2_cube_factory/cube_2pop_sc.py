@@ -78,8 +78,8 @@ logger.info("args: " + " ".join(sys.argv[1:]))
 
 # Fiber Model
 SIZE = args.volume
-# SIZE = 105  # to rotate a 60 um cube inside 120*sqrt(3)
-# SIZE = 210  # to rotate a 120 um cube inside 120*sqrt(3)
+# SIZE = 100  # to rotate a 60 um cube inside 2*30*1.5 + 10
+# SIZE = 190  # to rotate a 120 um cube inside 2*0*1.5 + 10
 RADIUS_LOGMEAN = args.fiber_radius
 PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
        0.9]  # fiber fraction: PSI * f0 + (1-PSI) * f1
@@ -168,7 +168,7 @@ with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
 # Run Solver
 logger.info(f"run solver")
 solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-    solver.fiber_bundles, 0.55 * SIZE)
+    solver.fiber_bundles, 0.5 * (SIZE + 10))
 for i in tqdm(range(1, args.max_steps)):
     if solver.step():
         break
@@ -193,7 +193,7 @@ for i in tqdm(range(1, args.max_steps)):
             h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
 
     solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-        solver.fiber_bundles, 0.55 * SIZE)
+        solver.fiber_bundles, 0.5 * (SIZE + 10))
 
     # if i > args.max_steps / 2 and overlap <= 0.001:
     #     break
