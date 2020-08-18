@@ -1,0 +1,129 @@
+\documentclass[tikz, border={2.25cm 0pt 0mm 0pt}, varwidth=30cm, multi=page]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{xcolor}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{statistics}
+% 
+% \definecolor{c21}{HTML}{A6CEE3}
+% \definecolor{c22}{HTML}{1F78B4}
+% 
+\makeatletter
+\definecolor{cc21}{HTML}{A6CEE3}
+\definecolor{cc22}{HTML}{1F78B4}
+\pgfplotscreateplotcyclelist{cc2}{cc21, cc22}
+\makeatother
+% 
+\begin{document}
+% 
+% \pgfplotscreateplotcyclelist{mycolorlist}{
+% c21,\\
+% c22,\\
+% }
+% 
+\pgfmathsetmacro{\ng}{2}
+\pgfmathsetmacro{\dx}{0.25}
+\pgfmathsetmacro{\db}{0.5}
+\pgfplotsset{
+    Boxplot/.style={
+        height=10.00cm, %22.37076cm
+        width=13.87303cm,
+        xmin=0.5,
+        xmax=8.5,
+        axis x line=none,
+      %   xtick distance=1,
+        xlabel=threads,
+        axis y line = left,
+        ymin=20,
+        enlarge y limits,
+        ymajorgrids,
+        clip=false,
+        y label style={at={(axis description cs:-0.075,.5)},rotate=0,anchor=south},
+      %   ylabel style={overlay},
+      %   yticklabel style={overlay},
+        boxplot={
+            draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
+            box extend=\db/\ng,
+            mark size=0.42pt,
+        },
+        boxplot/draw direction=y,
+        cycle list name=cc2,
+    },
+}
+% 
+\begin{tikzpicture}[trim axis left, trim axis right, baseline]
+]
+\begin{scope}[shift={(1,0)}]
+% \pgfplotstableread[col sep=comma, row sep=newline,header=true]{\datapath/cube_stat_r_1.0.csv}{\datatable}
+\begin{axis}[%
+   Boxplot, ylabel={$t$ in $\si{\second}$},
+  legend to name={legend},
+  legend entries = {
+  {$t_n$},
+  {$t_m$},
+  },
+  legend image post style={mark=square*},
+  legend columns=2,
+  % clip=false,
+  legend image post style={scale=5},
+  legend style={/tikz/every even column/.append style={column sep=1em}},
+]
+\foreach \i in {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0}{
+    \addplot+[fill, draw=black] table[
+        y={\i}, col sep=comma, row sep=newline,
+        ]{output/data_tn.csv};
+    \addplot+[fill, draw=black] table[
+        y={\i}, col sep=comma, row sep=newline,
+        ]{output/data_tm.csv};        
+}
+\node[above] (leg) at (axis description cs:0.5,1.0) {\ref{legend}};
+% \node[above, rotate=90, anchor=west] (leg) at (axis description cs:0.5,1.0) {\ref{legend\i}};
+% \def\xb{1.5}
+% \foreach \i in {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0}{{
+% \pgfmathsetmacro\xb{2-0.4}
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:0.7,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:1.3,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$1$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:1.7,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:2.3,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$2$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:2.7,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:3.3,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$3$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:3.7,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:4.3,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$4$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:4.7,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:5.3,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$5$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:5.7,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:6.3,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$6$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:6.7,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:7.3,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$7$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:7.7,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:8.3,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$8$};
+\end{axis}
+\end{scope}
+\end{tikzpicture}
+% 
+\end{document}

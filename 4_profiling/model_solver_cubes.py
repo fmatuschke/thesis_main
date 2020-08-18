@@ -163,6 +163,8 @@ if __name__ == "__main__":
                 f"{args.output}.csv",
                 index=False,
             )
+    df.pivot(index="i", columns="p")['tn'].to_csv(f"{args.output}_tn.csv")
+    df.pivot(index="i", columns="p")['tm'].to_csv(f"{args.output}_tm.csv")
 '''
 import pandas as pd
 import seaborn as sns
