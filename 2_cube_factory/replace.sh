@@ -16,4 +16,3 @@ echo "$file" >$1.run
 echo "$file"
 
 /p/project/cjinm11/Private/matuschke1/run_sbatch.sh $1.run
-# rm $1.run
