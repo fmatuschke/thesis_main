@@ -11,11 +11,11 @@ for r in 1 0.5; do
       if [ $(($i+$num_p)) -gt $(($N)) ]
       then
          num_p=$(($N-$i))
-         ./replace_juron.sh cube_2pop_juron.sh $num_p $i $r
+         ./replace_juron.sh cube_2pop_juron.sh $num_p $i $r cube_2pop_juron_1
          ((sum+=num_p))
          break
       fi
-      ./replace_juron.sh cube_2pop_juron.sh $num_p $i $r
+      ./replace_juron.sh cube_2pop_juron.sh $num_p $i $r cube_2pop_juron_1
       ((sum+=num_p))
       echo ""
    done

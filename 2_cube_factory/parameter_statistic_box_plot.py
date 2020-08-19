@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import os
 import sys
@@ -99,22 +101,22 @@ for r in df.r.unique():
         for psi in df[df.omega == omega].psi.unique():
             for fr in df.fr.unique():
                 for i, fl in enumerate(df.fl.unique()):
-                    df_[f"p_{psi}_fr_{fr}_fl_{fl}_time"] = df.query(
+                    df_[f"p_{psi}_o_{omega}_fr_{fr}_fl_{fl}_time"] = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     ).time.to_numpy()
-                    df_[f"p_{psi}_fr_{fr}_fl_{fl}_overlap"] = df.query(
+                    df_[f"p_{psi}_o_{omega}_fr_{fr}_fl_{fl}_overlap"] = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     ).overlap.to_numpy()
-                    df_[f"p_{psi}_fr_{fr}_fl_{fl}_frac_overlap"] = df.query(
+                    df_[f"p_{psi}_o_{omega}_fr_{fr}_fl_{fl}_frac_overlap"] = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     ).frac_overlap.to_numpy()
-                    df_[f"p_{psi}_fr_{fr}_fl_{fl}_frac_num_col_obj"] = df.query(
+                    df_[f"p_{psi}_o_{omega}_fr_{fr}_fl_{fl}_frac_num_col_obj"] = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     ).frac_num_col_obj.to_numpy()
-                    df_[f"p_{psi}_fr_{fr}_fl_{fl}_volume"] = df.query(
+                    df_[f"p_{psi}_o_{omega}_fr_{fr}_fl_{fl}_volume"] = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     ).volume.to_numpy()
-                    df_[f"p_{psi}_fr_{fr}_fl_{fl}_num_steps"] = df.query(
+                    df_[f"p_{psi}_o_{omega}_fr_{fr}_fl_{fl}_num_steps"] = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     ).num_steps.to_numpy()
     df_.to_csv(f"output/tmp/cube_stats_r_{r}.csv", index=False)
