@@ -33,6 +33,8 @@ parser.add_argument("-v",
                     required=True,
                     help="cutting volume size.")
 
+parser.add_argument("-p", "--num_proc", type=int, required=True, help="")
+
 args = parser.parse_args()
 
 os.makedirs(args.output, exist_ok=True)
@@ -77,7 +79,7 @@ def run(file):
 
 # run(args.input[1])
 
-with mp.Pool(processes=4) as pool:
+with mp.Pool(processes=args.num_proc) as pool:
     [
         f for f in tqdm(pool.imap_unordered(run, args.input),
                         total=len(args.input))

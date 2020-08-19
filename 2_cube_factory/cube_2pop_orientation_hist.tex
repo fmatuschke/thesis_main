@@ -1,4 +1,4 @@
-\documentclass[varwidth=160cm, multi=page]{standalone}
+\documentclass[tikz, multi=page]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
 \usepackage{pgfplots}
@@ -18,7 +18,7 @@
 \begin{document}
 % 
 % \foreach \omegas/\psis [count=\pp] in {{0,30,60,90}/{0.1,0.3,0.6,0.9}}{
-\foreach \omegas/\psis [count=\pp] in {{0,30,60,90}/{0.1,0.3,0.6,0.9},{0,10,20,30,40,50,60,70,80,90}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
+\foreach \omegas/\psis [count=\pp] in {{30,60,90}/{0.3,0.6,0.9},{0,10,20,30,40,50,60,70,80,90}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
 \begin{page}
 \begin{tikzpicture}
 \foreach \omega [count=\i] in \omegas {
@@ -35,11 +35,11 @@
          Set1\nextlist
          linestyles*\nextlist}
    ]
-   \foreach \radius/\volume in {0.50/105, 1.00/210} {
+   \foreach \radius/\volume in {0.50/90, 1.00/90} {
       \foreach \state in {init, solved} {
       \addplot+[very thick,]
          table [x=\state_phi_x, y=\state_phi_h, col sep=comma]
-         {output/images/init_vs_solved/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume_.csv} \closedcycle;
+         {output/cube_2pop_juron_0_hist/init_vs_solved/cube_2pop_psi_\psi0_omega_\omega.00_r_\radius_v0_\volume_.csv} \closedcycle;
    }}
    \coordinate (AA) at (axis cs:90,1);
    \end{polaraxis}
@@ -68,10 +68,10 @@
    \end{scope}
    \node[inner sep=0pt] at ($(\i\j.south east) + (-1,1) $)
       {\includegraphics[trim=120 55 90 130, clip, width=3cm]
-      {output/images/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
+      {output/cube_2pop_juron_0_hist/models/cube_2pop_psi_\psi0_omega_\omega.00_r_1.00_v0_210_.solved.png}};
    \end{scope}
    \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
-   \ifthenelse{\i=4 \AND \j=4}{\coordinate (B) at (\i\j.south east);}{}
+   \ifthenelse{\i=3 \AND \j=3}{\coordinate (B) at (\i\j.south east);}{}
    \ifthenelse{\i=10 \AND \j=9}{\coordinate (B) at (\i\j.south east);}{}
    \ifthenelse{\i=1}{\path (AA) -- (BB) node[above, midway, yshift=2em] {$\psi$};}{}
 }}

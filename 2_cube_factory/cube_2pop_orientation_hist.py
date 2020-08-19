@@ -20,8 +20,8 @@ import fastpli.tools
 import fastpli.objects
 import fastpli.analysis
 
-model_path = "output/1_rnd_seed/models"
-out_path = "output/orientation_hist"
+model_path = "output/cube_2pop_juron_0_"
+out_path = "output/cube_2pop_juron_0_hist"
 os.makedirs(out_path, exist_ok=True)
 
 hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)

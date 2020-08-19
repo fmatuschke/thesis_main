@@ -3,7 +3,6 @@
 set -e
 
 N=800
-n=5
 num_p=20
 sum=0
 dt=1
@@ -17,11 +16,11 @@ do
    if [ $(($i+$num_p)) -gt $(($N-1)) ]
    then
       num_p=$(($N-$i+1))
-      ./replace_juron.sh parameter_statistic_juron.sh $num_p 1 $i $dt
+      ./replace_juron.sh parameter_statistic_juron.sh $num_p 1 $i $dt parameter_statistic_juron_0
       ((sum+=num_p))
       break
    fi
-   ./replace_juron.sh parameter_statistic_juron.sh $num_p 1 $i $dt
+   ./replace_juron.sh parameter_statistic_juron.sh $num_p 1 $i $dt parameter_statistic_juron_0
    ((sum+=num_p))
 done
 
