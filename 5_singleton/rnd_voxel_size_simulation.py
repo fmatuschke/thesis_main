@@ -45,11 +45,11 @@ parser.add_argument("-o",
                     required=True,
                     help="Output path of solver.")
 
-parser.add_argument("-n",
-                    "--repeat",
-                    type=int,
-                    required=True,
-                    help="repeat n times")
+# parser.add_argument("-n",
+#                     "--repeat",
+#                     type=int,
+#                     required=True,
+#                     help="repeat n times")
 
 parser.add_argument("-m",
                     "--repeat_noise",
@@ -113,7 +113,7 @@ def run(parameter):
     file_pref = get_file_pref(parameter)
     logger.info(f"file_pref: {file_pref}")
 
-    with h5py.File(file_pref + '.h5', 'w-') as h5f:
+    with h5py.File(file_pref + '.h5', 'w') as h5f:
 
         h5f.attrs['script'] = open(os.path.abspath(__file__), 'r').read()
 
@@ -134,7 +134,13 @@ def run(parameter):
         rot = np.dot(rot_inc, rot_phi)
         fiber_bundles = fastpli.objects.fiber_bundles.Rotate(fiber_bundles, rot)
 
-        for n in range(args.repeat):
+        # for n in range(args.repeat):
+        Nx = 60 / VOXEL_SIZES[-1]
+        Ny = 60 / VOXEL_SIZES[-1]
+        print("test")
+        for n, (nx, ny) in enumerate(
+                itertools.product(range(-int(Nx // 2), int(Nx // 2), 10),
+                                  range(-int(Ny // 2), int(Ny // 2), 10))):
             logger.info(f"n_repeat: {n}")
             # Setup Simpli
             logger.info(f"prepair simulation")
@@ -150,8 +156,11 @@ def run(parameter):
             simpli.fiber_bundles = fiber_bundles
             simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
-            dim_origin = simpli.dim_origin = simpli.dim_origin + np.random.uniform(
-                -THICKNESS / 2, THICKNESS / 2, [3])
+            dim_origin = np.array([nx, ny, 0]) * VOXEL_SIZES[-1]
+            # print(dim_origin)
+            # continue
+            # dim_origin = simpli.dim_origin + np.random.uniform(
+            #     -THICKNESS / 2, THICKNESS / 2, [3])
             logger.info(f"dim_origin: {dim_origin}")
 
             for voxel_size in VOXEL_SIZES:
