@@ -17,11 +17,11 @@ do
    if [ $(($i+$num_p)) -gt $(($N-1)) ]
    then
       num_p=$(($N-$i+1))
-      ./juron_replace.sh parameter_statistic_juron.sh $num_p 1 $i $dt
+      ./replace_juron.sh parameter_statistic_juron.sh $num_p 1 $i $dt
       ((sum+=num_p))
       break
    fi
-   ./juron_replace.sh parameter_statistic_juron.sh $num_p 1 $i $dt
+   ./replace_juron.sh parameter_statistic_juron.sh $num_p 1 $i $dt
    ((sum+=num_p))
 done
 

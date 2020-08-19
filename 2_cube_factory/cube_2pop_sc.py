@@ -119,18 +119,20 @@ rnd_radii_0 = RADIUS_LOGMEAN * np.random.lognormal(0, 0.1, seeds_0.shape[0])
 rnd_radii_1 = RADIUS_LOGMEAN * np.random.lognormal(0, 0.1, seeds_1.shape[0])
 
 fiber_bundles = [
-    fastpli.model.sandbox.build.cuboid(p=-0.5 * np.array([SIZE, SIZE, SIZE]),
-                                       q=0.5 * np.array([SIZE, SIZE, SIZE]),
-                                       phi=np.deg2rad(0),
-                                       theta=np.deg2rad(90),
-                                       seeds=seeds_0,
-                                       radii=rnd_radii_0),
-    fastpli.model.sandbox.build.cuboid(p=-0.5 * np.array([SIZE, SIZE, SIZE]),
-                                       q=0.5 * np.array([SIZE, SIZE, SIZE]),
-                                       phi=np.deg2rad(omega),
-                                       theta=np.deg2rad(90),
-                                       seeds=seeds_1 + RADIUS_LOGMEAN,
-                                       radii=rnd_radii_1)
+    fastpli.model.sandbox.build.cuboid(
+        p=-0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
+        q=0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
+        phi=np.deg2rad(0),
+        theta=np.deg2rad(90),
+        seeds=seeds_0,
+        radii=rnd_radii_0),
+    fastpli.model.sandbox.build.cuboid(
+        p=-0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
+        q=0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
+        phi=np.deg2rad(omega),
+        theta=np.deg2rad(90),
+        seeds=seeds_1 + RADIUS_LOGMEAN,
+        radii=rnd_radii_1)
 ]
 
 solver.fiber_bundles = fiber_bundles
@@ -182,18 +184,18 @@ for i in tqdm(range(1, args.max_steps)):
             f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
         )
 
-        logger.debug(f"tmp saving")
-        with h5py.File(file_pref + '.tmp.h5', 'w') as h5f:
-            solver.save_h5(h5f,
-                           script=open(os.path.abspath(__file__), 'r').read())
-            h5f['/'].attrs['psi'] = psi
-            h5f['/'].attrs['omega'] = omega
-            h5f['/'].attrs['overlap'] = overlap
-            h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
-            h5f['/'].attrs['num_obj'] = solver.num_obj
-            h5f['/'].attrs['num_steps'] = solver.num_steps
-            h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
-            h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
+        # logger.debug(f"tmp saving")
+        # with h5py.File(file_pref + '.tmp.h5', 'w') as h5f:
+        #     solver.save_h5(h5f,
+        #                    script=open(os.path.abspath(__file__), 'r').read())
+        #     h5f['/'].attrs['psi'] = psi
+        #     h5f['/'].attrs['omega'] = omega
+        #     h5f['/'].attrs['overlap'] = overlap
+        #     h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
+        #     h5f['/'].attrs['num_obj'] = solver.num_obj
+        #     h5f['/'].attrs['num_steps'] = solver.num_steps
+        #     h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
+        #     h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
 
     solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
         solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
@@ -209,7 +211,7 @@ with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
     solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
     h5f['/'].attrs['psi'] = psi
     h5f['/'].attrs['omega'] = omega
-    h5f['/'].attrs['overlap'] = overlap
+    h5f['/'].attrs['overlap'] = solver.overlap
     h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
     h5f['/'].attrs['num_obj'] = solver.num_obj
     h5f['/'].attrs['num_steps'] = solver.num_steps
