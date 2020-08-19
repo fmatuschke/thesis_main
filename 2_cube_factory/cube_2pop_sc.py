@@ -168,7 +168,7 @@ with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
 # Run Solver
 logger.info(f"run solver")
 solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-    solver.fiber_bundles, 0.5 * (SIZE + 10))
+    solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
 for i in tqdm(range(1, args.max_steps)):
     if solver.step():
         break
@@ -193,7 +193,7 @@ for i in tqdm(range(1, args.max_steps)):
             h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
 
     solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-        solver.fiber_bundles, 0.5 * (SIZE + 10))
+        solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
 
     # if i > args.max_steps / 2 and overlap <= 0.001:
     #     break
