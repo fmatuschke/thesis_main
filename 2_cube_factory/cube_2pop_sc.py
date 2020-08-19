@@ -68,8 +68,11 @@ os.makedirs(args.output, exist_ok=True)
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
-log_file = output_name + f'.{datetime.datetime.now().strftime("%d:%m:%Y-%H:%M:%S")}.log'
-mh = helper.mpi.FileHandler(log_file, mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
+log_file = output_name + f'_{args.start}_{comm.Get_size()}.log'
+mh = helper.mpi.FileHandler(
+    log_file,
+    mode=MPI.MODE_WRONLY | MPI.MODE_CREATE  #| MPI.MODE_APPEND
+)
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 mh.setFormatter(formatter)
