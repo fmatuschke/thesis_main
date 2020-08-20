@@ -5,28 +5,34 @@ PYTHON=$(VENV)/bin/python3
 PIP=$(VENV)/bin/python3 -m pip
 BUILD=thesis
 
+FLAG.install=--system-site-packages
+FLAG.install-sc=--system-site-packages
+
 .PHONY: install
-install: env env-update requirements git-submodules clean-fastpli fastpli
+install: env env-update requirements git-submodules clean-fastpli fastpli jupyter
 
 .PHONY: install-sc
-install-sc: env env-update requirements-sc git-submodules clean-fastpli fastpli
+install-sc: env-sc env-update requirements-sc git-submodules clean-fastpli fastpli
 
-env: $(VENV)/bin/python3
+.PHONY: env
+env:
+	python3 -m venv $(VENV)
 
-$(VENV)/bin/python3:
+.PHONY: env-sc
+env-sc:
 	python3 -m venv --system-site-packages $(VENV)
 
 .PHONY: env-update
-env-update: env
+env-update:
 	$(PIP) install --upgrade pip -q
 
 .PHONY: requirements
-requirements: env
+requirements:
 	$(PIP) install -r requirements.txt -q
 	$(PIP) install 0_core/. -q
 
 .PHONY: requirements-sc
-requirements-sc: env	
+requirements-sc:
 	$(PIP) install -r requirements-sc.txt -q
 	$(PIP) install 0_core/. -q	
 
@@ -60,7 +66,7 @@ fastpli/setup: fastpli/
 	make BUILD=$(BUILD) fastpli
 
 .PHONY: fastpli
-fastpli: env fastpli/setup
+fastpli: fastpli/setup
 	$(PIP) uninstall fastpli -y -q
 	$(PIP) install fastpli/.
 
@@ -68,7 +74,7 @@ fastpli: env fastpli/setup
 fastpli-: clean-fastpli fastpli
 
 .PHONY: jupyter
-jupyter: env
+jupyter:
 	@if ! $(PIP) freeze | grep jupyterlab= -q; then \
 		echo "Install Jupyter Notebook"; \
 		$(PIP) install jupyter -q; \
@@ -81,7 +87,7 @@ jupyter: env
 
 # CLEANING
 .PHONY: clean
-clean:
+clean: clean-fastpli
 	rm -rf env-*
 
 .PHONY: clean-fastpli
