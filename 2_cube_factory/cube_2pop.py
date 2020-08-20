@@ -61,6 +61,12 @@ parser.add_argument("-p",
                     required=True,
                     help="Number of threads.")
 
+parser.add_argument("-t",
+                    "--time",
+                    type=float,
+                    required=True,
+                    help="allocation time in hours.")                    
+
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
 os.makedirs(args.output, exist_ok=True)
