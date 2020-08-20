@@ -26,22 +26,46 @@ os.makedirs(out_path, exist_ok=True)
 
 hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
 
-files = glob.glob(os.path.join(model_path, "*solved.pkl"))
+# files = glob.glob(os.path.join(model_path, "*solved.pkl"))
 
 
 def run(file):
-    file = file.split(".solved.pkl")[0]
-
-    data = pd.DataFrame()
     for phase, _ in [("init", "g"), ("solved", "r")]:
         df = pd.read_pickle(file + f".{phase}.pkl")
-        sub = (df.f0_inc == 0) & (df.f1_rot == 0)
 
-        if len(df[sub]) != 1:
-            sys.exit(1)
+        # sub = (df.f0_inc == 0) & (df.f1_rot == 0)
 
-        phi = df[sub].explode("phi").phi.to_numpy(float)
-        theta = df[sub].explode("theta").theta.to_numpy(float)
+        # if len(df[sub]) != 1:
+        #     sys.exit(1)
+
+        # phi = df[sub].explode("phi").phi.to_numpy(float)
+        # theta = df[sub].explode("theta").theta.to_numpy(float)
+
+    if state == "init":
+        f0_list = [0]
+        f1_list = [0]
+    else:
+        f0_list = fibers.inclinations()
+        f1_list = fibers.omega_rotations(omega)
+
+    df = []
+    for f0_inc in f0_list:
+        for f1_rot in f1_list:
+            # for v in [120, 60]:  # ascending order!
+            for v in [60]:  # ascending order!
+                phi, theta = fibers.ori_from_fbs(fbs, omega, f0_inc, f1_rot, v)
+
+                #TODO:!!!!!!!!!!!!!!!!!!!!!!!
+
+                df.append(
+                    pd.DataFrame([[
+                        f0_inc, f1_rot, v0, v, r, meta, phi, theta,
+                        os.path.abspath(file)
+                    ]],
+                                 columns=[
+                                     "f0_inc", "f1_rot", "v0", "v", "r", "meta",
+                                     "phi", "theta", "file"
+                                 ]))
 
         theta[phi > np.pi] = np.pi - theta[phi > np.pi]
         phi = helper.circular.remap(phi, np.pi, 0)
@@ -83,5 +107,13 @@ def run(file):
                 float_format='%.3f')
 
 
-with mp.Pool(processes=24) as pool:
-    [_ for _ in tqdm(pool.imap_unordered(run, files), total=len(files))]
+if __name__ == "__main__":
+
+    if os.path.isdir(args.input):
+        args.input = os.path.join(args.input, "cube_2pop.pkl")
+
+    df = pd.read_pickle(args.input)
+
+    files = df.files.tolist()
+    with mp.Pool(processes=24) as pool:
+        [_ for _ in tqdm(pool.imap_unordered(run, files), total=len(files))]
