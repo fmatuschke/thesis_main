@@ -68,7 +68,7 @@ os.makedirs(args.output, exist_ok=True)
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)
 logger.setLevel(logging.DEBUG)
-log_file = output_name + f'_{args.start}_{comm.Get_size()}.log'
+log_file = output_name + f'_{args.fiber_radius}_{args.volume}_{args.max_steps}_{args.start}_{comm.Get_size()}.log'
 mh = helper.mpi.FileHandler(
     log_file,
     mode=MPI.MODE_WRONLY | MPI.MODE_CREATE  #| MPI.MODE_APPEND
