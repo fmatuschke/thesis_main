@@ -177,6 +177,7 @@ with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
 
 # Run Solver
 logger.info(f"run solver")
+start_time = time.time()
 solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
     solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
 for i in tqdm(range(1, args.max_steps)):
@@ -209,12 +210,6 @@ for i in tqdm(range(1, args.max_steps)):
                 h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
                 h5f['/'].attrs['time'] = time.time() - start_time
 
-                h5f['/'].attrs['times'] = np.array(times)
-                h5f['/'].attrs['steps'] = np.array(steps)
-                h5f['/'].attrs['overlaps'] = np.array(overlaps)
-                h5f['/'].attrs['num_objs'] = np.array(num_objs)
-                h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
-
     # if i > args.max_steps / 2 and overlap <= 0.001:
     #     break
 
@@ -232,3 +227,4 @@ with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
     h5f['/'].attrs['num_steps'] = solver.num_steps
     h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
     h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
+    h5f['/'].attrs['time'] = time.time() - start_time
