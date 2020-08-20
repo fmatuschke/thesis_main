@@ -65,7 +65,7 @@ parser.add_argument("-t",
                     "--time",
                     type=float,
                     required=True,
-                    help="allocation time in hours.")                    
+                    help="allocation time in hours.")
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
@@ -166,21 +166,21 @@ with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
     h5f['/'].attrs['omega'] = omega
     h5f['/'].attrs['v0'] = SIZE
     h5f['/'].attrs['r'] = RADIUS_LOGMEAN
-    # print("OTHER META DATA?")
-    # h5f['/'].attrs['overlap'] = overlap
-    # h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
-    # h5f['/'].attrs['num_obj'] = solver.num_obj
+    h5f['/'].attrs['step'] = 0
+    h5f['/'].attrs['overlap'] = solver.overlap
+    h5f['/'].attrs['num_obj'] = solver.num_obj
+    h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
     h5f['/'].attrs['num_steps'] = 0
     h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
     h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
-
+    h5f['/'].attrs['time'] = 0
 
 # Run Solver
 logger.info(f"run solver")
 start_time = time.time()
 solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
     solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
-for i in tqdm(range(1, args.max_steps+1)):
+for i in tqdm(range(1, args.max_steps + 1)):
     if solver.step():
         break
 
@@ -194,14 +194,14 @@ for i in tqdm(range(1, args.max_steps+1)):
             if (time.time() - start_time) < 0.9 * args.time * 60 * 60:
                 with h5py.File(file_pref + '.tmp.h5', 'w') as h5f:
                     solver.save_h5(h5f,
-                                    script=open(os.path.abspath(__file__),
-                                                'r').read())
+                                   script=open(os.path.abspath(__file__),
+                                               'r').read())
                     h5f['/'].attrs['psi'] = psi
                     h5f['/'].attrs['omega'] = omega
-                    h5f['/'].attrs['overlap'] = solver.overlap
                     h5f['/'].attrs['step'] = i
-                    h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
+                    h5f['/'].attrs['overlap'] = solver.overlap
                     h5f['/'].attrs['num_obj'] = solver.num_obj
+                    h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
                     h5f['/'].attrs['num_steps'] = solver.num_steps
                     h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
                     h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius

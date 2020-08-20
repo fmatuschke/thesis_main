@@ -36,44 +36,74 @@ parser.add_argument("-p",
 args = parser.parse_args()
 
 
-def hist_bin(n):
-    return np.linspace(0, np.pi, n + 1, endpoint=True)
+def hist_polar_bin(n):
+    return np.linspace(-np.pi / 2, np.pi / 2, n + 1, endpoint=True)
 
 
 def run(file):
     fbs = fastpli.io.fiber_bundles.load(file)
+
+    state_ = file.split(f".h5")[0].split(".")[-1]
     r = helper.file.value(file, "r")
     v0 = helper.file.value(file, "v0")
     with h5py.File(file, "r") as h5f:
-        omega = h5f['/'].attrs['omega']
-        psi = h5f['/'].attrs['psi']
 
         if h5f['/'].attrs['num_steps'] == 0:
             state = "init"
         elif h5f['/'].attrs['overlap'] == 0:
             state = "solved"
         else:
-            state = "solved"
+            state = "tmp"
             warnings.warn("not solved")
 
-        data = {
-            "obj_mean_length": h5f['/'].attrs['obj_mean_length'],
-            "obj_min_radius": h5f['/'].attrs['obj_min_radius']
-        }
+        if state != state_:
+            raise ValueError("state != state_")
+
+        # TODO: only take h5 values
+        omega = h5f['/'].attrs['omega']
+        psi = h5f['/'].attrs['psi']
+        step = -1
+        overlap = -1
+        num_obj = -1
+        num_col_obj = -1
+        num_steps = -1
+        obj_mean_length = -1
+        obj_min_radius = -1
+        time = -1
         if state != "init":
-            data = {
-                **data,
-                **{
-                    "overlap": h5f['/'].attrs['overlap'],
-                    "num_col_obj": h5f['/'].attrs['num_col_obj'],
-                    "num_obj": h5f['/'].attrs['num_obj'],
-                    "num_steps": h5f['/'].attrs['num_steps'],
-                }
-            }
+            omega = h5f['/'].attrs['omega']
+            psi = h5f['/'].attrs['psi']
+            step = h5f['/'].attrs['step']
+            overlap = h5f['/'].attrs['overlap']
+            num_obj = h5f['/'].attrs['num_obj']
+            num_col_obj = h5f['/'].attrs['num_col_obj']
+            num_steps = h5f['/'].attrs['num_steps']
+            obj_mean_length = h5f['/'].attrs['obj_mean_length']
+            obj_min_radius = h5f['/'].attrs['obj_min_radius']
+            time = h5f['/'].attrs['time']
 
-    data = {**data, **{"v0": v0, "r": r, "state": state, "file": file}}
-
-    return data
+    return pd.DataFrame([[
+        omega, psi, v0, r, obj_mean_length, obj_min_radius, overlap,
+        num_col_obj, num_obj, num_steps, step, time, state, file
+    ]],
+                        columns=[
+                            "omega",
+                            "psi",
+                            "v0",
+                            "r",
+                            "obj_mean_length",
+                            "obj_min_radius",
+                            "obj_mean_length",
+                            "obj_min_radius",
+                            "overlap",
+                            "num_col_obj",
+                            "num_obj",
+                            "num_steps",
+                            "step",
+                            "time",
+                            "state",
+                            "fiber",
+                        ])
 
 
 if __name__ == "__main__":
@@ -82,9 +112,9 @@ if __name__ == "__main__":
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [
-            d for d in tqdm(
-                pool.imap_unordered(run, files), total=len(files), smoothing=0)
+            d for d in tqdm(pool.imap_unordered(run, files),
+                            total=len(files),
+                            smoothing=0.1)
         ]
-    # df = pd.concat(df, ignore_index=True)
-    df = pd.DataFrame(df)
+    df = pd.concat(df, ignore_index=True)
     df.to_pickle(os.path.join(args.input, "cube_2pop.pkl"))

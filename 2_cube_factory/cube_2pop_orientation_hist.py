@@ -1,119 +1,161 @@
+#! /usr/bin/env python3
+
 import numpy as np
 import multiprocessing as mp
-import itertools
-import h5py
+import argparse
 import os
 import sys
 import glob
+import warnings
 
-import matplotlib.pyplot as plt
-import scipy.stats
-import seaborn as sns
+import tqdm
 import pandas as pd
-import tikzplotlib
 
-from tqdm import tqdm
+import fibers
 
-import helper.circular
-import fastpli.io
-import fastpli.tools
-import fastpli.objects
-import fastpli.analysis
+# arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("-i",
+                    "--input",
+                    type=str,
+                    required=True,
+                    help="input path.")
+parser.add_argument("-o",
+                    "--output",
+                    type=str,
+                    required=True,
+                    help="output path.")
+parser.add_argument("-p",
+                    "--num_proc",
+                    default=1,
+                    type=int,
+                    help="Number of processes.")
+args = parser.parse_args()
 
-model_path = "output/cube_2pop_juron_0_"
-out_path = "output/cube_2pop_juron_0_hist"
-os.makedirs(out_path, exist_ok=True)
+os.makedirs(args.output, exist_ok=True)
 
-hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
-
-# files = glob.glob(os.path.join(model_path, "*solved.pkl"))
+hist_polar_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
 
 
-def run(file):
-    for phase, _ in [("init", "g"), ("solved", "r")]:
-        df = pd.read_pickle(file + f".{phase}.pkl")
+def run(df):
 
-        # sub = (df.f0_inc == 0) & (df.f1_rot == 0)
+    file = df["fiber"]
+    phi, theta = fibers.ori_from_file(file, 0, 0, 60)
+    incl = np.pi - theta
 
-        # if len(df[sub]) != 1:
-        #     sys.exit(1)
+    # remap to phi->[-np.pi/2, np.pi/2], incl->[-np.pi/2, np.pi/2]
+    phi[phi > np.pi * 3 / 2] -= 2 * np.pi
+    incl[phi > np.pi / 2] = -incl[phi > np.pi / 2]
+    phi[phi > np.pi / 2] = np.pi - phi[phi > np.pi / 2]
 
-        # phi = df[sub].explode("phi").phi.to_numpy(float)
-        # theta = df[sub].explode("theta").theta.to_numpy(float)
+    # df_ = pd.DataFrame()
 
-    if state == "init":
-        f0_list = [0]
-        f1_list = [0]
-    else:
-        f0_list = fibers.inclinations()
-        f1_list = fibers.omega_rotations(omega)
+    # df_[]
 
-    df = []
-    for f0_inc in f0_list:
-        for f1_rot in f1_list:
-            # for v in [120, 60]:  # ascending order!
-            for v in [60]:  # ascending order!
-                phi, theta = fibers.ori_from_fbs(fbs, omega, f0_inc, f1_rot, v)
+    # direction
+    h, x = np.histogram(phi, hist_polar_bin(180), density=True)
+    x = x[:-1] + (x[1] - x[0]) / 2
+    phi_x = x
+    phi_h = h / np.amax(h)
 
-                #TODO:!!!!!!!!!!!!!!!!!!!!!!!
+    # inclination
+    h, x = np.histogram(incl, hist_polar_bin(180), density=True)
+    x = np.pi / 2 - (x[:-1] + (x[1] - x[0]) / 2)  # np/2 for incl,
+    incl_x = x
+    incl_h = h / np.amax(h)
 
-                df.append(
-                    pd.DataFrame([[
-                        f0_inc, f1_rot, v0, v, r, meta, phi, theta,
-                        os.path.abspath(file)
-                    ]],
-                                 columns=[
-                                     "f0_inc", "f1_rot", "v0", "v", "r", "meta",
-                                     "phi", "theta", "file"
-                                 ]))
+    # INIT
+    file = file.replace("solved", "init")
+    file = file.replace("tmp", "init")
+    phi, theta = fibers.ori_from_file(file, 0, 0, 60)
+    incl = np.pi - theta
 
-        theta[phi > np.pi] = np.pi - theta[phi > np.pi]
-        phi = helper.circular.remap(phi, np.pi, 0)
+    # remap to phi->[-np.pi/2, np.pi/2], incl->[-np.pi/2, np.pi/2]
+    phi[phi > np.pi * 3 / 2] -= 2 * np.pi
+    incl[phi > np.pi / 2] = -incl[phi > np.pi / 2]
+    phi[phi > np.pi / 2] = np.pi - phi[phi > np.pi / 2]
 
-        # direction
-        h, x = np.histogram(phi, hist_bin(180), density=True)
-        x = x[:-1] + (x[1] - x[0]) / 2
-        x = np.append(np.concatenate((x, x - np.pi), axis=0), x[0])
-        h = np.append(np.concatenate((h, h), axis=0), h[0])
-        h = h / np.max(h)
-        h = h[np.logical_and(x >= -np.pi / 2, x < np.pi / 2)]
-        x = x[np.logical_and(x >= -np.pi / 2, x < np.pi / 2)]
-        data[f'{phase}_phi_x'] = np.rad2deg(x)
-        data[f'{phase}_phi_h'] = h
+    # direction
+    h, x = np.histogram(phi, hist_polar_bin(180), density=True)
+    x = x[:-1] + (x[1] - x[0]) / 2
+    phi_init_x = x
+    phi_init_h = h / np.amax(h)
 
-        # inclination
-        h, x = np.histogram(theta, hist_bin(180), density=True)
-        x = np.pi / 2 - (x[:-1] + (x[1] - x[0]) / 2)  # np/2 for incl,
-        # x = np.append(np.concatenate((x, x - np.pi), axis=0), x[0])
-        # h = np.append(np.concatenate((h, h), axis=0), h[0])
-        h = h / np.max(h)
-        h = h[np.logical_and(x >= -np.pi / 2, x < np.pi / 2)]
-        x = x[np.logical_and(x >= -np.pi / 2, x < np.pi / 2)]
+    # inclination
+    h, x = np.histogram(incl, hist_polar_bin(180), density=True)
+    x = np.pi / 2 - (x[:-1] + (x[1] - x[0]) / 2)  # np/2 for incl,
+    incl_init_x = x
+    incl_init_h = h / np.amax(h)
 
-        # append 0 line
-        df.loc[len(df)] = 0
-
-        data = pd.concat([
-            pd.DataFrame({
-                f'{phase}_incl_x': np.rad2deg(x),
-                f'{phase}_incl_h': h
-            }), data
-        ],
-                         axis=1)
-
-    data.to_csv(os.path.join(out_path,
-                             os.path.basename(file) + ".csv"),
-                index=False,
-                float_format='%.3f')
+    return pd.DataFrame([[
+        df.omega,
+        df.psi,
+        df.r,
+        phi_x,
+        phi_h,
+        incl_x,
+        incl_h,
+        phi_init_x,
+        phi_init_h,
+        incl_init_x,
+        incl_init_h,
+    ]],
+                        columns=[
+                            "omega",
+                            "psi",
+                            "r",
+                            "phi_x",
+                            "phi_h",
+                            "incl_x",
+                            "incl_h",
+                            "phi_init_x",
+                            "phi_init_h",
+                            "incl_init_x",
+                            "incl_init_h",
+                        ])
 
 
 if __name__ == "__main__":
 
-    if os.path.isdir(args.input):
-        args.input = os.path.join(args.input, "cube_2pop.pkl")
+    if not os.path.isfile(os.path.join(args.output, "cube_2pop.pkl")):
+        df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
 
-    df = pd.read_pickle(args.input)
+        df = df[df.state != "init"]
+        df = [df.iloc[i] for i in range(df.shape[0])]
 
-    files = df.files.tolist()
-    with mp.Pool(processes=24) as pool:
-        [_ for _ in tqdm(pool.imap_unordered(run, files), total=len(files))]
+        with mp.Pool(processes=args.num_proc) as pool:
+            df = [
+                _ for _ in tqdm.tqdm(
+                    pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
+            ]
+
+        df = pd.concat(df, ignore_index=True)
+        df.to_pickle(os.path.join(args.output, "cube_2pop.pkl"))
+    else:
+        df = pd.read_pickle(os.path.join(args.output, "cube_2pop.pkl"))
+
+    for r in df.r.unique():
+        df_ = pd.DataFrame()
+        for omega in df.omega.unique():
+            for psi in df[df.omega == omega].psi.unique():
+
+                df_sub = df.query("r == @r & omega == @omega & psi == @psi")
+                if len(df_sub) != 1:
+                    warnings.warn(f"len(df_sub) != 1: {r} {omega} {psi}")
+                    continue
+
+                df_[f"p_{psi}_o_{omega}_phi_x"] = df_sub.phi_x.iloc[0]
+                df_[f"p_{psi}_o_{omega}_phi_h"] = df_sub.phi_h.iloc[0]
+                df_[f"p_{psi}_o_{omega}_incl_x"] = df_sub.incl_x.iloc[0]
+                df_[f"p_{psi}_o_{omega}_incl_h"] = df_sub.incl_h.iloc[0]
+
+                df_[f"p_{psi}_o_{omega}_phi_init_x"] = df_sub.phi_init_x.iloc[0]
+                df_[f"p_{psi}_o_{omega}_phi_init_h"] = df_sub.phi_init_h.iloc[0]
+                df_[f"p_{psi}_o_{omega}_incl_init_x"] = df_sub.incl_init_x.iloc[
+                    0]
+                df_[f"p_{psi}_o_{omega}_incl_init_h"] = df_sub.incl_init_h.iloc[
+                    0]
+
+        df_.to_csv(os.path.join(args.output, f"cube_stats_r_{r}.csv"),
+                   index=False,
+                   float_format='%.4f')
