@@ -13,6 +13,6 @@
 source module /p/project/cjinm11/Private/matuschke1/thesis/jureca_modules.sh
 
 srun -n 96 /p/project/cjinm11/Private/matuschke1/thesis/env-jureca/bin/python3 \
-   -u -m mpi4py /p/project/cjinm11/Private/matuschke1/thesis/2_cube_factory/cube_2pop_sc.py \
+   -u -m mpi4py /p/project/cjinm11/Private/matuschke1/thesis/2_cube_factory/cube_2pop.py \
    -o /p/scratch/cjinm11/matuschke1/thesis/2/output/cube_2pop_2/ \
    -r $1 -v 90 -n 10000 -p 1 --start 0
