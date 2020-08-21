@@ -58,7 +58,9 @@
    }}
    \node[] at (axis cs:90,1.25) {\footnotesize 90};
    \node[] at (axis cs:-90,1.25) {\footnotesize -90};
+   \begin{scope}[overlay]
    \ifthenelse{\i=1}{\node[] at (axis cs:90,1.5) {$\psi$};}{}
+   \end{scope}
    \end{polaraxis}
    % 
    % INCLINATION
@@ -80,8 +82,9 @@
          table [x expr=\thisrow{x}+180, y=p_\psi_o_\omega_s_\state_incl_h, col sep=comma]
          {output/cube_2pop_0/hist/cube_stats_r_\radius.csv} \closedcycle;
    }}
-   % \coordinate (BB) at (axis cs:270,1);
+   \begin{scope}[overlay]
    \ifthenelse{\j=1}{\node[left] at (axis description cs:-0.25,0.5) {$\omega$};}{}
+   \end{scope}
    \end{polaraxis}
    \end{scope}
    % 
@@ -101,11 +104,11 @@
 }}
 % 
 % LEGEND
-\path[use as bounding box] ($(A) + (0,+0.75)$) rectangle (B);
-\coordinate (P) at (current bounding box.north);
-% \path[use as bounding box] ($(A) + (0,+2)$) rectangle (B);
+\begin{scope}[local bounding box=bbl]
+\path[] ($(A) + (0,+1.1)$) rectangle (B);
+\end{scope}
 \begin{axis}[%
-   legend to name=legend,
+   legend to name=legend\pp,
    legend cell align=left,
    legend columns=2,
    legend transposed=true,
@@ -126,9 +129,11 @@
    }}
    % 
 \end{axis}
-\node[anchor=north, scale=0.75, yshift=1ex] at (P) {\ref{legend}};
-% \draw[] (test.north east) rectangle (test.south west);
-% \path[use as bounding box] (A) rectangle (B);
+\path let \p1 = (current bounding box.north), \p2=(bbl.north) in node[anchor=north, scale=0.75, yshift=1ex] at (\x2, \y1) {\ref{legend\pp}};
+\path[use as bounding box] let \p1 = (bbl.north) in ($(A)+(-1,\y1)$) -- ($(B)+(-1,0)$);
+% \path[draw,red] ($(A)-(1,0)$) -- ($(B)+(1,0)$);
+% \path[draw,green] ($(A)-(2,0)$) -- ($(B)+(2,0)$);
+% \path[draw,blue] ($(A)-(3,0)$) -- ($(B)+(3,0)$);
 \end{tikzpicture}
 \end{page}
 }
