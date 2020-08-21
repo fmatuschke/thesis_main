@@ -36,6 +36,7 @@
 % 
 \foreach \omega [count=\i] in \omegas {
 \foreach \psi [count=\j] in \psis {
+   \pgfplotstableread{output/cube_2pop_0/hist/cube_stats_p_\psi_o_\omega_.csv}\csvfile;
    \begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
    % 
    % DIRECTION
@@ -53,8 +54,7 @@
    \foreach \radius in {0.50,1.00,2.00}{
       \foreach \state in {init, solved} {
       \addplot+[]
-         table [x=x, y=p_\psi_o_\omega_s_\state_phi_h, col sep=comma]
-         {output/cube_2pop_0/hist/cube_stats_r_\radius.csv} \closedcycle;
+         table [x=x, y=r_\radius_s_\state_phi_h, col sep=comma] \csvfile \closedcycle;
    }}
    \node[] at (axis cs:90,1.25) {\footnotesize 90};
    \node[] at (axis cs:-90,1.25) {\footnotesize -90};
@@ -79,8 +79,7 @@
    \foreach \radius in {0.50,1.00,2.00}{
       \foreach \state in {init, solved} {
       \addplot+[]
-         table [x expr=\thisrow{x}+180, y=p_\psi_o_\omega_s_\state_incl_h, col sep=comma]
-         {output/cube_2pop_0/hist/cube_stats_r_\radius.csv} \closedcycle;
+         table [x expr=\thisrow{x}+180, y=r_\radius_s_\state_incl_h, col sep=comma] \csvfile \closedcycle;
    }}
    \begin{scope}[overlay]
    \ifthenelse{\j=1}{\node[left] at (axis description cs:-0.25,0.5) {$\omega$};}{}

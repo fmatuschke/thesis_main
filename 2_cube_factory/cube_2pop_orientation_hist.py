@@ -114,10 +114,10 @@ if __name__ == "__main__":
 
     df = pd.concat(df, ignore_index=True)
 
-    for r in df.r.unique():
-        df_ = pd.DataFrame()
-        for omega in df.omega.unique():
-            for psi in df[df.omega == omega].psi.unique():
+    for omega in df.omega.unique():
+        for psi in df[df.omega == omega].psi.unique():
+            for r in df.r.unique():
+                df_ = pd.DataFrame()
 
                 df_sub = df.query("r == @r & omega == @omega & psi == @psi")
                 if len(df_sub) != 1:
@@ -125,23 +125,12 @@ if __name__ == "__main__":
                     continue
 
                 df_[f"x"] = np.rad2deg(df_sub.phi_x.iloc[0])
-                # df_[f"p_{psi}_o_{omega}_s_solved_phi_x"] = np.rad2deg(
-                #     df_sub.phi_x.iloc[0])
-                df_[f"p_{psi}_o_{omega}_s_solved_phi_h"] = df_sub.phi_h.iloc[0]
-                # df_[f"p_{psi}_o_{omega}_s_solved_incl_x"] = np.rad2deg(
-                #     df_sub.incl_x.iloc[0])
-                df_[f"p_{psi}_o_{omega}_s_solved_incl_h"] = df_sub.incl_h.iloc[
-                    0]
+                df_[f"r_{r}_o_{omega}_s_solved_phi_h"] = df_sub.phi_h.iloc[0]
+                df_[f"r_{r}_o_{omega}_s_solved_incl_h"] = df_sub.incl_h.iloc[0]
+                df_[f"r_{r}_s_init_phi_h"] = df_sub.phi_init_h.iloc[0]
+                df_[f"r_{r}_s_init_incl_h"] = df_sub.incl_init_h.iloc[0]
 
-                # df_[f"p_{psi}_o_{omega}_s_init_phi_x"] = np.rad2deg(
-                #     df_sub.phi_init_x.iloc[0])
-                df_[f"p_{psi}_o_{omega}_s_init_phi_h"] = df_sub.phi_init_h.iloc[
-                    0]
-                # df_[f"p_{psi}_o_{omega}_s_init_incl_x"] = np.rad2deg(
-                #     df_sub.incl_init_x.iloc[0])
-                df_[f"p_{psi}_o_{omega}_s_init_incl_h"] = df_sub.incl_init_h.iloc[
-                    0]
-
-        df_.to_csv(os.path.join(args.input, "hist", f"cube_stats_r_{r}.csv"),
-                   index=False,
-                   float_format='%.4f')
+            df_.to_csv(os.path.join(args.input, "hist",
+                                    f"cube_stats_p_{psi}_o_{omega}_.csv"),
+                       index=False,
+                       float_format='%.4f')
