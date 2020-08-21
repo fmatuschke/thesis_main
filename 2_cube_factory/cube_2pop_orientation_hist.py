@@ -35,10 +35,11 @@ hist_polar_bin = lambda n: np.linspace(
 
 def polar_hist(phi, theta):
     incl = np.pi / 2 - theta
+
     # remap to phi->[-np.pi/2, np.pi/2], incl->[-np.pi/2, np.pi/2]
     phi[phi > np.pi * 3 / 2] -= 2 * np.pi
     incl[phi > np.pi / 2] = -incl[phi > np.pi / 2]
-    phi[phi > np.pi / 2] = np.pi - phi[phi > np.pi / 2]
+    phi[phi > np.pi / 2] -= np.pi
 
     if np.any(incl < -np.pi / 2) or np.any(incl > np.pi / 2):
         raise ValueError("FOOO incl")

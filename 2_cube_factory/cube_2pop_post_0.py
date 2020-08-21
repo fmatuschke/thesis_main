@@ -93,8 +93,6 @@ def run(file):
                             "r",
                             "obj_mean_length",
                             "obj_min_radius",
-                            "obj_mean_length",
-                            "obj_min_radius",
                             "overlap",
                             "num_col_obj",
                             "num_obj",
