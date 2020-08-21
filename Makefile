@@ -9,7 +9,7 @@ FLAG.install=--system-site-packages
 FLAG.install-sc=--system-site-packages
 
 .PHONY: install
-install: env env-update requirements git-submodules clean-fastpli fastpli jupyter
+install: env env-update requirements git-submodules clean-fastpli fastpli
 
 .PHONY: install-sc
 install-sc: env-sc env-update requirements-sc git-submodules clean-fastpli fastpli
