@@ -130,7 +130,7 @@
    % 
 \end{axis}
 \path let \p1 = (current bounding box.north), \p2=(bbl.north) in node[anchor=north, scale=0.75, yshift=1ex] at (\x2, \y1) {\ref{legend\pp}};
-\path[use as bounding box] let \p1 = (bbl.north) in ($(A)+(-1,\y1)$) -- ($(B)+(-1,0)$);
+\path[use as bounding box] let \p1 = (bbl.north) in ($(A)+(-1,\y1)$) -- ($(B)+(1,0)$);
 % \path[draw,red] ($(A)-(1,0)$) -- ($(B)+(1,0)$);
 % \path[draw,green] ($(A)-(2,0)$) -- ($(B)+(2,0)$);
 % \path[draw,blue] ($(A)-(3,0)$) -- ($(B)+(3,0)$);
