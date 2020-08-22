@@ -135,9 +135,10 @@ def run_mean_std(parameter):
                 ]:
                     df_tmp = pd.DataFrame()
                     for n in df.n.unique():
-                        df_tmp[f"steps_{n}"] = df_[f"steps_{n}"]
-                    df__[f"{name}_mean"] = df_tmp.T.mean()
-                    df__[f"{name}_std"] = df_tmp.T.std()
+                        df_tmp[f"{name}_{n}"] = df_[f"{name}_{n}"]
+
+                    df__[f"{name}_mean"] = df_tmp.T.mean(axis=0)
+                    df__[f"{name}_std"] = df_tmp.T.std(axis=0)
 
                 df__.to_csv(
                     os.path.join(
@@ -164,7 +165,6 @@ if __name__ == "__main__":
     df.to_pickle(os.path.join(args.input,
                               "parameter_statistic_time_evolve.pkl"))
 
-    ys = ["times", "steps", "overlaps", "num_objs", "num_col_objs"]
     parameters = list(itertools.product(df.r.unique(), df.omega.unique()))
     with mp.Pool(processes=run.num_p) as pool:
         [

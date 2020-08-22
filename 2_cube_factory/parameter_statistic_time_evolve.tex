@@ -13,25 +13,30 @@
 \usepgfplotslibrary{colorbrewer}
 \usepgfplotslibrary{statistics}
 % 
-\def\datapath{output/cube_2pop_stat_juron__}
+% \usetikzlibrary{external}
+% \tikzexternalize[prefix=./output/tmp/]
+% 
+\def\datapath{output/cube_2pop_stat_0/time_evolve}
 % 
 \begin{document}
 % 
-\foreach \name in {times_,overlaps_,num_col_objs_}{
+\foreach \r in {0.5, 1.0, 2.0, 5.0, 10.0}{
+\foreach \name in {times,overlaps,num_objs,num_col_objs}{
 \begin{tikzpicture}[trim left=-10pt, trim axis right, baseline]
 ]
 \begin{axis}[%
-   cycle list/Dark2-8,
+   cycle list/Dark2,
    ]
-   \foreach \i in {0,1,2,3,4}{
-    \addplot+[mark=none] table[
-        x={steps_\i}, y={\name\i}, col sep=comma, row sep=newline,
-        ]{\datapath/cube_stat_time_evol_r_0.5_psi_0.5_fr_1.0_fl_4.0_.csv};
-        \addlegendentry{\i}
-   }
+   \foreach \fl in {1.0, 2.0, 4.0, 8.0}{
+   \foreach \fr in {1.0, 2.0, 4.0, 8.0}{
+    \addplot+[only marks, mark=o,error bars/.cd, y dir=both,y explicit] table[
+        x={steps_mean}, y={\name_mean}, y error=\name_std, col sep=comma,]
+        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+      %   \addlegendentry{\r,\fl,\fr}
+   }}
 % 
 \end{axis}
 \end{tikzpicture}
-}
+}}
 % 
 \end{document}
