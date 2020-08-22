@@ -101,23 +101,26 @@ def run(df):
 
 if __name__ == "__main__":
 
-    df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
+    if not os.path.isfile(os.path.join(args.input, "hist", "cube_2pop.pkl")):
+        df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
+        df = df[df.state != "init"]
+        df = [df.iloc[i] for i in range(df.shape[0])]
 
-    df = df[df.state != "init"]
-    df = [df.iloc[i] for i in range(df.shape[0])]
+        with mp.Pool(processes=args.num_proc) as pool:
+            df = [
+                _ for _ in tqdm.tqdm(
+                    pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
+            ]
 
-    with mp.Pool(processes=args.num_proc) as pool:
-        df = [
-            _ for _ in tqdm.tqdm(
-                pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
-        ]
-
-    df = pd.concat(df, ignore_index=True)
+        df = pd.concat(df, ignore_index=True)
+        df.to_pickle(os.path.join(args.input, "hist", "cube_2pop.pkl"))
+    else:
+        df = pd.read_pickle(os.path.join(args.input, "hist", "cube_2pop.pkl"))
 
     for omega in df.omega.unique():
         for psi in df[df.omega == omega].psi.unique():
+            df_ = pd.DataFrame()
             for r in df.r.unique():
-                df_ = pd.DataFrame()
 
                 df_sub = df.query("r == @r & omega == @omega & psi == @psi")
                 if len(df_sub) != 1:
@@ -125,8 +128,8 @@ if __name__ == "__main__":
                     continue
 
                 df_[f"x"] = np.rad2deg(df_sub.phi_x.iloc[0])
-                df_[f"r_{r}_o_{omega}_s_solved_phi_h"] = df_sub.phi_h.iloc[0]
-                df_[f"r_{r}_o_{omega}_s_solved_incl_h"] = df_sub.incl_h.iloc[0]
+                df_[f"r_{r}_s_solved_phi_h"] = df_sub.phi_h.iloc[0]
+                df_[f"r_{r}_s_solved_incl_h"] = df_sub.incl_h.iloc[0]
                 df_[f"r_{r}_s_init_phi_h"] = df_sub.phi_init_h.iloc[0]
                 df_[f"r_{r}_s_init_incl_h"] = df_sub.incl_init_h.iloc[0]
 

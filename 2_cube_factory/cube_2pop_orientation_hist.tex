@@ -1,7 +1,9 @@
 \documentclass[tikz, multi=page]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{tikz}
 \usepackage{pgfplots}
+\usepackage{pgfplotstable}
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
@@ -21,22 +23,18 @@
 % 
 \begin{document}
 % 
-% \pgfplotstableread{output/cube_2pop_0/hist/cube_stats_r_1.00.csv}\datab;
-% \pgfplotstableread{output/cube_2pop_0/hist/cube_stats_r_2.00.csv}\datac;
-% \pgfplotstableread{output/cube_2pop_0/hist/cube_stats_r_5.00.csv}\datad;
-% \pgfplotstableread{output/cube_2pop_0/hist/cube_stats_r_10.00.csv}\datae;
-% 
-% \foreach \omegas/\psis [count=\pp] in {{60.0}/{0.6}}{
-% \foreach \omegas/\psis [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9}}{
-\foreach \omegas/\psis [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9},{0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
+% \foreach \omegavalues/\psivalues [count=\pp] in {{60.0}/{0.6}}{
+% \foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9}}{
+\foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9},{0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
 \begin{page}
 \begin{tikzpicture}
 % 
 \pgfplotsset{every tick label/.append style={font=\footnotesize}}
 % 
-\foreach \omega [count=\i] in \omegas {
-\foreach \psi [count=\j] in \psis {
-   \pgfplotstableread{output/cube_2pop_0/hist/cube_stats_p_\psi_o_\omega_.csv}\csvfile;
+\foreach \omegavalue [count=\i] in \omegavalues {
+\foreach \psivalue [count=\j] in \psivalues {
+   % \pgfplotstableread{fexam1cdata.csv}\mydata
+   \pgfplotstableread[col sep = comma]{output/cube_2pop_0/hist/cube_stats_p_\psivalue_o_\omegavalue_.csv}\csvfile;
    \begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
    % 
    % DIRECTION
@@ -46,7 +44,7 @@
       xmin=-90, xmax=90,
       clip=false,
       xtick={-90,-45,0,45,90},
-      xticklabels={,45,0,-45,},
+      xticklabels={,\hphantom{-}45,0,-45,},
       ytick=\empty,
       cycle multiindex* list={Paired-10 \nextlist
                               dashed, solid\nextlist},
@@ -54,12 +52,12 @@
    \foreach \radius in {0.50,1.00,2.00}{
       \foreach \state in {init, solved} {
       \addplot+[]
-         table [x=x, y=r_\radius_s_\state_phi_h, col sep=comma] \csvfile \closedcycle;
+         table [x=x, y=r_\radius_s_\state_phi_h, col sep=comma] {\csvfile} \closedcycle;
    }}
    \node[] at (axis cs:90,1.25) {\footnotesize 90};
-   \node[] at (axis cs:-90,1.25) {\footnotesize -90};
+   \node[] at (axis cs:-90,1.25) {\footnotesize{-90\hphantom{-}}};
    \begin{scope}[overlay]
-   \ifthenelse{\i=1}{\node[] at (axis cs:90,1.5) {$\psi$};}{}
+   \ifthenelse{\i=1}{\node[] at (axis cs:90,1.5) {$\Psi = \psivalue$};}{}
    \end{scope}
    \end{polaraxis}
    % 
@@ -70,42 +68,40 @@
       ymin=0, ymax=1,
       xmin=90, xmax=270,
       xtick={90,135,180,225,270},
-      xticklabels={,45,0,-45,},
+      xticklabels={,\hphantom{-}45,0,-45,},
       ytick=\empty,
       cycle multiindex* list={Paired-10 \nextlist
                               dashed, solid\nextlist},
       clip=false,
    ]
-   \foreach \radius in {0.50,1.00,2.00}{
+   \foreach \radius in {1.00}{
       \foreach \state in {init, solved} {
       \addplot+[]
-         table [x expr=\thisrow{x}+180, y=r_\radius_s_\state_incl_h, col sep=comma] \csvfile \closedcycle;
+         table [x expr=\thisrow{x}+180, y=r_\radius_s_\state_incl_h, col sep=comma] {\csvfile} \closedcycle;
    }}
    \begin{scope}[overlay]
-   \ifthenelse{\j=1}{\node[left] at (axis description cs:-0.25,0.5) {$\omega$};}{}
+   \ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (axis description cs:-0.25,0.5) {$\Omega = \SI{\omegavalue}{\degree}$};}{}
    \end{scope}
    \end{polaraxis}
    \end{scope}
    % 
    % IMAGE
-   % \node[inner sep=0pt, anchor=center] at (image)
-   \node[inner sep=0pt, anchor=south east] at (\i\j.south east)
+  \node[inner sep=0pt, anchor=south east] at (\i\j.south east)
       {\includegraphics[trim=120 55 90 130, clip, width=1.25cm]
-      {output/cube_2pop_0/images/cube_2pop_psi_\psi0_omega_\omega0_r_2.00_v0_105_.solved.png}};
+      {output/cube_2pop_0/images/cube_2pop_psi_\psivalue0_omega_\omegavalue0_r_2.00_v0_105_.solved.png}};
    % 
    \end{scope}
 
    % COORDINATE for BB
    \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
    \coordinate (B) at (\i\j.south east);
-   % \ifthenelse{\i=1}{\node[above] at (0,0) {$\psi$};}{}
-   % \fill[red] (0,0) circle (0.25);
 }}
 % 
 % LEGEND
 \begin{scope}[local bounding box=bbl]
 \path[] ($(A) + (0,+1.1)$) rectangle (B);
 \end{scope}
+\begin{pgfinterruptboundingbox}
 \begin{axis}[%
    legend to name=legend\pp,
    legend cell align=left,
@@ -128,11 +124,9 @@
    }}
    % 
 \end{axis}
+\end{pgfinterruptboundingbox}
 \path let \p1 = (current bounding box.north), \p2=(bbl.north) in node[anchor=north, scale=0.75, yshift=1ex] at (\x2, \y1) {\ref{legend\pp}};
-\path[use as bounding box] let \p1 = (bbl.north) in ($(A)+(-1,\y1)$) -- ($(B)+(1,0)$);
-% \path[draw,red] ($(A)-(1,0)$) -- ($(B)+(1,0)$);
-% \path[draw,green] ($(A)-(2,0)$) -- ($(B)+(2,0)$);
-% \path[draw,blue] ($(A)-(3,0)$) -- ($(B)+(3,0)$);
+\path[use as bounding box] let \p1 = (current bounding box.north), \p2 = (A) in ($(\x2,\y1)-(0.25,0)$) -- ($(B)+(0.25,0)$);
 \end{tikzpicture}
 \end{page}
 }
