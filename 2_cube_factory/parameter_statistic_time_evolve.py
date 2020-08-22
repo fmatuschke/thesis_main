@@ -1,8 +1,8 @@
-''' 
-'''
+#!/usr/bin/env python3
 
 import numpy as np
 import multiprocessing as mp
+import itertools
 import argparse
 import warnings
 import h5py
@@ -31,6 +31,7 @@ parser.add_argument("-p",
                     type=int,
                     help="Number of processes.")
 args = parser.parse_args()
+os.makedirs(os.path.join(args.input, "time_evolve"), exist_ok=True)
 
 
 def run(file):
@@ -40,7 +41,7 @@ def run(file):
     v0 = float(file.split("_v0_")[1].split("_")[0])
     fl = float(file.split("_fl_")[1].split("_")[0])
     fr = float(file.split("_fr_")[1].split("_")[0])
-    n = float(file.split("_n_")[1].split("_")[0])
+    n = int(file.split("_n_")[1].split("_")[0])
     state = file.split(".")[-2].split(".")[-1]
 
     if state == "init":
@@ -65,6 +66,7 @@ def run(file):
         times,
         steps,
         overlaps,
+        num_objs,
         num_col_objs,
     ]],
                         columns=[
@@ -79,65 +81,94 @@ def run(file):
                             "times",
                             "steps",
                             "overlaps",
+                            "num_objs",
                             "num_col_objs",
                         ])
 
 
-files = glob.glob(os.path.join(args.input, "*.solved.h5"))
+def run_mean_std(parameter):
+    r, omega = parameter[0], parameter[1]
+    for psi in df[df.omega == omega].psi.unique():
+        for fr in df.fr.unique():
+            for fl in df.fl.unique():
+                df_ = pd.DataFrame()
+                names = []
+                for n in df.n.unique():
+                    times = df.query(
+                        "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                    ).times.iloc[0]
+                    steps = df.query(
+                        "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                    ).steps.iloc[0]
+                    overlaps = df.query(
+                        "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                    ).overlaps.iloc[0]
+                    num_objs = df.query(
+                        "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                    ).num_objs.iloc[0]
 
-run.flag = False
-run.num_p = args.num_proc
-with mp.Pool(processes=run.num_p) as pool:
-    df = [
-        d for d in tqdm(
-            pool.imap_unordered(run, files), total=len(files), smoothing=0)
-    ]
-    df = pd.concat(df, ignore_index=True)
+                    num_col_objs = df.query(
+                        "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
+                    ).num_col_objs.iloc[0]
 
-df.to_pickle(os.path.join(args.input, "cube_stat_evolve.pkl"))
+                    # length between different "n" can vary
+                    df__ = pd.DataFrame({
+                        f'steps_{n}': steps,
+                        f'times_{n}': times,
+                        f'overlaps_{n}': overlaps,
+                        f'num_objs_{n}': num_objs,
+                        f'num_col_objs_{n}': num_col_objs,
+                    })
 
-ys = ["times", "steps", "overlaps", "num_col_objs"]
-for r in df.r.unique():
-    for omega in df.omega.unique():
-        for psi in df[df.omega == omega].psi.unique():
-            for fr in df.fr.unique():
-                for fl in df.fl.unique():
-                    df_ = pd.DataFrame()
-                    names = []
+                    names.append(f"steps_{n}")
+                    names.append(f"times_{n}")
+                    names.append(f"overlaps_{n}")
+                    names.append(f"num_objs_{n}")
+                    names.append(f"num_col_objs_{n}")
+
+                    df_ = pd.concat([df_, df__], ignore_index=True, axis=1)
+                df_.columns = names
+
+                df__ = pd.DataFrame()
+                for name in [
+                        "steps", "times", "overlaps", "num_objs", "num_col_objs"
+                ]:
+                    df_tmp = pd.DataFrame()
                     for n in df.n.unique():
-                        times = df.query(
-                            "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
-                        ).times.iloc[0]
-                        steps = df.query(
-                            "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
-                        ).steps.iloc[0]
-                        overlaps = df.query(
-                            "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
-                        ).overlaps.iloc[0]
-                        num_col_objs = df.query(
-                            "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
-                        ).num_col_objs.iloc[0]
+                        df_tmp[f"steps_{n}"] = df_[f"steps_{n}"]
+                    df__[f"{name}_mean"] = df_tmp.T.mean()
+                    df__[f"{name}_std"] = df_tmp.T.std()
 
-                        df__ = pd.DataFrame({
-                            f'steps_{n}': steps,
-                            f'times_{n}': times,
-                            f'overlaps_{n}': overlaps,
-                            f'num_col_objs_{n}': num_col_objs,
-                        })
+                df__.to_csv(
+                    os.path.join(
+                        args.input, "time_evolve",
+                        f'cube_stat_time_evolve_r_{r}_psi_{psi}_fr_{fr}_fl_{fl}_.csv'
+                    ),
+                    index=False,
+                )
 
-                        names.append(f"steps_{int(n)}")
-                        names.append(f"times_{int(n)}")
-                        names.append(f"overlaps_{int(n)}")
-                        names.append(f"num_col_objs_{int(n)}")
 
-                        df_ = pd.concat([df_, df__], ignore_index=True, axis=1)
+if __name__ == "__main__":
+    files = glob.glob(os.path.join(args.input, "*.solved.h5"))
 
-                    df_.columns = names
+    run.flag = False
+    run.num_p = args.num_proc
+    with mp.Pool(processes=run.num_p) as pool:
+        df = [
+            d for d in tqdm(pool.imap_unordered(run, files),
+                            total=len(files),
+                            smoothing=0.1)
+        ]
+        df = pd.concat(df, ignore_index=True)
 
-                    df_.to_csv(
-                        os.path.join(
-                            args.input,
-                            f'cube_stat_time_evol_r_{r}_psi_{psi}_fr_{fr}_fl_{fl}_.csv'
-                        ),
-                        index=False,
-                    )
+    df.to_pickle(os.path.join(args.input,
+                              "parameter_statistic_time_evolve.pkl"))
+
+    ys = ["times", "steps", "overlaps", "num_objs", "num_col_objs"]
+    parameters = list(itertools.product(df.r.unique(), df.omega.unique()))
+    with mp.Pool(processes=run.num_p) as pool:
+        [
+            _ for _ in tqdm(pool.imap_unordered(run_mean_std, parameters),
+                            total=len(parameters),
+                            smoothing=0.1)
+        ]

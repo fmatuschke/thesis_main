@@ -1,5 +1,4 @@
-''' find best arbeitspunkt for solver
-'''
+#!/usr/bin/env python3
 
 import numpy as np
 import multiprocessing as mp
@@ -32,9 +31,34 @@ parser.add_argument("-p",
                     help="Number of processes.")
 args = parser.parse_args()
 
+hist_polar_bin = lambda n: np.linspace(
+    -np.pi / 2, np.pi / 2, n + 1, endpoint=True)
 
-def hist_bin(n):
-    return np.linspace(0, np.pi, n + 1, endpoint=True)
+
+def polar_hist(phi, theta):
+    incl = np.pi / 2 - theta
+
+    # remap to phi->[-np.pi/2, np.pi/2], incl->[-np.pi/2, np.pi/2]
+    phi[phi > np.pi * 3 / 2] -= 2 * np.pi
+    incl[phi > np.pi / 2] = -incl[phi > np.pi / 2]
+    phi[phi > np.pi / 2] -= np.pi
+
+    if np.any(incl < -np.pi / 2) or np.any(incl > np.pi / 2):
+        raise ValueError("FOOO incl")
+    if np.any(phi < -np.pi / 2) or np.any(phi > np.pi / 2):
+        raise ValueError("FOOO phi")
+
+    # direction
+    h, x = np.histogram(phi, hist_polar_bin(180), density=True)
+    phi_x = x[:-1] + (x[1] - x[0]) / 2
+    phi_h = h / np.amax(h)
+
+    # inclination
+    h, x = np.histogram(incl, hist_polar_bin(180), density=True)
+    incl_x = x[:-1] + (x[1] - x[0]) / 2
+    incl_h = h / np.amax(h)
+
+    return phi_x, phi_h, incl_x, incl_h
 
 
 def run(file):
@@ -70,7 +94,7 @@ def run(file):
                         f"Single Memory: {simpli.memory_usage(item='tissue'):.0f} MB"
                     )
                     print(
-                        f"Total Memory: {simpli.memory_usage(item='tissue') * run.num_p:.0f} MB"
+                        f"Total Memory: {simpli.memory_usage(item='tissue') * args.num_proc:.0f} MB"
                     )
                     run.flag.value = 1
 
@@ -103,15 +127,7 @@ def run(file):
         raise ValueError("FOO")
 
     phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
-
-    theta[phi > np.pi] = np.pi - theta[phi > np.pi]
-    phi = helper.circular.remap(phi, np.pi, 0)
-    phi_h, phi_x = np.histogram(phi.ravel(), hist_bin(180), density=True)
-    theta_h, theta_x = np.histogram(theta.ravel(), hist_bin(180), density=True)
-
-    # df = pd.DataFrame(columns=["phi", "theta"], dtype='object')
-    # df = pd.DataFrame(columns=["phi_h", "phi_x", "theta_h", "theta_x"],
-    #                   dtype='object')
+    phi_x, phi_h, incl_x, incl_h = polar_hist(phi, theta)
 
     return pd.DataFrame([[
         omega,
@@ -131,10 +147,10 @@ def run(file):
         time,
         unique_elements,
         count_elements,
-        phi_h,
         phi_x,
-        theta_h,
-        theta_x,
+        phi_h,
+        incl_x,
+        incl_h,
     ]],
                         columns=[
                             "omega",
@@ -154,10 +170,10 @@ def run(file):
                             "time",
                             "unique_elements",
                             "count_elements",
-                            "phi_h",
                             "phi_x",
-                            "theta_h",
-                            "theta_x",
+                            "phi_h",
+                            "incl_x",
+                            "incl_h",
                         ])
 
 
@@ -165,11 +181,10 @@ files = glob.glob(os.path.join(args.input, "*.h5"))
 
 run.flag = mp.Value('i', 0)
 run.lock = mp.Lock()
-run.num_p = args.num_proc
-with mp.Pool(processes=run.num_p) as pool:
+with mp.Pool(processes=args.num_proc) as pool:
     df = [
         d for d in tqdm(
-            pool.imap_unordered(run, files), total=len(files), smoothing=0)
+            pool.imap_unordered(run, files), total=len(files), smoothing=0.1)
     ]
     df = pd.concat(df, ignore_index=True)
 

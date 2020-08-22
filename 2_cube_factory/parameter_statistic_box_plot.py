@@ -21,6 +21,7 @@ parser.add_argument("-i",
                     required=True,
                     help="Path of file.")
 args = parser.parse_args()
+os.makedirs(os.path.join(args.input, "boxplot"), exist_ok=True)
 
 df = pd.read_pickle(os.path.join(args.input, "parameter_statistic.pkl"))
 df = df[df.state == "solved"]
@@ -33,67 +34,6 @@ df['volume'] = df.count_elements.map(
 df['frac_num_col_obj'] = df.num_col_obj / df.num_obj
 df['frac_overlap'] = df.overlap / df.num_col_obj
 df = df.replace([np.inf, np.nan], 0)
-
-# # missing members
-# for r in df.r.unique():
-#     for omega in df.omega.unique():
-#         for psi in df[df.omega == omega].psi.unique():
-#             for fr in df.fr.unique():
-#                 for fl in df.fl.unique():
-#                     for n in df.n.unique():
-#                         if not len(
-#                                 df.query(
-#                                     "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
-#                                 )):
-#                             raise ValueError("FOO")
-#                             # time = 60 * 60 * 11
-#                             # frac_num_col_obj = 0.5
-#                             # volume = 0.5
-#                             # ["time", "frac_num_col_obj", "volume"]
-#                             # df = df.append(
-#                             #     {
-#                             #         "r": r,
-#                             #         "psi": psi,
-#                             #         "omega": omega,
-#                             #         "fr": fr,
-#                             #         "fl": fl,
-#                             #         "time": time,
-#                             #         "n": n,
-#                             #         "frac_num_col_obj": frac_num_col_obj,
-#                             #         "volume": volume
-#                             #     },
-#                             #     ignore_index=True)
-
-#                     # ys = [
-#                     #     "time", "overlap", "frac_overlap", "frac_num_col_obj",
-#                     #     "volume", "num_steps"
-#                     # ]
-#                     # # ys = ["time", "frac_num_col_obj", "volume"]
-#                     # df_ = df.query(
-#                     #     "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
-#                     # )
-#                     # df_[ys].to_csv(
-#                     #     os.path.join(
-#                     #         args.input,
-#                     #         f'cube_stat_r_{r}_psi_{psi}_fr_{fr}_fl_{fl}_.csv'),
-#                     #     index=False,
-#                     #     #   float_format='%.6f'
-#                     # )
-
-# df = df[["n", "r", "omega", "psi", "fr", "fl", "time"]]
-
-# # print(list(df.columns).remove("n"))
-
-# print(df)
-
-# df.pivot(index="n", columns=["r", "omega", "psi", "fr", "fl"],
-#          values="time").to_csv(f"test.csv")
-
-#  .to_csv(f"test.csv")
-
-# print(df.fr.unique())
-# print(df.fl.unique())
-# print(df.psi.unique())
 
 for r in df.r.unique():
     df_ = pd.DataFrame()
@@ -119,4 +59,5 @@ for r in df.r.unique():
                     df_[f"p_{psi}_o_{omega}_fr_{fr}_fl_{fl}_num_steps"] = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     ).num_steps.to_numpy()
-    df_.to_csv(f"output/tmp/cube_stats_r_{r}.csv", index=False)
+    df_.to_csv(os.path.join(args.input, "boxplot", f"cube_stats_r_{r}.csv"),
+               index=False)
