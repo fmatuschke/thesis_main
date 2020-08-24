@@ -18,6 +18,9 @@
 % 
 \def\datapath{output/cube_2pop_stat_0/time_evolve}
 % 
+\def\height{22.37076cm} %22.37076cm/5
+\def\width{13.87303cm} %13.87303cm,
+% 
 \begin{document}
 % 
 \foreach \name in {times,overlaps,num_objs,num_col_objs}{
@@ -26,10 +29,21 @@
 \begin{axis}[%
    cycle list/Dark2,
    ]
-   \foreach \r in {0.5, 1.0}{
-   \foreach \fl in {2.0, 8.0}{
-   \foreach \fr in {2.0, 8.0}{
-    \addplot+[only marks, mark=*,error bars/.cd, y dir=both,y explicit] table[
+   \foreach \r in {0.5}{
+   \foreach \fl in {2.0}{
+   \foreach \fr in {2.0}{
+   % \foreach \r in {0.5, 1.0}{
+   % \foreach \fl in {2.0, 8.0}{
+   % \foreach \fr in {2.0, 8.0}{
+    \addplot+[%
+       width = \width,
+       height = 0.5*\height,
+       only marks, mark=*,
+       mark size=0.5pt,
+       error bars/.cd,
+       error bar style={line width=0.5pt},
+       error mark options={rotate=90,mark size=2pt, line width=0.5pt},
+       y dir=both,y explicit] table[
         x={steps_mean}, y={\name_mean}, y error=\name_std, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
       %   \addlegendentryexpanded{$r=\r,f_l=\fl,f_r=\fr$}

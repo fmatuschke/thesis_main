@@ -45,13 +45,16 @@
       xticklabels={,\hphantom{-}45,0,-45,},
       ytick=\empty,
       cycle multiindex* list={Paired-10 \nextlist
-                              dashed, solid\nextlist},
+                              {dashed, dash phase=0pt}, solid,
+                              {dashed, dash phase=1pt}, solid,
+                              {dashed, dash phase=2pt}, solid\nextlist},
    ]
    \foreach \radius in {0.50,1.00,2.00} {
       \foreach \state in {init, solved} {
-      \addplot+[]
+      \addplot+[]       
          table [x=x, y=r_\radius_s_\state_phi_h, col sep = comma]
             {output/cube_2pop_0/hist/cube_stats_p_\psivalue_o_\omegavalue_.csv} \closedcycle;
+        
    }}
    \node[] at (axis cs:90,1.25) {\footnotesize 90};
    \node[] at (axis cs:-90,1.25) {\footnotesize{-90\hphantom{-}}};
@@ -70,7 +73,7 @@
       xticklabels={,\hphantom{-}45,0,-45,},
       ytick=\empty,
       cycle multiindex* list={Paired-10 \nextlist
-                              dashed, solid\nextlist},
+                              {dotted}, solid\nextlist},
       clip=false,
    ]
    \foreach \radius in {0.50,1.00,2.00} {
@@ -114,7 +117,7 @@
    legend style={font=\vphantom{hg},draw=white!15!black,legend cell align=left, 
                  /tikz/every even column/.append style={column sep=1ex}},
    cycle multiindex* list={Paired-10 \nextlist
-                           dashed, solid\nextlist},
+                           {dashed}, solid\nextlist},
    ]
    % 
    \foreach \radius in {0.50,1.00,2.00}{

@@ -12,7 +12,7 @@ FLAG.install-sc=--system-site-packages
 install: env env-update requirements git-submodules clean-fastpli fastpli
 
 .PHONY: install-sc
-install-sc: env-sc env-update requirements-sc git-submodules clean-fastpli fastpli
+install-sc: clean env-sc env-update requirements-sc git-submodules clean-fastpli fastpli
 
 .PHONY: env
 env:
@@ -88,7 +88,7 @@ jupyter:
 # CLEANING
 .PHONY: clean
 clean: clean-fastpli
-	rm -rf env-*
+	rm -rf env-$(VENV)
 
 .PHONY: clean-fastpli
 .ONESHELL:
