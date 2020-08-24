@@ -191,7 +191,7 @@ for i in tqdm(range(1, args.max_steps + 1)):
         )
 
         if i % 100 == 0:
-            if (time.time() - start_time) < 0.9 * args.time * 60 * 60:
+            if (time.time() - start_time) > 0.9 * args.time * 60 * 60:
                 with h5py.File(file_pref + '.tmp.h5', 'w') as h5f:
                     solver.save_h5(h5f,
                                    script=open(os.path.abspath(__file__),
