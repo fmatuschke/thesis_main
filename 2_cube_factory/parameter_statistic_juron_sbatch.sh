@@ -2,6 +2,7 @@
 
 set -e
 
+n=160 # value without radii
 N=800
 num_p=20
 sum=0
@@ -10,6 +11,7 @@ dt=1
 if [ $# -eq 0 ]
   then
     echo "No arguments supplied"
+    exit
 fi
 
 for ((i=0; i<$N; i=i+$num_p))

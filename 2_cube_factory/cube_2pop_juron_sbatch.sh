@@ -5,6 +5,7 @@ set -e
 if [ $# -eq 0 ]
   then
     echo "No arguments supplied"
+    exit
 fi
 
 for r in 10 5 2 1 0.5; do
