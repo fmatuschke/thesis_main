@@ -2,6 +2,11 @@
 
 set -e
 
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied"
+fi
+
 for r in 10 5 2 1 0.5; do
    N=92
    num_p=20
@@ -11,11 +16,11 @@ for r in 10 5 2 1 0.5; do
       if [ $(($i+$num_p)) -gt $(($N)) ]
       then
          num_p=$(($N-$i))
-         ./replace_juron.sh cube_2pop_juron.sh $num_p $i $r cube_2pop_0
+         ./replace_juron.sh cube_2pop_juron.sh $num_p $i $r $1
          ((sum+=num_p))
          break
       fi
-      ./replace_juron.sh cube_2pop_juron.sh $num_p $i $r cube_2pop_0
+      ./replace_juron.sh cube_2pop_juron.sh $num_p $i $r $1
       ((sum+=num_p))
       echo ""
    done
