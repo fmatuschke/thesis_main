@@ -46,8 +46,8 @@
       ytick=\empty,
       cycle multiindex* list={Paired-10 \nextlist
                               {dashed, dash phase=0pt}, solid,
-                              {dashed, dash phase=1pt}, solid,
-                              {dashed, dash phase=2pt}, solid\nextlist},
+                              {dashed, dash phase=2pt}, solid,
+                              {dashed, dash phase=4pt}, solid\nextlist},
    ]
    \foreach \radius in {0.50,1.00,2.00} {
       \foreach \state in {init, solved} {
@@ -73,7 +73,9 @@
       xticklabels={,\hphantom{-}45,0,-45,},
       ytick=\empty,
       cycle multiindex* list={Paired-10 \nextlist
-                              {dotted}, solid\nextlist},
+                              {dashed, dash phase=0pt}, solid,
+                              {dashed, dash phase=1pt}, solid,
+                              {dashed, dash phase=2pt}, solid\nextlist},
       clip=false,
    ]
    \foreach \radius in {0.50,1.00,2.00} {

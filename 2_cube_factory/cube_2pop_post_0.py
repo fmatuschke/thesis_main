@@ -50,14 +50,16 @@ def run(file):
 
         if h5f['/'].attrs['num_steps'] == 0:
             state = "init"
-        elif h5f['/'].attrs['overlap'] == 0:
+        elif h5f['/'].attrs['overlap'] == 0 and h5f['/'].attrs[
+                'num_col_obj'] == 0:
             state = "solved"
         else:
-            state = "tmp"
+            state = "not_solved"
             warnings.warn("not solved")
 
-        if state != state_:
-            raise ValueError("state != state_")
+        # if state != state_:
+        #     print(state, state_)
+        #     raise ValueError("state != state_")
 
         # TODO: only take h5 values
         omega = h5f['/'].attrs['omega']
