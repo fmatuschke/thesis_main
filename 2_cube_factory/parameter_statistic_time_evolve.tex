@@ -12,6 +12,7 @@
 \pgfplotsset{compat=1.17}
 \usepgfplotslibrary{colorbrewer}
 \usepgfplotslibrary{statistics}
+\usepgfplotslibrary{groupplots}
 % 
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
@@ -23,38 +24,126 @@
 % 
 \begin{document}
 % 
-\foreach \name in {times,overlaps,num_objs,num_col_objs}{
-\begin{tikzpicture}[trim left=-10pt, trim axis right, baseline]
-]
-\begin{axis}[%
+% \foreach \name in {times}{
+\begin{tikzpicture}[]
+\begin{groupplot}[%
+  group style={
+      group size=2 by 3,
+      horizontal sep=2cm,
+      horizontal sep=2cm,
+      ylabels at=edge left,
+  },
    cycle list/Dark2,
-   ]
-   \foreach \r in {0.5}{
-   \foreach \fl in {2.0}{
-   \foreach \fr in {2.0}{
-   % \foreach \r in {0.5, 1.0}{
-   % \foreach \fl in {2.0, 8.0}{
-   % \foreach \fr in {2.0, 8.0}{
+]
+% \foreach \name/\label in {times/$t$ in $\si{\second}$}{
+\nextgroupplot[ylabel={$t$ in $\si{\second}$}]
+   \foreach \r in {0.5, 1.0}{
+   \foreach \fl in {2.0, 8.0}{
+   \foreach \fr in {2.0, 8.0}{
     \addplot+[%
        width = \width,
        height = 0.5*\height,
        only marks, mark=*,
-       mark size=0.5pt,
+       mark size=0.125pt, %mean value marker
        error bars/.cd,
-       error bar style={line width=0.5pt},
-       error mark options={rotate=90,mark size=2pt, line width=0.5pt},
+       error bar style={line width=0.125pt}, % thickness line top-bottom
+       error mark options={rotate=90,mark size=0.5pt, line width=0.125pt}, % top bottom marker
        y dir=both,y explicit] table[
-        x={steps_mean}, y={\name_mean}, y error=\name_std, col sep=comma,]
+        x={steps_mean}, y={times_mean}, y error=times_std, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
-      %   \addlegendentryexpanded{$r=\r,f_l=\fl,f_r=\fr$}
    }}}
 % 
-\end{axis}
-\end{tikzpicture}
-}
+\nextgroupplot[ylabel={overlap}]
+   \foreach \r in {0.5, 1.0}{
+   \foreach \fl in {2.0, 8.0}{
+   \foreach \fr in {2.0, 8.0}{
+    \addplot+[%
+       width = \width,
+       height = 0.5*\height,
+       only marks, mark=*,
+       mark size=0.125pt, %mean value marker
+       error bars/.cd,
+       error bar style={line width=0.125pt}, % thickness line top-bottom
+       error mark options={rotate=90,mark size=0.5pt, line width=0.125pt}, % top bottom marker
+       y dir=both,y explicit] table[
+        x={steps_mean}, y={overlaps_mean}, y error=overlaps_std, col sep=comma,]
+        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+   }}}
 % 
-\begin{tikzpicture}[]
+\nextgroupplot[ylabel={$\# obj$}]
+   \foreach \r in {0.5, 1.0}{
+   \foreach \fl in {2.0, 8.0}{
+   \foreach \fr in {2.0, 8.0}{
+    \addplot+[%
+       width = \width,
+       height = 0.5*\height,
+       only marks, mark=*,
+       mark size=0.125pt, %mean value marker
+       error bars/.cd,
+       error bar style={line width=0.125pt}, % thickness line top-bottom
+       error mark options={rotate=90,mark size=0.5pt, line width=0.125pt}, % top bottom marker
+       y dir=both,y explicit] table[
+        x={steps_mean}, y={num_objs_mean}, y error=num_objs_std, col sep=comma,]
+        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+   }}}
+% 
+\nextgroupplot[ylabel={$\# col obj$}]
+   \foreach \r in {0.5, 1.0}{
+   \foreach \fl in {2.0, 8.0}{
+   \foreach \fr in {2.0, 8.0}{
+    \addplot+[%
+       width = \width,
+       height = 0.5*\height,
+       only marks, mark=*,
+       mark size=0.125pt, %mean value marker
+       error bars/.cd,
+       error bar style={line width=0.125pt}, % thickness line top-bottom
+       error mark options={rotate=90,mark size=0.5pt, line width=0.125pt}, % top bottom marker
+       y dir=both,y explicit] table[
+        x={steps_mean}, y={num_col_objs_mean}, y error=num_col_objs_std, col sep=comma,]
+        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+   }}} 
+%
+\nextgroupplot[ylabel={$overlap frac$}]
+   \foreach \r in {0.5, 1.0}{
+   \foreach \fl in {2.0, 8.0}{
+   \foreach \fr in {2.0, 8.0}{
+    \addplot+[%
+       width = \width,
+       height = 0.5*\height,
+       only marks, mark=*,
+       mark size=0.125pt, %mean value marker
+       error bars/.cd,
+       error bar style={line width=0.125pt}, % thickness line top-bottom
+       error mark options={rotate=90,mark size=0.5pt, line width=0.125pt}, % top bottom marker
+       y dir=both,y explicit] table[
+        x={steps_mean}, y={overlaps_frac_mean}, y error=overlaps_frac_std, col sep=comma,]
+        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+   }}}
+   % \coordinate (L) at (axis description cs:1,0);
+% 
+% \nextgroupplot[ylabel={$t$ in $\si{\second}$}]
+%    \foreach \r in {0.5, 1.0}{
+%    \foreach \fl in {2.0, 8.0}{
+%    \foreach \fr in {2.0, 8.0}{
+%     \addplot+[%
+%        width = \width,
+%        height = 0.5*\height,
+%        only marks, mark=*,
+%        mark size=0.125pt, %mean value marker
+%        error bars/.cd,
+%        error bar style={line width=0.125pt}, % thickness line top-bottom
+%        error mark options={rotate=90,mark size=0.5pt, line width=0.125pt}, % top bottom marker
+%        y dir=both,y explicit] table[
+%         x={steps_mean}, y={times_mean}, y error=times_std, col sep=comma,]
+%         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+%    }}}
+\end{groupplot}
+% 
+% LEGEND
+\begin{pgfinterruptboundingbox}
 \begin{axis}[%
+   legend to name={legend\currfilebase},
    legend cell align=left,
    % legend columns=2,
    % legend transposed=true,
@@ -75,5 +164,8 @@
    }}}
    % 
 \end{axis}
+\end{pgfinterruptboundingbox}
+\path let \p1=($(current bounding box.north east)-(current bounding box.south west)$) in node[anchor=center] at ($(current bounding box.south west) + (\x1/5*4,\y1*2/11)$) {\ref{legend\currfilebase}};
+% \path let \p1=(current bounding box.east), in node[anchor=south east] at (\x1/1) {\ref{legend\currfilebase}};
 \end{tikzpicture}
 \end{document}

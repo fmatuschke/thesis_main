@@ -111,6 +111,10 @@ def run_mean_std(parameter):
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl & n == @n"
                     ).num_col_objs.iloc[0]
 
+                    num_col_objs_ = num_col_objs.copy()
+                    num_col_objs_[num_col_objs_ == 0] = 1
+                    overlaps_frac = overlaps / num_col_objs_
+
                     # length between different "n" can vary
                     df__ = pd.DataFrame({
                         f'steps_{n}': steps,
@@ -118,6 +122,7 @@ def run_mean_std(parameter):
                         f'overlaps_{n}': overlaps,
                         f'num_objs_{n}': num_objs,
                         f'num_col_objs_{n}': num_col_objs,
+                        f'overlaps_frac_{n}': overlaps_frac,
                     })
 
                     names.append(f"steps_{n}")
@@ -125,13 +130,15 @@ def run_mean_std(parameter):
                     names.append(f"overlaps_{n}")
                     names.append(f"num_objs_{n}")
                     names.append(f"num_col_objs_{n}")
+                    names.append(f"overlaps_frac_{n}")
 
                     df_ = pd.concat([df_, df__], ignore_index=True, axis=1)
                 df_.columns = names
 
                 df__ = pd.DataFrame()
                 for name in [
-                        "steps", "times", "overlaps", "num_objs", "num_col_objs"
+                        "steps", "times", "overlaps", "num_objs",
+                        "num_col_objs", "overlaps_frac"
                 ]:
                     df_tmp = pd.DataFrame()
                     for n in df.n.unique():
