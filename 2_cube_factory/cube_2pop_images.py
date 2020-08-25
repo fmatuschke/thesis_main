@@ -32,7 +32,7 @@ parser.add_argument("-p", "--num_proc", type=int, required=True, help="")
 
 args = parser.parse_args()
 
-os.makedirs(os.path.join(args.output, "images"), exist_ok=True)
+os.makedirs(os.path.join(args.input, "images"), exist_ok=True)
 
 solver = fastpli.model.solver.Solver()
 
@@ -46,7 +46,7 @@ def run(file):
     solver.fiber_bundles = fbs
     solver.draw_scene()
 
-    file = os.path.join(os.path.abspath(args.output), "images",
+    file = os.path.join(os.path.abspath(args.input), "images",
                         os.path.splitext(os.path.basename(file))[0])
     solver.save_ppm(file + ".ppm")
     subprocess.run(f"convert {file}.ppm {file}.png && rm {file}.ppm",
