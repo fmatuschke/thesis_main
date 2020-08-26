@@ -37,7 +37,7 @@ p_shift = np.array([(RADIUS_OUT + RADIUS_IN) * 0.5 / np.cos(np.deg2rad(30)), 0,
 V_FRACTION = 0.5
 
 solver = fastpli.model.solver.Solver()
-solver.omp_num_threads = 8
+solver.omp_num_threads = 4
 
 # fiber seeds
 print("seeding")
@@ -93,7 +93,7 @@ fiber_bundles.append(data)
 solver.fiber_bundles = fiber_bundles
 solver.obj_mean_length = FB_RADIUS * 4
 solver.obj_min_radius = FB_RADIUS * 8
-solver.boundry_checking(10)
+solver.apply_boundary_conditions(10)
 fiber_bundles = solver.fiber_bundles
 solver.draw_scene()
 # input()
@@ -107,7 +107,7 @@ for fb in fiber_bundles:
 solver.fiber_bundles = fiber_bundles
 solver.obj_mean_length = FB_RADIUS * 2
 solver.obj_min_radius = FB_RADIUS * 5
-solver.boundry_checking(10)
+solver.apply_boundary_conditions(10)
 fiber_bundles = solver.fiber_bundles
 solver.draw_scene()
 
@@ -135,7 +135,7 @@ for fb in fiber_bundles:
 solver.fiber_bundles = new_fiber_bundles
 solver.obj_mean_length = F_RADIUS * 2
 solver.obj_min_radius = F_RADIUS * 5
-solver.boundry_checking(10)
+solver.apply_boundary_conditions(10)
 fiber_bundles = solver.fiber_bundles
 solver.draw_scene()
 # input()
@@ -148,7 +148,7 @@ solver.draw_scene()
 #         f[:, -1] *= np.random.lognormal(0, 0.05, f.shape[0])
 
 # solver.fiber_bundles = fiber_bundles
-# solver.boundry_checking(100)
+# solver.apply_boundary_conditions(100)
 # fiber_bundles = solver.fiber_bundles
 # solver.draw_scene()
 # input()
@@ -164,6 +164,8 @@ print(file_pref)
 n_f_to_pick = 0
 for i in trange(10000):
     solved = solver.step()
+
+    n_col_obj = solver.num_col_obj
 
     v = solver.overlap / (solver.num_col_obj + 1e-16)
     if (solver.num_col_obj == 0 or v < 0.01) and len(num_f_in_fb) > 0:
@@ -218,14 +220,19 @@ for i in trange(10000):
 
     if (i % 25) == 0:
         tqdm.write("f step {}, {}, {}, {}%".format(
-            i, solver.num_obj, solver.num_col_obj,
-            round(solver.overlap / (solver.num_col_obj + 1e-16) * 100)))
+            i, solver.num_obj, n_col_obj,
+            round(solver.overlap / (n_col_obj + 1e-16) * 100)))
+
+    if (i % 100) == 0:
+        fastpli.io.fiber_bundles.save(file_pref + '.tmp.dat',
+                                      solver.fiber_bundles,
+                                      mode="w")
 
     if solved:
         break
 
 print("step:", i, solver.num_obj, solver.num_col_obj,
       solver.overlap / solver.num_col_obj * 100)
+fastpli.io.fiber_bundles.save(file_pref + '.solved.dat', solver.fiber_bundles)
 helper.save_h5_fibers(file_pref + '.solved.h5', solver.fiber_bundles, __file__,
                       solver.as_dict(), i, solver.num_col_obj, solver.overlap)
-fastpli.io.fiber.save(file_pref + '.solved.dat', solver.fiber_bundles)
