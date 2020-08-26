@@ -24,7 +24,7 @@ args = parser.parse_args()
 os.makedirs(os.path.join(args.input, "boxplot"), exist_ok=True)
 
 df = pd.read_pickle(os.path.join(args.input, "parameter_statistic.pkl"))
-df = df[df.state == "solved"]
+df = df[df.state != "init"]
 # df = df[df.omega == 90.0]
 # df = df[df.psi == 0.5]
 # df = df[df.fl <= 6]
@@ -40,7 +40,8 @@ for r in df.r.unique():
     for omega in df.omega.unique():
         for psi in df[df.omega == omega].psi.unique():
             for fr in df.fr.unique():
-                for i, fl in enumerate(df.fl.unique()):
+                for fl in df.fl.unique():
+                    # print(r, omega, psi, fr, fl)
                     df_[f"p_{psi}_o_{omega}_fr_{fr}_fl_{fl}_time"] = df.query(
                         "r == @r & omega == @omega & psi == @psi & fr == @fr & fl == @fl"
                     ).time.to_numpy()

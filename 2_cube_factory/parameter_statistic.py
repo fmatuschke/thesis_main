@@ -189,7 +189,7 @@ def run(parameters):
 
             if i % 100 == 0:
                 if (time.time() - start_time) > 0.9 * args.time * 60 * 60:
-                    with h5py.File(file_pref + '.tmp.h5', 'w') as h5f:
+                    with h5py.File(f'{file_pref}.tmp.h5', 'w') as h5f:
                         solver.save_h5(h5f,
                                        script=open(os.path.abspath(__file__),
                                                    'r').read())
@@ -246,6 +246,10 @@ def run(parameters):
         h5f['/'].attrs['overlaps'] = overlaps
         h5f['/'].attrs['num_objs'] = num_objs
         h5f['/'].attrs['num_col_objs'] = num_col_objs
+
+    if os.path.isfile(f'{file_pref}.tmp.h5'):
+        os.remove(f'{file_pref}.tmp.h5')
+
     logger.info(f"done")
 
 

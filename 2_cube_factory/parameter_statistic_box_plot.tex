@@ -20,8 +20,9 @@
 \pgfplotscreateplotcyclelist{cc2}{cc21, cc22}
 \makeatother
 % 
+\def\datapath{output/parameter_statistic_0/boxplot}
+% 
 % \def\varwidth{13.87303cm}
-% \def\datapath{output/cube_2pop_stat_juron__}
 % \renewcommand\textwidth{13.87303cm}
 % 
 \begin{document}
@@ -72,7 +73,7 @@
 \begin{tabular}{@{}c@{}}
 % 
 \begin{tikzpicture}[trim left=-42pt, baseline]
-% \pgfplotstableread[col sep=comma, row sep=newline,header=true]{output/tmp/cube_stat_r_1.0.csv}{\datatable}
+% \pgfplotstableread[col sep=comma, row sep=newline,header=true]{\datapath/cube_stat_r_1.0.csv}{\datatable}
 \begin{axis}[%
     Boxplot,
     ylabel={$t$ in $\si{\second}$}, ymode={log},
@@ -103,7 +104,7 @@
         y={p_\psi_o_\omega_fr_\fr_fl_\fl_time}, 
         % y index = 1,
         col sep=comma, row sep=newline,
-        ]{output/tmp/cube_stats_r_\fiberradius.csv};
+        ]{\datapath/cube_stats_r_\fiberradius.csv};
 }
 \xachse
 \node[anchor=south] at (title.north) {\ref{legend\currfilebase\fiberradius}};
@@ -119,7 +120,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={p_\psi_o_\omega_fr_\fr_fl_\fl_frac_num_col_obj}, col sep=comma, row sep=newline,
-        ]{output/tmp/cube_stats_r_\fiberradius.csv};
+        ]{\datapath/cube_stats_r_\fiberradius.csv};
 }
 \xachse
 \end{axis}
@@ -132,7 +133,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={p_\psi_o_\omega_fr_\fr_fl_\fl_volume}, col sep=comma, row sep=newline,
-        ]{output/tmp/cube_stats_r_\fiberradius.csv};
+        ]{\datapath/cube_stats_r_\fiberradius.csv};
 }
 \xachse
 \end{axis}
@@ -145,7 +146,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={p_\psi_o_\omega_fr_\fr_fl_\fl_num_steps}, col sep=comma, row sep=newline,
-        ]{output/tmp/cube_stats_r_\fiberradius.csv};
+        ]{\datapath/cube_stats_r_\fiberradius.csv};
 }
 \xachse
 \end{axis}
@@ -159,7 +160,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={p_\psi_o_\omega_fr_\fr_fl_\fl_frac_overlap}, col sep=comma, row sep=newline,
-        ]{output/tmp/cube_stats_r_\fiberradius.csv};
+        ]{\datapath/cube_stats_r_\fiberradius.csv};
 }
 \xachse
 \end{axis}

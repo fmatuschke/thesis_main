@@ -107,7 +107,7 @@ def run(file):
 
         obj_mean_length = h5f['/'].attrs['obj_mean_length']
         obj_min_radius = h5f['/'].attrs['obj_min_radius']
-        if state == "solved":
+        if state != "init":
             overlap = h5f['/'].attrs['overlap']
             num_col_obj = h5f['/'].attrs['num_col_obj']
             num_obj = h5f['/'].attrs['num_obj']

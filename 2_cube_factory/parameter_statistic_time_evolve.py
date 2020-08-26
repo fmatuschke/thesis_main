@@ -157,7 +157,7 @@ def run_mean_std(parameter):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(args.input, "*.solved.h5"))
+    files = glob.glob(os.path.join(args.input, "*.h5"))
 
     run.flag = False
     run.num_p = args.num_proc
