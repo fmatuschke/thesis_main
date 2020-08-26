@@ -44,6 +44,10 @@ def run(file):
         fbs, [[-args.volume / 2] * 3, [args.volume / 2] * 3])
 
     solver.fiber_bundles = fbs
+    # solver.reset_view()
+    # solver.set_view_angles(30, 30, 0)
+    # solver.set_view_distance(120)
+    # solver.set_view_center(0, 0, 0)
     solver.draw_scene()
 
     file = os.path.join(os.path.abspath(args.input), "images",

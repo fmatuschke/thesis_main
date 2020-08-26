@@ -3,8 +3,8 @@ set -e
 
 mkdir -p output/tmp
 mkdir -p output/tmp/output/tmp
+mkdir -p output/tikz
 
-rm -f output/tikz/parameter_statistic_box_plot.pdf
 lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp parameter_statistic_box_plot.tex
 lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp parameter_statistic_box_plot.tex
 mv output/tmp/parameter_statistic_box_plot.pdf output/tikz/parameter_statistic_box_plot.pdf
