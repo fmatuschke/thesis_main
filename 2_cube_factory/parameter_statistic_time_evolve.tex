@@ -34,6 +34,47 @@
    error mark options={rotate=90,mark size=0.5pt, line width=0.2pt}, % top and bottom (line) marker
    y dir=both,y explicit,
    },}
+%
+\pgfplotsset{colormap/Blues-4}
+\pgfplotsset{colormap/Greens-4}
+\pgfplotsset{colormap/Oranges-4}
+\pgfplotsset{colormap/Purples-4}
+\pgfplotsset{colormap/Reds-4}
+\pgfplotsset{colormap/Greys-4}
+% 
+% \pgfplotsset{
+% cycle multiindex* list={
+%    \foreach \name in {Blues,Greens,Oranges,Purples,Reds,Greys}{
+%    \foreach \i in {0,1,2,3}{
+%    index of colormap={\i of \name-4},}}
+%    \nextlist
+% }}
+\pgfplotsset{
+cycle multiindex* list={
+   index of colormap={1 of Blues-4},index of colormap={2 of Blues-4},
+   index of colormap={3 of Blues-4},
+   index of colormap={1 of Greens-4},index of colormap={2 of Greens-4},
+   index of colormap={3 of Greens-4},
+   index of colormap={1 of Oranges-4},index of colormap={2 of Oranges-4},
+   index of colormap={3 of Oranges-4},
+   index of colormap={1 of Purples-4},index of colormap={2 of Purples-4},
+   index of colormap={3 of Purples-4},
+   index of colormap={1 of Reds-4},index of colormap={2 of Reds-4},
+   index of colormap={3 of Reds-4},
+   index of colormap={1 of Greys-4},index of colormap={2 of Greys-4},
+   index of colormap={3 of Greys-4},
+   \nextlist
+}}
+% 
+% \foreach \fiberradius [count=\i] in {0.5,1.0,2.0,} {
+% \foreach \fl in {2.0,8.0} {
+% \foreach \fr in {1.0,2.0,4.0,8.0} {
+% 
+\newcommand{\Loop}[1]{
+   \foreach \r in {0.5,1.0,2.0}{
+   \foreach \fl in {2.0, 8.0}{
+   \foreach \fr in {2.0,4.0,8.0}{#1}}}} % 1.0 und 2.0 nicht unterscheidbar
+% 
 % \foreach \name in {times}{
 \begin{tikzpicture}[]
 \begin{groupplot}[%
@@ -43,46 +84,45 @@
       horizontal sep=2cm,
       ylabels at=edge left,
   },
-   cycle list/Paired-12,
+   % cycle list/Paired-12,
    xmode=log,
    ymode=log,
 ]
 % 
-\nextgroupplot[ylabel={overlap}]
-   \foreach \r in {0.5, 1.0}{
-   \foreach \fl in {2.0, 8.0}{
-   \foreach \fr in {2.0, 8.0}{
-    \addplot+[] table[
-        x={times_mean}, y={overlaps_mean}, x error = {times_std} , y error={overlaps_std}, col sep=comma,]
-        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
-   }}}
+% \nextgroupplot[ylabel={overlap}]
+   % \Loop{
+%     \addplot+[] table[
+%         x={times_mean}, y={overlaps_mean}, x error = {times_std} , y error={overlaps_std}, col sep=comma,]
+%         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+%    }
+% % 
+% \nextgroupplot[ylabel={$\# obj$}]
+   % \Loop{
+%     \addplot+[] table[
+%         x={times_mean}, y={num_objs_mean}, x error = {times_std} , y error={num_objs_std}, col sep=comma,]
+%         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+%    }
 % 
-\nextgroupplot[ylabel={$\# obj$}]
-   \foreach \r in {0.5, 1.0}{
-   \foreach \fl in {2.0, 8.0}{
-   \foreach \fr in {2.0, 8.0}{
+\nextgroupplot[ylabel={$\# steps$}]
+   \Loop{
     \addplot+[] table[
-        x={times_mean}, y={num_objs_mean}, x error = {times_std} , y error={num_objs_std}, col sep=comma,]
+        x={times_mean}, y={steps_mean}, x error = {times_std} , y error={steps_std}, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
-   }}}
+   }
 % 
-\nextgroupplot[ylabel={$\# col obj$}]
-   \foreach \r in {0.5, 1.0}{
-   \foreach \fl in {2.0, 8.0}{
-   \foreach \fr in {2.0, 8.0}{
+\nextgroupplot[ylabel={$\# col obj$}, ymin=5]
+   \Loop{
     \addplot+[] table[
         x={times_mean}, y={num_col_objs_mean}, x error = {times_std} , y error={num_col_objs_std}, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
-   }}} 
+   }
 %
-\nextgroupplot[ylabel={$overlap frac$}]
-   \foreach \r in {0.5, 1.0}{
-   \foreach \fl in {2.0, 8.0}{
-   \foreach \fr in {2.0, 8.0}{
+\nextgroupplot[ylabel={$overlap frac$}, ymin=0.001]
+    \Loop{
     \addplot+[] table[
         x={times_mean}, y={overlaps_frac_mean}, x error = {times_std} , y error={overlaps_frac_std}, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
-   }}}
+    }
    % \coordinate (L) at (axis description cs:1,0);
 % 
 \end{groupplot}
@@ -92,27 +132,30 @@
 \begin{axis}[%
    legend to name={legend\currfilebase},
    legend cell align=left,
-   legend columns=2,
+   legend columns=9,
    legend transposed=true,
    scale only axis, 
    width=1mm,
    hide axis,
    legend image post style={sharp plot},
    legend style={font=\vphantom{hg},draw=white!15!black,legend cell align=left, 
-                 /tikz/every even column/.append style={column sep=1ex}},
-   cycle list/Dark2,
+                 /tikz/every even column/.append style={column sep=2ex}},
+   % cycle list/Paired-12,
    ]
    % 
-   \foreach \r in {0.5, 1.0}{
-   \foreach \fl in {2.0, 8.0}{
-   \foreach \fr in {2.0, 8.0}{
+   \Loop{
          \addplot coordinates {(0,0)};
-         \addlegendentryexpanded{$r=\r,f_l=\fl,f_r=\fr$}
-   }}}
+         \pgfmathparse{int(round(\fl))} \let\intfl=\pgfmathresult
+         \pgfmathparse{int(round(\fr))} \let\intfr=\pgfmathresult
+         \ifthenelse{\intfr = 4}{%
+            \addlegendentryexpanded{$f_r=\intfr,f_l=\intfl,r=\r$}}{%
+            \addlegendentryexpanded{$f_r=\intfr$}}
+         % \addlegendentryexpanded{$r=\r,f_l=\intfl,f_r=\intfr$}
+   }
    % 
 \end{axis}
 \end{pgfinterruptboundingbox}
-\path node[anchor=south] at (current bounding box.north) {\ref{legend\currfilebase}};
-% \path let \p1=($(current bounding box.north east)-(current bounding box.south west)$) in node[anchor=center] at ($(current bounding box.south west) + (\x1/5*4,\y1*2/11)$) {\ref{legend\currfilebase}};
+% \path node[anchor=south] at ($(current bounding box.north) + (0,1)$) {\ref{legend\currfilebase}};
+\path let \p1=($(current bounding box.north east)-(current bounding box.south west)$) in node[anchor=center] at ($(current bounding box.south west) + (\x1/5*4,\y1*1/4)$) {\ref{legend\currfilebase}};
 \end{tikzpicture}
 \end{document}
