@@ -4,6 +4,7 @@ import fastpli.tools
 import fastpli.io
 
 import numpy as np
+import subprocess
 import argparse
 import datetime
 import itertools
@@ -84,6 +85,9 @@ formatter = logging.Formatter(
 mh.setFormatter(formatter)
 logger.addHandler(mh)
 logger.info("args: " + " ".join(sys.argv[1:]))
+logger.info(
+    f"git: {subprocess.check_output(['git' 'rev-parse' 'HEAD']).strip()}")
+logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
 # Fiber Model
 SIZE = args.volume

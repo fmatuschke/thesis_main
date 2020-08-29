@@ -25,7 +25,6 @@ from mpi4py import MPI
 comm = MPI.COMM_WORLD
 import multiprocessing as mp
 
-
 if __name__ == "__main__":
     # reproducability
     np.random.seed(42)
@@ -82,7 +81,9 @@ if __name__ == "__main__":
     mh.setFormatter(formatter)
     logger.addHandler(mh)
     logger.info("args: " + " ".join(sys.argv[1:]))
-    logger.info(f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD'])}")
+    logger.info(
+        f"git: {subprocess.check_output(['git' 'rev-parse' 'HEAD']).strip()}")
+    logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
     # PARAMETER
     PIXEL_PM = 1.25

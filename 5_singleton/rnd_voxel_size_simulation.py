@@ -1,5 +1,6 @@
 import numpy as np
 import multiprocessing as mp
+import subprocess
 import itertools
 import argparse
 import logging
@@ -289,6 +290,7 @@ def omega_rotations(omega, dphi=np.deg2rad(10)):
 
 if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
+    logger.info(f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD'])}")
     logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
     file_list = args.input
