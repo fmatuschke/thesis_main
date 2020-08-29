@@ -196,7 +196,7 @@ for i in tqdm(range(1, args.max_steps + 1)):
 
         if i % 100 == 0:
             if (time.time() - start_time) > 0.9 * args.time * 60 * 60:
-                with h5py.File(file_pref + '.tmp.h5', 'w') as h5f:
+                with h5py.File(f'{file_pref}.tmp.h5', 'w') as h5f:
                     solver.save_h5(h5f,
                                    script=open(os.path.abspath(__file__),
                                                'r').read())
@@ -215,9 +215,6 @@ for i in tqdm(range(1, args.max_steps + 1)):
             solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
                 solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
 
-    # if i > args.max_steps / 2 and overlap <= 0.001:
-    #     break
-
 overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
 
 logger.info(f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}")
@@ -234,3 +231,6 @@ with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
     h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
     h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
     h5f['/'].attrs['time'] = time.time() - start_time
+
+if os.path.isfile(f'{file_pref}.tmp.h5'):
+    os.remove(f'{file_pref}.tmp.h5')

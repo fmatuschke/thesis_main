@@ -74,8 +74,7 @@ def run(file):
     try:
         fbs = fastpli.io.fiber_bundles.load(file)
     except:
-        print(f"failed to open file: {file}")
-        raise ValueError("FOO")
+        raise ValueError("failed to open file")
 
     if state != "init":
         # Setup Simpli
@@ -122,9 +121,8 @@ def run(file):
 
     fbs_ = fastpli.objects.fiber_bundles.Cut(fbs, [[-30] * 3, [30] * 3])
 
-    if len(fbs_[0]) == 0:
-        print(omega, psi, r, v0, fl, fr, n, state)
-        raise ValueError("FOO")
+    if len([f for fb in fbs for f in fb]) == 0:
+        raise ValueError(f"FOO: no fibers inside cube: {file}")
 
     phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs_)
     phi_x, phi_h, incl_x, incl_h = polar_hist(phi, theta)

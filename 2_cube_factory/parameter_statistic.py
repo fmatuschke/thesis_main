@@ -214,8 +214,10 @@ def run(parameters):
 
             if i != args.max_steps:
                 solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
-                    solver.fiber_bundles,
-                    [-0.5 * np.array([SIZE] * 3), 0.5 * np.array([SIZE] * 3)])
+                    solver.fiber_bundles, [
+                        -0.5 * np.array([SIZE + 2 * radius] * 3),
+                        0.5 * np.array([SIZE + 2 * radius] * 3)
+                    ])
 
     end_time = time.time()
 
@@ -265,13 +267,12 @@ def check_file(p):
 if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
     logger.info(
-        f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}"
-    )
+        f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
     logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
     # Fiber Model
     N_REPEAT = range(5)
-    SIZE = 90  # to create a 60 micro meter cube
+    SIZE = 60  # only 60 because only needed for tissue count
     FIBER_RADII = [0.5, 1.0, 2.0, 5.0, 10]
     OBJ_MEAN_LENGTH_F = [1.0, 2.0, 4.0, 8.0]
     OBJ_MIN_RADIUS_F = [1.0, 2.0, 4.0, 8.0]
