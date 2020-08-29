@@ -265,7 +265,8 @@ def check_file(p):
 if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
     logger.info(
-        f"git: {subprocess.check_output(['git' 'rev-parse' 'HEAD']).strip()}")
+        f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}"
+    )
     logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
     # Fiber Model
