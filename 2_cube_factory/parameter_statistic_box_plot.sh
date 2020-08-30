@@ -8,4 +8,4 @@ mkdir -p output/tikz
 lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp parameter_statistic_box_plot.tex
 lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp parameter_statistic_box_plot.tex
 mv output/tmp/parameter_statistic_box_plot.pdf output/tikz/parameter_statistic_box_plot.pdf
-xdg-open output/tikz/parameter_statistic_box_plot.pdf &>/dev/null 2>&1
+open output/tikz/parameter_statistic_box_plot.pdf &>/dev/null 2>&1
