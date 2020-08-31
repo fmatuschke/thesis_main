@@ -1,4 +1,4 @@
-\documentclass[tikz,varwidth=30cm, multi=page]{standalone}
+\documentclass[tikz]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
 \usepackage{pgfplots}
@@ -17,29 +17,27 @@
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
 % 
-\def\datapath{output/parameter_statistic_0/time_evolve}
-% 
-\def\height{22.37076cm}
 \def\width{13.87303cm}
+\def\height{22.37076cm}
+\def\datapath{output/parameter_statistic_1/time_evolve}
+% 
 % 
 \begin{document}
 % 
 \pgfplotsset{every axis plot post/.append style={%
    only marks, mark=*,
-   mark size=0.15pt, %mean value marker
+   mark size=0.3pt, %mean value marker
    error bars/.cd,
-   error bar style={line width=0.2pt}, % thickness line top to bottom
-   error mark options={rotate=90,mark size=0.5pt, line width=0.2pt}, % top and bottom (line) marker
+   error bar style={line width=0.4pt}, % thickness line top to bottom
+   error mark options={rotate=90,mark size=0.8pt, line width=0.4pt}, % top and bottom (line) marker
    y dir=both, y explicit,
    },
    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
    }
-% 
-
 %
 \pgfplotsset{colormap/Blues-4}
 \pgfplotsset{colormap/Greens-4}
-\pgfplotsset{colormap/Oranges-4}
+\pgfplotsset{colormap/RdPu-4}
 \pgfplotsset{colormap/Purples-4}
 \pgfplotsset{colormap/Reds-4}
 \pgfplotsset{colormap/Greys-4}
@@ -50,8 +48,8 @@ cycle multiindex* list={
    index of colormap={3 of Blues-4},
    index of colormap={1 of Greens-4},index of colormap={2 of Greens-4},
    index of colormap={3 of Greens-4},
-   index of colormap={1 of Oranges-4},index of colormap={2 of Oranges-4},
-   index of colormap={3 of Oranges-4},
+   index of colormap={1 of RdPu-4},index of colormap={2 of RdPu-4},
+   index of colormap={3 of RdPu-4},
    index of colormap={1 of Purples-4},index of colormap={2 of Purples-4},
    index of colormap={3 of Purples-4},
    index of colormap={1 of Reds-4},index of colormap={2 of Reds-4},
@@ -66,7 +64,7 @@ cycle multiindex* list={
    \foreach \fl in {2.0, 8.0}{
    \foreach \fr in {2.0,4.0,8.0}{#1}}}} % 1.0 und 2.0 nicht unterscheidbar
 % 
-\begin{tikzpicture}[]
+\begin{tikzpicture}
 \begin{groupplot}[%
   group style={
       group size=1 by 3,
@@ -101,14 +99,14 @@ cycle multiindex* list={
         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
    }
 % 
-\nextgroupplot[ylabel={$\# col obj$}, ymin=5]
+\nextgroupplot[ylabel={$\# col obj$}, ymin=0.01]
    \Loop{
     \addplot+[] table[
         x={times_mean}, y={num_col_objs_mean}, x error = {times_std} , y error={num_col_objs_std}, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
    }
 %
-\nextgroupplot[ylabel={$overlap frac$}, ymin=0.003]
+\nextgroupplot[ylabel={$overlap frac$}, ymin=0.0005]
     \Loop{
     \addplot+[] table[
         x={times_mean}, y={overlaps_frac_mean}, x error = {times_std} , y error={overlaps_frac_std}, col sep=comma,]

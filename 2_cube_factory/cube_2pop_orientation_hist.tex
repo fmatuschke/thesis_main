@@ -1,4 +1,4 @@
-\documentclass[tikz, multi=page]{standalone}
+\documentclass[tikz]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
 \usepackage{tikz}
@@ -16,8 +16,8 @@
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
 % 
-\def\height{22.37076cm} %22.37076cm/5
-\def\width{13.87303cm} %13.87303cm,
+\def\width{13.87303cm}
+\def\height{22.37076cm}
 % 
 \def\delta{3.5}
 % 
@@ -26,7 +26,6 @@
 % \foreach \omegavalues/\psivalues [count=\pp] in {{60.0}/{0.6}}{
 % \foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9}}{
 \foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9},{0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
-\begin{page}
 \begin{tikzpicture}
 % 
 \pgfplotsset{every tick label/.append style={font=\footnotesize}}
@@ -134,9 +133,8 @@
 \end{axis}
 \end{pgfinterruptboundingbox}
 \path let \p1 = (current bounding box.north), \p2=(bbl.north) in node[anchor=north, scale=0.75, yshift=1ex] at (\x2, \y1) {\ref{legend\pp}};
-\path[use as bounding box] let \p1 = (current bounding box.north), \p2 = (A) in ($(\x2,\y1)-(0.25,0)$) -- ($(B)+(0.25,0)$);
+\path[use as bounding box] let \p1 = (current bounding box.north), \p2 = (A) in ($(\x2,\y1)-(0.35,0)$) -- ($(B)+(0.35,0)$);
 \end{tikzpicture}
-\end{page}
 }
 % 
 \end{document}

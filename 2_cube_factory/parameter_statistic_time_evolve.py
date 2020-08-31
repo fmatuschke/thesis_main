@@ -135,6 +135,27 @@ def run_mean_std(parameter):
                     df_ = pd.concat([df_, df__], ignore_index=True, axis=1)
                 df_.columns = names
 
+                # numbers = list(set([int(2**(i / 10.0)) for i in range(100)]))
+
+                if len(df_) > 100:
+                    numbers = np.logspace(0,
+                                          np.log2(len(df_) - 1),
+                                          100,
+                                          base=2,
+                                          endpoint=True,
+                                          dtype=int)
+                    numbers = sorted(list(set(list(numbers) + list(range(10)))))
+                else:
+                    numbers = list(range(len(df_)))
+                # print(numbers, len(df_))
+
+                # print(type(numbers))
+                # print(numbers)
+                # print(np.array(numbers) < len(df_))
+
+                # numbers = numbers[np.array(numbers) < len(df_)]
+                # print(numbers)
+
                 df__ = pd.DataFrame()
                 for name in [
                         "steps", "times", "overlaps", "num_objs",
@@ -144,8 +165,8 @@ def run_mean_std(parameter):
                     for n in df.n.unique():
                         df_tmp[f"{name}_{n}"] = df_[f"{name}_{n}"]
 
-                    df__[f"{name}_mean"] = df_tmp.T.mean(axis=0)
-                    df__[f"{name}_std"] = df_tmp.T.std(axis=0)
+                    df__[f"{name}_mean"] = df_tmp.T.mean(axis=0)[numbers]
+                    df__[f"{name}_std"] = df_tmp.T.std(axis=0)[numbers]
 
                 df__.to_csv(
                     os.path.join(
