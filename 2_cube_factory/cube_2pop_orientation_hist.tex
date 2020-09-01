@@ -22,6 +22,7 @@
 \def\delta{3.5}
 % 
 \begin{document}
+\pgfplotsset{colormap/Set1}
 % 
 % \foreach \omegavalues/\psivalues [count=\pp] in {{60.0}/{0.6}}{
 % \foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9}}{
@@ -43,7 +44,9 @@
       xtick={-90,-45,0,45,90},
       xticklabels={,\hphantom{-}45,0,-45,},
       ytick=\empty,
-      cycle multiindex* list={Paired-10 \nextlist
+      cycle multiindex* list={index of colormap={2 of Set1},index of colormap={2 of Set1},
+                              index of colormap={1 of Set1},index of colormap={1 of Set1},
+                              index of colormap={0 of Set1},index of colormap={0 of Set1} \nextlist
                               {dashed, dash phase=0pt}, solid,
                               {dashed, dash phase=2pt}, solid,
                               {dashed, dash phase=4pt}, solid\nextlist},
@@ -71,10 +74,12 @@
       xtick={90,135,180,225,270},
       xticklabels={,\hphantom{-}45,0,-45,},
       ytick=\empty,
-      cycle multiindex* list={Paired-10 \nextlist
+      cycle multiindex* list={index of colormap={2 of Set1},index of colormap={2 of Set1},
+                              index of colormap={1 of Set1},index of colormap={1 of Set1},
+                              index of colormap={0 of Set1},index of colormap={0 of Set1} \nextlist
                               {dashed, dash phase=0pt}, solid,
-                              {dashed, dash phase=1pt}, solid,
-                              {dashed, dash phase=2pt}, solid\nextlist},
+                              {dashed, dash phase=2pt}, solid,
+                              {dashed, dash phase=4pt}, solid\nextlist},
       clip=false,
    ]
    \foreach \radius in {0.50,1.00,2.00} {
@@ -120,8 +125,10 @@
    legend image post style={sharp plot},
    legend style={font=\vphantom{hg},draw=white!15!black,legend cell align=left, 
                  /tikz/every even column/.append style={column sep=1ex}},
-   cycle multiindex* list={Paired-10 \nextlist
-                           {dashed}, solid\nextlist},
+   cycle multiindex* list={index of colormap={2 of Set1},index of colormap={2 of Set1},
+                           index of colormap={1 of Set1},index of colormap={1 of Set1},
+                           index of colormap={0 of Set1},index of colormap={0 of Set1} \nextlist
+                           dashed, solid\nextlist},
    ]
    % 
    \foreach \radius in {0.50,1.00,2.00}{
