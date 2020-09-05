@@ -9,10 +9,10 @@ FLAG.install=--system-site-packages
 FLAG.install-sc=--system-site-packages
 
 .PHONY: install
-install: env env-update requirements git-submodules clean-fastpli fastpli
+install: env env-update requirements git-submodules-update clean-fastpli fastpli
 
 .PHONY: install-sc
-install-sc: clean env-sc env-update requirements-sc git-submodules clean-fastpli fastpli
+install-sc: clean env-sc env-update requirements-sc git-submodules-update clean-fastpli fastpli
 
 .PHONY: env
 env:
@@ -36,12 +36,12 @@ requirements-sc:
 	$(PIP) install -r requirements-sc.txt -q
 	$(PIP) install 0_core/. -q	
 
-.PHONY: git-submodules
-git-submodules:
+.PHONY: git-submodules-update
+git-submodules-update:
 	git submodule update --init --recursive
 
-.PHONY: git-submodules-pull
-git-submodules-pull:
+.PHONY: git-submodules
+git-submodules:
 	cd fastpli
 	git checkout development
 	git pull
