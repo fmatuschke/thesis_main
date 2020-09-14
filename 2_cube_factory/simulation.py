@@ -29,12 +29,6 @@ if __name__ == "__main__":
     # reproducability
     np.random.seed(42)
 
-    # path
-    FILE_NAME = os.path.abspath(__file__)
-    FILE_PATH = os.path.dirname(FILE_NAME)
-    FILE_BASE = os.path.basename(FILE_NAME)
-    FILE_NAME = os.path.splitext(FILE_BASE)[0]
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-o",
                         "--output",
@@ -65,26 +59,23 @@ if __name__ == "__main__":
 
     mp_pool = mp.Pool(args.threads)
 
-    # logger
-    logger = logging.getLogger("rank[%i]" % comm.rank)
-    logger.setLevel(logging.DEBUG)
-    log_file = os.path.join(args.output, "simulation.log")
-
-    if os.path.isfile(log_file):
-        print("Log file already exists")
-        sys.exit(1)
-
-    mh = helper.mpi.FileHandler(log_file,
-                                mode=MPI.MODE_WRONLY | MPI.MODE_CREATE)
-    formatter = logging.Formatter(
-        '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
-    mh.setFormatter(formatter)
-    logger.addHandler(mh)
-    logger.info("args: " + " ".join(sys.argv[1:]))
-    logger.info(
-        f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}"
-    )
-    logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
+    # # logger
+    # logger = logging.getLogger("rank[%i]" % comm.rank)
+    # logger.setLevel(logging.DEBUG)
+    # log_file = os.path.join(
+    #     args.output, f'simulation_{args.voxel_size}_{comm.Get_size()}.log')
+    # mh = helper.mpi.FileHandler(
+    #     log_file,
+    #     mode=MPI.MODE_WRONLY | MPI.MODE_CREATE  #| MPI.MODE_APPEND
+    # )
+    # formatter = logging.Formatter(
+    #     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
+    # mh.setFormatter(formatter)
+    # logger.addHandler(mh)
+    # logger.info("args: " + " ".join(sys.argv[1:]))
+    # logger.info(
+    #     f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
+    # logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
     # PARAMETER
     PIXEL_PM = 1.25
@@ -106,16 +97,16 @@ if __name__ == "__main__":
     if comm.Get_rank() == 0:
         print(f"Single Memory: {simpli.memory_usage():.0f} MB")
         print(f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
-    logger.info(f"Single Memory: {simpli.memory_usage():.0f} MB")
-    logger.info(
-        f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
+    # logger.info(f"Single Memory: {simpli.memory_usage():.0f} MB")
+    # logger.info(
+    #     f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
     del simpli
 
     # simulation loop
     parameter = []
     fiber_inc = [(f, i) for f in file_list for i in fibers.inclinations()]
     for file, f0_inc in fiber_inc:
-        logger.info(f"input file: {file}")
+        # logger.info(f"input file: {file}")
 
         with h5py.File(file, 'r') as h5f:
             omega = h5f['/'].attrs["omega"]
@@ -131,18 +122,18 @@ if __name__ == "__main__":
         file_name += f'_inc_{f0_inc:.2f}'
         file_name += f'_rot_{f1_rot:.2f}'
         file_name = os.path.join(args.output, file_name)
-        logger.info(f"input file: {file}")
-        logger.info(f"output file: {file_name}")
+        # logger.info(f"input file: {file}")
+        # logger.info(f"output file: {file_name}")
 
         with h5py.File(file, 'r') as h5f:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
             psi = h5f['/'].attrs["psi"]
             omega = h5f['/'].attrs["omega"]
 
-        logger.info(f"omega: {omega}")
-        logger.info(f"psi: {psi}")
-        logger.info(f"inclination : {f0_inc}")
-        logger.info(f"rotation : {f1_rot}")
+        # logger.info(f"omega: {omega}")
+        # logger.info(f"psi: {psi}")
+        # logger.info(f"inclination : {f0_inc}")
+        # logger.info(f"rotation : {f1_rot}")
 
         rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
         rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
@@ -167,7 +158,7 @@ if __name__ == "__main__":
                     simpli.voxel_size = args.voxel_size
                     simpli.pixel_size = res
                     simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
-                    simpli.interpolate = True
+                    simpli.interpolate = "Slerp"
                     simpli.wavelength = 525  # in nm
                     simpli.optical_sigma = 0.71  # in pixel size
                     simpli.verbose = 0
@@ -185,7 +176,7 @@ if __name__ == "__main__":
                                                         (1.0, dn, 1, model)]
                                                       ] * len(fiber_bundles)
 
-                    logger.info(f"tissue_pipeline: model:{model}")
+                    # logger.info(f"tissue_pipeline: model:{model}")
 
                     save = ['optic', 'epa', 'rofl']
                     #                     save += ['tissue'] if m == 0 and name == 'LAP' else []
@@ -198,7 +189,7 @@ if __name__ == "__main__":
                         (unique_elements, counts_elements))
 
                     # Simulate PLI Measurement
-                    logger.info(f"simulation_pipeline: model:{model}")
+                    # logger.info(f"simulation_pipeline: model:{model}")
                     # FIXME: LAP sigma ist bei einem pixel sinnfrei -> 20µm
 
                     simpli.light_intensity = intensity  # a.u.
