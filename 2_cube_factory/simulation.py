@@ -15,7 +15,7 @@ import fastpli.objects
 import fastpli.tools
 import fastpli.io
 
-from tqdm import tqdm
+import tqdm
 
 # from simulation_repeat import run_simulation_pipeline_n
 import helper.mpi
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         for f1_rot in fibers.omega_rotations(omega):
             parameter.append((file, f0_inc, f1_rot))
 
-    for file, f0_inc, f1_rot in tqdm(
+    for file, f0_inc, f1_rot in tqdm.tqdm(
             parameter[comm.Get_rank()::comm.Get_size()]):
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
@@ -129,6 +129,8 @@ if __name__ == "__main__":
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
             psi = h5f['/'].attrs["psi"]
             omega = h5f['/'].attrs["omega"]
+            # radius = h5f['/'].attrs["r"]  # FIXME: change
+            # v0 = h5f['/'].attrs["v0"]  # FIXME: change
 
         # logger.info(f"omega: {omega}")
         # logger.info(f"psi: {psi}")
@@ -218,6 +220,7 @@ if __name__ == "__main__":
 
                     dset.attrs['parameter/psi'] = psi
                     dset.attrs['parameter/omega'] = omega
+                    dset.attrs['parameter/fiber_path'] = file
                     dset.attrs['parameter/v'] = LENGTH
                     dset.attrs['parameter/f0_inc'] = f0_inc
                     dset.attrs['parameter/f1_rot'] = f1_rot

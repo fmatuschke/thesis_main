@@ -7,7 +7,7 @@ import subprocess
 import itertools
 
 import pandas as pd
-from tqdm import tqdm
+import tqdm
 
 import fastpli.tools
 import helper.spherical_interpolation
@@ -150,106 +150,111 @@ def tikz_sphere(x,
 
 if __name__ == "__main__":
 
-    sim_path = "output/1_rnd_seed/simulation/*.h5"
-    ana_file = "output/1_rnd_seed/analysis/"
-    out_path = "output/1_rnd_seed/images/spheres/"
+    sim_path = "output/simulation_2"
+    # ana_file = "output/1_rnd_seed/analysis/"
+    # out_path = "output/1_rnd_seed/images/spheres/"
 
-    os.makedirs(out_path, exist_ok=True)
+    os.makedirs(os.path.join(sim_path, "images"), exist_ok=True)
 
-    for i, (microscope, model) in enumerate(
-            list(itertools.product(["PM", "LAP"], ["r", "p"]))):
+    df = pd.read_pickle(
+        os.path.join(sim_path, "analysis", f"cube_2pop_simulation.pkl"))
+    df_acc = pd.read_pickle(
+        os.path.join(sim_path, "analysis",
+                     f"cube_2pop_simulation_schilling.pkl"))
 
-        df = pd.read_pickle(
-            os.path.join(
-                ana_file,
-                f"cube_2pop_simulation_{microscope}_model_{model}_.pkl"))
+    with tqdm.tqdm(total=len(df.psi.unique()) * len(df.f0_inc.unique()) *
+                   len(df.microscope.unique()) * len(df.model.unique()),
+                   leave=False) as pbar:
 
-        df_acc = pd.read_pickle(
-            os.path.join(
-                ana_file,
-                f"cube_2pop_simulation_{microscope}_model_{model}_schilling.pkl"
-            ))
+        for microscope in df.microscope.unique():
+            for model in df.model.unique():
+                for psi in df.psi.unique():
+                    for f0_inc in df.f0_inc.unique():
 
-        with tqdm(total=len(df.psi.unique()) * len(df.f0_inc.unique()) * 4,
-                  initial=i * len(df.psi.unique()) * len(df.f0_inc.unique()),
-                  leave=False) as pbar:
-            for psi in df.psi.unique():
-                for f0_inc in df.f0_inc.unique():
+                        file_name = f"sphere_{microscope}_model_{model}_psi_{psi:.2f}_f0_inc_{f0_inc:.2f}"
 
-                    file_name = f"sphere_{microscope}_model_{model}_psi_{psi:.2f}_f0_inc_{f0_inc:.2f}"
-                    # if os.path.isfile(f"{os.path.join(out_path,file_name)}.pdf"):
-                    #     continue
+                        sub = (df_acc.microscope
+                               == microscope) & (df_acc.model == model) & (
+                                   df_acc.f0_inc == f0_inc) & (df_acc.f0_inc
+                                                               == f0_inc)
 
-                    sub = (df_acc.psi == psi) & (df_acc.f0_inc == f0_inc)
-                    f1_rot = df_acc[sub].f1_rot.to_numpy(float)
-                    omega = df_acc[sub].omega.to_numpy(float)
-                    data = df_acc[sub].acc.to_numpy(float)
+                        # print(df_acc[sub])
+                        # if len(df_acc[sub]) != 1:
+                        #     print("FOOO")
+                        #     exit(1)
 
-                    # get points on sphere
-                    phi = []
-                    theta = []
-                    for f1, om in zip(f1_rot, omega):
-                        v = np.array(
-                            [np.cos(np.deg2rad(om)),
-                             np.sin(np.deg2rad(om)), 0])
-                        rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
-                        rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1))
-                        rot = np.dot(rot_inc, rot_phi)
-                        v = np.dot(rot, v)
-                        theta.extend([np.arccos(v[2])])
-                        phi.extend([np.arctan2(v[1], v[0])])
+                        f1_rot = df_acc[sub].f1_rot.to_numpy(float)
+                        omega = df_acc[sub].omega.to_numpy(float)
+                        data = df_acc[sub].acc.to_numpy(float)
 
-                    phi_ = phi.copy()
-                    theta_ = theta.copy()
-                    data_ = data.copy()
+                        # get points on sphere
+                        phi = []
+                        theta = []
+                        for f1, om in zip(f1_rot, omega):
+                            v = np.array([
+                                np.cos(np.deg2rad(om)),
+                                np.sin(np.deg2rad(om)), 0
+                            ])
+                            rot_inc = fastpli.tools.rotation.y(
+                                -np.deg2rad(f0_inc))
+                            rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1))
+                            rot = np.dot(rot_inc, rot_phi)
+                            v = np.dot(rot, v)
+                            theta.extend([np.arccos(v[2])])
+                            phi.extend([np.arctan2(v[1], v[0])])
 
-                    # apply symmetries
-                    phi = np.array(phi)
-                    theta = np.array(theta)
+                        phi_ = phi.copy()
+                        theta_ = theta.copy()
+                        data_ = data.copy()
 
-                    phi = np.concatenate((phi, -phi), axis=0)
-                    theta = np.concatenate((theta, theta), axis=0)
-                    data = np.concatenate((data, data), axis=0)
+                        # apply symmetries
+                        phi = np.array(phi)
+                        theta = np.array(theta)
 
-                    phi = np.concatenate((phi, phi), axis=0)
-                    theta = np.concatenate((theta, np.pi + theta), axis=0)
-                    data = np.concatenate((data, data), axis=0)
+                        phi = np.concatenate((phi, -phi), axis=0)
+                        theta = np.concatenate((theta, theta), axis=0)
+                        data = np.concatenate((data, data), axis=0)
 
-                    # rm multiple
-                    phi, theta = helper.spherical_interpolation.remap_sph_angles(
-                        phi, theta)
-                    tmp = np.concatenate(
-                        (np.atleast_2d(phi), np.atleast_2d(theta),
-                         np.atleast_2d(data)),
-                        axis=0)
-                    tmp = np.unique(tmp, axis=1)
-                    phi, theta, data = tmp[0, :], tmp[1, :], tmp[2, :]
+                        phi = np.concatenate((phi, phi), axis=0)
+                        theta = np.concatenate((theta, np.pi + theta), axis=0)
+                        data = np.concatenate((data, data), axis=0)
 
-                    # interplate mesh on sphere
-                    x, y, z, data_i = helper.spherical_interpolation.on_mesh(
-                        phi, theta, data, 40, 40)
+                        # rm multiple
+                        phi, theta = helper.spherical_interpolation.remap_sph_angles(
+                            phi, theta)
+                        tmp = np.concatenate(
+                            (np.atleast_2d(phi), np.atleast_2d(theta),
+                             np.atleast_2d(data)),
+                            axis=0)
+                        tmp = np.unique(tmp, axis=1)
+                        phi, theta, data = tmp[0, :], tmp[1, :], tmp[2, :]
 
-                    r = 1
-                    x2 = np.multiply(np.cos(phi_), np.sin(theta_)) * r
-                    y2 = np.multiply(np.sin(phi_), np.sin(theta_)) * r
-                    z2 = np.cos(theta_) * r
+                        # interplate mesh on sphere
+                        x, y, z, data_i = helper.spherical_interpolation.on_mesh(
+                            phi, theta, data, 40, 40)
 
-                    tikz_sphere(x,
-                                y,
-                                z,
-                                data_i,
-                                f"{os.path.join(out_path,file_name)}.tikz",
-                                x2,
-                                y2,
-                                z2,
-                                data_,
-                                path_to_data="\\currfiledir",
-                                standalone=False)
+                        r = 1
+                        x2 = np.multiply(np.cos(phi_), np.sin(theta_)) * r
+                        y2 = np.multiply(np.sin(phi_), np.sin(theta_)) * r
+                        z2 = np.cos(theta_) * r
 
-                    # subprocess.run(
-                    #     f"cd {out_path} && pdflatex -interaction=nonstopmode {file_name}.tikz && rm {file_name}.aux {file_name}.log",
-                    #     shell=True,
-                    #     stdout=subprocess.DEVNULL,
-                    #     check=True)
+                        tikz_sphere(
+                            x,
+                            y,
+                            z,
+                            data_i,
+                            f"{os.path.join(sim_path,'images',file_name)}.tikz",
+                            x2,
+                            y2,
+                            z2,
+                            data_,
+                            path_to_data="\\currfiledir",
+                            standalone=False)
 
-                    pbar.update()
+                        # subprocess.run(
+                        #     f"cd {out_path} && pdflatex -interaction=nonstopmode {file_name}.tikz && rm {file_name}.aux {file_name}.log",
+                        #     shell=True,
+                        #     stdout=subprocess.DEVNULL,
+                        #     check=True)
+
+                        pbar.update()

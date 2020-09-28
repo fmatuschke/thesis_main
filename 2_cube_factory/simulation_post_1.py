@@ -1,83 +1,104 @@
 import numpy as np
+import multiprocessing as mp
 import itertools
+import argparse
 import os
 
 import pandas as pd
-from tqdm import tqdm
+import tqdm
 
-from mpi4py import MPI
-comm = MPI.COMM_WORLD
+import fastpli.io
+import fastpli.analysis
 
 import helper.spherical_harmonics
 import helper.schilling
+import fibers
 
-sim_path = "output/simulation/*.h5"
-out_file = "output/analysis/"
+# arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("-i",
+                    "--input",
+                    type=str,
+                    required=True,
+                    help="input path.")
+parser.add_argument("-p",
+                    "--num_proc",
+                    default=1,
+                    type=int,
+                    help="Number of processes.")
+args = parser.parse_args()
 
-for microscope, model in list(itertools.product(
-    ["PM", "LAP"], ["r", "p"]))[comm.Get_rank()::comm.Get_size()]:
 
-    if os.path.isfile(
-            os.path.join(
-                out_file,
-                f"cube_2pop_simulation_{microscope}_model_{model}_schilling.pkl"
-            )):
-        continue
+def run(parameter):
+    # rofl
+    psi, omega, f0_inc, f1_rot, microscope, model = parameter
+    sub = (df.psi == psi) & (df.omega == omega) & (df.f0_inc == f0_inc) & (
+        df.f1_rot == f1_rot) & (df.microscope == microscope) & (df.model
+                                                                == model)
 
+    if len(df[sub]) != 1:
+        print("FOOO")
+        exit(1)
+
+    phi = df[sub].explode("rofl_dir").rofl_dir.to_numpy(dtype=float)
+    theta = np.pi / 2 - df[sub].explode("rofl_inc").rofl_inc.to_numpy(
+        dtype=float)
+    sh0 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
+
+    # ground truth
+    sub = (df_org.psi == psi) & (df_org.omega == omega)
+    phi, theta = fibers.ori_from_file(df_org[sub].fiber.iloc[0], f0_inc, f1_rot)
+    sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
+
+    # ACC
+    acc = helper.schilling.angular_correlation_coefficient(sh0, sh1)
+
+    return pd.DataFrame(
+        {
+            'microscope': microscope,
+            'model': model,
+            'f0_inc': f0_inc,
+            'f1_rot': f1_rot,
+            'omega': omega,
+            'psi': psi,
+            'acc': acc
+        },
+        index=[0])
+
+
+if __name__ == "__main__":
+    # with mp.Pool(processes=args.num_proc) as pool:
     df = pd.read_pickle(
-        os.path.join(out_file,
-                     f"cube_2pop_simulation_{microscope}_model_{model}_.pkl"))
+        os.path.join(args.input, "analysis", f"cube_2pop_simulation.pkl"))
 
-    df_acc = []
-    with tqdm(total=len(df[['psi', 'omega', 'f0_inc', 'f1_rot'
-                           ]].drop_duplicates().index)) as pbar:
-        for psi in df.psi.unique():
-            for omega in df[df.psi == psi].omega.unique():
-                df_sub = df[(df.psi == psi) & (df.omega == omega)]
-                df_org = pd.read_pickle(
-                    f"output/models/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_.solved.pkl"
-                )
-                for f0_inc in df_sub.f0_inc.unique():
-                    for f1_rot in df_sub[df_sub.f0_inc ==
-                                         f0_inc].f1_rot.unique():
+    df_org = pd.read_pickle(
+        f"output/cube_2pop_1/cube_2pop.pkl")  # TODO: same number as simulation
 
-                        # rofl
-                        sub = (df_sub.f0_inc == f0_inc) & (df_sub.f1_rot
-                                                           == f1_rot)
-                        phi = df_sub[sub].explode("rofl_dir").rofl_dir.to_numpy(
-                            dtype=float)
-                        theta = np.pi / 2 - df_sub[sub].explode(
-                            "rofl_inc").rofl_inc.to_numpy(dtype=float)
-                        sh0 = helper.spherical_harmonics.real_spherical_harmonics(
-                            phi, theta, 6)
+    df_org = df_org[df_org.r == df.r.unique()[0]]
+    df_org = df_org[df_org.state != "init"]
+    if len(df_org) == 0:
+        print("FOOO")
+        exit(1)
 
-                        # ground truth
-                        sub = (df_org.f0_inc == f0_inc) & (df_org.f1_rot
-                                                           == f1_rot)
-                        phi = df_org[sub].phi.explode().to_numpy(float)
-                        theta = df_org[sub].theta.explode().to_numpy(float)
-                        sh1 = helper.spherical_harmonics.real_spherical_harmonics(
-                            phi, theta, 6)
+    parameters = []
+    for microscope in df.microscope.unique():
+        for model in df.model.unique():
+            for psi in df.psi.unique():
+                for omega in df[df.psi == psi].omega.unique():
+                    df_sub = df[(df.psi == psi) & (df.omega == omega)]
+                    for f0_inc in df_sub.f0_inc.unique():
+                        for f1_rot in df_sub[df_sub.f0_inc ==
+                                             f0_inc].f1_rot.unique():
+                            parameters.append(
+                                (psi, omega, f0_inc, f1_rot, microscope, model))
 
-                        # ACC
-                        acc = helper.schilling.angular_correlation_coefficient(
-                            sh0, sh1)
-
-                        df_acc.append(
-                            pd.DataFrame(
-                                {
-                                    'f0_inc': f0_inc,
-                                    'f1_rot': f1_rot,
-                                    'omega': omega,
-                                    'psi': psi,
-                                    'acc': acc
-                                },
-                                index=[0]))
-
-                        pbar.update()
-
-    df_acc = pd.concat(df_acc, ignore_index=True)
-    df_acc.to_pickle(
-        os.path.join(
-            out_file,
-            f"cube_2pop_simulation_{microscope}_model_{model}_schilling.pkl"))
+    with mp.Pool(processes=args.num_proc) as pool:
+        df = [
+            d for d in tqdm.tqdm(pool.imap_unordered(run, parameters),
+                                 total=len(parameters),
+                                 smoothing=0.02)
+        ]
+    df = pd.concat(df, ignore_index=True)
+    df.to_pickle(
+        os.path.join(args.input, "analysis",
+                     "cube_2pop_simulation_schilling.pkl"))

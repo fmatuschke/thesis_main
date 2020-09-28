@@ -7,14 +7,17 @@ import fastpli.io
 
 
 def inclinations(n=10):
-    return np.linspace(0, np.pi / 2, n, True)
+    return np.linspace(0, 90, n, True)
 
 
 def omega_rotations(omega, dphi=np.deg2rad(10)):
 
     rot = []
 
-    n_rot = int(np.round(np.sqrt((1 - np.cos(2 * omega)) / (1 - np.cos(dphi)))))
+    n_rot = int(
+        np.round(
+            np.sqrt((1 - np.cos(2 * np.deg2rad(omega))) /
+                    (1 - np.cos(np.deg2rad(dphi))))))
     if n_rot == 0:
         rot.append(0)
     else:
@@ -36,7 +39,7 @@ def rotate(fbs, f0_inc, f1_rot):
     return fbs
 
 
-def ori_from_fbs(fbs, omega, f0_inc=0, f1_rot=0, cut=None):
+def ori_from_fbs(fbs, f0_inc=0, f1_rot=0, cut=None):
     fbs = rotate(fbs, f0_inc, f1_rot)
     if cut:
         if isinstance(cut, (int, float)):
@@ -47,6 +50,4 @@ def ori_from_fbs(fbs, omega, f0_inc=0, f1_rot=0, cut=None):
 
 def ori_from_file(file, f0_inc, f1_rot, cut=None):
     fbs = fastpli.io.fiber_bundles.load(file)
-    with h5py.File(file, "r") as h5f:
-        omega = h5f['/'].attrs['omega']
-    return ori_from_fbs(fbs, omega, f0_inc, f1_rot, cut)
+    return ori_from_fbs(fbs, f0_inc, f1_rot, cut)
