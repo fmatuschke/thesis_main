@@ -148,7 +148,7 @@ if __name__ == "__main__":
                     # Setup Simpli
                     simpli = fastpli.simulation.Simpli()
                     warnings.filterwarnings("ignore", message="objects overlap")
-                    simpli.omp_num_threads = args.threads
+                    simpli.omp_num_threads = 1
                     simpli.voxel_size = args.voxel_size
                     simpli.pixel_size = res
                     simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
