@@ -10,7 +10,7 @@ def inclinations(n=10):
     return np.linspace(0, 90, n, True)
 
 
-def omega_rotations(omega, dphi=np.deg2rad(10)):
+def omega_rotations(omega, dphi=10):
 
     rot = []
 

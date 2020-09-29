@@ -25,64 +25,56 @@ from mpi4py import MPI
 comm = MPI.COMM_WORLD
 import multiprocessing as mp
 
+# reproducability
+np.random.seed(42)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-o",
+                    "--output",
+                    type=str,
+                    required=True,
+                    help="Output path.")
+
+parser.add_argument("-i",
+                    "--input",
+                    nargs='+',
+                    required=True,
+                    help="input string.")
+
+parser.add_argument("-v",
+                    "--voxel_size",
+                    type=float,
+                    required=True,
+                    help="voxel_size in um.")
+
+args = parser.parse_args()
+os.makedirs(args.output, exist_ok=True)
+
+# logger
+logger = logging.getLogger("rank[%i]" % comm.rank)
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler(
+    os.path.join(
+        args.output,
+        f'simulation_{args.voxel_size}_{comm.Get_size()}_{comm.Get_rank()}.log')
+)
+formatter = logging.Formatter(
+    '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+logger.info("args: " + " ".join(sys.argv[1:]))
+logger.info(
+    f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
+logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
+
 if __name__ == "__main__":
-    # reproducability
-    np.random.seed(42)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-o",
-                        "--output",
-                        type=str,
-                        required=True,
-                        help="Output path.")
-
-    parser.add_argument("-i",
-                        "--input",
-                        nargs='+',
-                        required=True,
-                        help="input string.")
-
-    parser.add_argument("-v",
-                        "--voxel_size",
-                        type=float,
-                        required=True,
-                        help="voxel_size in um.")
-
-    parser.add_argument("-t",
-                        "--threads",
-                        type=int,
-                        required=True,
-                        help="number of threads")
-
-    args = parser.parse_args()
-    os.makedirs(args.output, exist_ok=True)
-
-    mp_pool = mp.Pool(args.threads)
-
-    # # logger
-    # logger = logging.getLogger("rank[%i]" % comm.rank)
-    # logger.setLevel(logging.DEBUG)
-    # log_file = os.path.join(
-    #     args.output, f'simulation_{args.voxel_size}_{comm.Get_size()}.log')
-    # mh = helper.mpi.FileHandler(
-    #     log_file,
-    #     mode=MPI.MODE_WRONLY | MPI.MODE_CREATE  #| MPI.MODE_APPEND
-    # )
-    # formatter = logging.Formatter(
-    #     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
-    # mh.setFormatter(formatter)
-    # logger.addHandler(mh)
-    # logger.info("args: " + " ".join(sys.argv[1:]))
-    # logger.info(
-    #     f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
-    # logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
     # PARAMETER
     PIXEL_PM = 1.25
     PIXEL_LAP = 20
     LENGTH = 60
     THICKNESS = 60
-    # FIBER_INCLINATION = np.linspace(0, 90, 10, True)
 
     file_list = args.input
     # print Memory
@@ -97,9 +89,9 @@ if __name__ == "__main__":
     if comm.Get_rank() == 0:
         print(f"Single Memory: {simpli.memory_usage():.0f} MB")
         print(f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
-    # logger.info(f"Single Memory: {simpli.memory_usage():.0f} MB")
-    # logger.info(
-    #     f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
+    logger.info(f"Single Memory: {simpli.memory_usage():.0f} MB")
+    logger.info(
+        f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
     del simpli
 
     # simulation loop
@@ -111,7 +103,7 @@ if __name__ == "__main__":
         with h5py.File(file, 'r') as h5f:
             omega = h5f['/'].attrs["omega"]
 
-        for f1_rot in fibers.omega_rotations(omega):
+        for f1_rot in fibers.omega_rotations(omega, 10):
             parameter.append((file, f0_inc, f1_rot))
 
     for file, f0_inc, f1_rot in tqdm.tqdm(
@@ -122,8 +114,8 @@ if __name__ == "__main__":
         file_name += f'_inc_{f0_inc:.2f}'
         file_name += f'_rot_{f1_rot:.2f}'
         file_name = os.path.join(args.output, file_name)
-        # logger.info(f"input file: {file}")
-        # logger.info(f"output file: {file_name}")
+        logger.info(f"input file: {file}")
+        logger.info(f"output file: {file_name}")
 
         with h5py.File(file, 'r') as h5f:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
@@ -132,10 +124,10 @@ if __name__ == "__main__":
             # radius = h5f['/'].attrs["r"]  # FIXME: change
             # v0 = h5f['/'].attrs["v0"]  # FIXME: change
 
-        # logger.info(f"omega: {omega}")
-        # logger.info(f"psi: {psi}")
-        # logger.info(f"inclination : {f0_inc}")
-        # logger.info(f"rotation : {f1_rot}")
+        logger.info(f"omega: {omega}")
+        logger.info(f"psi: {psi}")
+        logger.info(f"inclination : {f0_inc}")
+        logger.info(f"rotation : {f1_rot}")
 
         rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
         rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
@@ -178,10 +170,10 @@ if __name__ == "__main__":
                                                         (1.0, dn, 1, model)]
                                                       ] * len(fiber_bundles)
 
-                    # logger.info(f"tissue_pipeline: model:{model}")
+                    logger.info(f"tissue_pipeline: model:{model}")
 
                     save = ['optic', 'epa', 'rofl']
-                    #                     save += ['tissue'] if m == 0 and name == 'LAP' else []
+                    # save += ['tissue'] if m == 0 and name == 'LAP' else []
                     label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                         h5f=dset, save=save)
 
@@ -191,7 +183,7 @@ if __name__ == "__main__":
                         (unique_elements, counts_elements))
 
                     # Simulate PLI Measurement
-                    # logger.info(f"simulation_pipeline: model:{model}")
+                    logger.info(f"simulation_pipeline: model:{model}")
                     # FIXME: LAP sigma ist bei einem pixel sinnfrei -> 20µm
 
                     simpli.light_intensity = intensity  # a.u.
@@ -199,24 +191,12 @@ if __name__ == "__main__":
 
                     simpli.save_parameter_h5(h5f=dset)
 
-                    # if name == 'LAP':
-                    #     run_simulation_pipeline_n(simpli,
-                    #                               label_field,
-                    #                               vector_field,
-                    #                               tissue_properties,
-                    #                               int((PIXEL_LAP / PIXEL_PM)**2),
-                    #                               h5f=dset,
-                    #                               save=save,
-                    #                               crop_tilt=True,
-                    #                               mp_pool=mp_pool)
-                    # else:
                     simpli.run_simulation_pipeline(label_field,
                                                    vector_field,
                                                    tissue_properties,
                                                    h5f=dset,
                                                    save=save,
-                                                   crop_tilt=True,
-                                                   mp_pool=mp_pool)
+                                                   crop_tilt=True)
 
                     dset.attrs['parameter/psi'] = psi
                     dset.attrs['parameter/omega'] = omega
