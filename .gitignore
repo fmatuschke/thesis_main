@@ -7,6 +7,8 @@ mpi.*.err
 *.sh.run
 *.csv
 *.dat
+*.out
+*.err
 
 # Created by https://www.gitignore.io/api/code,python
 # Edit at https://www.gitignore.io/?templates=code,python
