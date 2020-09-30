@@ -150,7 +150,7 @@ def tikz_sphere(x,
 
 if __name__ == "__main__":
 
-    sim_path = "output/simulation_2"
+    sim_path = "output/simulation_1.0"
     # ana_file = "output/1_rnd_seed/analysis/"
     # out_path = "output/1_rnd_seed/images/spheres/"
 
@@ -173,15 +173,9 @@ if __name__ == "__main__":
 
                         file_name = f"sphere_{microscope}_model_{model}_psi_{psi:.2f}_f0_inc_{f0_inc:.2f}"
 
-                        sub = (df_acc.microscope
-                               == microscope) & (df_acc.model == model) & (
-                                   df_acc.f0_inc == f0_inc) & (df_acc.f0_inc
-                                                               == f0_inc)
-
-                        # print(df_acc[sub])
-                        # if len(df_acc[sub]) != 1:
-                        #     print("FOOO")
-                        #     exit(1)
+                        sub = (df_acc.microscope == microscope) & (
+                            df_acc.model == model) & (df_acc.psi == psi) & (
+                                df_acc.f0_inc == f0_inc)
 
                         f1_rot = df_acc[sub].f1_rot.to_numpy(float)
                         omega = df_acc[sub].omega.to_numpy(float)
