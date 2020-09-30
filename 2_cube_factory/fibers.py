@@ -23,7 +23,7 @@ def omega_rotations(omega, dphi=10):
     else:
         n_rot += (n_rot + 1) % 2
         n_rot = max(n_rot, 3)
-        for f_rot in np.linspace(-180, 180, n_rot, True):
+        for f_rot in np.linspace(-90, 90, n_rot, True):
             f_rot = np.round(f_rot, 2)
             rot.append(f_rot)
 

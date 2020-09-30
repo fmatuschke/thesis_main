@@ -226,22 +226,21 @@ def f0_incs(n=10):
     return np.linspace(0, 90, n, True)
 
 
-def omega_rotations(omega, dphi=np.deg2rad(10)):
+# def omega_rotations(omega, dphi=np.deg2rad(10)):
 
-    rot = []
+#     rot = []
 
-    n_rot = int(np.round(np.sqrt((1 - np.cos(2 * omega)) / (1 - np.cos(dphi)))))
-    if n_rot == 0:
-        rot.append(0)
-    else:
-        n_rot += (n_rot + 1) % 2
-        n_rot = max(n_rot, 3)
-        for f_rot in np.linspace(-180, 180, n_rot, True):
-            f_rot = np.round(f_rot, 2)
-            rot.append(f_rot)
+#     n_rot = int(np.round(np.sqrt((1 - np.cos(2 * omega)) / (1 - np.cos(dphi)))))
+#     if n_rot == 0:
+#         rot.append(0)
+#     else:
+#         n_rot += (n_rot + 1) % 2
+#         n_rot = max(n_rot, 3)
+#         for f_rot in np.linspace(-180, 180, n_rot, True):
+#             f_rot = np.round(f_rot, 2)
+#             rot.append(f_rot)
 
-    return rot
-
+#     return rot
 
 if __name__ == "__main__":
     logger.info("args: " + " ".join(sys.argv[1:]))
