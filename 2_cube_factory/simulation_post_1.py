@@ -28,6 +28,28 @@ parser.add_argument("-p",
                     help="Number of processes.")
 args = parser.parse_args()
 
+# share data
+manager = mp.Manager()
+gt_dict = manager.dict()
+
+
+def calcGroundTruth(parameter):
+    # rofl
+    psi, omega, f0_inc, f1_rot = parameter
+
+    # ground truth
+    sub = (df_org.psi == psi) & (df_org.omega == omega)
+    phi, theta = fibers.ori_from_file(df_org[sub].fiber.iloc[0], f0_inc, f1_rot)
+    sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
+
+    gt_dict[
+        f'f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}'] = sh1
+
+    # return {
+    #     f'f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi.2f}':
+    #         sh1
+    # }
+
 
 def run(parameter):
     # rofl
@@ -45,10 +67,13 @@ def run(parameter):
         dtype=float)
     sh0 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
-    # ground truth
-    sub = (df_org.psi == psi) & (df_org.omega == omega)
-    phi, theta = fibers.ori_from_file(df_org[sub].fiber.iloc[0], f0_inc, f1_rot)
-    sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
+    # # ground truth
+    # sub = (df_org.psi == psi) & (df_org.omega == omega)
+    # phi, theta = fibers.ori_from_file(df_org[sub].fiber.iloc[0], f0_inc, f1_rot)
+    # sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
+
+    sh1 = gt_dict[
+        f'f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
 
     # ACC
     acc = helper.schilling.angular_correlation_coefficient(sh0, sh1)
@@ -80,6 +105,28 @@ if __name__ == "__main__":
         print("FOOO")
         exit(1)
 
+    # # TEST
+    # df = df[df.omega == 10]
+    # df_org = df_org[df_org.omega == 10]
+
+    # GROUND TRUTH sh coeff
+    parameters_gt = []
+    for psi in df.psi.unique():
+        for omega in df[df.psi == psi].omega.unique():
+            df_sub = df[(df.psi == psi) & (df.omega == omega)]
+            for f0_inc in df_sub.f0_inc.unique():
+                for f1_rot in df_sub[df_sub.f0_inc == f0_inc].f1_rot.unique():
+                    parameters_gt.append((psi, omega, f0_inc, f1_rot))
+
+    with mp.Pool(processes=args.num_proc) as pool:
+        [
+            _ for _ in tqdm.tqdm(pool.imap_unordered(calcGroundTruth,
+                                                     parameters_gt),
+                                 total=len(parameters_gt),
+                                 smoothing=0)
+        ]
+
+    # schilling
     parameters = []
     for microscope in df.microscope.unique():
         for model in df.model.unique():
@@ -96,7 +143,7 @@ if __name__ == "__main__":
         df = [
             d for d in tqdm.tqdm(pool.imap_unordered(run, parameters),
                                  total=len(parameters),
-                                 smoothing=0.02)
+                                 smoothing=0)
         ]
     df = pd.concat(df, ignore_index=True)
     df.to_pickle(
