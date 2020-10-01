@@ -13,13 +13,17 @@
 \usepgfplotslibrary{polar}
 \usetikzlibrary{external}
 \usetikzlibrary{calc}
-\tikzexternalize[prefix=./output/tmp/,
-                  % mode=list and make, 
-                  ]
-
-\def\path{output/simulation_1.0/images}
-\def\setup{PM}
-\def\model{r}
+% 
+% path relative to output/tmp
+% __SIMULATION__ is replaced by sed
+\def\path{../../output/__SIMULATION__/images}
+\def\setup{__MICROSCOPE__}
+\def\model{__MODEL__}
+% 
+\tikzexternalize[prefix=./tikz/,
+                 figure name=\setup_\model_,
+                 mode=list and make, 
+                 ]
 % 
 \begin{document}
 %

@@ -42,6 +42,7 @@ def tikz_sphere(x,
                 y2=None,
                 z2=None,
                 data2=None,
+                f0_inc=0,
                 path_to_data=None,
                 standalone=False,
                 only_dat=False,
@@ -127,11 +128,12 @@ def tikz_sphere(x,
                 "    table[x=x,y=y,z=z,point meta=\\thisrow{c}, col sep=comma]\n" \
                 f"        {{{file_name}_1.dat}};\n"
             )
+            x, y, z = np.cos(np.deg2rad(f0_inc)), 0, np.sin(np.deg2rad(f0_inc))
             f.write("" \
                 "\\addplot3[\n" \
                 "    only marks, thick,\n" \
                 "    mark=o, mark color=black]\n" \
-                f"        coordinates {{ ({x2[0]:.2f},{y2[0]:.2f},{z2[0]:.2f}) }};\n"
+                f"        coordinates {{ ({x:.2f},{y:.2f},{z:.2f}) }};\n"
                 )
         f.write("" \
             "\\draw[->, black, thick] (axis cs:1, 0, 0) -- (axis cs:1.5, 0, 0) node[pos=0.5, below]{$x$};\n"
@@ -242,6 +244,7 @@ if __name__ == "__main__":
                             y2,
                             z2,
                             data_,
+                            f0_inc,
                             path_to_data="\\currfiledir",
                             standalone=False)
 
