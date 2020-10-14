@@ -16,6 +16,8 @@
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
 % 
+\def\datapath{output/cube_2pop_1}
+% 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
 % 
@@ -55,7 +57,7 @@
       \foreach \state in {init, solved} {
       \addplot+[]       
          table [x=x, y=r_\radius_s_\state_phi_h, col sep = comma]
-            {output/cube_2pop_0/hist/cube_stats_p_\psivalue_o_\omegavalue_.csv} \closedcycle;
+            {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_.csv} \closedcycle;
         
    }}
    \node[] at (axis cs:90,1.25) {\footnotesize 90};
@@ -86,7 +88,7 @@
       \foreach \state in {init, solved} {
       \addplot+[]
          table [x expr=\thisrow{x}+180, y=r_\radius_s_\state_incl_h, col sep = comma] 
-            {output/cube_2pop_0/hist/cube_stats_p_\psivalue_o_\omegavalue_.csv} \closedcycle;
+            {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_.csv} \closedcycle;
    }}
    \begin{scope}[overlay]
    \ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (axis description cs:-0.25,0.5) {$\Omega = \SI{\omegavalue}{\degree}$};}{}
@@ -98,7 +100,7 @@
   \node[inner sep=0pt, anchor=south east] at (\i\j.south east)
       {\includegraphics[trim=50 42 34 42, clip, width=1.25cm]
       % {\includegraphics[trim=120 55 90 130, clip, width=1.25cm]
-      {output/cube_2pop_0/images/cube_2pop_psi_\psivalue0_omega_\omegavalue0_r_2.00_v0_105_.solved.png}};
+      {\datapath/images/cube_2pop_psi_\psivalue0_omega_\omegavalue0_r_2.00_v0_105_.solved.png}};
    % 
    \node[] at ($(\i\j.north) - (-0.6,0.25) $) {\footnotesize$\varphi$};
    \node[] at ($(\i\j.north) - (0.6,0.25) $) {\footnotesize$\alpha$};

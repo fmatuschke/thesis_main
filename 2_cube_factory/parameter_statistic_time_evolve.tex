@@ -19,7 +19,7 @@
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\datapath{output/parameter_statistic_1/time_evolve}
+\def\datapath{output/parameter_statistic_2/time_evolve}
 % 
 % 
 \begin{document}
@@ -64,6 +64,7 @@ cycle multiindex* list={
    \foreach \fl in {2.0, 8.0}{
    \foreach \fr in {2.0,4.0,8.0}{#1}}}} % 1.0 und 2.0 nicht unterscheidbar
 % 
+\foreach \psi in {0.5,1.0}{
 \begin{tikzpicture}
 \begin{groupplot}[%
   group style={
@@ -92,25 +93,25 @@ cycle multiindex* list={
 %         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
 %    }
 % 
-\nextgroupplot[ylabel={$\# steps$}]
+\nextgroupplot[ylabel={$\# steps$}, ymin=30, ymax=200000, xmin=0.2, xmax=100000]
    \Loop{
     \addplot+[] table[
         x={times_mean}, y={steps_mean}, x error = {times_std} , y error={steps_std}, col sep=comma,]
-        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+        {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
 % 
-\nextgroupplot[ylabel={$\# col obj$}, ymin=0.01]
+\nextgroupplot[ylabel={$\# col obj$}, ymin=0, ymax=2000000, xmin=0.2, xmax=100000]
    \Loop{
     \addplot+[] table[
         x={times_mean}, y={num_col_objs_mean}, x error = {times_std} , y error={num_col_objs_std}, col sep=comma,]
-        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+        {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
 %
-\nextgroupplot[ylabel={$overlap frac$}, ymin=0.0005]
+\nextgroupplot[ylabel={$overlap frac$}, ymin=0.0005, ymax=0.3, xmin=0.2, xmax=100000]
     \Loop{
     \addplot+[] table[
         x={times_mean}, y={overlaps_frac_mean}, x error = {times_std} , y error={overlaps_frac_std}, col sep=comma,]
-        {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+        {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
     }
    % \coordinate (L) at (axis description cs:1,0);
 % 
@@ -155,4 +156,5 @@ cycle multiindex* list={
 % \path node[anchor=north] at ($(current bounding box.south) - (0,0.5cm)$) {\ref{legend\currfilebase}};
 \path node[anchor=north] at ($(group c1r3.south) - (0,0.75cm)$) {\ref{legend\currfilebase}};
 \end{tikzpicture}
+}
 \end{document}

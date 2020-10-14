@@ -1,0 +1,157 @@
+\documentclass[tikz]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{statistics}
+\tikzset{>=latex}
+% 
+\def\width{13.87303cm}
+\def\height{22.37076cm}
+\def\datapath{output/parameter_statistic_2/boxplot}
+% 
+\begin{document}
+\pgfmathsetmacro{\ng}{8}
+\pgfmathsetmacro{\dx}{0.75}
+% 
+\pgfplotsset{
+    Boxplot/.style={
+        cycle list/Paired-8,
+        xmin=0.42,
+        xmax=4.58,
+        axis x line=none,
+        axis y line = left,
+        enlarge y limits,
+        ymajorgrids,
+        clip=false,
+        % y label style={at={(axis description cs:-0.125,.5)},rotate=0,anchor=south},
+        boxplot={
+            draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
+            box extend=\dx/(\ng+1),
+            mark size=0.42pt,
+            draw/median/.code={%
+               \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
+               \pgfextra
+               \pgftransformshift{
+                  \pgfplotsboxplotpointabbox
+                     {\pgfplotsboxplotvalue{median}}
+                     {0.5}
+               }
+               \pgfuseplotmark{*}
+               \endpgfextra
+               ;
+            },
+        },
+        boxplot/draw direction=y,
+    },
+    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
+}
+%
+\newcommand{\xachse}{
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$1$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$2$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$4$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$8$};
+\node [anchor=base west, xshift = 2em] at (last.base east) {$f_l$};
+}
+% 
+\newcommand{\Loop}[1]{
+\foreach \fl in {1.0,2.0,4.0,8.0} {
+\foreach \fr in {1.0,2.0,4.0,8.0} {
+\foreach \psi/\omega in {1.0/0.0,0.5/90.0} {#1}}}}
+% 
+\begin{tikzpicture}[]
+\begin{groupplot}[%
+  group style={
+      group size=1 by 5,
+      horizontal sep=2cm,
+      vertical sep=0.75cm,
+      ylabels at=edge left,
+  },
+   width = \width,
+   height = 0.19*\height,
+   Boxplot,
+]
+% 
+\nextgroupplot[ylabel={$\textnormal{$r_f$}= 0.5$},
+               legend to name={legend\currfilebase},
+               legend image post style={mark=square*},
+               legend columns=2,
+               legend cell align={left},
+               legend image post style={scale=1},
+               legend transposed=true,
+               legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
+               legend entries={%
+                  {$f_r=1.0,\hspace{1.5pt} \mathbin{\|}$},
+                  {$f_r=1.0,\times$},
+                  {$f_r=2.0,\hspace{1.5pt} \mathbin{\|}$},
+                  {$f_r=2.0,\times$},
+                  {$f_r=4.0,\hspace{1.5pt} \mathbin{\|}$},
+                  {$f_r=4.0,\times$},
+                  {$f_r=8.0,\hspace{1.5pt} \mathbin{\|}$},
+                  {$f_r=8.0,\times$}}]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={p_\psi_o_\omega_fr_\fr_fl_\fl_volume}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stats_r_0.5.csv};
+}
+\xachse
+\node[anchor=east] at ({axis description cs:0,1.0}) {$V/V_0$};
+% \node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {$\textnormal{$r_f$}= 0.5$};
+% 
+\nextgroupplot[ylabel={$\textnormal{$r_f$}= 1.0$},]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={p_\psi_o_\omega_fr_\fr_fl_\fl_volume}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stats_r_1.0.csv};
+}
+\xachse
+\node[anchor=east] at ({axis description cs:0,1.0}) {$V/V_0$};
+% \node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {$\textnormal{$r_f$}= 1.0$};
+% 
+\nextgroupplot[ylabel={$\textnormal{$r_f$}= 2.0$},]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={p_\psi_o_\omega_fr_\fr_fl_\fl_volume}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stats_r_2.0.csv};
+}
+\xachse
+\node[anchor=east] at ({axis description cs:0,1.0}) {$V/V_0$};
+% \node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {$\textnormal{$r_f$}= 2.0$};
+% 
+\nextgroupplot[ylabel={$\textnormal{$r_f$}= 5.0$},]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={p_\psi_o_\omega_fr_\fr_fl_\fl_volume}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stats_r_5.0.csv};
+}
+\xachse
+\node[anchor=east] at ({axis description cs:0,1.0}) {$V/V_0$};
+% \node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {$\textnormal{$r_f$}= 5.0$};
+% 
+\nextgroupplot[ylabel={$\textnormal{$r_f$}= 10.0$},]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={p_\psi_o_\omega_fr_\fr_fl_\fl_volume}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stats_r_10.0.csv};
+}
+\xachse
+\node[anchor=east] at ({axis description cs:0,1.0}) {$V/V_0$};
+% \node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {$\textnormal{$r_f$}= 10.0$};
+%
+\end{groupplot}
+% 
+\node[anchor=north] at ($(group c1r5.south) - (0,0.75cm)$) {\ref{legend\currfilebase}};
+% 
+\end{tikzpicture}
+% 
+\end{document}
