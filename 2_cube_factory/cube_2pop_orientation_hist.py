@@ -70,7 +70,9 @@ def run(df):
     phi_x, phi_h, incl_x, incl_h = polar_hist(phi, theta)
 
     # 2d hist
-    h, x, y, _ = fastpli.analysis.orientation.histogram(phi, theta)
+    h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
+                                                        theta,
+                                                        weight_area=True)
 
     # INIT
     file = file.replace("solved", "init")
@@ -91,7 +93,7 @@ def run(df):
 
 if __name__ == "__main__":
 
-    if False or not os.path.isfile(
+    if True or not os.path.isfile(
             os.path.join(args.input, "hist", "cube_2pop.pkl")):
         df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
         df = df[df.state != "init"]
