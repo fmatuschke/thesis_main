@@ -34,7 +34,7 @@ requirements:
 .PHONY: requirements-sc
 requirements-sc:
 	$(PIP) install -r requirements-sc.txt -q
-	$(PIP) install 0_core/. -q	
+	$(PIP) install 0_core/. -q
 
 .PHONY: git-submodules-update
 git-submodules-update:
@@ -88,7 +88,7 @@ jupyter:
 # CLEANING
 .PHONY: clean
 clean: clean-fastpli
-	rm -rf env-$(VENV)
+	rm -rf $(VENV)
 
 .PHONY: clean-fastpli
 .ONESHELL:
