@@ -6,4 +6,5 @@ python3 voxel_size.py -i ../../1_model/1_cubes/output/cube_2pop_1/cube_2pop_psi_
 
 # analyse
 ./voxel_size_post_0.py -i output/test -p 16
+./voxel_size_post_1.py -i output/test -p 16
 ```

@@ -143,40 +143,45 @@ def run(parameter):
         fiber_bundles = models.rotate(fiber_bundles, f0_inc, f1_rot)
 
         for n in range(args.repeat):
-            logger.info(f"n_repeat: {n}")
-            # Setup Simpli
-            logger.info(f"prepair simulation")
-            simpli = fastpli.simulation.Simpli()
-            simpli.omp_num_threads = 1
-            simpli.pixel_size = PIXEL_SIZE
-            # simpli.sensor_gain = 1.5  # pm
-            simpli.optical_sigma = 0.71  # in voxel size
-            simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
-            simpli.interpolate = "Slerp"
-            simpli.untilt_sensor_view = True
-            simpli.wavelength = 525  # in nm
-            simpli.light_intensity = 50000  # a.u.
-            simpli.fiber_bundles = fiber_bundles
-            simpli.tilts = np.deg2rad(np.array([(0, 0)]))
-
+            rnd_dim_origin = np.random.uniform(-30, 30 - PIXEL_SIZE, [2])
             for voxel_size in VOXEL_SIZES:
-                logger.info(f"voxel_size: {voxel_size}")
-                simpli.voxel_size = voxel_size
-                simpli.set_voi(
-                    -0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]),
-                    0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]))
-                simpli.dim_origin = simpli.dim_origin + np.random.uniform(
-                    -PIXEL_SIZE, PIXEL_SIZE, [3])
-
-                logger.info("memory: " + str(round(simpli.memory_usage(), 2)) +
-                            'MB')
-                if simpli.memory_usage() * args.num_proc > 230000:
-                    print(str(round(simpli.memory_usage(), 2)) + 'MB')
-                    return
-
                 for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
+                    logger.info(f"n_repeat: {n}")
+                    logger.info(f"voxel_size: {voxel_size}")
                     logger.info(f"model: {model}")
+
+                    # Setup Simpli
+                    logger.info(f"prepair simulation")
+                    simpli = fastpli.simulation.Simpli()
+                    simpli.omp_num_threads = 1
+                    simpli.pixel_size = PIXEL_SIZE
+                    # simpli.sensor_gain = 1.5  # pm
+                    simpli.optical_sigma = 0.71  # in voxel size
+                    simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
+                    simpli.interpolate = "Slerp"
+                    simpli.untilt_sensor_view = True
+                    simpli.wavelength = 525  # in nm
+                    simpli.light_intensity = 50000  # a.u.
+                    simpli.fiber_bundles = fiber_bundles
+                    simpli.tilts = np.deg2rad(np.array([(0, 0)]))
+
+                    simpli.voxel_size = voxel_size
+                    simpli.set_voi(
+                        -0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]),
+                        0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]))
+
+                    # print(simpli.dim_origin)
+                    simpli.dim_origin[:2] = rnd_dim_origin
+                    # print(simpli.dim_origin)
+
+                    logger.info("memory: " +
+                                str(round(simpli.memory_usage(), 2)) + 'MB')
+                    if simpli.memory_usage() * args.num_proc > 230000:
+                        print(str(round(simpli.memory_usage(), 2)) + 'MB')
+                        return
+
                     dset = h5f.create_group(f'simpli/{voxel_size}/{model}/{n}')
+                    dset.attrs['dim_origin'] = rnd_dim_origin
 
                     simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
                                                         (1.0, dn, 0, model)]
@@ -254,12 +259,9 @@ if __name__ == "__main__":
             parameters.append((file, f0_inc, f1_rot))
 
     # filter
-    logger.info("parameters before filter: " + str(parameters))
-    parameters = list(filter(check_file, parameters))
-    logger.info("parameters after filter: " + str(parameters))
-
-    # run(parameters[0])
-    # run((1.0, 0, 90, 0))
+    # logger.info("parameters before filter: " + str(parameters))
+    # parameters = list(filter(check_file, parameters))
+    # logger.info("parameters after filter: " + str(parameters))
 
     with mp.Pool(processes=args.num_proc) as pool:
         [

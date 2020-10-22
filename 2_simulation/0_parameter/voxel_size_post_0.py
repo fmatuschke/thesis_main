@@ -77,6 +77,9 @@ def run(file):
                 for n in h5f[f'simpli/{voxel_size}/{model}']:
                     h5f_sub = h5f[f'simpli/{voxel_size}/{model}/{n}']
                     for m in h5f_sub[f'simulation/optic/0/']:
+                        if h5f_sub[
+                                f'analysis/epa/0/transmittance/{m}'].size != 1:
+                            raise ValueError("FOOOO")
                         df.append(
                             pd.DataFrame(
                                 [[
@@ -95,11 +98,11 @@ def run(file):
                                     h5f_sub[f'simulation/optic/0/{m}'][...
                                                                       ].ravel(),
                                     h5f_sub[f'analysis/epa/0/transmittance/{m}']
-                                    [...].ravel(),
+                                    [...].ravel()[0],
                                     h5f_sub[f'analysis/epa/0/direction/{m}'][
-                                        ...].ravel(),
+                                        ...].ravel()[0],
                                     h5f_sub[f'analysis/epa/0/retardation/{m}'][
-                                        ...].ravel(),
+                                        ...].ravel()[0],
                                 ]],
                                 columns=[
                                     "voxel_size",
@@ -139,4 +142,4 @@ with mp.Pool(processes=args.num_proc) as pool:
         for sub in tqdm.tqdm(pool.imap_unordered(run, files), total=len(files))
     ]
 df = pd.concat(df, ignore_index=True)
-df.to_pickle(os.path.join(args.input, "voxel_size.pkl"))
+df.to_pickle(os.path.join(args.input, "voxel_size_post_0.pkl"))
