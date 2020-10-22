@@ -10,6 +10,9 @@ mpi.*.err
 *.out
 *.err
 
+literatur/*
+!literatur/readme.md
+
 # Created by https://www.gitignore.io/api/code,python
 # Edit at https://www.gitignore.io/?templates=code,python
 
