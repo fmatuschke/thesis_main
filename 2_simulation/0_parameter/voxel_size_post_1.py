@@ -58,18 +58,31 @@ def run(row):
     for vs in df_.voxel_size.unique():
 
         df_res.append({
-            "radius": radius,
-            "model": model,
-            "omega": omega,
-            "psi": psi,
-            "f0_inc": f0_inc,
-            "f1_rot": f1_rot,
-            "n": n,
-            "m": m,
-            "vs": vs,
-            "d_trans": ref.epa_trans - df_[df_.voxel_size == vs].epa_trans,
-            "d_dir": circ_diff(ref.epa_dir, df_[df_.voxel_size == vs].epa_dir),
-            "d_ret": ref.epa_ret - df_[df_.voxel_size == vs].epa_ret,
+            "voxel_size":
+                vs,
+            "radius":
+                radius,
+            "model":
+                model,
+            "omega":
+                omega,
+            "psi":
+                psi,
+            "f0_inc":
+                f0_inc,
+            "f1_rot":
+                f1_rot,
+            "n":
+                n,
+            "m":
+                m,
+            "epa_trans_diff":
+                ref.epa_trans - df_[df_.voxel_size == vs].epa_trans.iloc[0],
+            "epa_dir_diff":
+                circ_diff(ref.epa_dir,
+                          df_[df_.voxel_size == vs].epa_dir.iloc[0]),
+            "epa_ret_diff":
+                ref.epa_ret - df_[df_.voxel_size == vs].epa_ret.iloc[0],
         })
     return df_res
 
