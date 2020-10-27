@@ -67,11 +67,11 @@ parser.add_argument("-p",
                     required=True,
                     help="Number of parallel processes.")
 
-# parser.add_argument("-t",
-#                     "--num_threads",
-#                     type=int,
-#                     required=True,
-#                     help="Number of threads per process.")
+parser.add_argument("-t",
+                    "--num_threads",
+                    type=int,
+                    required=True,
+                    help="Number of threads per process.")
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
@@ -90,8 +90,9 @@ formatter = logging.Formatter(
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-VOXEL_SIZES = [0.05, 0.125, 0.25, 0.625, 1.25]
-# VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+# VOXEL_SIZES = [0.05, 0.125, 0.25, 0.625, 1.25]
+# VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
 N_INC = 10
 PIXEL_SIZE = 1.25  # PM
@@ -105,8 +106,10 @@ def get_file_pref(parameter):
     pre = base.split("_psi_")[0]
     omega = float(file.split("_omega_")[1].split("_")[0])
     psi = float(file.split("_psi_")[1].split("_")[0])
+    r = float(file.split("_r_")[1].split("_")[0])
 
     return output_name + f"_{pre}_psi_{psi:.2f}_omega_{omega:.2f}_" \
+        f"r_{r:.2f}_" \
         f"f0_inc_{f0_inc:.2f}_" \
         f"f1_rot_{f1_rot:.2f}_" \
         f"p0_{PIXEL_SIZE:.2f}_"
@@ -153,7 +156,7 @@ def run(parameter):
                     # Setup Simpli
                     logger.info(f"prepair simulation")
                     simpli = fastpli.simulation.Simpli()
-                    simpli.omp_num_threads = 1
+                    simpli.omp_num_threads = args.num_threads
                     simpli.pixel_size = PIXEL_SIZE
                     # simpli.sensor_gain = 1.5  # pm
                     simpli.optical_sigma = 0.71  # in voxel size
@@ -251,17 +254,22 @@ if __name__ == "__main__":
     file_list = args.input
 
     parameters = []
-    for file, f0_inc in list(
-            itertools.product(file_list, models.inclinations(10))):
-        omega = float(file.split("_omega_")[1].split("_")[0])
+    for file, f0_inc in list(itertools.product(file_list, [0, 90])):
+        parameters.append((file, f0_inc, 0))
 
-        for f1_rot in models.omega_rotations(omega):
-            parameters.append((file, f0_inc, f1_rot))
+    # for file, f0_inc in list(
+    #         itertools.product(file_list, models.inclinations(10))):
+    #     omega = float(file.split("_omega_")[1].split("_")[0])
+    # for f1_rot in models.omega_rotations(omega):
+    #     parameters.append((file, f0_inc, f1_rot))
 
     # filter
     # logger.info("parameters before filter: " + str(parameters))
     # parameters = list(filter(check_file, parameters))
     # logger.info("parameters after filter: " + str(parameters))
+
+    print(len(parameters))
+    # parameter = parameters[comm.Get_rank()::comm.Get_size()]
 
     with mp.Pool(processes=args.num_proc) as pool:
         [

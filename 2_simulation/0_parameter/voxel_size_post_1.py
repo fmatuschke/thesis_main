@@ -76,13 +76,18 @@ def run(row):
                 n,
             "m":
                 m,
-            "epa_trans_diff":
-                ref.epa_trans - df_[df_.voxel_size == vs].epa_trans.iloc[0],
+            "epa_trans_diff_rel":
+                np.abs((df_[df_.voxel_size == vs].epa_trans.iloc[0] -
+                        ref.epa_trans)) / ref.epa_trans,
             "epa_dir_diff":
-                circ_diff(ref.epa_dir,
-                          df_[df_.voxel_size == vs].epa_dir.iloc[0]),
-            "epa_ret_diff":
-                ref.epa_ret - df_[df_.voxel_size == vs].epa_ret.iloc[0],
+                circ_diff(
+                    df_[df_.voxel_size == vs].epa_dir.iloc[0],
+                    ref.epa_dir,
+                ),
+            "epa_ret_diff_rel":
+                np.abs(
+                    (df_[df_.voxel_size == vs].epa_ret.iloc[0] - ref.epa_ret)) /
+                ref.epa_ret,
         })
     return df_res
 
