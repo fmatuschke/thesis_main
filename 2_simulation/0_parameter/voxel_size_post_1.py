@@ -45,50 +45,67 @@ def run(row):
     psi = row["psi"]
     f0_inc = row["f0_inc"]
     f1_rot = row["f1_rot"]
-    n = row["n"]
-    m = row["m"]
+    # n = row["n"]
+    # m = row["m"]
 
     sub = (df.radius == radius) & (df.model == model) & (df.omega == omega) & (
-        df.psi == psi) & (df.f0_inc == f0_inc) & (df.f1_rot == f1_rot) & (
-            df.n == n) & (df.m == m)
+        df.psi == psi) & (df.f0_inc == f0_inc) & (df.f1_rot == f1_rot)
+    #  & (df.n == n) & (df.m == m)
 
-    df_ = df[sub].sort_values(by=['voxel_size'])
-    ref = df_.iloc[0]
+    df_ = df[sub]
+    # ref = df[sub]
+    # ref = ref[ref.m == 0]
+    # ref = ref.sort_values(by=['voxel_size'])
+    # ref = df_.iloc[0]
 
     for vs in df_.voxel_size.unique():
+        for n in df_.n.unique():
+            ref = df_[(df_.voxel_size == vs) & (df_.n == n) & (df_.m == 0)]
 
-        df_res.append({
-            "voxel_size":
-                vs,
-            "radius":
-                radius,
-            "model":
-                model,
-            "omega":
-                omega,
-            "psi":
-                psi,
-            "f0_inc":
-                f0_inc,
-            "f1_rot":
-                f1_rot,
-            "n":
-                n,
-            "m":
-                m,
-            "epa_trans_diff_rel":
-                np.abs((df_[df_.voxel_size == vs].epa_trans.iloc[0] -
-                        ref.epa_trans)) / ref.epa_trans,
-            "epa_dir_diff":
-                circ_diff(
-                    df_[df_.voxel_size == vs].epa_dir.iloc[0],
-                    ref.epa_dir,
-                ),
-            "epa_ret_diff_rel":
-                np.abs(
-                    (df_[df_.voxel_size == vs].epa_ret.iloc[0] - ref.epa_ret)) /
-                ref.epa_ret,
-        })
+            if len(ref) != 1:
+                print("FOOOO ref", len(ref))
+                sys.exit()
+
+            ref = ref.squeeze()
+
+            for m in df_.m.unique():
+                df__ = df_[(df_.voxel_size == vs) & (df_.n == n) & (df_.m == m)]
+                if len(df__) != 1:
+                    print("FOOOO df__", len(df__))
+                    sys.exit()
+
+                df__ = df__.squeeze()
+
+                df_res.append({
+                    "voxel_size":
+                        vs,
+                    "radius":
+                        radius,
+                    "model":
+                        model,
+                    "omega":
+                        omega,
+                    "psi":
+                        psi,
+                    "f0_inc":
+                        f0_inc,
+                    "f1_rot":
+                        f1_rot,
+                    "n":
+                        n,
+                    "m":
+                        m,
+                    "epa_trans_diff_rel":
+                        np.abs(
+                            (df__.epa_trans - ref.epa_trans)) / ref.epa_trans,
+                    "epa_dir_diff":
+                        np.abs(circ_diff(
+                            df__.epa_dir,
+                            ref.epa_dir,
+                        )),
+                    "epa_ret_diff_rel":
+                        np.abs((df__.epa_ret - ref.epa_ret)) / ref.epa_ret,
+                })
     return df_res
 
 
@@ -98,8 +115,8 @@ if __name__ == "__main__":
     df_res = []
 
     parameters = list(
-        df[["radius", "model", "omega", "psi", "f0_inc", "f1_rot", "n",
-            "m"]].drop_duplicates().iterrows())
+        df[["radius", "model", "omega", "psi", "f0_inc",
+            "f1_rot"]].drop_duplicates().iterrows())
 
     with mp.Pool(processes=args.num_proc) as pool:
         df_res = [

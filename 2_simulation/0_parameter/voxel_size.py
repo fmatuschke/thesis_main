@@ -8,6 +8,7 @@ import datetime
 import warnings
 import time
 import h5py
+import glob
 import sys
 import os
 
@@ -21,6 +22,7 @@ import fastpli.model.solver
 import fastpli.tools
 import fastpli.io
 
+import helper
 import models
 
 from mpi4py import MPI
@@ -37,11 +39,12 @@ FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
 # arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("-i",
-                    "--input",
-                    nargs='+',
-                    required=True,
-                    help="input string.")
+parser.add_argument(
+    "-i",
+    "--input",
+    # nargs='+',
+    required=True,
+    help="input string.")
 
 parser.add_argument("-o",
                     "--output",
@@ -91,8 +94,8 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 # VOXEL_SIZES = [0.05, 0.125, 0.25, 0.625, 1.25]
-# VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
-VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+# VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
 N_INC = 10
 PIXEL_SIZE = 1.25  # PM
@@ -251,24 +254,27 @@ if __name__ == "__main__":
     logger.info(f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD'])}")
     logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
-    file_list = args.input
+    file_list = glob.glob(os.path.join(args.input, "*.h5"))
+
+    # four case study -> ||,+,*,*|
+    filtered_files = []
+    for file in file_list:
+        psi = helper.file.value(file, "psi")
+        omega = helper.file.value(file, "omega")
+        r = helper.file.value(file, "r")
+        v0 = helper.file.value(file, "v0")
+        if psi == 1:
+            filtered_files.append(file)
+        elif psi == 0.5 and omega == 90:
+            filtered_files.append(file)
 
     parameters = []
-    for file, f0_inc in list(itertools.product(file_list, [0, 90])):
+    for file, f0_inc in list(itertools.product(filtered_files, [0, 90])):
         parameters.append((file, f0_inc, 0))
 
-    # for file, f0_inc in list(
-    #         itertools.product(file_list, models.inclinations(10))):
-    #     omega = float(file.split("_omega_")[1].split("_")[0])
-    # for f1_rot in models.omega_rotations(omega):
-    #     parameters.append((file, f0_inc, f1_rot))
+    logger.info("parameters: " + str(parameters))
 
-    # filter
-    # logger.info("parameters before filter: " + str(parameters))
-    # parameters = list(filter(check_file, parameters))
-    # logger.info("parameters after filter: " + str(parameters))
-
-    print(len(parameters))
+    print("total:", len(parameters))
     # parameter = parameters[comm.Get_rank()::comm.Get_size()]
 
     with mp.Pool(processes=args.num_proc) as pool:

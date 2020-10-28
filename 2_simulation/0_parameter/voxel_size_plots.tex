@@ -1,0 +1,139 @@
+\documentclass[tikz]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{statistics}
+\tikzset{>=latex}
+% 
+\def\width{13.87303cm}
+\def\height{22.37076cm}
+\def\datapath{output/test_all/results/}
+% 
+\begin{document}
+\pgfmathsetmacro{\ng}{8}
+\pgfmathsetmacro{\dx}{0.75}
+% 
+\pgfplotsset{
+    Boxplot/.style={
+        cycle list/Paired-8,
+        xmin=0.42,
+        xmax=4.58,
+        axis x line=none,
+        axis y line = left,
+        enlarge y limits,
+        ymajorgrids,
+        clip=false,
+        % y label style={at={(axis description cs:-0.125,.5)},rotate=0,anchor=south},
+        boxplot={
+            draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
+            box extend=\dx/(\ng+1),
+            mark size=0.42pt,
+            draw/median/.code={%
+               \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
+               \pgfextra
+               \pgftransformshift{
+                  \pgfplotsboxplotpointabbox
+                     {\pgfplotsboxplotvalue{median}}
+                     {0.5}
+               }
+               \pgfuseplotmark{*}
+               \endpgfextra
+               ;
+            },
+        },
+        boxplot/draw direction=y,
+    },
+    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
+}
+%
+\newcommand{\xachse}{
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$0.5$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$1$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$2$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$5$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:4.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:5.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$10$};
+\node [anchor=base west, xshift = 2em] at (last.base east) {$radius$};
+}
+% 
+\newcommand{\Loop}[1]{
+\foreach \r in {0.5,1,2,5,10} {
+\foreach \vs in {0.005,0.01,0.025,0.05,0.125,0.25,0.625,1.25} {#1}}}
+% 
+% \foreach \fiberradius [count=\i] in {0.5} {
+\foreach \fiberradius [count=\i] in {0.5,1.0,2.0,5.0,10.0} {
+\begin{tikzpicture}[]
+\begin{groupplot}[%
+  group style={
+      group size=1 by 3,
+      horizontal sep=2cm,
+      vertical sep=0.75cm,
+      ylabels at=edge left,
+  },
+   width = \width,
+   height = 0.19*\height,
+   Boxplot,
+]
+% 
+\nextgroupplot[ylabel={trans}, %ymode={log},
+               % extra y ticks={60, 300, 1800, 3600, 7200, 21600, 86400},
+               % extra y tick labels={1min, 5min, 30min, 1h, 2h, 6h, 24h},
+               % extra y tick style={y tick label style={right, font=\scriptsize, yshift=1ex}},
+               legend to name={legend\currfilebase\i},
+               legend image post style={mark=square*},
+               legend columns=2,
+               legend cell align={left},
+               legend image post style={scale=1},
+               legend transposed=true,
+               legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
+               legend entries={%
+                  {$vs=0.005,\times$},
+                  {$vs=0.01,\times$},
+                  {$vs=0.025,\times$},
+                  {$vs=0.05,\times$},
+                  {$vs=0.125,\times$},
+                  {$vs=0.25,\times$},
+                  {$vs=0.625,\times$},
+                  {$vs=1.25,\times$}}]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={epa_trans_diff_rel}, col sep=comma, row sep=newline,
+        ]{\datapath/vs_stats_vs_\vs_r_\r.csv};
+}
+% 
+\node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {fiber\_radius $= \fiberradius$};
+\xachse
+% 
+\nextgroupplot[ylabel={dir},]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={epa_dir_diff}, col sep=comma, row sep=newline,
+        ]{\datapath/vs_stats_vs_\vs_r_\r.csv};
+}
+\xachse
+% 
+\nextgroupplot[ylabel={ret},]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={epa_ret_diff_rel}, col sep=comma, row sep=newline,
+        ]{\datapath/vs_stats_vs_\vs_r_\r.csv};
+}
+\xachse
+% 
+\end{groupplot}
+% 
+\node[anchor=north] at ($(group c1r5.south) - (0,0.75cm)$) {\ref{legend\currfilebase\i}};
+% 
+\end{tikzpicture}
+}
+% 
+\end{document}
