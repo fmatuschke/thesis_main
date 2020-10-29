@@ -11,11 +11,20 @@
 #SBATCH --mail-user=f.matuschke@fz-juelich.de
 #SBATCH --mail-type=ALL
 
-source /p/home/jusers/matuschke1/jureca/private/thesis/jureca_modules.sh
+THESIS="$(git rev-parse --show-toplevel)"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+NAME="$(basename $0 | rev | cut -d'_' -f 1 | rev)"
 
-srun -n $1 /p/home/jusers/matuschke1/jureca/private/thesis/env-jureca/bin/python3 \
+source $THESIS/jureca_modules.sh
+
+Num=1
+OMP_NUM_THREADS=$Num
+export OMP_NUM_THREADS
+
+srun -n $1 $THESIS/env-jureca/bin/python3 \
    -m mpi4py parameter_statistic.py \
    -o /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_stat_ \
    -n 100000 \
    --start $3 \
-   --time $4
+   --time $4 \
+   -p $Num

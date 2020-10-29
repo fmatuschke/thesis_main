@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+mkdir -p output/tmp
+mkdir -p output/tmp/output/tmp
+mkdir -p output/tikz
+
+lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp voxel_size_plots.tex
+lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp voxel_size_plots.tex
+mv output/tmp/voxel_size_plots.pdf output/tikz/voxel_size_plots.pdf
+xdg-open output/tikz/voxel_size_plots.pdf &>/dev/null 2>&1
