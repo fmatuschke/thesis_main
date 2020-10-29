@@ -35,7 +35,7 @@ for _, p in parameters:
     sub = (df.f0_inc == f0_inc) & (df.omega == omega) & (df.psi == psi) & (
         df.model == model) & (df.m > 0)
 
-    df_ = df[sub]
+    df_ = df[sub].copy()
     for col in df_.columns:
         if len(df_[col].unique()) == 1:
             df_ = df_.drop(col, axis=1)
@@ -47,9 +47,19 @@ for _, p in parameters:
         for r in df_.radius.unique():
             # for n in df_.n.unique():
             #     for m in df_.m.unique():
-            df__ = df_[(df_.voxel_size == vs) & (df_.radius == r)]
-            df__.to_csv(os.path.join(args.input, "results",
-                                     f"vs_stats_vs_{vs}_r_{r}.csv"),
+            df__ = df_[(df_.voxel_size == vs) & (df_.radius == r)].copy()
+
+            if df__.isna().any().any():
+                print("FOOO missing")
+
+            # data = df__.epa_ret_diff_rel.to_numpy()
+            # data[data > 42] = 42
+            # df__.epa_ret_diff_rel = data
+
+            df__.to_csv(os.path.join(
+                args.input, "results",
+                f"vs_stats_omega_{omega}_psi_{psi}_f0_inc_{f0_inc}_mode_{model}_vs_{vs}_r_{r}.csv"
+            ),
                         index=False)
 
     # fig, axs = plt.subplots(1, 3, figsize=(20, 10))

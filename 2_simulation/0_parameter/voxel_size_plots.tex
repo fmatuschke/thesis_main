@@ -17,7 +17,7 @@
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\datapath{output/test_all/results/}
+\def\datapath{output/test_all/results}
 % 
 \begin{document}
 \pgfmathsetmacro{\ng}{8}
@@ -27,7 +27,7 @@
     Boxplot/.style={
         cycle list/Paired-8,
         xmin=0.42,
-        xmax=4.58,
+        xmax=5.58,
         axis x line=none,
         axis y line = left,
         enlarge y limits,
@@ -66,11 +66,15 @@
 }
 % 
 \newcommand{\Loop}[1]{
-\foreach \r in {0.5,1,2,5,10} {
+\foreach \r in {0.5,1.0,2.0,5.0,10.0} {
 \foreach \vs in {0.005,0.01,0.025,0.05,0.125,0.25,0.625,1.25} {#1}}}
 % 
 % \foreach \fiberradius [count=\i] in {0.5} {
-\foreach \fiberradius [count=\i] in {0.5,1.0,2.0,5.0,10.0} {
+\def\omega{0.0}
+\def\psi{1.0}
+\def\finc{0}
+\def\mode{p}
+\foreach \p [count=\i] in {0} {
 \begin{tikzpicture}[]
 \begin{groupplot}[%
   group style={
@@ -107,31 +111,31 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={epa_trans_diff_rel}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_vs_\vs_r_\r.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
 }
 % 
-\node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {fiber\_radius $= \fiberradius$};
+\node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {\p};
 \xachse
 % 
 \nextgroupplot[ylabel={dir},]
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={epa_dir_diff}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_vs_\vs_r_\r.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
 }
 \xachse
 % 
-\nextgroupplot[ylabel={ret},]
-\Loop{
-    \addplot+[fill, draw=black] table[%
-        y={epa_ret_diff_rel}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_vs_\vs_r_\r.csv};
-}
-\xachse
+% \nextgroupplot[ylabel={ret},]
+% \Loop{
+%     \addplot+[fill, draw=black] table[%
+%         y={epa_ret_diff_rel}, col sep=comma, row sep=newline,
+%         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
+% }
+% \xachse
 % 
 \end{groupplot}
 % 
-\node[anchor=north] at ($(group c1r5.south) - (0,0.75cm)$) {\ref{legend\currfilebase\i}};
+\node[anchor=north] at ($(group c1r2.south) - (0,0.0cm)$) {\ref{legend\currfilebase\i}};
 % 
 \end{tikzpicture}
 }
