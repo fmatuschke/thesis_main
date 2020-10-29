@@ -60,7 +60,8 @@ def run(row):
 
     for vs in df_.voxel_size.unique():
         for n in df_.n.unique():
-            ref = df_[(df_.voxel_size == vs) & (df_.n == n) & (df_.m == 0)]
+            ref = df_[(df_.voxel_size == min(df_.voxel_size.unique())) &
+                      (df_.n == n) & (df_.m == 0)]
 
             if len(ref) != 1:
                 print("FOOOO ref", len(ref))
@@ -105,13 +106,22 @@ def run(row):
                         )),
                     "epa_ret_diff":
                         np.abs((df__.epa_ret - ref.epa_ret)
-                              )  # / (ref.epa_ret + 1e-6),
+                              ),  # / (ref.epa_ret + 1e-6),
+                    "epa_ret_diff_rel":
+                        np.abs((df__.epa_ret - ref.epa_ret)) /
+                        (ref.epa_ret + 1e-6),
+                    "data_diff":
+                        np.mean(np.abs(
+                            (df__.optic - ref.optic))) / ref.epa_trans,
+                    "data_diff_sqr":
+                        np.mean((df__.optic - ref.optic)**2) / ref.epa_trans**2,
                 })
     return df_res
 
 
 if __name__ == "__main__":
     df = pd.read_pickle(os.path.join(args.input, "voxel_size_post_0.pkl"))
+    # df = df[df.m == 0].copy()
 
     df_res = []
 
