@@ -138,7 +138,7 @@ if __name__ == "__main__":
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
 
-            for m, (dn, model) in enumerate([(-0.001, 'p'), (0.002, 'r')]):
+            for m, (dn, model) in enumerate([(-0.003, 'p'), (0.006, 'r')]):
                 for name, gain, intensity, res, tilt_angle, sigma in [
                     ('LAP', 3, 26000, PIXEL_LAP, 5.5, 0.71),
                     ('PM', 1.5, 50000, PIXEL_PM, 3.9, 0.71)
@@ -166,8 +166,8 @@ if __name__ == "__main__":
 
                     simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
                         fiber_bundles, rot)
-                    simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
-                                                        (1.0, dn, 1, model)]
+                    simpli.fiber_bundles_properties = [[(0.75, 0, 10, 'b'),
+                                                        (1.0, dn, 10, model)]
                                                       ] * len(fiber_bundles)
 
                     logger.info(f"tissue_pipeline: model:{model}")

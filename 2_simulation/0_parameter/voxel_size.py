@@ -22,14 +22,14 @@ import fastpli.model.solver
 import fastpli.tools
 import fastpli.io
 
-import helper
+import helper.file
 import models
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 
 # reproducability
-np.random.seed(42)
+# np.random.seed(42)
 
 # path
 FILE_NAME = os.path.abspath(__file__)
@@ -94,7 +94,8 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 # VOXEL_SIZES = [0.05, 0.125, 0.25, 0.625, 1.25]
-VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+# VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
 N_INC = 10
@@ -125,6 +126,9 @@ def run(parameter):
     file_pref = get_file_pref(parameter)
     logger.info(f"file_pref: {file_pref}")
 
+    rnd_seed = int.from_bytes(os.urandom(4), byteorder='little')
+    logger.info(f"rnd seed: {rnd_seed}")
+    np.random.seed(rnd_seed)
     with h5py.File(file_pref + '.h5', 'w-') as h5f:
 
         h5f.attrs['script'] = open(os.path.abspath(__file__), 'r').read()
@@ -144,14 +148,15 @@ def run(parameter):
         h5f.attrs['f0_inc'] = f0_inc
         h5f.attrs['f1_rot'] = f1_rot
         h5f.attrs['pixel_size'] = PIXEL_SIZE
+        h5f.attrs['rnd_seed'] = rnd_seed
         h5f['fiber_bundles'] = file
 
         fiber_bundles = models.rotate(fiber_bundles, f0_inc, f1_rot)
 
         for n in range(args.repeat):
-            rnd_dim_origin = np.random.uniform(-30, 30 - PIXEL_SIZE, [2])
+            rnd_dim_origin = np.random.uniform(-30, 30 - 2 * PIXEL_SIZE, [2])
             for voxel_size in VOXEL_SIZES:
-                for dn, model in [(-0.001, 'p'), (0.002, 'r')]:
+                for dn, model in [(-0.003, 'p'), (0.006, 'r')]:
                     logger.info(f"n_repeat: {n}")
                     logger.info(f"voxel_size: {voxel_size}")
                     logger.info(f"model: {model}")
@@ -173,8 +178,10 @@ def run(parameter):
 
                     simpli.voxel_size = voxel_size
                     simpli.set_voi(
-                        -0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]),
-                        0.5 * np.array([PIXEL_SIZE, PIXEL_SIZE, THICKNESS]))
+                        -0.5 *
+                        np.array([2 * PIXEL_SIZE, 2 * PIXEL_SIZE, THICKNESS]),
+                        0.5 *
+                        np.array([2 * PIXEL_SIZE, 2 * PIXEL_SIZE, THICKNESS]))
 
                     # print(simpli.dim_origin)
                     simpli.dim_origin[:2] = rnd_dim_origin
@@ -189,8 +196,8 @@ def run(parameter):
                     dset = h5f.create_group(f'simpli/{voxel_size}/{model}/{n}')
                     dset.attrs['dim_origin'] = rnd_dim_origin
 
-                    simpli.fiber_bundles_properties = [[(0.75, 0, 0, 'b'),
-                                                        (1.0, dn, 0, model)]
+                    simpli.fiber_bundles_properties = [[(0.75, 0, 10, 'b'),
+                                                        (1.0, dn, 10, model)]
                                                       ] * len(fiber_bundles)
 
                     with warnings.catch_warnings():
@@ -203,6 +210,11 @@ def run(parameter):
                         label_field, return_counts=True)
                     dset.attrs['label_field_stats'] = np.asarray(
                         (unique_elements, counts_elements))
+
+                    if np.all(unique_elements == 0):
+                        print(file, f0_inc, f1_rot, counts_elements,
+                              unique_elements, rnd_dim_origin, simpli.dim,
+                              simpli.dim_origin)
 
                     # Simulate PLI Measurement
                     # simpli.save_parameter_h5(h5f=dset)
@@ -254,7 +266,7 @@ if __name__ == "__main__":
     logger.info(f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD'])}")
     logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
-    file_list = glob.glob(os.path.join(args.input, "*.h5"))
+    file_list = glob.glob(os.path.join(args.input, "*.solved.h5"))
 
     # four case study -> ||,+,*,*|
     filtered_files = []

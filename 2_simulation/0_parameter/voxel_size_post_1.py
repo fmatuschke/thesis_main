@@ -58,17 +58,16 @@ def run(row):
     # ref = ref.sort_values(by=['voxel_size'])
     # ref = df_.iloc[0]
 
-    for vs in df_.voxel_size.unique():
-        for n in df_.n.unique():
-            ref = df_[(df_.voxel_size == min(df_.voxel_size.unique())) &
-                      (df_.n == n) & (df_.m == 0)]
+    for n in df_.n.unique():
+        ref = df_[(df_.voxel_size == min(df_.voxel_size.unique())) &
+                  (df_.n == n) & (df_.m == 0)]
 
-            if len(ref) != 1:
-                print("FOOOO ref", len(ref))
-                sys.exit()
+        if len(ref) != 1:
+            print("FOOOO ref", len(ref))
+            sys.exit()
 
-            ref = ref.squeeze()
-
+        ref = ref.squeeze()
+        for vs in df_.voxel_size.unique():
             for m in df_.m.unique():
                 df__ = df_[(df_.voxel_size == vs) & (df_.n == n) & (df_.m == m)]
                 if len(df__) != 1:

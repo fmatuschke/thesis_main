@@ -52,9 +52,9 @@ for _, p in parameters:
             if df__.isna().any().any():
                 print("FOOO missing")
 
-            # data = df__.epa_ret_diff_rel.to_numpy()
-            # data[data > 42] = 42
-            # df__.epa_ret_diff_rel = data
+            data = df__.epa_ret_diff_rel.to_numpy()
+            data[data > 4.2] = 4.2
+            df__.epa_ret_diff_rel = data
 
             df__.to_csv(os.path.join(
                 args.input, "results",

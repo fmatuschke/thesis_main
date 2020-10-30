@@ -17,10 +17,10 @@
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\datapath{output/test_all/results}
+\def\datapath{output/test_25/results}
 % 
 \begin{document}
-\pgfmathsetmacro{\ng}{8}
+\pgfmathsetmacro{\ng}{7}
 \pgfmathsetmacro{\dx}{0.75}
 % 
 \pgfplotsset{
@@ -67,24 +67,22 @@
 % 
 \newcommand{\Loop}[1]{
 \foreach \r in {0.5,1.0,2.0,5.0,10.0} {
-\foreach \vs in {0.005,0.01,0.025,0.05,0.125,0.25,0.625,1.25} {#1}}}
+\foreach \vs in {0.01,0.025,0.05,0.125,0.25,0.625,1.25} {#1}}}
 % 
-% \foreach \fiberradius [count=\i] in {0.5} {
-\def\omega{0.0}
-\def\psi{1.0}
-\def\finc{0}
-\def\mode{p}
-\foreach \p [count=\i] in {0} {
+
+\foreach \mode [count=\j] in {p,r} {
+\foreach \omega/\psi/\finc [count=\i] in {0.0/1.0/0,0.0/1.0/90,90.0/0.5/0,90.0/0.5/90} { %
+
 \begin{tikzpicture}[]
 \begin{groupplot}[%
   group style={
-      group size=1 by 3,
+      group size=1 by 4,
       horizontal sep=2cm,
       vertical sep=0.75cm,
       ylabels at=edge left,
   },
    width = \width,
-   height = 0.19*\height,
+   height = 0.24*\height,
    Boxplot,
 ]
 % 
@@ -92,7 +90,7 @@
                % extra y ticks={60, 300, 1800, 3600, 7200, 21600, 86400},
                % extra y tick labels={1min, 5min, 30min, 1h, 2h, 6h, 24h},
                % extra y tick style={y tick label style={right, font=\scriptsize, yshift=1ex}},
-               legend to name={legend\currfilebase\i},
+               legend to name={legend\currfilebase\i\j},
                legend image post style={mark=square*},
                legend columns=2,
                legend cell align={left},
@@ -100,21 +98,21 @@
                legend transposed=true,
                legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
                legend entries={%
-                  {$vs=0.005,\times$},
-                  {$vs=0.01,\times$},
-                  {$vs=0.025,\times$},
-                  {$vs=0.05,\times$},
-                  {$vs=0.125,\times$},
-                  {$vs=0.25,\times$},
-                  {$vs=0.625,\times$},
-                  {$vs=1.25,\times$}}]
+                %   {$vs=0.005$},
+                  {$vs=0.01$},
+                  {$vs=0.025$},
+                  {$vs=0.05$},
+                  {$vs=0.125$},
+                  {$vs=0.25$},
+                  {$vs=0.625$},
+                  {$vs=1.25$}}]
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={epa_trans_diff_rel}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
 }
 % 
-\node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {\p};
+\node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {\mode/\omega/\psi/\finc};
 \xachse
 % 
 \nextgroupplot[ylabel={dir},]
@@ -125,19 +123,35 @@
 }
 \xachse
 % 
-% \nextgroupplot[ylabel={ret},]
+\nextgroupplot[ylabel={ret},ymax=1, clip=true]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={epa_ret_diff_rel}, col sep=comma, row sep=newline,
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
+}
+\xachse
+% 
+\nextgroupplot[ylabel={data diff},]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={data_diff}, col sep=comma, row sep=newline,
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
+}
+\xachse
+% 
+% \nextgroupplot[ylabel={data diff sqr},]
 % \Loop{
 %     \addplot+[fill, draw=black] table[%
-%         y={epa_ret_diff_rel}, col sep=comma, row sep=newline,
+%         y={data_diff_sqr}, col sep=comma, row sep=newline,
 %         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
 % }
 % \xachse
 % 
 \end{groupplot}
 % 
-\node[anchor=north] at ($(group c1r2.south) - (0,0.0cm)$) {\ref{legend\currfilebase\i}};
+\node[anchor=north] at ($(group c1r4.south) - (0,0.75cm)$) {\ref{legend\currfilebase\i\j}};
 % 
 \end{tikzpicture}
-}
+}}
 % 
 \end{document}

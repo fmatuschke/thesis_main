@@ -1,5 +1,6 @@
 env*/
 **/output/
+data/
 .numba_config.yaml
 thesis.zip
 mpi.*.out
