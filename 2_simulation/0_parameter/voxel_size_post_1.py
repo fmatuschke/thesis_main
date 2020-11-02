@@ -104,8 +104,7 @@ def run(row):
                             ref.epa_dir,
                         )),
                     "epa_ret_diff":
-                        np.abs((df__.epa_ret - ref.epa_ret)
-                              ),  # / (ref.epa_ret + 1e-6),
+                        np.abs((df__.epa_ret - ref.epa_ret)),
                     "epa_ret_diff_rel":
                         np.abs((df__.epa_ret - ref.epa_ret)) /
                         (ref.epa_ret + 1e-6),

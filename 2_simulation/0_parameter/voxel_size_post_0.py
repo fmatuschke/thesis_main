@@ -77,9 +77,9 @@ def run(file):
                 for n in h5f[f'simpli/{voxel_size}/{model}']:
                     h5f_sub = h5f[f'simpli/{voxel_size}/{model}/{n}']
                     for m in h5f_sub[f'simulation/optic/0/']:
-                        if h5f_sub[
-                                f'analysis/epa/0/transmittance/{m}'].size != 1:
-                            raise ValueError("FOOOO")
+                        # if h5f_sub[
+                        #         f'analysis/epa/0/transmittance/{m}'].size != 1:
+                        #     raise ValueError("FOOOO")
                         df.append(
                             pd.DataFrame(
                                 [[
@@ -95,14 +95,13 @@ def run(file):
                                     int(n),
                                     int(m),
                                     # h5f_sub['simulation/data/0'][...],
-                                    h5f_sub[f'simulation/optic/0/{m}'][...
-                                                                      ].ravel(),
+                                    h5f_sub[f'simulation/optic/0/{m}'][...],
                                     h5f_sub[f'analysis/epa/0/transmittance/{m}']
-                                    [...].ravel()[0],
+                                    [...],
                                     h5f_sub[f'analysis/epa/0/direction/{m}'][
-                                        ...].ravel()[0],
+                                        ...],
                                     h5f_sub[f'analysis/epa/0/retardation/{m}'][
-                                        ...].ravel()[0],
+                                        ...],
                                 ]],
                                 columns=[
                                     "voxel_size",

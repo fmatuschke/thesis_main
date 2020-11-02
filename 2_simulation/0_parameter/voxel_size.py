@@ -247,6 +247,9 @@ def run(parameter):
                             dset[f'analysis/epa/{t}/direction/{m}'] = epa[1]
                             dset[f'analysis/epa/{t}/retardation/{m}'] = epa[2]
 
+                            if images_.size != epa[0].size:
+                                raise ValueError("FOOOO")
+
                         dset[f'simulation/optic/{t}'].attrs['theta'] = theta
                         dset[f'simulation/optic/{t}'].attrs['phi'] = phi
                         dset[f'analysis/epa/{t}'].attrs['theta'] = theta

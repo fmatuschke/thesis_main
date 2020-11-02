@@ -7,6 +7,7 @@ import glob
 import argparse
 
 import pandas as pd
+import tqdm
 
 import helper.circular
 
@@ -22,45 +23,66 @@ os.makedirs(os.path.join(args.input, "results"), exist_ok=True)
 df = pd.read_pickle(
     os.path.join(os.path.join(args.input, "voxel_size_post_1.pkl")))
 df = df[df.f1_rot == 0]
-df['epa_dir_diff'] = np.rad2deg(df['epa_dir_diff'])
+# df = df.apply(pd.Series.explode).reset_index()
+# print(df['epa_dir_diff'].iloc[0])
+# df['epa_dir_diff'] = np.rad2deg(df['epa_dir_diff'])
 
 parameters = list(df[["f0_inc", "omega", "psi",
                       "model"]].drop_duplicates().iterrows())
 
-for _, p in parameters:
+for _, p in tqdm.tqdm(parameters):
     f0_inc = p['f0_inc']
     omega = p['omega']
     psi = p['psi']
     model = p['model']
-    sub = (df.f0_inc == f0_inc) & (df.omega == omega) & (df.psi == psi) & (
-        df.model == model) & (df.m > 0)
 
-    df_ = df[sub].copy()
-    for col in df_.columns:
-        if len(df_[col].unique()) == 1:
-            df_ = df_.drop(col, axis=1)
+    for m in [0, 1]:
+        if m:
+            sub = (df.f0_inc == f0_inc) & (df.omega == omega) & (
+                df.psi == psi) & (df.model == model) & (df.m > 0)
+        else:
+            sub = (df.f0_inc == f0_inc) & (df.omega == omega) & (
+                df.psi == psi) & (df.model == model) & (df.m == 0)
 
-    string = [str(elm) for elm in p]
-    string = '-'.join(string)
+        df_ = df[sub].copy()
+        for col in df_.columns:
+            if pd.api.types.is_numeric_dtype(df[col]):
+                if len(df_[col].unique()) == 1:
+                    df_ = df_.drop(col, axis=1)
 
-    for vs in df_.voxel_size.unique():
-        for r in df_.radius.unique():
-            # for n in df_.n.unique():
-            #     for m in df_.m.unique():
-            df__ = df_[(df_.voxel_size == vs) & (df_.radius == r)].copy()
+        for vs in tqdm.tqdm(df_.voxel_size.unique(), leave=False):
+            for r in df_.radius.unique():
+                df__ = df_[(df_.voxel_size == vs) & (df_.radius == r)].copy()
+                df__ = df__.apply(pd.Series.explode).reset_index(
+                    drop=True).apply(pd.Series.explode).reset_index(drop=True)
 
-            if df__.isna().any().any():
-                print("FOOO missing")
+                # for col in df__.columns:
+                #     if len(df__[col].unique()) == 1:
+                #         df__ = df__.drop(col, axis=1)
 
-            data = df__.epa_ret_diff_rel.to_numpy()
-            data[data > 4.2] = 4.2
-            df__.epa_ret_diff_rel = data
+                # for col in df__.columns:
+                #     if pd.api.types.is_object_dtype(df__[col]):
+                #         df__[col] = df__[col].astype(float)
 
-            df__.to_csv(os.path.join(
-                args.input, "results",
-                f"vs_stats_omega_{omega}_psi_{psi}_f0_inc_{f0_inc}_mode_{model}_vs_{vs}_r_{r}.csv"
-            ),
-                        index=False)
+                if df__.isna().any().any():
+                    print("FOOO missing")
+
+                # # because of pgfplots/tikz
+                # data = df__.epa_ret_diff_rel.to_numpy().ravel()
+                # data[data > 4.2] = 4.2
+                # df__.epa_ret_diff_rel = data
+
+                # df__.loc[df__.epa_ret_diff_rel == 0, "epa_ret_diff_rel"] = 0.01
+                # df__.loc[df__.data_diff == 0, "epa_ret_diff_rel"] = 0.01
+
+                df__.to_csv(os.path.join(
+                    args.input, "results",
+                    f"vs_stats_omega_{omega}_psi_{psi}_f0_inc_{f0_inc}_mode_{model}_vs_{vs}_r_{r}_m_{m}.csv"
+                ),
+                            index=False,
+                            float_format='%.9f',
+                            na_rep="nan")
+
 
     # fig, axs = plt.subplots(1, 3, figsize=(20, 10))
     # fig.suptitle(string, fontsize=21)

@@ -23,9 +23,16 @@
 \pgfmathsetmacro{\ng}{7}
 \pgfmathsetmacro{\dx}{0.75}
 % 
+\pgfplotsset{colormap/Paired-8}
 \pgfplotsset{
     Boxplot/.style={
-        cycle list/Paired-8,
+        cycle list={index of colormap={1 of Paired-8},
+                    index of colormap={2 of Paired-8},
+                    index of colormap={3 of Paired-8},
+                    index of colormap={4 of Paired-8},
+                    index of colormap={5 of Paired-8},
+                    index of colormap={6 of Paired-8},
+                    index of colormap={7 of Paired-8}},
         xmin=0.42,
         xmax=5.58,
         axis x line=none,
@@ -109,7 +116,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={epa_trans_diff_rel}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r_m_1.csv};
 }
 % 
 \node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {\mode/\omega/\psi/\finc};
@@ -119,7 +126,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={epa_dir_diff}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r_m_1.csv};
 }
 \xachse
 % 
@@ -127,7 +134,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={epa_ret_diff_rel}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r_m_1.csv};
 }
 \xachse
 % 
@@ -135,7 +142,7 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r_m_1.csv};
 }
 \xachse
 % 
@@ -143,7 +150,7 @@
 % \Loop{
 %     \addplot+[fill, draw=black] table[%
 %         y={data_diff_sqr}, col sep=comma, row sep=newline,
-%         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r.csv};
+%         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_vs_\vs_r_\r_m_1.csv};
 % }
 % \xachse
 % 
