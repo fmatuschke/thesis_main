@@ -140,8 +140,8 @@ if __name__ == "__main__":
 
             for m, (dn, model) in enumerate([(-0.003, 'p'), (0.006, 'r')]):
                 for name, gain, intensity, res, tilt_angle, sigma in [
-                    ('LAP', 3, 26000, PIXEL_LAP, 5.5, 0.71),
-                    ('PM', 1.5, 50000, PIXEL_PM, 3.9, 0.71)
+                    ('LAP', 3, 26000, PIXEL_LAP, 5.5, 0.75),
+                    ('PM', 1.5, 50000, PIXEL_PM, 3.9, 0.75)
                 ]:
                     dset = h5f.create_group(name + '/' + model)
 

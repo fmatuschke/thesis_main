@@ -68,8 +68,7 @@ def run(parameter):
     simpli = fastpli.simulation.Simpli()
     simpli.omp_num_threads = args.num_threads
     simpli.pixel_size = PIXEL_SIZE
-    # simpli.sensor_gain = 1.5  # pm
-    simpli.optical_sigma = 0.71  # in voxel size
+    simpli.optical_sigma = 0.75  # in voxel size
     simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
     simpli.interpolate = "Slerp"
     simpli.untilt_sensor_view = True
@@ -143,8 +142,8 @@ if __name__ == "__main__":
 
     parameters = []
     for file in files:
-        for fn in [1, 2, 3, 4]:
-            for dn, model in [(-0.001 * fn, 'p'), (0.002 * fn, 'r')]:
+        for dn in np.arange(0.001, 0.01, 0.001):
+            for dn, model in [(-dn, 'p'), (dn, 'r')]:
                 parameters.append((file, dn, model))
 
     with mp.Pool(processes=args.num_proc) as pool:
