@@ -56,6 +56,12 @@ def run(parameter):
     file = parameter[0]
     dn = parameter[1]
     model = parameter[2]
+    name = parameter[3]
+    gain = parameter[4]
+    intensity = parameter[5]
+    res = parameter[6]
+    tilt_angle = parameter[7]
+    sigma = parameter[8]
 
     with h5py.File(file, 'r') as h5f_:
         fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
@@ -67,13 +73,13 @@ def run(parameter):
 
     simpli = fastpli.simulation.Simpli()
     simpli.omp_num_threads = args.num_threads
-    simpli.pixel_size = PIXEL_SIZE
-    simpli.optical_sigma = 0.75  # in voxel size
+    simpli.pixel_size = res
+    simpli.optical_sigma = sigma  # in voxel size
     simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
     simpli.interpolate = "Slerp"
     simpli.untilt_sensor_view = True
     simpli.wavelength = 525  # in nm
-    simpli.light_intensity = 50000  # a.u.
+    simpli.light_intensity = intensity  # a.u.
     simpli.fiber_bundles = fiber_bundles
     simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
@@ -100,7 +106,7 @@ def run(parameter):
                                        tissue_properties, theta, phi)
 
         # simpli.sensor_gain = 0
-        simpli.sensor_gain = 1.5
+        simpli.sensor_gain = gain
 
         images_ = simpli.apply_optic(images)
         t, d, r = simpli.apply_epa(images_)
@@ -110,6 +116,7 @@ def run(parameter):
             radius,
             v0,
             model,
+            name,
             omega,
             psi,
             simpli.pixel_size,
@@ -123,6 +130,7 @@ def run(parameter):
                               "radius",
                               "v0",
                               "model",
+                              "setup",
                               "omega",
                               "psi",
                               "pixel_size",
@@ -142,9 +150,14 @@ if __name__ == "__main__":
 
     parameters = []
     for file in files:
-        for dn in np.arange(0.001, 0.01, 0.001):
-            for dn, model in [(-dn, 'p'), (dn, 'r')]:
-                parameters.append((file, dn, model))
+        for fn in np.arange(1, 5.001, 0.125):  # [1, 2, 3, 3.75, 4, 5]:
+            for dn, model in [(-0.001 * fn, 'p'), (0.002 * fn, 'r')]:
+                for name, gain, intensity, res, tilt_angle, sigma in [
+                    ('LAP', 3, 26000, 20, 5.5, 0.75),
+                    ('PM', 1.25, 16000, 1.25, 3.9, 0.75)
+                ]:
+                    parameters.append((file, dn, model, name, gain, intensity,
+                                       res, tilt_angle, sigma))
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [

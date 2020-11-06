@@ -138,10 +138,10 @@ if __name__ == "__main__":
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
 
-            for m, (dn, model) in enumerate([(-0.003, 'p'), (0.006, 'r')]):
+            for m, (dn, model) in enumerate([(-0.008 / 2, 'p'), (0.008, 'r')]):
                 for name, gain, intensity, res, tilt_angle, sigma in [
-                    ('LAP', 3, 26000, PIXEL_LAP, 5.5, 0.75),
-                    ('PM', 1.5, 50000, PIXEL_PM, 3.9, 0.75)
+                    ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
+                    ('PM', 0.117, 16000, PIXEL_PM, 3.9, 0.75)
                 ]:
                     dset = h5f.create_group(name + '/' + model)
 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
                     simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
                     simpli.interpolate = "Slerp"
                     simpli.wavelength = 525  # in nm
-                    simpli.optical_sigma = 0.71  # in pixel size
+                    simpli.optical_sigma = 0.75  # in pixel size
                     simpli.verbose = 0
 
                     simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
