@@ -184,10 +184,11 @@ if __name__ == "__main__":
 
                     # Simulate PLI Measurement
                     logger.info(f"simulation_pipeline: model:{model}")
-                    # FIXME: LAP sigma ist bei einem pixel sinnfrei -> 20µm
 
                     simpli.light_intensity = intensity  # a.u.
-                    simpli.sensor_gain = gain
+                    simpli.noise_model = lambda x: np.round(
+                        np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16
+                                                                      )
 
                     simpli.save_parameter_h5(h5f=dset)
 
