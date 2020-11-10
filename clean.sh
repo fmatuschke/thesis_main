@@ -8,4 +8,4 @@ else
    echo 'no env detected'
 fi
 
-find . -type f -iname "*.ipynb" -not -path "./env*/*" -not -path "./**/env*/*" -exec jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace {} \;
+find . -type f -iname "*.ipynb" -not -path "./env*/*" -not -path "./**/env*/*" -exec python3 -m nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace {} \;
