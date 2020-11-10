@@ -91,7 +91,7 @@ def run(parameter):
     # simpli.dim_origin[:2] = rnd_dim_origin
     # print(simpli.dim_origin)
 
-    simpli.fiber_bundles_properties = [[(0.75, 0, 10, 'b'), (1.0, dn, 10, model)
+    simpli.fiber_bundles_properties = [[(0.75, 0, 40, 'b'), (1.0, dn, 40, model)
                                        ]] * len(fiber_bundles)
 
     with warnings.catch_warnings():
@@ -153,8 +153,8 @@ if __name__ == "__main__":
         for fn in np.arange(1, 5.001, 0.125):  # [1, 2, 3, 3.75, 4, 5]:
             for dn, model in [(-0.001 * fn, 'p'), (0.002 * fn, 'r')]:
                 for name, gain, intensity, res, tilt_angle, sigma in [
-                    ('LAP', 3, 26000, 20, 5.5, 0.75),
-                    ('PM', 1.25, 16000, 1.25, 3.9, 0.75)
+                    ('LAP', 3, 35000, 20, 5.5, 0.75),
+                    ('PM', 0.1175, 8000, 1.25, 3.9, 0.75)
                 ]:
                     parameters.append((file, dn, model, name, gain, intensity,
                                        res, tilt_angle, sigma))

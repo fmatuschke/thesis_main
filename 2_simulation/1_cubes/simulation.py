@@ -141,7 +141,7 @@ if __name__ == "__main__":
             for m, (dn, model) in enumerate([(-0.008 / 2, 'p'), (0.008, 'r')]):
                 for name, gain, intensity, res, tilt_angle, sigma in [
                     ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
-                    ('PM', 0.117, 16000, PIXEL_PM, 3.9, 0.75)
+                    ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
                 ]:
                     dset = h5f.create_group(name + '/' + model)
 
@@ -166,8 +166,8 @@ if __name__ == "__main__":
 
                     simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
                         fiber_bundles, rot)
-                    simpli.fiber_bundles_properties = [[(0.75, 0, 10, 'b'),
-                                                        (1.0, dn, 10, model)]
+                    simpli.fiber_bundles_properties = [[(0.75, 0, 40, 'b'),
+                                                        (1.0, dn, 40, model)]
                                                       ] * len(fiber_bundles)
 
                     logger.info(f"tissue_pipeline: model:{model}")
