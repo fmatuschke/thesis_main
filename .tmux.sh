@@ -1,4 +1,11 @@
-SESSIONNAME=${PWD##*/}
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+	SESSIONNAME=${PWD##*/}
+else
+	SESSIONNAME=$1
+fi
+
 tmux has-session -t $SESSIONNAME 2> /dev/null
 
 if [ $? != 0 ] ; then
