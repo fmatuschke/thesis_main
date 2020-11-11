@@ -23,7 +23,7 @@ import fastpli.io
 
 import tqdm
 
-VOXEL_SIZE = 0.1
+VOXEL_SIZE = 0.125
 PIXEL_SIZE = 1.25
 THICKNESS = 60
 
@@ -60,8 +60,10 @@ def run(parameter):
     gain = parameter[4]
     intensity = parameter[5]
     res = parameter[6]
-    tilt_angle = parameter[7]
+    # tilt_angle = parameter[7]
     sigma = parameter[8]
+    species = parameter[9]
+    mu = parameter[10]
 
     with h5py.File(file, 'r') as h5f_:
         fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
@@ -91,7 +93,7 @@ def run(parameter):
     # simpli.dim_origin[:2] = rnd_dim_origin
     # print(simpli.dim_origin)
 
-    simpli.fiber_bundles_properties = [[(0.75, 0, 40, 'b'), (1.0, dn, 40, model)
+    simpli.fiber_bundles_properties = [[(0.75, 0, mu, 'b'), (1.0, dn, mu, model)
                                        ]] * len(fiber_bundles)
 
     with warnings.catch_warnings():
@@ -105,13 +107,14 @@ def run(parameter):
         images = simpli.run_simulation(label_field, vector_field,
                                        tissue_properties, theta, phi)
 
-        # simpli.sensor_gain = 0
-        simpli.sensor_gain = gain
+        simpli.noise_model = lambda x: np.round(
+            np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
 
         images_ = simpli.apply_optic(images)
         t, d, r = simpli.apply_epa(images_)
 
         df = pd.DataFrame([[
+            species,
             simpli.voxel_size,
             radius,
             v0,
@@ -121,11 +124,13 @@ def run(parameter):
             psi,
             simpli.pixel_size,
             dn,
+            mu,
             t,
             d,
             r,
         ]],
                           columns=[
+                              "species",
                               "voxel_size",
                               "radius",
                               "v0",
@@ -135,6 +140,7 @@ def run(parameter):
                               "psi",
                               "pixel_size",
                               "dn",
+                              "mu",
                               "transmittance",
                               "direction",
                               "retardation",
@@ -156,8 +162,11 @@ if __name__ == "__main__":
                     ('LAP', 3, 35000, 20, 5.5, 0.75),
                     ('PM', 0.1175, 8000, 1.25, 3.9, 0.75)
                 ]:
-                    parameters.append((file, dn, model, name, gain, intensity,
-                                       res, tilt_angle, sigma))
+                    for species, mu in [('Roden', 10), ('Vervet', 20),
+                                        ('Human', 50)]:
+                        parameters.append(
+                            (file, dn, model, name, gain, intensity, res,
+                             tilt_angle, sigma, species, mu))
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [

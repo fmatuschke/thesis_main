@@ -156,7 +156,8 @@ def run(parameter):
         for n in tqdm.tqdm(list(range(args.repeat)), leave=False):
             rnd_dim_origin = np.random.uniform(-30, 30 - 2 * PIXEL_SIZE, [2])
             for voxel_size in VOXEL_SIZES:
-                for species, mu in [('Vervet', 20), ('Human', 50)]:
+                for species, mu in [('Roden', 10), ('Vervet', 20),
+                                    ('Human', 50)]:
                     for dn, model in [(-0.003, 'p'), (0.006, 'r')]:
                         for setup, gain, intensity in [('LAP', 3, 35000),
                                                        ('PM', 0.1175, 8000)]:

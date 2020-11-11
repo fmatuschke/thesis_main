@@ -138,76 +138,82 @@ if __name__ == "__main__":
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
 
-            for m, (dn, model) in enumerate([(-0.008 / 2, 'p'), (0.008, 'r')]):
-                for name, gain, intensity, res, tilt_angle, sigma in [
-                    ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
-                    ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
-                ]:
-                    dset = h5f.create_group(name + '/' + model)
+            for species, mu in [('Roden', 10), ('Vervet', 20), ('Human', 50)]:
+                for m, (dn, model) in enumerate([(-0.008 / 2, 'p'),
+                                                 (0.008, 'r')]):
+                    for name, gain, intensity, res, tilt_angle, sigma in [
+                        ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
+                        ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
+                    ]:
+                        dset = h5f.create_group(f'{name}/{species}/{model}/')
 
-                    # Setup Simpli
-                    simpli = fastpli.simulation.Simpli()
-                    warnings.filterwarnings("ignore", message="objects overlap")
-                    simpli.omp_num_threads = 1
-                    simpli.voxel_size = args.voxel_size
-                    simpli.pixel_size = res
-                    simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
-                    simpli.interpolate = "Slerp"
-                    simpli.wavelength = 525  # in nm
-                    simpli.optical_sigma = 0.75  # in pixel size
-                    simpli.verbose = 0
+                        # Setup Simpli
+                        simpli = fastpli.simulation.Simpli()
+                        warnings.filterwarnings("ignore",
+                                                message="objects overlap")
+                        simpli.omp_num_threads = 1
+                        simpli.voxel_size = args.voxel_size
+                        simpli.pixel_size = res
+                        simpli.filter_rotations = np.linspace(
+                            0, np.pi, 9, False)
+                        simpli.interpolate = "Slerp"
+                        simpli.wavelength = 525  # in nm
+                        simpli.optical_sigma = 0.75  # in pixel size
+                        simpli.verbose = 0
 
-                    simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
-                                   0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
-                    simpli.tilts = np.deg2rad(
-                        np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
-                                  (tilt_angle, 180), (tilt_angle, 270)]))
-                    simpli.add_crop_tilt_halo()
+                        simpli.set_voi(
+                            -0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
+                            0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
+                        simpli.tilts = np.deg2rad(
+                            np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
+                                      (tilt_angle, 180), (tilt_angle, 270)]))
+                        simpli.add_crop_tilt_halo()
 
-                    simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
-                        fiber_bundles, rot)
-                    simpli.fiber_bundles_properties = [[(0.75, 0, 40, 'b'),
-                                                        (1.0, dn, 40, model)]
-                                                      ] * len(fiber_bundles)
+                        simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
+                            fiber_bundles, rot)
+                        simpli.fiber_bundles_properties = [[
+                            (0.75, 0, mu, 'b'), (1.0, dn, mu, model)
+                        ]] * len(fiber_bundles)
 
-                    logger.info(f"tissue_pipeline: model:{model}")
+                        logger.info(f"tissue_pipeline: model:{model}")
 
-                    save = ['optic', 'epa', 'rofl']
-                    # save += ['tissue'] if m == 0 and name == 'LAP' else []
-                    label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
-                        h5f=dset, save=save)
+                        save = ['optic', 'epa', 'rofl']
+                        # save += ['tissue'] if m == 0 and name == 'LAP' else []
+                        label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
+                            h5f=dset, save=save)
 
-                    unique_elements, counts_elements = np.unique(
-                        label_field, return_counts=True)
-                    dset.attrs['label_field_stats'] = np.asarray(
-                        (unique_elements, counts_elements))
+                        unique_elements, counts_elements = np.unique(
+                            label_field, return_counts=True)
+                        dset.attrs['label_field_stats'] = np.asarray(
+                            (unique_elements, counts_elements))
 
-                    # Simulate PLI Measurement
-                    logger.info(f"simulation_pipeline: model:{model}")
+                        # Simulate PLI Measurement
+                        logger.info(f"simulation_pipeline: model:{model}")
 
-                    simpli.light_intensity = intensity  # a.u.
-                    simpli.noise_model = lambda x: np.round(
-                        np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16
-                                                                      )
+                        simpli.light_intensity = intensity  # a.u.
+                        simpli.noise_model = lambda x: np.round(
+                            np.random.normal(x, np.sqrt(gain * x))).astype(
+                                np.uint16)
 
-                    simpli.save_parameter_h5(h5f=dset)
+                        simpli.save_parameter_h5(h5f=dset)
 
-                    simpli.run_simulation_pipeline(label_field,
-                                                   vector_field,
-                                                   tissue_properties,
-                                                   h5f=dset,
-                                                   save=save,
-                                                   crop_tilt=True)
+                        simpli.run_simulation_pipeline(label_field,
+                                                       vector_field,
+                                                       tissue_properties,
+                                                       h5f=dset,
+                                                       save=save,
+                                                       crop_tilt=True)
 
-                    dset.attrs['parameter/psi'] = psi
-                    dset.attrs['parameter/omega'] = omega
-                    dset.attrs['parameter/fiber_path'] = file
-                    dset.attrs['parameter/v'] = LENGTH
-                    dset.attrs['parameter/f0_inc'] = f0_inc
-                    dset.attrs['parameter/f1_rot'] = f1_rot
-                    dset.attrs[
-                        'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel()
+                        dset.attrs['parameter/psi'] = psi
+                        dset.attrs['parameter/omega'] = omega
+                        dset.attrs['parameter/fiber_path'] = file
+                        dset.attrs['parameter/v'] = LENGTH
+                        dset.attrs['parameter/f0_inc'] = f0_inc
+                        dset.attrs['parameter/f1_rot'] = f1_rot
+                        dset.attrs[
+                            'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel(
+                            )
 
-                    del label_field
-                    del vector_field
-                    del simpli
+                        del label_field
+                        del vector_field
+                        del simpli
