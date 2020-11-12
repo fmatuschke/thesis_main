@@ -98,7 +98,6 @@ SIZE = args.volume
 RADIUS_LOGMEAN = args.fiber_radius
 PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
        0.9]  # fiber fraction: PSI * f0 + (1-PSI) * f1
-# OMEGA = np.linspace(0, 90, 10, True)  # angle of opening (f0, f1)
 
 PHI, THETA = sphere.htm_sc(2)
 THETA = THETA[np.logical_and(PHI >= 0, PHI <= 0.5 * np.pi)]
@@ -114,7 +113,7 @@ if args.start + comm.Get_rank() >= len(PARAMETER):
 
 # solve
 psi, (phi, theta) = PARAMETER[args.start + comm.Get_rank()]
-logger.info(f"psi:{psi}, omega:{omega}")
+logger.info(f"psi:{psi}, phi:{phi}, theta:{theta}")
 
 # setup solver
 solver = fastpli.model.solver.Solver()
@@ -174,7 +173,8 @@ logger.debug(f"save init")
 with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
     solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
     h5f['/'].attrs['psi'] = psi
-    h5f['/'].attrs['omega'] = omega
+    h5f['/'].attrs['phi'] = phi
+    h5f['/'].attrs['theta'] = theta
     h5f['/'].attrs['v0'] = SIZE
     h5f['/'].attrs['radius'] = RADIUS_LOGMEAN
     h5f['/'].attrs['step'] = 0
@@ -208,7 +208,8 @@ for i in tqdm(range(1, args.max_steps + 1)):
                                    script=open(os.path.abspath(__file__),
                                                'r').read())
                     h5f['/'].attrs['psi'] = psi
-                    h5f['/'].attrs['omega'] = omega
+                    h5f['/'].attrs['phi'] = phi
+                    h5f['/'].attrs['theta'] = theta
                     h5f['/'].attrs['step'] = i
                     h5f['/'].attrs['overlap'] = solver.overlap
                     h5f['/'].attrs['num_obj'] = solver.num_obj
@@ -229,7 +230,8 @@ logger.debug(f"save solved")
 with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
     solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
     h5f['/'].attrs['psi'] = psi
-    h5f['/'].attrs['omega'] = omega
+    h5f['/'].attrs['phi'] = phi
+    h5f['/'].attrs['theta'] = theta
     h5f['/'].attrs['v0'] = SIZE
     h5f['/'].attrs['radius'] = RADIUS_LOGMEAN
     h5f['/'].attrs['step'] = i
