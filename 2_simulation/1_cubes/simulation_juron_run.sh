@@ -7,7 +7,7 @@ do
       file=$(sed 's/$2/'"$v"'/g' <<<"$file")
 
 
-      file=$(sed 's/$3/'"$v"'/g' <<<"$file")
+      file=$(sed 's/$3/'"$start"'/g' <<<"$file")
 
       echo "$file" >tmp.run
       echo "$file"
