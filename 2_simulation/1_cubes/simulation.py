@@ -96,14 +96,14 @@ if __name__ == "__main__":
 
     # simulation loop
     parameter = []
-    fiber_inc = [(f, i) for f in file_list for i in fibers.inclinations(5)]
+    fiber_inc = [(f, i) for f in file_list for i in fibers.inclinations(10)]
     for file, f0_inc in fiber_inc:
         # logger.info(f"input file: {file}")
 
         with h5py.File(file, 'r') as h5f:
             omega = h5f['/'].attrs["omega"]
 
-        for f1_rot in fibers.omega_rotations(omega, 22.5):
+        for f1_rot in fibers.omega_rotations(omega, 10):
             parameter.append((file, f0_inc, f1_rot))
 
     for file, f0_inc, f1_rot in tqdm.tqdm(
