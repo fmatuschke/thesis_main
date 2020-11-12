@@ -103,6 +103,9 @@ PHI, THETA = sphere.htm_sc(2)
 THETA = THETA[np.logical_and(PHI >= 0, PHI <= 0.5 * np.pi)]
 PHI = PHI[np.logical_and(PHI >= 0, PHI <= 0.5 * np.pi)]
 
+PHI = PHI[np.logical_and(THETA >= 0, THETA <= 0.5 * np.pi)]
+THETA = THETA[np.logical_and(THETA >= 0, THETA <= 0.5 * np.pi)]
+
 PARAMETER = list(itertools.product(PSI, zip(PHI, THETA)))
 
 PARAMETER.append((0.0, (0.0, 0.0)))

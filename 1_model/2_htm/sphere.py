@@ -52,41 +52,44 @@ def htm_sc(level=0):
     return phi, theta
 
 
-# import matplotlib.pyplot as plt
+if __name__ == "__main__":
 
-# # print(htm(1))
-# # print(htm_sc(1))
+    import matplotlib.pyplot as plt
 
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
+    # print(htm(1))
+    # print(htm_sc(1))
 
-# phi, theta = htm_sc(2)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
-# theta = theta[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
-# phi = phi[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
+    phi, theta = htm_sc(3)
 
-# # ax.plot_surface(x, y, z, facecolors=plt.cm.viridis(data_i))
+    theta = theta[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
+    phi = phi[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
+    phi = phi[np.logical_and(theta >= 0, theta <= 0.5 * np.pi)]
+    theta = theta[np.logical_and(theta >= 0, theta <= 0.5 * np.pi)]
 
-# print(phi.shape)
+    # ax.plot_surface(x, y, z, facecolors=plt.cm.viridis(data_i))
 
-# r = 1.0
-# x = np.multiply(np.cos(phi), np.sin(theta)) * r
-# y = np.multiply(np.sin(phi), np.sin(theta)) * r
-# z = np.cos(theta) * r
+    print(phi.shape)
 
-# sc = ax.scatter(
-#     x,
-#     y,
-#     z,
-#     marker='o',
-#     s=50,
-#     # c=data_,
-#     alpha=1,
-#     vmin=0,
-#     vmax=1,
-#     cmap="viridis")
-# plt.colorbar(sc)
-# ax.set_xlabel('$X$')
-# ax.set_ylabel('$Y$')
-# ax.view_init(30, 30)
-# plt.show()
+    r = 1.0
+    x = np.multiply(np.cos(phi), np.sin(theta)) * r
+    y = np.multiply(np.sin(phi), np.sin(theta)) * r
+    z = np.cos(theta) * r
+
+    sc = ax.scatter(x,
+                    y,
+                    z,
+                    marker='o',
+                    s=50,
+                    c=range(len(phi)),
+                    alpha=1,
+                    vmin=0,
+                    vmax=len(phi),
+                    cmap="viridis")
+    plt.colorbar(sc)
+    ax.set_xlabel('$X$')
+    ax.set_ylabel('$Y$')
+    ax.view_init(30, 30)
+    plt.show()
