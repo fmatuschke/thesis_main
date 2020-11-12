@@ -94,7 +94,8 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 # VOXEL_SIZES = [0.05, 0.125, 0.25, 0.625, 1.25]
-VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+VOXEL_SIZES = [0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+# VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
@@ -153,18 +154,18 @@ def run(parameter):
 
         fiber_bundles = models.rotate(fiber_bundles, f0_inc, f1_rot)
 
-        for n in tqdm.tqdm(list(range(args.repeat)), leave=False):
+        for n in tqdm.tqdm(list(range(args.repeat))):
             rnd_dim_origin = np.random.uniform(-30, 30 - 2 * PIXEL_SIZE, [2])
+            logger.info(f"n_repeat: {n}")
             for voxel_size in VOXEL_SIZES:
+                logger.info(f"voxel_size: {voxel_size}")
                 for species, mu in [('Roden', 10), ('Vervet', 20),
                                     ('Human', 50)]:
-                    for dn, model in [(-0.003, 'p'), (0.006, 'r')]:
+                    logger.info(f"species: {species}")
+                    for dn, model in [(-0.004, 'p'), (0.008, 'r')]:
+                        logger.info(f"model: {model}")
                         for setup, gain, intensity in [('LAP', 3, 35000),
                                                        ('PM', 0.1175, 8000)]:
-                            logger.info(f"n_repeat: {n}")
-                            logger.info(f"voxel_size: {voxel_size}")
-                            logger.info(f"model: {model}")
-                            logger.info(f"species: {species}")
                             logger.info(f"setup: {setup}")
 
                             # Setup Simpli
@@ -277,6 +278,7 @@ def run(parameter):
 
                             del label_field
                             del vector_field
+                            del simpli
 
 
 def check_file(p):
