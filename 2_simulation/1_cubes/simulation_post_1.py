@@ -39,7 +39,10 @@ def calcGroundTruth(parameter):
 
     # ground truth
     sub = (df_org.psi == psi) & (df_org.omega == omega)
-    phi, theta = fibers.ori_from_file(df_org[sub].fiber.iloc[0], f0_inc, f1_rot)
+
+    phi, theta = fibers.ori_from_file(
+        f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/{df_org[sub].fiber.iloc[0]}",
+        f0_inc, f1_rot)
     sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
     gt_dict[
@@ -53,10 +56,10 @@ def calcGroundTruth(parameter):
 
 def run(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot, microscope, model = parameter
+    psi, omega, f0_inc, f1_rot, microscope, species, model = parameter
     sub = (df.psi == psi) & (df.omega == omega) & (df.f0_inc == f0_inc) & (
-        df.f1_rot == f1_rot) & (df.microscope == microscope) & (df.model
-                                                                == model)
+        df.f1_rot == f1_rot) & (df.microscope == microscope) & (
+            df.species == species) & (df.model == model)
 
     if len(df[sub]) != 1:
         print("FOOO")
@@ -81,6 +84,7 @@ def run(parameter):
     return pd.DataFrame(
         {
             'microscope': microscope,
+            'species': species,
             'model': model,
             'f0_inc': f0_inc,
             'f1_rot': f1_rot,
@@ -97,7 +101,8 @@ if __name__ == "__main__":
         os.path.join(args.input, "analysis", f"cube_2pop_simulation.pkl"))
 
     df_org = pd.read_pickle(
-        f"output/cube_2pop_1/cube_2pop.pkl")  # TODO: same number as simulation
+        f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_1/cube_2pop.pkl"
+    )  # TODO: same number as simulation
 
     df_org = df_org[df_org.r == df.r.unique()[0]]
     df_org = df_org[df_org.state != "init"]
@@ -129,15 +134,16 @@ if __name__ == "__main__":
     # schilling
     parameters = []
     for microscope in df.microscope.unique():
-        for model in df.model.unique():
-            for psi in df.psi.unique():
-                for omega in df[df.psi == psi].omega.unique():
-                    df_sub = df[(df.psi == psi) & (df.omega == omega)]
-                    for f0_inc in df_sub.f0_inc.unique():
-                        for f1_rot in df_sub[df_sub.f0_inc ==
-                                             f0_inc].f1_rot.unique():
-                            parameters.append(
-                                (psi, omega, f0_inc, f1_rot, microscope, model))
+        for species in df.species.unique():
+            for model in df.model.unique():
+                for psi in df.psi.unique():
+                    for omega in df[df.psi == psi].omega.unique():
+                        df_sub = df[(df.psi == psi) & (df.omega == omega)]
+                        for f0_inc in df_sub.f0_inc.unique():
+                            for f1_rot in df_sub[df_sub.f0_inc ==
+                                                 f0_inc].f1_rot.unique():
+                                parameters.append((psi, omega, f0_inc, f1_rot,
+                                                   microscope, species, model))
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [
