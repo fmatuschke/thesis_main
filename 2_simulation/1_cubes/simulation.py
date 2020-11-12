@@ -47,6 +47,8 @@ parser.add_argument("-v",
                     required=True,
                     help="voxel_size in um.")
 
+parser.add_argument("--start", type=int, required=True, help="mpi start.")
+
 args = parser.parse_args()
 os.makedirs(args.output, exist_ok=True)
 
@@ -56,8 +58,8 @@ logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler(
     os.path.join(
         args.output,
-        f'simulation_{args.voxel_size}_{comm.Get_size()}_{comm.Get_rank()}.log')
-)
+        f'simulation_{args.voxel_size}_{comm.Get_size()}_{comm.Get_rank()}_{args.start}.log'
+    ))
 formatter = logging.Formatter(
     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
 fh.setFormatter(formatter)
@@ -106,8 +108,10 @@ if __name__ == "__main__":
         for f1_rot in fibers.omega_rotations(omega, 15):
             parameter.append((file, f0_inc, f1_rot))
 
-    for file, f0_inc, f1_rot in tqdm.tqdm(
-            parameter[comm.Get_rank()::comm.Get_size()]):
+    if (comm.Get_rank() + args.start) >= len(parameter):
+        exit(0)
+
+    for file, f0_inc, f1_rot in parameter[comm.Get_rank() + args.start]:
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
         file_name += f'_vs_{args.voxel_size:.4f}'
