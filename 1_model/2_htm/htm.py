@@ -113,7 +113,7 @@ if args.start + comm.Get_rank() >= len(PARAMETER):
     sys.exit(0)
 
 # solve
-psi, omega = PARAMETER[args.start + comm.Get_rank()]
+psi, (phi, theta) = PARAMETER[args.start + comm.Get_rank()]
 logger.info(f"psi:{psi}, omega:{omega}")
 
 # setup solver
@@ -122,7 +122,7 @@ solver.obj_mean_length = RADIUS_LOGMEAN * 2
 solver.obj_min_radius = RADIUS_LOGMEAN * 2
 solver.omp_num_threads = args.num_proc
 
-file_pref = output_name + f"_psi_{psi:.2f}_index_{args.start + comm.Get_rank()}_phi_{phi:.2f}_omega_{omega:.2f}_r_" \
+file_pref = output_name + f"_psi_{psi:.2f}_index_{args.start + comm.Get_rank()}_phi_{phi:.2f}_theta_{theta:.2f}_r_" \
                             f"{RADIUS_LOGMEAN:.2f}_v0_{SIZE:.0f}_"
 logger.info(f"file_pref: {file_pref}")
 
@@ -146,8 +146,8 @@ fiber_bundles = [
     fastpli.model.sandbox.build.cuboid(
         p=-0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
         q=0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
-        phi=np.deg2rad(omega),
-        theta=np.deg2rad(90),
+        phi=np.deg2rad(phi),
+        theta=np.deg2rad(theta),
         seeds=seeds_1 + RADIUS_LOGMEAN,
         radii=rnd_radii_1)
 ]
