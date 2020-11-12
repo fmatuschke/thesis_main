@@ -108,10 +108,9 @@ if __name__ == "__main__":
         for f1_rot in fibers.omega_rotations(omega, 15):
             parameter.append((file, f0_inc, f1_rot))
 
-    if (comm.Get_rank() + args.start) >= len(parameter):
-        exit(0)
+    if (comm.Get_rank() + args.start) < len(parameter):
+        file, f0_inc, f1_rot = parameter[comm.Get_rank() + args.start]
 
-    for file, f0_inc, f1_rot in parameter[comm.Get_rank() + args.start]:
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
         file_name += f'_vs_{args.voxel_size:.4f}'
