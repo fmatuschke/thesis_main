@@ -15,6 +15,9 @@ export OMP_NUM_THREADS
 
 mpirun /p/home/jusers/matuschke1/juron/private/thesis/env-juron/bin/python3 \
 				-m mpi4py simulation.py \
-            -i /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_1/*r_1.00_*.solved.h5
-            -o /p/scratch/cjinm11/matuschke1/thesis/2/simulation_1
-            -v 0.125
+            -i /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_1/*omega_0.00*r_$2_*.solved.h5 \
+               /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_1/*omega_30.00*r_$2_*.solved.h5 \
+               /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_1/*omega_60.00*r_$2_*.solved.h5 \
+               /p/scratch/cjinm11/matuschke1/thesis/2/cube_2pop_1/*omega_90.00*r_$2_*.solved.h5 \
+            -o /p/scratch/cjinm11/matuschke1/thesis/2/4er/$1
+            -v $1
