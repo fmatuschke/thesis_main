@@ -99,16 +99,17 @@ RADIUS_LOGMEAN = args.fiber_radius
 PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
        0.9]  # fiber fraction: PSI * f0 + (1-PSI) * f1
 
+# get positiv spherical segment of htm angles
 PHI, THETA = sphere.htm_sc(2)
-THETA = THETA[np.logical_and(PHI >= 0, PHI <= 0.5 * np.pi)]
-PHI = PHI[np.logical_and(PHI >= 0, PHI <= 0.5 * np.pi)]
-
-PHI = PHI[np.logical_and(THETA >= 0, THETA <= 0.5 * np.pi)]
-THETA = THETA[np.logical_and(THETA >= 0, THETA <= 0.5 * np.pi)]
+mask = np.logical_and(PHI >= 0, PHI <= 0.5 * np.pi, THETA >= 0,
+                      THETA <= 0.5 * np.pi)
+PHI = PHI[mask]
+THETA = THETA[mask]
 
 PARAMETER = list(itertools.product(PSI, zip(PHI, THETA)))
+PARAMETER.append((0.0, (0.0, np.pi / 2)))
 
-PARAMETER.append((0.0, (0.0, 0.0)))
+# print(len(PARAMETER))
 
 if args.start + comm.Get_rank() >= len(PARAMETER):
     logger.info("args.start + comm.Get_rank() > len(PARAMETER)")
@@ -124,8 +125,14 @@ solver.obj_mean_length = RADIUS_LOGMEAN * 2
 solver.obj_min_radius = RADIUS_LOGMEAN * 2
 solver.omp_num_threads = args.num_proc
 
-file_pref = output_name + f"_psi_{psi:.2f}_index_{args.start + comm.Get_rank()}_phi_{phi:.2f}_theta_{theta:.2f}_r_" \
-                            f"{RADIUS_LOGMEAN:.2f}_v0_{SIZE:.0f}_"
+file_pref = f"{output_name}_" \
+            f"psi_{psi:.2f}_" \
+            f"index_{args.start + comm.Get_rank()}_" \
+            f"phi_{np.rad2deg(phi):.2f}_" \
+            f"theta_{np.rad2deg(theta):.2f}_" \
+            f"r_{RADIUS_LOGMEAN:.2f}_" \
+            f"v0_{SIZE:.0f}_"
+
 logger.info(f"file_pref: {file_pref}")
 
 # pick random seeds for fiber population distribution
@@ -141,15 +148,15 @@ fiber_bundles = [
     fastpli.model.sandbox.build.cuboid(
         p=-0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
         q=0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
-        phi=np.deg2rad(0),
-        theta=np.deg2rad(90),
+        phi=0,
+        theta=np.pi / 2,
         seeds=seeds_0,
         radii=rnd_radii_0),
     fastpli.model.sandbox.build.cuboid(
         p=-0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
         q=0.5 * np.array([SIZE + 10 * RADIUS_LOGMEAN] * 3),
-        phi=np.deg2rad(phi),
-        theta=np.deg2rad(theta),
+        phi=phi,
+        theta=theta,
         seeds=seeds_1 + RADIUS_LOGMEAN,
         radii=rnd_radii_1)
 ]

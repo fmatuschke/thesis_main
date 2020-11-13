@@ -17,6 +17,8 @@ def htm(level=0):
     for i, j, k in triangle_indices:
         triangles.append((points[i], points[j], points[k]))
 
+    points = np.unique(np.reshape(triangles, (-1, 3)), axis=0)
+
     for i in range(level):
         new_triangles = []
         w = [None] * 3
@@ -34,13 +36,16 @@ def htm(level=0):
             new_triangles.append(np.array((t[1], w[0], w[2])))
             new_triangles.append(np.array((t[2], w[1], w[0])))
             new_triangles.append(np.array((w[0], w[1], w[2])))
+
         triangles = new_triangles
 
-    # get points from triangle
-    triangles = np.array(triangles)
-    triangles.shape = (-1, 3)
+        # keep points order
+        points_ = np.concatenate((points, np.reshape(triangles, (-1, 3))),
+                                 axis=0)
+        _, idx = np.unique(points_, return_index=True, axis=0)
+        points = points_[np.sort(idx), :]
 
-    return np.unique(triangles, axis=0)
+    return points
 
 
 def htm_sc(level=0):
@@ -62,7 +67,7 @@ if __name__ == "__main__":
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    phi, theta = htm_sc(3)
+    phi, theta = htm_sc(2)
 
     theta = theta[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
     phi = phi[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
@@ -86,7 +91,7 @@ if __name__ == "__main__":
                     c=range(len(phi)),
                     alpha=1,
                     vmin=0,
-                    vmax=len(phi),
+                    vmax=len(phi) - 1,
                     cmap="viridis")
     plt.colorbar(sc)
     ax.set_xlabel('$X$')

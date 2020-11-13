@@ -27,22 +27,24 @@ df = df[df.f1_rot == 0]
 # print(df['epa_dir_diff'].iloc[0])
 # df['epa_dir_diff'] = np.rad2deg(df['epa_dir_diff'])
 
-parameters = list(df[["f0_inc", "omega", "psi",
-                      "model"]].drop_duplicates().iterrows())
+parameters = list(df[["f0_inc", "omega", "psi", "model", "setup",
+                      "species"]].drop_duplicates().iterrows())
 
 for _, p in tqdm.tqdm(parameters):
     f0_inc = p['f0_inc']
     omega = p['omega']
     psi = p['psi']
     model = p['model']
+    setup = p['setup']
+    species = p['species']
 
     for m in [0, 1]:
+        sub = (df.f0_inc == f0_inc) & (df.omega == omega) & (df.psi == psi) & (
+            df.model == model) & (df.setup == setup) & (df.species == species)
         if m:
-            sub = (df.f0_inc == f0_inc) & (df.omega == omega) & (
-                df.psi == psi) & (df.model == model) & (df.m > 0)
+            sub = sub & (df.m > 0)
         else:
-            sub = (df.f0_inc == f0_inc) & (df.omega == omega) & (
-                df.psi == psi) & (df.model == model) & (df.m == 0)
+            sub = sub & (df.m == 0)
 
         df_ = df[sub].copy()
         for col in df_.columns:
@@ -72,17 +74,24 @@ for _, p in tqdm.tqdm(parameters):
                 # data[data > 4.2] = 4.2
                 # df__.epa_ret_diff_rel = data
 
-                # df__.loc[df__.epa_ret_diff_rel == 0, "epa_ret_diff_rel"] = 0.01
-                # df__.loc[df__.data_diff == 0, "epa_ret_diff_rel"] = 0.01
+                df__.loc[df__.epa_ret_diff_rel == 0, "epa_ret_diff_rel"] = 1e-16
+                df__.loc[df__.data_diff == 0, "data_diff"] = 1e-16
+                df__.drop(["voxel_size", "radius", "setup", "species", "model"],
+                          inplace=True,
+                          axis=1)
 
-                df__.to_csv(os.path.join(
-                    args.input, "results",
-                    f"vs_stats_omega_{omega}_psi_{psi}_f0_inc_{f0_inc}_mode_{model}_vs_{vs}_r_{r}_m_{m}.csv"
-                ),
-                            index=False,
-                            float_format='%.9f',
-                            na_rep="nan")
+                # for col in df__.columns:
+                #     if len(df__[col].unique()) == 1:
+                #         df__.drop(col, inplace=True, axis=1)
 
+                df__.to_csv(
+                    os.path.join(
+                        args.input, "results",
+                        f"vs_stats_omega_{omega}_psi_{psi}_f0_inc_{f0_inc}_mode_{model}_species_{species}_setup_{setup}_vs_{vs}_r_{r}_m_{m}.csv"
+                    ),
+                    index=False,
+                    # float_format='%.9f',
+                    na_rep="nan")
 
     # fig, axs = plt.subplots(1, 3, figsize=(20, 10))
     # fig.suptitle(string, fontsize=21)

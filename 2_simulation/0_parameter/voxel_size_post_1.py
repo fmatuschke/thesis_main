@@ -41,6 +41,8 @@ def run(row):
 
     radius = row["radius"]
     model = row["model"]
+    setup = row["setup"]
+    species = row["species"]
     omega = row["omega"]
     psi = row["psi"]
     f0_inc = row["f0_inc"]
@@ -48,16 +50,23 @@ def run(row):
     # n = row["n"]
     # m = row["m"]
 
-    sub = (df.radius == radius) & (df.model == model) & (df.omega == omega) & (
-        df.psi == psi) & (df.f0_inc == f0_inc) & (df.f1_rot == f1_rot)
+    sub = (df.radius == radius) & (df.setup == setup) & (
+        df.species == species) & (df.model == model) & (df.omega == omega) & (
+            df.psi == psi) & (df.f0_inc == f0_inc) & (df.f1_rot == f1_rot)
     #  & (df.n == n) & (df.m == m)
 
     df_ = df[sub]
+    # print(len(df_))
+    # print(df_.n.unique())
+    # print(df_.m.unique())
+    # print(df_.voxel_size.unique())
+    # print(df_.radius.unique())
     # ref = df[sub]
     # ref = ref[ref.m == 0]
     # ref = ref.sort_values(by=['voxel_size'])
     # ref = df_.iloc[0]
 
+    # print(df_.columns)
     for n in df_.n.unique():
         ref = df_[(df_.voxel_size == min(df_.voxel_size.unique())) &
                   (df_.n == n) & (df_.m == 0)]
@@ -81,6 +90,10 @@ def run(row):
                         vs,
                     "radius":
                         radius,
+                    "setup":
+                        setup,
+                    "species":
+                        species,
                     "model":
                         model,
                     "omega":
@@ -123,9 +136,10 @@ if __name__ == "__main__":
 
     df_res = []
 
-    parameters = list(
-        df[["radius", "model", "omega", "psi", "f0_inc",
-            "f1_rot"]].drop_duplicates().iterrows())
+    parameters = list(df[[
+        "radius", "model", "setup", "species", "omega", "psi", "f0_inc",
+        "f1_rot"
+    ]].drop_duplicates().iterrows())
 
     with mp.Pool(processes=args.num_proc) as pool:
         df_res = [

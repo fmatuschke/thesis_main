@@ -73,54 +73,66 @@ def run(file):
         pixel_size = h5f['/'].attrs['pixel_size']
 
         for voxel_size in h5f['simpli']:
-            for model in h5f[f'simpli/{voxel_size}']:
-                for n in h5f[f'simpli/{voxel_size}/{model}']:
-                    h5f_sub = h5f[f'simpli/{voxel_size}/{model}/{n}']
-                    for m in h5f_sub[f'simulation/optic/0/']:
-                        # if h5f_sub[
-                        #         f'analysis/epa/0/transmittance/{m}'].size != 1:
-                        #     raise ValueError("FOOOO")
-                        df.append(
-                            pd.DataFrame(
-                                [[
-                                    float(voxel_size),
-                                    radius,
-                                    v0,
-                                    model,
-                                    omega,
-                                    psi,
-                                    f0_inc,
-                                    f1_rot,
-                                    pixel_size,
-                                    int(n),
-                                    int(m),
-                                    # h5f_sub['simulation/data/0'][...],
-                                    h5f_sub[f'simulation/optic/0/{m}'][...],
-                                    h5f_sub[f'analysis/epa/0/transmittance/{m}']
-                                    [...],
-                                    h5f_sub[f'analysis/epa/0/direction/{m}'][
-                                        ...],
-                                    h5f_sub[f'analysis/epa/0/retardation/{m}'][
-                                        ...],
-                                ]],
-                                columns=[
-                                    "voxel_size",
-                                    "radius",
-                                    "v0",
-                                    "model",
-                                    "omega",
-                                    "psi",
-                                    "f0_inc",
-                                    "f1_rot",
-                                    "pixel_size",
-                                    "n",
-                                    "m",
-                                    #  "data",
-                                    "optic",
-                                    "epa_trans",
-                                    "epa_dir",
-                                    "epa_ret",
-                                ]))
+            for setup in h5f[f'simpli/{voxel_size}']:
+                for species in h5f[f'simpli/{voxel_size}/{setup}']:
+                    for model in h5f[f'simpli/{voxel_size}/{setup}/{species}']:
+                        for n in h5f[
+                                f'simpli/{voxel_size}/{setup}/{species}/{model}']:
+                            h5f_sub = h5f[
+                                f'simpli/{voxel_size}/{setup}/{species}/{model}/{n}']
+                            for m in h5f_sub[f'simulation/optic/0/']:
+                                # if h5f_sub[
+                                #         f'analysis/epa/0/transmittance/{m}'].size != 1:
+                                #     raise ValueError("FOOOO")
+                                df.append(
+                                    pd.DataFrame(
+                                        [[
+                                            float(voxel_size),
+                                            radius,
+                                            v0,
+                                            setup,
+                                            species,
+                                            model,
+                                            omega,
+                                            psi,
+                                            f0_inc,
+                                            f1_rot,
+                                            pixel_size,
+                                            int(n),
+                                            int(m),
+                                            # h5f_sub['simulation/data/0'][...],
+                                            h5f_sub[f'simulation/optic/0/{m}'][
+                                                ...],
+                                            h5f_sub[
+                                                f'analysis/epa/0/transmittance/{m}']
+                                            [...],
+                                            h5f_sub[
+                                                f'analysis/epa/0/direction/{m}']
+                                            [...],
+                                            h5f_sub[
+                                                f'analysis/epa/0/retardation/{m}']
+                                            [...],
+                                        ]],
+                                        columns=[
+                                            "voxel_size",
+                                            "radius",
+                                            "v0",
+                                            "setup",
+                                            "species",
+                                            "model",
+                                            "omega",
+                                            "psi",
+                                            "f0_inc",
+                                            "f1_rot",
+                                            "pixel_size",
+                                            "n",
+                                            "m",
+                                            #  "data",
+                                            "optic",
+                                            "epa_trans",
+                                            "epa_dir",
+                                            "epa_ret",
+                                        ]))
 
     return pd.concat(df, ignore_index=True)
 

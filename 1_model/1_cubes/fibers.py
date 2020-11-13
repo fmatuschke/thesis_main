@@ -51,3 +51,37 @@ def ori_from_fbs(fbs, f0_inc=0, f1_rot=0, cut=None):
 def ori_from_file(file, f0_inc, f1_rot, cut=None):
     fbs = fastpli.io.fiber_bundles.load(file)
     return ori_from_fbs(fbs, f0_inc, f1_rot, cut)
+
+
+def vec_from_fbs(fbs, f0_inc=0, f1_rot=0, cut=None):
+    fbs = rotate(fbs, f0_inc, f1_rot)
+    if cut:
+        if isinstance(cut, (int, float)):
+            cut = [[-cut / 2] * 3, [cut / 2] * 3]
+        fbs = fastpli.objects.fiber_bundles.Cut(fbs, cut)
+
+    vecs = []
+    for fb in fbs:
+        vec = []
+        for f in fb:
+            if f.shape[0] <= 1:
+                continue
+
+            vec.extend(f[1:, :-1] - f[0:-1, :-1])
+            # print(f[1:, :-1], f[0:-1, :-1], f[1:, :-1] - f[0:-1, :-1])
+
+        vec = np.atleast_2d(np.array(vec))
+
+        # if vec.size > 0:
+        #     vec[vec[:, 0] < 0, :] = -vec[vec[:, 0] < 0, :]
+        vecs.append(vec)
+
+    if len(vecs) == 1:
+        vecs.append(np.empty(shape=(0, 0)))
+
+    return vecs
+
+
+def vec_from_file(file, f0_inc, f1_rot, cut=None):
+    fbs = fastpli.io.fiber_bundles.load(file)
+    return vec_from_fbs(fbs, f0_inc, f1_rot, cut)
