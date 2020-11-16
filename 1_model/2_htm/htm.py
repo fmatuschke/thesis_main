@@ -101,8 +101,10 @@ PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
 
 # get positiv spherical segment of htm angles
 PHI, THETA = sphere.htm_sc(2)
-mask = np.logical_and(PHI >= 0, PHI <= 0.5 * np.pi, THETA >= 0,
-                      THETA <= 0.5 * np.pi)
+mask = np.logical_and(
+    PHI >= 0,
+    np.logical_and(PHI <= 0.5 * np.pi,
+                   np.logical_and(THETA >= 0, THETA <= 0.5 * np.pi)))
 PHI = PHI[mask]
 THETA = THETA[mask]
 
