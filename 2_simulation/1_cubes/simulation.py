@@ -120,6 +120,10 @@ if __name__ == "__main__":
         logger.info(f"input file: {file}")
         logger.info(f"output file: {file_name}")
 
+        if os.path.isfile(file_name + '.h5'):
+            logger.info(f"file exists : {file_name}.h5")
+            return
+
         with h5py.File(file, 'r') as h5f:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
             psi = h5f['/'].attrs["psi"]
