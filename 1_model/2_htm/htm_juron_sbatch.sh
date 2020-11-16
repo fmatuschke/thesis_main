@@ -9,7 +9,7 @@ if [ $# -eq 0 ]
 fi
 
 for r in 10 5 2 1 0.5; do
-   N=226
+   N=136
    num_p=20
    sum=0
    for ((i=0; i<$N; i=i+$num_p))
