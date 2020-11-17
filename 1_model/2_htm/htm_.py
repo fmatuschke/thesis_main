@@ -130,7 +130,6 @@ for psi, (phi, theta) in tqdm(PARAMETER[args.start +
 
     file_pref = f"{output_name}_" \
                 f"psi_{psi:.2f}_" \
-                f"index_{args.start + comm.Get_rank()}_" \
                 f"phi_{np.rad2deg(phi):.2f}_" \
                 f"theta_{np.rad2deg(theta):.2f}_" \
                 f"r_{RADIUS_LOGMEAN:.2f}_" \
@@ -204,8 +203,9 @@ for psi, (phi, theta) in tqdm(PARAMETER[args.start +
     # Run Solver
     logger.info(f"run solver")
     start_time = time.time()
-    solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-        solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
+    solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
+        solver.fiber_bundles, [[-0.5 * (SIZE + 10 * RADIUS_LOGMEAN)] * 3,
+                               [0.5 * (SIZE + 10 * RADIUS_LOGMEAN)] * 3])
     for i in tqdm(range(1, args.max_steps + 1), leave=False):
         if solver.step():
             break
@@ -236,8 +236,10 @@ for psi, (phi, theta) in tqdm(PARAMETER[args.start +
                         h5f['/'].attrs['time'] = time.time() - start_time
 
             if i != args.max_steps:
-                solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-                    solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
+                solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
+                    solver.fiber_bundles,
+                    [[-0.5 * (SIZE + 10 * RADIUS_LOGMEAN)] * 3,
+                     [0.5 * (SIZE + 10 * RADIUS_LOGMEAN)] * 3])
 
     overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
 
