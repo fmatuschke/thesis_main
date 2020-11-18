@@ -35,10 +35,23 @@ gt_dict = manager.dict()
 
 def calcGroundTruth(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot = parameter
+    psi, omega, f0_inc, f1_rot, radius = parameter
 
     # ground truth
-    sub = (df_org.psi == psi) & (df_org.omega == omega)
+    sub = (df_org.psi == psi) & (df_org.omega == omega) & (df_org.r == radius)
+
+    if len(df_org[sub]) != 1:
+        df_ = df_org[sub]
+        for col in df_.columns:
+            try:
+                if len(df_[col].unique()) == 1:
+                    df_.drop(col, inplace=True, axis=1)
+            except:
+                pass
+        print(df_.columns)
+        print(len(df_))
+        print("FOOO:3")
+        exit(1)
 
     phi, theta = fibers.ori_from_file(
         f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/{df_org[sub].fiber.iloc[0]}",
@@ -46,37 +59,28 @@ def calcGroundTruth(parameter):
     sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
     gt_dict[
-        f'f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}'] = sh1
-
-    # return {
-    #     f'f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi.2f}':
-    #         sh1
-    # }
+        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}'] = sh1
 
 
 def run(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot, microscope, species, model = parameter
+    psi, omega, f0_inc, f1_rot, microscope, species, model, radius = parameter
     sub = (df.psi == psi) & (df.omega == omega) & (df.f0_inc == f0_inc) & (
         df.f1_rot == f1_rot) & (df.microscope == microscope) & (
-            df.species == species) & (df.model == model)
+            df.species == species) & (df.model == model) & (df.r == radius)
 
     if len(df[sub]) != 1:
-        print("FOOO")
-        exit(1)
+        print("FOOO:2")
+        return pd.DataFrame()
 
     phi = df[sub].explode("rofl_dir").rofl_dir.to_numpy(dtype=float)
     theta = np.pi / 2 - df[sub].explode("rofl_inc").rofl_inc.to_numpy(
         dtype=float)
     sh0 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
-    # # ground truth
-    # sub = (df_org.psi == psi) & (df_org.omega == omega)
-    # phi, theta = fibers.ori_from_file(df_org[sub].fiber.iloc[0], f0_inc, f1_rot)
-    # sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
-
+    # ground truth
     sh1 = gt_dict[
-        f'f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
+        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
 
     # ACC
     acc = helper.schilling.angular_correlation_coefficient(sh0, sh1)
@@ -86,6 +90,7 @@ def run(parameter):
             'microscope': microscope,
             'species': species,
             'model': model,
+            'radius': radius,
             'f0_inc': f0_inc,
             'f1_rot': f1_rot,
             'omega': omega,
@@ -104,24 +109,29 @@ if __name__ == "__main__":
         f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_1/cube_2pop.pkl"
     )  # TODO: same number as simulation
 
-    df_org = df_org[df_org.r == df.r.unique()[0]]
+    # df_org = df_org[df_org.r == df.r.unique()[0]]
     df_org = df_org[df_org.state != "init"]
     if len(df_org) == 0:
-        print("FOOO")
-        exit(1)
+        print("FOOO:1")
+        sys.exit(1)
 
-    # # TEST
-    # df = df[df.omega == 10]
-    # df_org = df_org[df_org.omega == 10]
+    # TEST
+    # df = df[df.omega == 30]
+    # df_org = df_org[df_org.omega == 30]
+    # df = df[df.r == 2.0]
+    # df_org = df_org[df_org.r == 2.0]
 
     # GROUND TRUTH sh coeff
     parameters_gt = []
-    for psi in df.psi.unique():
-        for omega in df[df.psi == psi].omega.unique():
-            df_sub = df[(df.psi == psi) & (df.omega == omega)]
-            for f0_inc in df_sub.f0_inc.unique():
-                for f1_rot in df_sub[df_sub.f0_inc == f0_inc].f1_rot.unique():
-                    parameters_gt.append((psi, omega, f0_inc, f1_rot))
+    for radius in df.r.unique():
+        for psi in df.psi.unique():
+            for omega in df[df.psi == psi].omega.unique():
+                df_sub = df[(df.psi == psi) & (df.omega == omega)]
+                for f0_inc in df_sub.f0_inc.unique():
+                    for f1_rot in df_sub[df_sub.f0_inc ==
+                                         f0_inc].f1_rot.unique():
+                        parameters_gt.append(
+                            (psi, omega, f0_inc, f1_rot, radius))
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
@@ -133,17 +143,19 @@ if __name__ == "__main__":
 
     # schilling
     parameters = []
-    for microscope in df.microscope.unique():
-        for species in df.species.unique():
-            for model in df.model.unique():
-                for psi in df.psi.unique():
-                    for omega in df[df.psi == psi].omega.unique():
-                        df_sub = df[(df.psi == psi) & (df.omega == omega)]
-                        for f0_inc in df_sub.f0_inc.unique():
-                            for f1_rot in df_sub[df_sub.f0_inc ==
-                                                 f0_inc].f1_rot.unique():
-                                parameters.append((psi, omega, f0_inc, f1_rot,
-                                                   microscope, species, model))
+    for radius in df.r.unique():
+        for microscope in df.microscope.unique():
+            for species in df.species.unique():
+                for model in df.model.unique():
+                    for psi in df.psi.unique():
+                        for omega in df[df.psi == psi].omega.unique():
+                            df_sub = df[(df.psi == psi) & (df.omega == omega)]
+                            for f0_inc in df_sub.f0_inc.unique():
+                                for f1_rot in df_sub[df_sub.f0_inc ==
+                                                     f0_inc].f1_rot.unique():
+                                    parameters.append(
+                                        (psi, omega, f0_inc, f1_rot, microscope,
+                                         species, model, radius))
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [

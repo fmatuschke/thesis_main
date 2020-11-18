@@ -154,8 +154,12 @@ def run(parameter):
 
         fiber_bundles = models.rotate(fiber_bundles, f0_inc, f1_rot)
 
+        nstep = int(np.round(np.sqrt(args.repeat)))
+        step = 60 / nstep  # 60er cube
         for n in tqdm.tqdm(list(range(args.repeat))):
-            rnd_dim_origin = np.random.uniform(-30, 30 - 2 * PIXEL_SIZE, [2])
+            # rnd_dim_origin = np.random.uniform(-30, 30 - 2 * PIXEL_SIZE, [2])
+            rnd_dim_origin = np.array(
+                (-30 + (n % nstep) * step, -30 + (n // nstep) * step))
             logger.info(f"n_repeat: {n}")
             for voxel_size in VOXEL_SIZES:
                 logger.info(f"voxel_size: {voxel_size}")
@@ -164,8 +168,8 @@ def run(parameter):
                     logger.info(f"species: {species}")
                     for dn, model in [(-0.004, 'p'), (0.008, 'r')]:
                         logger.info(f"model: {model}")
-                        for setup, gain, intensity in [('LAP', 3, 35000),
-                                                       ('PM', 0.1175, 8000)]:
+                        for setup, gain, intensity in [('PM', 0.1175, 8000)]:
+                            # ('LAP', 3, 35000), PIXEL_SIZE!!!
                             logger.info(f"setup: {setup}")
 
                             # Setup Simpli
@@ -198,7 +202,7 @@ def run(parameter):
                             logger.info("memory: " +
                                         str(round(simpli.memory_usage(), 2)) +
                                         'MB')
-                            if simpli.memory_usage() * args.num_proc > 230000:
+                            if simpli.memory_usage() * args.num_proc > 100000:
                                 print(
                                     str(round(simpli.memory_usage(), 2)) + 'MB')
                                 return

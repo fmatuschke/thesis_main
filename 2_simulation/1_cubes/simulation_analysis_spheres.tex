@@ -20,9 +20,10 @@
 \def\setup{__MICROSCOPE__}
 \def\species{__SPECIES__}
 \def\model{__MODEL__}
+\def\radius{__RADIUS__}
 % 
 \tikzexternalize[prefix=./tikz/,
-                 figure name=\setup_\species_\model_,
+                 figure name=\radius_\setup_\species_\model_,
                  mode=list and make, 
                  ]
 % 
@@ -30,64 +31,68 @@
 %
 \begin{page}
 \resizebox{\textwidth}{!}{
-\foreach \fnull in {45.00,90.00} {
-   \input{\path/sphere_\setup_species_\species_model_\model_psi_0.30_f0_inc_\fnull.tikz}
+\foreach \fnull in {0.00, 30.00,60.00,90.00} {
+   \input{\path/sphere_r_\radius_\setup_species_\species_model_\model_psi_0.00_f0_inc_\fnull.tikz}
 }}
-% \resizebox{\textwidth}{!}{
-% \foreach \fnull in {45.00,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.60_f0_inc_\fnull.tikz}
-% }}
-% \resizebox{\textwidth}{!}{
-% \foreach \fnull in {45.00,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.90_f0_inc_\fnull.tikz}
-% }}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0.00, 30.00,60.00,90.00} {
+   \input{\path/sphere_r_\radius_\setup_species_\species_model_\model_psi_0.30_f0_inc_\fnull.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0.00, 30.00,60.00,90.00} {
+   \input{\path/sphere_r_\radius_\setup_species_\species_model_\model_psi_0.60_f0_inc_\fnull.tikz}
+}}
+\resizebox{\textwidth}{!}{
+\foreach \fnull in {0.00, 30.00,60.00,90.00} {
+   \input{\path/sphere_r_\radius_\setup_species_\species_model_\model_psi_0.90_f0_inc_\fnull.tikz}
+}}
 \end{page}
 % 
-\begin{page}
-\resizebox{\textwidth}{!}{
-\foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-   \input{\path/sphere_\setup_species_\species_model_\model_psi_0.00_f0_inc_0.00.tikz}
-}}
-\resizebox{\textwidth}{!}{
-\foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-   \input{\path/sphere_\setup_species_\species_model_\model_psi_0.10_f0_inc_\fnull.tikz}
-}}
-\resizebox{\textwidth}{!}{
-\foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-   \input{\path/sphere_\setup_species_\species_model_\model_psi_0.20_f0_inc_\fnull.tikz}
-}}
+% \begin{page}
 % \resizebox{\textwidth}{!}{
 % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.30_f0_inc_\fnull.tikz}
+%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.00_f0_inc_0.00.tikz}
 % }}
 % \resizebox{\textwidth}{!}{
 % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.40_f0_inc_\fnull.tikz}
+%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.10_f0_inc_\fnull.tikz}
 % }}
 % \resizebox{\textwidth}{!}{
 % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.50_f0_inc_\fnull.tikz}
+%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.20_f0_inc_\fnull.tikz}
 % }}
-% \resizebox{\textwidth}{!}{
-% \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.60_f0_inc_\fnull.tikz}
-% }}
-% \resizebox{\textwidth}{!}{
-% \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.70_f0_inc_\fnull.tikz}
-% }}
-% \resizebox{\textwidth}{!}{
-% \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.80_f0_inc_\fnull.tikz}
-% }}
-% \resizebox{\textwidth}{!}{
-% \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.90_f0_inc_\fnull.tikz}
-% }}
-% \resizebox{\textwidth}{!}{
-% \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
-%    \input{\path/sphere_\setup_species_\species_model_\model_psi_1.00_f0_inc_\fnull.tikz}
-% }}
-\end{page}
-% \\
+% % \resizebox{\textwidth}{!}{
+% % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
+% %    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.30_f0_inc_\fnull.tikz}
+% % }}
+% % \resizebox{\textwidth}{!}{
+% % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
+% %    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.40_f0_inc_\fnull.tikz}
+% % }}
+% % \resizebox{\textwidth}{!}{
+% % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
+% %    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.50_f0_inc_\fnull.tikz}
+% % }}
+% % \resizebox{\textwidth}{!}{
+% % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
+% %    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.60_f0_inc_\fnull.tikz}
+% % }}
+% % \resizebox{\textwidth}{!}{
+% % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
+% %    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.70_f0_inc_\fnull.tikz}
+% % }}
+% % \resizebox{\textwidth}{!}{
+% % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
+% %    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.80_f0_inc_\fnull.tikz}
+% % }}
+% % \resizebox{\textwidth}{!}{
+% % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
+% %    \input{\path/sphere_\setup_species_\species_model_\model_psi_0.90_f0_inc_\fnull.tikz}
+% % }}
+% % \resizebox{\textwidth}{!}{
+% % \foreach \fnull in {0.00,22.50,45.00,67.50,90.00} {
+% %    \input{\path/sphere_\setup_species_\species_model_\model_psi_1.00_f0_inc_\fnull.tikz}
+% % }}
+% \end{page}
+% % \\
 \end{document}

@@ -108,8 +108,9 @@ if __name__ == "__main__":
         for f1_rot in fibers.omega_rotations(omega, 15):
             parameter.append((file, f0_inc, f1_rot))
 
-    if (comm.Get_rank() + args.start) < len(parameter):
-        file, f0_inc, f1_rot = parameter[comm.Get_rank() + args.start]
+    for file, f0_inc, f1_rot in parameter[comm.Get_rank() +
+                                          args.start::comm.Get_size()]:
+        # file, f0_inc, f1_rot = parameter[comm.Get_rank() + args.start]
 
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
@@ -122,7 +123,7 @@ if __name__ == "__main__":
 
         if os.path.isfile(file_name + '.h5'):
             logger.info(f"file exists : {file_name}.h5")
-            return
+            continue
 
         with h5py.File(file, 'r') as h5f:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
