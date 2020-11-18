@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def htm(level=0):
+def htm(level=0, sort=True):
     '''
     Hierarchical Triangular Mesh
     https://arxiv.org/pdf/cs/0701164.pdf
@@ -39,17 +39,21 @@ def htm(level=0):
 
         triangles = new_triangles
 
-        # keep points order
-        points_ = np.concatenate((points, np.reshape(triangles, (-1, 3))),
-                                 axis=0)
-        _, idx = np.unique(points_, return_index=True, axis=0)
-        points = points_[np.sort(idx), :]
+        if sort:
+            # keep points order
+            points_ = np.concatenate((points, np.reshape(triangles, (-1, 3))),
+                                     axis=0)
+            _, idx = np.unique(points_, return_index=True, axis=0)
+            points = points_[np.sort(idx), :]
+
+    if not sort:
+        points = np.unique(np.reshape(triangles, (-1, 3)), axis=0)
 
     return points, triangles
 
 
-def htm_sc(level=0):
-    points, _ = htm(level)
+def htm_sc(level=0, sort=True):
+    points, _ = htm(level, sort)
 
     phi = np.arctan2(points[:, 1], points[:, 0])
     theta = np.arccos(points[:, 2])  # length is 1
@@ -92,99 +96,109 @@ def to_stl(file_name, data):
 
 if __name__ == "__main__":
 
-    # import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 
-    # # print(htm(1))
-    # # print(htm_sc(1))
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
+    phi, theta = htm_sc(3, False)
 
-    # phi, theta = htm_sc(2)
+    theta = theta[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
+    phi = phi[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
+    phi = phi[np.logical_and(theta >= 0, theta <= 0.5 * np.pi)]
+    theta = theta[np.logical_and(theta >= 0, theta <= 0.5 * np.pi)]
 
-    # theta = theta[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
-    # phi = phi[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
-    # phi = phi[np.logical_and(theta >= 0, theta <= 0.5 * np.pi)]
-    # theta = theta[np.logical_and(theta >= 0, theta <= 0.5 * np.pi)]
+    # ax.plot_surface(x, y, z, facecolors=plt.cm.viridis(data_i))
 
-    # # ax.plot_surface(x, y, z, facecolors=plt.cm.viridis(data_i))
+    print(phi.shape)
 
-    # print(phi.shape)
+    theta = theta[phi.argsort(kind='mergesort')]
+    phi = phi[phi.argsort(kind='mergesort')]
+    print(np.rad2deg(theta))
+    print(np.rad2deg(phi))
+    print((-theta).argsort())
+    phi = np.flip(phi[(-theta).argsort(kind='mergesort')])
+    theta = np.flip(theta[(-theta).argsort(kind='mergesort')])
+    print(np.rad2deg(theta))
+    print(np.rad2deg(phi))
 
-    # r = 1.0
-    # x = np.multiply(np.cos(phi), np.sin(theta)) * r
-    # y = np.multiply(np.sin(phi), np.sin(theta)) * r
-    # z = np.cos(theta) * r
+    r = 1.0
+    x = np.multiply(np.cos(phi), np.sin(theta)) * r
+    y = np.multiply(np.sin(phi), np.sin(theta)) * r
+    z = np.cos(theta) * r
 
-    # sc = ax.scatter(x,
-    #                 y,
-    #                 z,
-    #                 marker='o',
-    #                 s=50,
-    #                 c=range(len(phi)),
-    #                 alpha=1,
-    #                 vmin=0,
-    #                 vmax=len(phi) - 1,
-    #                 cmap="viridis")
-    # plt.colorbar(sc)
-    # ax.set_xlabel('$X$')
-    # ax.set_ylabel('$Y$')
-    # ax.view_init(30, 30)
-    # plt.show()
+    color = list(range(len(phi)))
+    # color.reverse()
 
-    for j in range(5):
-        p, t = htm(j)
-        t = np.array(t)
+    sc = ax.scatter(x,
+                    y,
+                    z,
+                    marker='o',
+                    s=50,
+                    c=color,
+                    alpha=1,
+                    vmin=0,
+                    vmax=len(phi) - 1,
+                    cmap="viridis")
+    plt.colorbar(sc)
+    ax.set_xlabel('$X$')
+    ax.set_ylabel('$Y$')
+    ax.view_init(30, 30)
+    plt.show()
 
-        data = []
-        for i in t:
-            tmp = []
-            for p in i:
-                tmp.append(p)
-            # tmp.append(np.cross(i[1] - i[0], i[2] - i[0]))
-            data.append(np.array(tmp))
+    # for j in range(5):
+    #     p, t = htm(j)
+    #     t = np.array(t)
 
-        to_stl(f"htm_{j}.stl", data)
+    #     data = []
+    #     for i in t:
+    #         tmp = []
+    #         for p in i:
+    #             tmp.append(p)
+    #         # tmp.append(np.cross(i[1] - i[0], i[2] - i[0]))
+    #         data.append(np.array(tmp))
 
-    with open("test.tex", "w") as file:
-        p, t = htm(0)
-        t = np.array(t)
+    #     to_stl(f"htm_{j}.stl", data)
 
-        for i in range(t.shape[0]):
-            if np.sum(t[i, :, 2] < 0) > 1:
-                continue
+    # with open("test.tex", "w") as file:
+    #     p, t = htm(0)
+    #     t = np.array(t)
 
-            if np.sum(t[i, :, 2] <= 0) == 3:
-                continue
+    #     for i in range(t.shape[0]):
+    #         if np.sum(t[i, :, 2] < 0) > 1:
+    #             continue
 
-            file.write(
-                f"\draw[thick, black] ({t[i,0,0]:.3f}, {t[i,0,1]:.3f}, {t[i,0,2]:.3f}) -- ({t[i,1,0]:.3f}, {t[i,1,1]:.3f}, {t[i,1,2]:.3f}) -- ({t[i,2,0]:.3f}, {t[i,2,1]:.3f}, {t[i,2,2]:.3f}) -- cycle;\n"
-            )
+    #         if np.sum(t[i, :, 2] <= 0) == 3:
+    #             continue
 
-        for i in range(p.shape[0]):
-            if p[i, 2] < 0:
-                continue
-            file.write(
-                f"\\fill ({p[i,0]:.3f}, {p[i,1]:.3f}, {p[i,2]:.3f}) circle (0.01);\n"
-            )
+    #         file.write(
+    #             f"\draw[thick, black] ({t[i,0,0]:.3f}, {t[i,0,1]:.3f}, {t[i,0,2]:.3f}) -- ({t[i,1,0]:.3f}, {t[i,1,1]:.3f}, {t[i,1,2]:.3f}) -- ({t[i,2,0]:.3f}, {t[i,2,1]:.3f}, {t[i,2,2]:.3f}) -- cycle;\n"
+    #         )
 
-        p, t = htm(1)
-        t = np.array(t)
+    #     for i in range(p.shape[0]):
+    #         if p[i, 2] < 0:
+    #             continue
+    #         file.write(
+    #             f"\\fill ({p[i,0]:.3f}, {p[i,1]:.3f}, {p[i,2]:.3f}) circle (0.01);\n"
+    #         )
 
-        for i in range(t.shape[0]):
-            if np.sum(t[i, :, 2] < 0) > 1:
-                continue
+    #     p, t = htm(1)
+    #     t = np.array(t)
 
-            if np.sum(t[i, :, 2] <= 0) == 3:
-                continue
+    #     for i in range(t.shape[0]):
+    #         if np.sum(t[i, :, 2] < 0) > 1:
+    #             continue
 
-            file.write(
-                f"\draw[dashed, black] ({t[i,0,0]:.3f}, {t[i,0,1]:.3f}, {t[i,0,2]:.3f}) -- ({t[i,1,0]:.3f}, {t[i,1,1]:.3f}, {t[i,1,2]:.3f}) -- ({t[i,2,0]:.3f}, {t[i,2,1]:.3f}, {t[i,2,2]:.3f}) -- cycle;\n"
-            )
+    #         if np.sum(t[i, :, 2] <= 0) == 3:
+    #             continue
 
-        for i in range(p.shape[0]):
-            if p[i, 2] < 0:
-                continue
-            file.write(
-                f"\\fill ({p[i,0]:.3f}, {p[i,1]:.3f}, {p[i,2]:.3f}) circle (0.01);\n"
-            )
+    #         file.write(
+    #             f"\draw[dashed, black] ({t[i,0,0]:.3f}, {t[i,0,1]:.3f}, {t[i,0,2]:.3f}) -- ({t[i,1,0]:.3f}, {t[i,1,1]:.3f}, {t[i,1,2]:.3f}) -- ({t[i,2,0]:.3f}, {t[i,2,1]:.3f}, {t[i,2,2]:.3f}) -- cycle;\n"
+    #         )
+
+    #     for i in range(p.shape[0]):
+    #         if p[i, 2] < 0:
+    #             continue
+    #         file.write(
+    #             f"\\fill ({p[i,0]:.3f}, {p[i,1]:.3f}, {p[i,2]:.3f}) circle (0.01);\n"
+    #         )
