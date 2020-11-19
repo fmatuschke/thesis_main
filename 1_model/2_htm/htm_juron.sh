@@ -20,4 +20,4 @@ export OMP_NUM_THREADS
 mpirun /p/project/cjinm11/Private/matuschke1/thesis/env-juron/bin/python3 \
    -u -m mpi4py /p/project/cjinm11/Private/matuschke1/thesis/1_model/2_htm/htm.py \
    -o /p/scratch/cjinm11/matuschke1/thesis/1/$4 \
-   -r $3 -v 105 -n 100000 -p $Num --start $2 --time 24
+   -r $3 -v 60 -n 100000 -p $Num --start $2 --time 24
