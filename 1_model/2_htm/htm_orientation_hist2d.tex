@@ -16,11 +16,11 @@
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
 % 
-\def\datapath{output/cube_2pop_1}
+\def\datapath{output/htm_}
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\radiusvalue{1.0}
+\def\radiusvalue{1.00}
 % 
 \def\deltax{7}
 \def\deltay{6}
@@ -28,15 +28,14 @@
 \begin{document}
 \pgfplotsset{colormap/Set1}
 % 
-% \foreach \omegavalues/\psivalues [count=\pp] in {{60.0}/{0.6}}{
-% \foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9}}{
-\foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9},{0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
+% \foreach \omegavalue/\thetavalue/\phivalue [count=\i] in {{0.00/90.00/0.00},{45.00/90.00/45.00},{90.00/90.00/90.00}} {
+% \foreach \omegavalue/\thetavalue/\phivalue [count=\i] in {{0.00/90.00/0.00},{45.00/90.00/45.00},{90.00/90.00/90.00},{45.00/45.00/0.00},{90.00/45.00/90.00},{90.00/0.00/0.00}} {
 \begin{tikzpicture}
 % 
 \pgfplotsset{every tick label/.append style={font=\footnotesize}}
 % 
-\foreach \omegavalue [count=\i] in \omegavalues {
-\foreach \psivalue [count=\j] in \psivalues {
+\foreach \omegavalue/\thetavalue/\phivalue [count=\i] in {{0.00/90.00/0.00},{45.00/90.00/45.00},{90.00/90.00/90.00}} {
+\foreach \psivalue [count=\j] in {0.30,0.60,0.90}  {
    \begin{scope}[shift={(\j*\deltax,-\i*\deltay)}, local bounding box=\i\j]
 %    
 \begin{scope}[local bounding box=bb]
@@ -68,16 +67,16 @@
     % }
     % /pgf/number format/sci subscript
 ]
-\addplot3 [surf] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat};
+\addplot3 [surf] file {\datapath/hist/htm_psi_\psivalue_theta_\thetavalue_phi_\phivalue_r_\radiusvalue_.dat};
 \end{polaraxis}
 \end{scope}
 \begin{scope}[]
 \ifthenelse{\i=1}{\node[anchor=south] at (bb.north) {$\Psi = \psivalue$};}{}
-\ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (bb.west) {$\Omega = \SI{\omegavalue}{\degree}$};}{}
+\ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (bb.west) {$\thetavalue/\phivalue$};}{}
 \end{scope}
 \end{scope}
 }}
 \end{tikzpicture}
-}
+% }
 % 
 \end{document}

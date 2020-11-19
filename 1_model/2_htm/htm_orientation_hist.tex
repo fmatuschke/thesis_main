@@ -16,7 +16,7 @@
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
 % 
-\def\datapath{output/cube_2pop_1}
+\def\datapath{output/htm_}
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
@@ -26,15 +26,13 @@
 \begin{document}
 \pgfplotsset{colormap/Set1}
 % 
-% \foreach \omegavalues/\psivalues [count=\pp] in {{60.0}/{0.6}}{
-% \foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9}}{
-\foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9},{0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
 \begin{tikzpicture}
 % 
 \pgfplotsset{every tick label/.append style={font=\footnotesize}}
 % 
-\foreach \omegavalue [count=\i] in \omegavalues {
-\foreach \psivalue [count=\j] in \psivalues {
+\foreach \omegavalue/\thetavalue/\phivalue [count=\i] in {{0.00/90.00/0.00},{45.00/90.00/45.00},{90.00/90.00/90.00}} {
+% \foreach \omegavalue/\thetavalue/\phivalue [count=\i] in {{0.00/90.00/0.00},{45.00/90.00/45.00},{90.00/90.00/90.00},{45.00/45.00/0.00},{90.00/45.00/90.00},{90.00/0.00/0.00}} {
+\foreach \psivalue [count=\j] in {0.30,0.60,0.90} {
    \begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
    % 
    % DIRECTION
@@ -55,9 +53,10 @@
    ]
    \foreach \radius in {0.50,1.00,2.00} {
       \foreach \state in {init, solved} {
-      \addplot+[]       
-         table [x=x, y=r_\radius_s_\state_phi_h, col sep = comma]
-            {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_.csv} \closedcycle;
+         % \directlua{tex.print('\string\\message{\datapath/hist/htm_psi_\psivalue_theta_\thetavalue_phi_\phivalue_.csv}')}
+         \addplot+[]       
+            table [x=x, y=r_\radius_\state_phi_h, col sep = comma]
+               {\datapath/hist/htm_psi_\psivalue_theta_\thetavalue_phi_\phivalue_.csv} \closedcycle;
         
    }}
    \node[] at (axis cs:90,1.25) {\footnotesize 90};
@@ -87,20 +86,20 @@
    \foreach \radius in {0.50,1.00,2.00} {
       \foreach \state in {init, solved} {
       \addplot+[]
-         table [x expr=\thisrow{x}+180, y=r_\radius_s_\state_incl_h, col sep = comma] 
-            {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_.csv} \closedcycle;
+         table [x expr=\thisrow{x}+180, y=r_\radius_\state_incl_h, col sep = comma] 
+            {\datapath/hist/htm_psi_\psivalue_theta_\thetavalue_phi_\phivalue_.csv} \closedcycle;
    }}
    \begin{scope}[overlay]
-   \ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (axis description cs:-0.25,0.5) {$\Omega = \SI{\omegavalue}{\degree}$};}{}
+   \ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (axis description cs:-0.25,0.5) {$\Omega=\SI{\phivalue}{\degree}$};}{}
    \end{scope}
    \end{polaraxis}
    \end{scope}
    % 
    % IMAGE
-  \node[inner sep=0pt, anchor=south east] at (\i\j.south east)
-      {\includegraphics[trim=50 42 34 42, clip, width=1.25cm]
-      % {\includegraphics[trim=120 55 90 130, clip, width=1.25cm]
-      {\datapath/images/cube_2pop_psi_\psivalue0_omega_\omegavalue0_r_2.00_v0_105_.solved.png}};
+%   \node[inner sep=0pt, anchor=south east] at (\i\j.south east)
+%       {\includegraphics[trim=50 42 34 42, clip, width=1.25cm]
+%       % {\includegraphics[trim=120 55 90 130, clip, width=1.25cm]
+%       {\datapath/images/cube_2pop_psi_\psivalue0_omega_\omegavalue0_r_2.00_v0_105_.solved.png}};
    % 
    \node[] at ($(\i\j.north) - (-0.6,0.25) $) {\footnotesize$\varphi$};
    \node[] at ($(\i\j.north) - (0.6,0.25) $) {\footnotesize$\alpha$};
@@ -110,14 +109,14 @@
    \ifthenelse{\i=1 \AND \j=1}{\coordinate (A) at (\i\j.north west);}{}
    \coordinate (B) at (\i\j.south east);
 }}
-% 
+% % 
 % LEGEND
 \begin{scope}[local bounding box=bbl]
 \path[] ($(A) + (0,+1.1)$) rectangle (B);
 \end{scope}
 \begin{pgfinterruptboundingbox}
 \begin{axis}[%
-   legend to name=legend\pp,
+   legend to name=legend,
    legend cell align=left,
    legend columns=2,
    legend transposed=true,
@@ -141,9 +140,9 @@
    % 
 \end{axis}
 \end{pgfinterruptboundingbox}
-\path let \p1 = (current bounding box.north), \p2=(bbl.north) in node[anchor=north, scale=0.75, yshift=1ex] at (\x2, \y1) {\ref{legend\pp}};
+\path let \p1 = (current bounding box.north), \p2=(bbl.north) in node[anchor=north, scale=0.75, yshift=1ex] at (\x2, \y1) {\ref{legend}};
 \path[use as bounding box] let \p1 = (current bounding box.north), \p2 = (A) in ($(\x2,\y1)-(0.35,0)$) -- ($(B)+(0.35,0)$);
 \end{tikzpicture}
-}
+% }
 % 
 \end{document}

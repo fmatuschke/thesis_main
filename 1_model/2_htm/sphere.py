@@ -101,26 +101,57 @@ if __name__ == "__main__":
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    phi, theta = htm_sc(3, False)
+    phi, theta = htm_sc(1, True)
 
     theta = theta[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
     phi = phi[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
     phi = phi[np.logical_and(theta >= 0, theta <= 0.5 * np.pi)]
     theta = theta[np.logical_and(theta >= 0, theta <= 0.5 * np.pi)]
 
+    pseudo_theta_sort_htm_0_quadrant = [2, 1, 0]
+    pseudo_theta_sort_htm_1_quadrant = [2, 3, 1, 4, 5, 0]
+    pseudo_theta_sort_htm_2_quadrant = [
+        2, 6, 3, 7, 1, 8, 14, 12, 11, 4, 13, 5, 9, 10, 0
+    ]
+    pseudo_theta_sort_htm_3_quadrant = [
+        2, 15, 6, 16, 3, 18, 7, 17, 1, 19, 37, 39, 38, 30, 31, 27, 25, 8, 41,
+        14, 43, 12, 29, 11, 20, 40, 42, 44, 28, 26, 4, 33, 13, 35, 5, 22, 34,
+        36, 24, 9, 32, 10, 21, 23, 0
+    ]
+    # pseudo_sort = range(theta.size)
+    pseudo_sort = pseudo_theta_sort_htm_1_quadrant
+
+    theta = theta[pseudo_sort]
+    phi = phi[pseudo_sort]
+
+    for t, p in zip(np.rad2deg(theta), np.rad2deg(phi)):
+        print(f"{t:.2f}/{p:.2f}")
+
+    r = 1.0
+    x = np.multiply(np.cos(phi), np.sin(theta)) * r
+    y = np.multiply(np.sin(phi), np.sin(theta)) * r
+    z = np.cos(theta) * r
+    for i, j, k in zip(x, y, z):
+        omega = np.arccos(np.dot(np.array((1, 0, 0)), np.array((i, j, k))))
+        print(f"{np.rad2deg(omega):.2f}")
+
+    for t, p, i, j, k in zip(np.rad2deg(theta), np.rad2deg(phi), x, y, z):
+        omega = np.arccos(np.dot(np.array((1, 0, 0)), np.array((i, j, k))))
+        print(f"{np.rad2deg(omega):.2f}/{t:.2f}/{p:.2f}")
+
     # ax.plot_surface(x, y, z, facecolors=plt.cm.viridis(data_i))
 
-    print(phi.shape)
+    # theta = theta[phi.argsort(kind='mergesort')]
+    # phi = phi[phi.argsort(kind='mergesort')]
 
-    theta = theta[phi.argsort(kind='mergesort')]
-    phi = phi[phi.argsort(kind='mergesort')]
-    print(np.rad2deg(theta))
-    print(np.rad2deg(phi))
-    print((-theta).argsort())
-    phi = np.flip(phi[(-theta).argsort(kind='mergesort')])
-    theta = np.flip(theta[(-theta).argsort(kind='mergesort')])
-    print(np.rad2deg(theta))
-    print(np.rad2deg(phi))
+    # theta = np.deg2rad(np.round(np.rad2deg(theta), 0))
+    # # print(np.rad2deg(theta))
+    # # print(np.rad2deg(phi))
+    # # print((-theta).argsort())
+    # phi = np.flip(phi[theta.argsort(kind='mergesort')])
+    # theta = np.flip(theta[theta.argsort(kind='mergesort')])
+    # print(np.rad2deg(theta))
+    # print(np.rad2deg(phi))
 
     r = 1.0
     x = np.multiply(np.cos(phi), np.sin(theta)) * r
@@ -140,6 +171,10 @@ if __name__ == "__main__":
                     vmin=0,
                     vmax=len(phi) - 1,
                     cmap="viridis")
+
+    for n, (i, j, k) in enumerate(zip(x, y, z)):
+        ax.text(i, j, k, f"{n}")
+
     plt.colorbar(sc)
     ax.set_xlabel('$X$')
     ax.set_ylabel('$Y$')

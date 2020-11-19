@@ -131,7 +131,7 @@ if __name__ == "__main__":
             with open(
                     os.path.join(
                         args.input, "hist",
-                        f"htm_psi_{psi}_theta_{f1_theta}_phi_{f1_phi}_r_{r}_.dat"
+                        f"htm_psi_{psi:.2f}_theta_{np.rad2deg(f1_theta):.2f}_phi_{np.rad2deg(f1_phi):.2f}_r_{r:.2f}_.dat"
                     ), "w") as f:
 
                 H = df_sub.hist_2d_h.iloc[0]
@@ -158,13 +158,14 @@ if __name__ == "__main__":
 
             # polar hist
             df_[f"x"] = np.rad2deg(df_sub.phi_x.iloc[0])
-            df_[f"r_{r:.2f}_s_phi_h"] = df_sub.phi_h.iloc[0]
-            df_[f"r_{r:.2f}_s_incl_h"] = df_sub.incl_h.iloc[0]
-            df_[f"r_{r:.2f}_i_phi_h"] = df_sub.phi_init_h.iloc[0]
-            df_[f"r_{r:.2f}_i_incl_h"] = df_sub.incl_init_h.iloc[0]
+            df_[f"r_{r:.2f}_solved_phi_h"] = df_sub.phi_h.iloc[0]
+            df_[f"r_{r:.2f}_solved_incl_h"] = df_sub.incl_h.iloc[0]
+            df_[f"r_{r:.2f}_init_phi_h"] = df_sub.phi_init_h.iloc[0]
+            df_[f"r_{r:.2f}_init_incl_h"] = df_sub.incl_init_h.iloc[0]
 
         df_.to_csv(os.path.join(
             args.input, "hist",
-            f"htm_psi_{psi}_theta_{f1_theta}_phi_{f1_phi}_.csv"),
+            f"htm_psi_{psi:.2f}_theta_{np.rad2deg(f1_theta):.2f}_phi_{np.rad2deg(f1_phi):.2f}_.csv"
+        ),
                    index=False,
                    float_format='%.4f')
