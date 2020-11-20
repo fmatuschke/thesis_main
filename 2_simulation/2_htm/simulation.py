@@ -79,6 +79,8 @@ if __name__ == "__main__":
     THICKNESS = 60
 
     file_list = args.input
+    logger.info(f"len file_list: {file_list}")
+
     # print Memory
     simpli = fastpli.simulation.Simpli()
     simpli.voxel_size = args.voxel_size  # in mu meter
