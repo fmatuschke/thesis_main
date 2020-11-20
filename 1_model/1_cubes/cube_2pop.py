@@ -91,7 +91,7 @@ logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
 # Fiber Model
 SIZE = args.volume
-# SIZE = 100  # to rotate a 60 um cube inside 2*30*1.5 + 10
+# SIZE = 115  # to rotate a 60 um cube inside 2*35*1.5 + 10 (35 for tiltin cropping)
 # SIZE = 190  # to rotate a 120 um cube inside 2*0*1.5 + 10
 RADIUS_LOGMEAN = args.fiber_radius
 PSI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
