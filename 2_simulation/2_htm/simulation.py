@@ -112,7 +112,7 @@ if __name__ == "__main__":
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
         file_name += f'_vs_{args.voxel_size:.4f}'
-        file_name += f'_f0_inc_{np.rad2deg(f0_inc):.2f}'
+        file_name += f'_f0_inc_{f0_inc:.2f}'
         file_name = os.path.join(args.output, file_name)
         logger.info(f"input file: {file}")
         logger.info(f"output file: {file_name}")
@@ -120,6 +120,8 @@ if __name__ == "__main__":
         if os.path.isfile(file_name + '.h5'):
             logger.info(f"file exists : {file_name}.h5")
             continue
+
+        rot = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
 
         with h5py.File(file, 'r') as h5f:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
@@ -168,7 +170,8 @@ if __name__ == "__main__":
                                   (tilt_angle, 180), (tilt_angle, 270)]))
                     simpli.add_crop_tilt_halo()
 
-                    simpli.fiber_bundles = fiber_bundles
+                    simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
+                        fiber_bundles, rot)
                     simpli.fiber_bundles_properties = [[(0.75, 0, 100, 'b'),
                                                         (1.0, dn, 100, model)]
                                                       ] * len(fiber_bundles)
