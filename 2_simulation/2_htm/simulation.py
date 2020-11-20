@@ -106,8 +106,7 @@ if __name__ == "__main__":
     parameter = [(f, i) for f in file_list for i in inclinations(4)]
     print(len(parameter))
 
-    for file, f0_inc in parameter[comm.Get_rank() +
-                                  args.start::comm.Get_size()]:
+    for file, f0_inc in [parameter[comm.Get_rank() + args.start]]:
 
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
@@ -181,60 +180,64 @@ if __name__ == "__main__":
                     label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                     )
 
-                    for species, mu in [('Roden', 10), ('Vervet', 20),
-                                        ('Human', 50)]:
+                    dset = h5f.create_group(f'{name}/{model}/')
+                    dset['tissue'] = label_field.astype(np.uint16)
+                    dset['optical_axis'] = vector_field.astype(np.uint16)
 
-                        logger.info(f"tissue: {species}, {mu}")
+                    # for species, mu in [('Roden', 10), ('Vervet', 20),
+                    #                     ('Human', 50)]:
 
-                        tissue_properties[1:, 1] = mu
+                    #     logger.info(f"tissue: {species}, {mu}")
 
-                        dset = h5f.create_group(f'{name}/{species}/{model}/')
+                    #     tissue_properties[1:, 1] = mu
 
-                        unique_elements, counts_elements = np.unique(
-                            label_field, return_counts=True)
-                        dset.attrs['label_field_stats'] = np.asarray(
-                            (unique_elements, counts_elements))
+                    #     dset = h5f.create_group(f'{name}/{model}/{species}/')
 
-                        # Simulate PLI Measurement
-                        simpli.light_intensity = intensity  # a.u.
-                        simpli.noise_model = lambda x: np.round(
-                            np.random.normal(x, np.sqrt(gain * x))).astype(
-                                np.uint16)
+                    #     unique_elements, counts_elements = np.unique(
+                    #         label_field, return_counts=True)
+                    #     dset.attrs['label_field_stats'] = np.asarray(
+                    #         (unique_elements, counts_elements))
 
-                        simpli.save_parameter_h5(h5f=dset)
+                    #     # Simulate PLI Measurement
+                    #     simpli.light_intensity = intensity  # a.u.
+                    #     simpli.noise_model = lambda x: np.round(
+                    #         np.random.normal(x, np.sqrt(gain * x))).astype(
+                    #             np.uint16)
 
-                        save = ['optic', 'epa', 'rofl']
-                        simpli.run_simulation_pipeline(label_field,
-                                                       vector_field,
-                                                       tissue_properties,
-                                                       h5f=dset,
-                                                       save=save,
-                                                       crop_tilt=True)
+                    #     simpli.save_parameter_h5(h5f=dset)
 
-                        dset.attrs['parameter/name'] = name
-                        dset.attrs['parameter/gain'] = gain
-                        dset.attrs['parameter/intensity'] = intensity
-                        dset.attrs['parameter/res'] = res
-                        dset.attrs['parameter/tilt_angle'] = tilt_angle
-                        dset.attrs['parameter/sigma'] = sigma
-                        dset.attrs['parameter/species'] = species
-                        dset.attrs['parameter/mu'] = mu
-                        dset.attrs['parameter/dn'] = dn
-                        dset.attrs['parameter/model'] = model
+                    #     save = ['optic', 'epa', 'rofl']
+                    #     simpli.run_simulation_pipeline(label_field,
+                    #                                    vector_field,
+                    #                                    tissue_properties,
+                    #                                    h5f=dset,
+                    #                                    save=save,
+                    #                                    crop_tilt=True)
 
-                        dset.attrs['parameter/f0_inc'] = f0_inc
-                        dset.attrs['parameter/psi'] = psi
-                        dset.attrs['parameter/fiber_path'] = file
-                        dset.attrs['parameter/volume'] = LENGTH
-                        dset.attrs['parameter/theta'] = theta
-                        dset.attrs['parameter/phi'] = phi
-                        dset.attrs['parameter/radius'] = radius
-                        dset.attrs['parameter/v0'] = v0
+                    #     dset.attrs['parameter/name'] = name
+                    #     dset.attrs['parameter/gain'] = gain
+                    #     dset.attrs['parameter/intensity'] = intensity
+                    #     dset.attrs['parameter/res'] = res
+                    #     dset.attrs['parameter/tilt_angle'] = tilt_angle
+                    #     dset.attrs['parameter/sigma'] = sigma
+                    #     dset.attrs['parameter/species'] = species
+                    #     dset.attrs['parameter/mu'] = mu
+                    #     dset.attrs['parameter/dn'] = dn
+                    #     dset.attrs['parameter/model'] = model
 
-                        dset.attrs[
-                            'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel(
-                            )
+                    #     dset.attrs['parameter/f0_inc'] = f0_inc
+                    #     dset.attrs['parameter/psi'] = psi
+                    #     dset.attrs['parameter/fiber_path'] = file
+                    #     dset.attrs['parameter/volume'] = LENGTH
+                    #     dset.attrs['parameter/theta'] = theta
+                    #     dset.attrs['parameter/phi'] = phi
+                    #     dset.attrs['parameter/radius'] = radius
+                    #     dset.attrs['parameter/v0'] = v0
 
-                    del label_field
-                    del vector_field
-                    del simpli
+                    #     dset.attrs[
+                    #         'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel(
+                    #         )
+
+                    # del label_field
+                    # del vector_field
+                    # del simpli
