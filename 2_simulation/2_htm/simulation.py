@@ -128,11 +128,16 @@ if __name__ == "__main__":
                 ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
                 ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
             ]:
+                logger.info(
+                    f"setup: {name}, {gain}, {intensity}, {res}, {tilt_angle}, {sigma}"
+                )
 
                 # print(name, gain, intensity, res, tilt_angle, sigma)
 
                 for m, (dn, model) in enumerate([(-0.008 / 2, 'p'),
                                                  (0.008, 'r')]):
+
+                    logger.info(f"model: {m}, {dn}, {model}")
 
                     # print(m, (dn, model))
                     # Setup Simpli
@@ -166,7 +171,7 @@ if __name__ == "__main__":
                     for species, mu in [('Roden', 10), ('Vervet', 20),
                                         ('Human', 50)]:
 
-                        # print(species, mu)
+                        logger.info(f"tissue: {species}, {mu}")
 
                         tissue_properties[1:, 1] = mu
 
@@ -178,8 +183,6 @@ if __name__ == "__main__":
                             (unique_elements, counts_elements))
 
                         # Simulate PLI Measurement
-                        logger.info(f"simulation_pipeline: model:{model}")
-
                         simpli.light_intensity = intensity  # a.u.
                         simpli.noise_model = lambda x: np.round(
                             np.random.normal(x, np.sqrt(gain * x))).astype(
