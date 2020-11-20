@@ -70,6 +70,11 @@ logger.info(
     f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
 logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
+
+def inclinations(n=10):
+    return np.linspace(0, 90, n, True)
+
+
 if __name__ == "__main__":
 
     # PARAMETER
@@ -98,11 +103,16 @@ if __name__ == "__main__":
         f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
     del simpli
 
-    for file in [file_list[comm.Get_rank() + args.start]]:
+    parameter = [(f, i) for f in file_list for i in inclinations(4)]
+    print(len(parameter))
+
+    for file, f0_inc in parameter[comm.Get_rank() +
+                                  args.start::comm.Get_size()]:
 
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
         file_name += f'_vs_{args.voxel_size:.4f}'
+        file_name += f'_f0_inc_{np.rad2deg(f0_inc):.2f}'
         file_name = os.path.join(args.output, file_name)
         logger.info(f"input file: {file}")
         logger.info(f"output file: {file_name}")
@@ -209,6 +219,7 @@ if __name__ == "__main__":
                         dset.attrs['parameter/dn'] = dn
                         dset.attrs['parameter/model'] = model
 
+                        dset.attrs['parameter/f0_inc'] = f0_inc
                         dset.attrs['parameter/psi'] = psi
                         dset.attrs['parameter/fiber_path'] = file
                         dset.attrs['parameter/volume'] = LENGTH

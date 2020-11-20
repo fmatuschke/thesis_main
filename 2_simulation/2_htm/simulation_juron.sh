@@ -1,6 +1,6 @@
 #!/bin/bash -x
 #BSUB -n 20
-#BSUB -W 10:00
+#BSUB -W 24:00
 #BSUB -q normal
 #BSUB -J thesis-htm_sim
 #BSUB -o "stdout.%J.out"

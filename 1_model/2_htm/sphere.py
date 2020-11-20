@@ -101,7 +101,7 @@ if __name__ == "__main__":
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    phi, theta = htm_sc(1, True)
+    phi, theta = htm_sc(2, True)
 
     theta = theta[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
     phi = phi[np.logical_and(phi >= 0, phi <= 0.5 * np.pi)]
@@ -119,10 +119,10 @@ if __name__ == "__main__":
         36, 24, 9, 32, 10, 21, 23, 0
     ]
     # pseudo_sort = range(theta.size)
-    pseudo_sort = pseudo_theta_sort_htm_1_quadrant
+    # pseudo_sort = pseudo_theta_sort_htm_1_quadrant
 
-    theta = theta[pseudo_sort]
-    phi = phi[pseudo_sort]
+    # theta = theta[pseudo_sort]
+    # phi = phi[pseudo_sort]
 
     for t, p in zip(np.rad2deg(theta), np.rad2deg(phi)):
         print(f"{t:.2f}/{p:.2f}")

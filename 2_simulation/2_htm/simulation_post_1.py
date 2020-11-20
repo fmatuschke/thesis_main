@@ -35,10 +35,12 @@ gt_dict = manager.dict()
 
 def calcGroundTruth(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot, radius = parameter
+    radius, psi, f1_theta, f1_phi = parameter
 
     # ground truth
-    sub = (df_org.psi == psi) & (df_org.omega == omega) & (df_org.r == radius)
+    sub = (df_org.radius == radius) & (df_org.psi == psi) & (
+        df_org.f1_theta == f1_theta) & (df_org.f1_phi == f1_phi) & (df_org.state
+                                                                    == "solved")
 
     if len(df_org[sub]) != 1:
         df_ = df_org[sub]
@@ -49,25 +51,26 @@ def calcGroundTruth(parameter):
             except:
                 pass
         print(df_.columns)
-        print(len(df_))
-        print("FOOO:3")
+        print(df_)
+        print(f"FOOO:3: {len(df_)}")
         exit(1)
 
     phi, theta = fibers.ori_from_file(
-        f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/{df_org[sub].fiber.iloc[0]}",
-        f0_inc, f1_rot)
+        f"/data/PLI-Group/felix/data/thesis/1_model/2_htm/{df_org[sub].fiber.iloc[0]}",
+        0, 0, 60)
     sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
     gt_dict[
-        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}'] = sh1
+        f'r_{radius:.2f}_f1_theta_{f1_theta:.2f}_f1_phi_{f1_phi:.2f}_psi_{psi:.2f}'] = sh1
 
 
 def run(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot, microscope, species, model, radius = parameter
-    sub = (df.psi == psi) & (df.omega == omega) & (df.f0_inc == f0_inc) & (
-        df.f1_rot == f1_rot) & (df.microscope == microscope) & (
-            df.species == species) & (df.model == model) & (df.r == radius)
+    radius, psi, f1_theta, f1_phi, model, microscope, species = parameter
+    sub = (df.radius == radius) & (df.psi == psi) & (
+        df.f1_theta == f1_theta) & (df.f1_phi == f1_phi) & (
+            df.model == model) & (df.microscope == microscope) & (df.species
+                                                                  == species)
 
     if len(df[sub]) != 1:
         print("FOOO:2")
@@ -80,7 +83,7 @@ def run(parameter):
 
     # ground truth
     sh1 = gt_dict[
-        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
+        f'r_{radius:.2f}_f1_theta_{f1_theta:.2f}_f1_phi_{f1_phi:.2f}_psi_{psi:.2f}']
 
     # ACC
     acc = helper.schilling.angular_correlation_coefficient(sh0, sh1)
@@ -91,9 +94,8 @@ def run(parameter):
             'species': species,
             'model': model,
             'radius': radius,
-            'f0_inc': f0_inc,
-            'f1_rot': f1_rot,
-            'omega': omega,
+            'f1_theta': f1_theta,
+            'f1_phi': f1_phi,
             'psi': psi,
             'acc': acc
         },
@@ -103,17 +105,17 @@ def run(parameter):
 if __name__ == "__main__":
     # with mp.Pool(processes=args.num_proc) as pool:
     df = pd.read_pickle(
-        os.path.join(args.input, "analysis", f"cube_2pop_simulation.pkl"))
+        os.path.join(args.input, "analysis", f"htm_simulation.pkl"))
 
     df_org = pd.read_pickle(
-        f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_1/cube_2pop.pkl"
+        f"/data/PLI-Group/felix/data/thesis/1_model/2_htm/output/htm_/data.pkl"
     )  # TODO: same number as simulation
 
-    # df_org = df_org[df_org.r == df.r.unique()[0]]
-    df_org = df_org[df_org.state != "init"]
-    if len(df_org) == 0:
-        print("FOOO:1")
-        sys.exit(1)
+    # # df_org = df_org[df_org.r == df.r.unique()[0]]
+    # df_org = df_org[df_org.state != "init"]
+    # if len(df_org) == 0:
+    #     print("FOOO:1")
+    #     sys.exit(1)
 
     # TEST
     # df = df[df.omega == 30]
@@ -122,16 +124,16 @@ if __name__ == "__main__":
     # df_org = df_org[df_org.r == 2.0]
 
     # GROUND TRUTH sh coeff
+
+    # print(df.columns)
+
+    sub = df[['radius', 'psi', 'f1_theta', 'f1_phi']]
+    sub = sub.drop_duplicates()
+    # for f1_theta, f1_phi, psi in sub.itertuples(index=False):
+
     parameters_gt = []
-    for radius in df.r.unique():
-        for psi in df.psi.unique():
-            for omega in df[df.psi == psi].omega.unique():
-                df_sub = df[(df.psi == psi) & (df.omega == omega)]
-                for f0_inc in df_sub.f0_inc.unique():
-                    for f1_rot in df_sub[df_sub.f0_inc ==
-                                         f0_inc].f1_rot.unique():
-                        parameters_gt.append(
-                            (psi, omega, f0_inc, f1_rot, radius))
+    for radius, psi, f1_theta, f1_phi in sub.itertuples(index=False):
+        parameters_gt.append((radius, psi, f1_theta, f1_phi))
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
@@ -143,19 +145,15 @@ if __name__ == "__main__":
 
     # schilling
     parameters = []
-    for radius in df.r.unique():
-        for microscope in df.microscope.unique():
-            for species in df.species.unique():
-                for model in df.model.unique():
-                    for psi in df.psi.unique():
-                        for omega in df[df.psi == psi].omega.unique():
-                            df_sub = df[(df.psi == psi) & (df.omega == omega)]
-                            for f0_inc in df_sub.f0_inc.unique():
-                                for f1_rot in df_sub[df_sub.f0_inc ==
-                                                     f0_inc].f1_rot.unique():
-                                    parameters.append(
-                                        (psi, omega, f0_inc, f1_rot, microscope,
-                                         species, model, radius))
+
+    sub = df[[
+        'radius', 'psi', 'f1_theta', 'f1_phi', 'model', 'microscope', 'species'
+    ]]
+    sub = sub.drop_duplicates()
+    for radius, psi, f1_theta, f1_phi, model, microscope, species in sub.itertuples(
+            index=False):
+        parameters.append(
+            (radius, psi, f1_theta, f1_phi, model, microscope, species))
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [
@@ -165,5 +163,4 @@ if __name__ == "__main__":
         ]
     df = pd.concat(df, ignore_index=True)
     df.to_pickle(
-        os.path.join(args.input, "analysis",
-                     "cube_2pop_simulation_schilling.pkl"))
+        os.path.join(args.input, "analysis", "simulation_schilling.pkl"))

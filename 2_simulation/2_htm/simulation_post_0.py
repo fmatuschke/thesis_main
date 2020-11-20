@@ -30,45 +30,45 @@ args = parser.parse_args()
 
 def run(file):
     df = []
-    radius = helper.file.value(file, "r")  # FIXME: new versions in h5 file
-    try:
-        with h5py.File(file, 'r') as h5f:
-            for microscope, species, model in list(
-                    itertools.product(["PM", "LAP"],
-                                      ["Roden", "Vervet", "Human"],
-                                      ["r", "p"])):
-                h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
+    # radius = helper.file.value(file, "r")  # FIXME: new versions in h5 file
+    # try:
+    with h5py.File(file, 'r') as h5f:
+        for microscope, species, model in list(
+                itertools.product(["PM", "LAP"], ["Roden", "Vervet", "Human"],
+                                  ["r", "p"])):
+            h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
 
-                # radius = 1  # FIXME: !!!
+            # radius = 1  # FIXME: !!!
 
-                df.append(
-                    pd.DataFrame(
-                        [[
-                            microscope,
-                            species,
-                            model,
-                            radius,
-                            # float(h5f_sub.attrs['parameter/r']),
-                            float(h5f_sub.attrs['parameter/omega']),
-                            float(h5f_sub.attrs['parameter/psi']),
-                            float(h5f_sub.attrs['parameter/f0_inc']),
-                            float(h5f_sub.attrs['parameter/f1_rot']),
-                            h5f_sub['analysis/rofl/direction'][...].ravel(),
-                            h5f_sub['analysis/rofl/inclination'][...].ravel(),
-                            h5f_sub['analysis/rofl/t_rel'][...].ravel(),
-                            h5f_sub['analysis/epa/0/transmittance'][
-                                ...].ravel(),
-                            h5f_sub['analysis/epa/0/direction'][...].ravel(),
-                            h5f_sub['analysis/epa/0/retardation'][...].ravel()
-                        ]],
-                        columns=[
-                            "microscope", "species", "model", "r", "omega",
-                            "psi", "f0_inc", "f1_rot", "rofl_dir", "rofl_inc",
-                            "rofl_trel", "epa_trans", "epa_dir", "epa_ret"
-                        ]))
-    except:
-        pass
-        # os.remove(file)
+            df.append(
+                pd.DataFrame(
+                    [[
+                        microscope,
+                        species,
+                        model,
+                        # radius,
+                        # float(h5f_sub.attrs['parameter/r']),
+                        # float(h5f_sub.attrs['parameter/omega']),
+                        float(h5f_sub.attrs['parameter/psi']),
+                        float(h5f_sub.attrs['parameter/radius']),
+                        float(h5f_sub.attrs['parameter/theta']),
+                        float(h5f_sub.attrs['parameter/phi']),
+                        # float(h5f_sub.attrs['parameter/f1_rot']),
+                        h5f_sub['analysis/rofl/direction'][...].ravel(),
+                        h5f_sub['analysis/rofl/inclination'][...].ravel(),
+                        h5f_sub['analysis/rofl/t_rel'][...].ravel(),
+                        h5f_sub['analysis/epa/0/transmittance'][...].ravel(),
+                        h5f_sub['analysis/epa/0/direction'][...].ravel(),
+                        h5f_sub['analysis/epa/0/retardation'][...].ravel()
+                    ]],
+                    columns=[
+                        "microscope", "species", "model", "psi", "radius",
+                        "f1_theta", "f1_phi", "rofl_dir", "rofl_inc",
+                        "rofl_trel", "epa_trans", "epa_dir", "epa_ret"
+                    ]))
+    # except:
+    #     pass
+    # os.remove(file)
     return df
 
 
@@ -88,4 +88,4 @@ if __name__ == "__main__":
     df = pd.concat(df, ignore_index=True)
     df.to_pickle(
         os.path.join(os.path.join(args.input, "analysis"),
-                     f"cube_2pop_simulation.pkl"))
+                     f"htm_simulation.pkl"))
