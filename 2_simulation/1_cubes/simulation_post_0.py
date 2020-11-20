@@ -42,30 +42,27 @@ def run(file):
                 # radius = 1  # FIXME: !!!
 
                 df.append(
-                    pd.DataFrame(
-                        [[
-                            microscope,
-                            species,
-                            model,
-                            radius,
-                            # float(h5f_sub.attrs['parameter/r']),
-                            float(h5f_sub.attrs['parameter/omega']),
-                            float(h5f_sub.attrs['parameter/psi']),
-                            float(h5f_sub.attrs['parameter/f0_inc']),
-                            float(h5f_sub.attrs['parameter/f1_rot']),
-                            h5f_sub['analysis/rofl/direction'][...].ravel(),
-                            h5f_sub['analysis/rofl/inclination'][...].ravel(),
-                            h5f_sub['analysis/rofl/t_rel'][...].ravel(),
-                            h5f_sub['analysis/epa/0/transmittance'][
-                                ...].ravel(),
-                            h5f_sub['analysis/epa/0/direction'][...].ravel(),
-                            h5f_sub['analysis/epa/0/retardation'][...].ravel()
-                        ]],
-                        columns=[
-                            "microscope", "species", "model", "r", "omega",
-                            "psi", "f0_inc", "f1_rot", "rofl_dir", "rofl_inc",
-                            "rofl_trel", "epa_trans", "epa_dir", "epa_ret"
-                        ]))
+                    pd.DataFrame([[
+                        microscope, species, model,
+                        float(radius),
+                        float(h5f_sub.attrs['parameter/radius']),
+                        float(h5f_sub.attrs['parameter/omega']),
+                        float(h5f_sub.attrs['parameter/psi']),
+                        float(h5f_sub.attrs['parameter/f0_inc']),
+                        float(h5f_sub.attrs['parameter/f1_rot']),
+                        h5f_sub['analysis/rofl/direction'][...].ravel(),
+                        h5f_sub['analysis/rofl/inclination'][...].ravel(),
+                        h5f_sub['analysis/rofl/t_rel'][...].ravel(),
+                        h5f_sub['analysis/epa/0/transmittance'][...].ravel(),
+                        h5f_sub['analysis/epa/0/direction'][...].ravel(),
+                        h5f_sub['analysis/epa/0/retardation'][...].ravel()
+                    ]],
+                                 columns=[
+                                     "microscope", "species", "model", "r",
+                                     "omega", "psi", "f0_inc", "f1_rot",
+                                     "rofl_dir", "rofl_inc", "rofl_trel",
+                                     "epa_trans", "epa_dir", "epa_ret"
+                                 ]))
     except:
         pass
         # os.remove(file)

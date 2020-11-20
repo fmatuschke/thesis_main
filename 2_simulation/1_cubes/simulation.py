@@ -108,8 +108,10 @@ if __name__ == "__main__":
         for f1_rot in fibers.omega_rotations(omega, 15):
             parameter.append((file, f0_inc, f1_rot))
 
-    for file, f0_inc, f1_rot in parameter[comm.Get_rank() +
-                                          args.start::comm.Get_size()]:
+    # print(len(parameter))
+
+    for file, f0_inc, f1_rot in [parameter[comm.Get_rank() + args.start]]:
+        # ::comm.Get_size()
         # file, f0_inc, f1_rot = parameter[comm.Get_rank() + args.start]
 
         _, file_name = os.path.split(file)
@@ -212,10 +214,19 @@ if __name__ == "__main__":
                                                        save=save,
                                                        crop_tilt=True)
 
+                        # v = np.array([
+                        #     np.cos(np.deg2rad(omega)),
+                        #     np.sin(np.deg2rad(omega)), 0
+                        # ])
+                        # v = np.dot(rot, v)
+                        # f1_theta = np.arccos(v[2])
+                        # f1_phi = np.arctan2(v[1], v[0])
+                        # dset.attrs['parameter/f1_theta'] = f1_theta
+                        # dset.attrs['parameter/f1_phi'] = f1_phi
                         dset.attrs['parameter/psi'] = psi
                         dset.attrs['parameter/omega'] = omega
                         dset.attrs['parameter/fiber_path'] = file
-                        dset.attrs['parameter/v'] = LENGTH
+                        dset.attrs['parameter/volume'] = LENGTH
                         dset.attrs['parameter/f0_inc'] = f0_inc
                         dset.attrs['parameter/f1_rot'] = f1_rot
                         dset.attrs[
