@@ -96,7 +96,7 @@ if __name__ == "__main__":
         f"Total Memory: {simpli.memory_usage()* comm.Get_size():.0f} MB")
     del simpli
 
-    for file in file_list[comm.Get_rank() + args.start::comm.Get_size()]:
+    for file in [file_list[comm.Get_rank() + args.start]]:
 
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
@@ -122,48 +122,53 @@ if __name__ == "__main__":
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
 
-            for species, mu in [('Roden', 10), ('Vervet', 20), ('Human', 50)]:
+            for name, gain, intensity, res, tilt_angle, sigma in [
+                ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
+                ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
+            ]:
+
+                # print(name, gain, intensity, res, tilt_angle, sigma)
+
                 for m, (dn, model) in enumerate([(-0.008 / 2, 'p'),
                                                  (0.008, 'r')]):
-                    for name, gain, intensity, res, tilt_angle, sigma in [
-                        ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
-                        ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
-                    ]:
+
+                    # print(m, (dn, model))
+                    # Setup Simpli
+                    simpli = fastpli.simulation.Simpli()
+                    warnings.filterwarnings("ignore", message="objects overlap")
+                    simpli.omp_num_threads = 1
+                    simpli.voxel_size = args.voxel_size
+                    simpli.pixel_size = res
+                    simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
+                    simpli.interpolate = "Slerp"
+                    simpli.wavelength = 525  # in nm
+                    simpli.optical_sigma = 0.75  # in pixel size
+                    simpli.verbose = 0
+                    simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
+                                   0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
+                    simpli.tilts = np.deg2rad(
+                        np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
+                                  (tilt_angle, 180), (tilt_angle, 270)]))
+                    simpli.add_crop_tilt_halo()
+
+                    simpli.fiber_bundles = fiber_bundles
+                    simpli.fiber_bundles_properties = [[(0.75, 0, 100, 'b'),
+                                                        (1.0, dn, 100, model)]
+                                                      ] * len(fiber_bundles)
+
+                    logger.info(f"tissue_pipeline: model:{model}")
+
+                    label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
+                    )
+
+                    for species, mu in [('Roden', 10), ('Vervet', 20),
+                                        ('Human', 50)]:
+
+                        # print(species, mu)
+
+                        tissue_properties[1:, 1] = mu
+
                         dset = h5f.create_group(f'{name}/{species}/{model}/')
-
-                        # Setup Simpli
-                        simpli = fastpli.simulation.Simpli()
-                        warnings.filterwarnings("ignore",
-                                                message="objects overlap")
-                        simpli.omp_num_threads = 1
-                        simpli.voxel_size = args.voxel_size
-                        simpli.pixel_size = res
-                        simpli.filter_rotations = np.linspace(
-                            0, np.pi, 9, False)
-                        simpli.interpolate = "Slerp"
-                        simpli.wavelength = 525  # in nm
-                        simpli.optical_sigma = 0.75  # in pixel size
-                        simpli.verbose = 0
-
-                        simpli.set_voi(
-                            -0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
-                            0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
-                        simpli.tilts = np.deg2rad(
-                            np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
-                                      (tilt_angle, 180), (tilt_angle, 270)]))
-                        simpli.add_crop_tilt_halo()
-
-                        simpli.fiber_bundles = fiber_bundles
-                        simpli.fiber_bundles_properties = [[
-                            (0.75, 0, mu, 'b'), (1.0, dn, mu, model)
-                        ]] * len(fiber_bundles)
-
-                        logger.info(f"tissue_pipeline: model:{model}")
-
-                        save = ['optic', 'epa', 'rofl']
-                        # save += ['tissue'] if m == 0 and name == 'LAP' else []
-                        label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
-                            h5f=dset, save=save)
 
                         unique_elements, counts_elements = np.unique(
                             label_field, return_counts=True)
@@ -180,6 +185,7 @@ if __name__ == "__main__":
 
                         simpli.save_parameter_h5(h5f=dset)
 
+                        save = ['optic', 'epa', 'rofl']
                         simpli.run_simulation_pipeline(label_field,
                                                        vector_field,
                                                        tissue_properties,
@@ -203,13 +209,13 @@ if __name__ == "__main__":
                         dset.attrs['parameter/volume'] = LENGTH
                         dset.attrs['parameter/theta'] = theta
                         dset.attrs['parameter/phi'] = phi
-                        dset.attrs['parameter/r'] = radius
+                        dset.attrs['parameter/radius'] = radius
                         dset.attrs['parameter/v0'] = v0
 
                         dset.attrs[
                             'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel(
                             )
 
-                        del label_field
-                        del vector_field
-                        del simpli
+                    del label_field
+                    del vector_field
+                    del simpli
