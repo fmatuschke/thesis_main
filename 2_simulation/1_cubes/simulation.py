@@ -131,8 +131,8 @@ if __name__ == "__main__":
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
             psi = h5f['/'].attrs["psi"]
             omega = h5f['/'].attrs["omega"]
-            # radius = h5f['/'].attrs["r"]  # FIXME: change
-            # v0 = h5f['/'].attrs["v0"]  # FIXME: change
+            radius = h5f['/'].attrs["radius"]  # FIXME: change
+            v0 = h5f['/'].attrs["v0"]  # FIXME: change
 
         logger.info(f"omega: {omega}")
         logger.info(f"psi: {psi}")

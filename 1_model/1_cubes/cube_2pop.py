@@ -202,6 +202,8 @@ for i in tqdm(range(1, args.max_steps + 1)):
                                                'r').read())
                     h5f['/'].attrs['psi'] = psi
                     h5f['/'].attrs['omega'] = omega
+                    h5f['/'].attrs['v0'] = SIZE
+                    h5f['/'].attrs['radius'] = RADIUS_LOGMEAN
                     h5f['/'].attrs['step'] = i
                     h5f['/'].attrs['overlap'] = solver.overlap
                     h5f['/'].attrs['num_obj'] = solver.num_obj
