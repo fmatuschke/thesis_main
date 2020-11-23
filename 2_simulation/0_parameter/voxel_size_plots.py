@@ -74,8 +74,9 @@ for _, p in tqdm.tqdm(parameters):
                 # data[data > 4.2] = 4.2
                 # df__.epa_ret_diff_rel = data
 
-                df__.loc[df__.epa_ret_diff_rel == 0, "epa_ret_diff_rel"] = 1e-16
-                df__.loc[df__.data_diff == 0, "data_diff"] = 1e-16
+                df__.loc[df__.epa_ret_diff_rel == 0,
+                         "epa_ret_diff_rel"] = np.nan
+                df__.loc[df__.data_diff == 0, "data_diff"] = np.nan
                 df__.drop(["voxel_size", "radius", "setup", "species", "model"],
                           inplace=True,
                           axis=1)

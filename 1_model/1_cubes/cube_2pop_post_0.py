@@ -41,9 +41,8 @@ def hist_polar_bin(n):
 
 
 def run(file):
-    fbs = fastpli.io.fiber_bundles.load(file)
-
-    state_ = file.split(f".h5")[0].split(".")[-1]
+    # fbs = fastpli.io.fiber_bundles.load(file)
+    # state_ = file.split(f".h5")[0].split(".")[-1]
     r = helper.file.value(file, "r")
     v0 = helper.file.value(file, "v0")
     with h5py.File(file, "r") as h5f:
@@ -92,7 +91,7 @@ def run(file):
                             "omega",
                             "psi",
                             "v0",
-                            "r",
+                            "radius",
                             "obj_mean_length",
                             "obj_min_radius",
                             "overlap",

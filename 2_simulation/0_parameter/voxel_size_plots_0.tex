@@ -19,7 +19,7 @@
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\datapath{output/vs_6_25/results}
+\def\datapath{output/vs_0.01_6_25/results}
 % 
 \begin{document}
 \pgfmathsetmacro{\ng}{6}
@@ -78,13 +78,17 @@
 \foreach \r in {0.5,1.0,2.0,5.0,10.0} {
 \foreach \vs in {0.025,0.05,0.125,0.25,0.625,1.25} {#1}}} %0.01, 
 % 
-
-% \foreach \mode [count=\j] in {p} {
-% \foreach \omega/\psi/\finc [count=\i] in {0.0/1.0/0} { %
-\foreach \setup [count=\k] in {PM,LAP} { %
+\foreach \setup [count=\k] in {PM} { % LAP
 \foreach \species [count=\l] in {Roden,Vervet,Human} { %
 \foreach \mode [count=\m] in {p,r} { %
 \foreach \omega/\psi/\finc [count=\i] in {0.0/1.0/0,0.0/1.0/90,90.0/0.5/0,90.0/0.5/90} { %
+% 
+% \foreach \setup [count=\k] in {PM} { %
+% \foreach \species [count=\l] in {Human} { %
+% \foreach \mode [count=\m] in {p} { %
+% \foreach \omega/\psi/\finc [count=\i] in {0.0/1.0/0,0.0/1.0/90,90.0/0.5/0,90.0/0.5/90} { %
+% 
+\directlua{tex.print('\string\\message{\k, \l, \m, \i}')}
 % 
 \begin{tikzpicture}[]
 \begin{groupplot}[%
@@ -131,7 +135,7 @@
 \nextgroupplot[ylabel={dir},]
 \Loop{
     \addplot+[fill, draw=black] table[%
-        y={epa_dir_diff}, col sep=comma, row sep=newline,
+        y={epa_dir_diff}, y expr=\thisrow{epa_dir_diff}*180/3.141, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_0.csv};
 }
 \xachse
@@ -145,8 +149,9 @@
 }
 \xachse
 % 
-\nextgroupplot[ylabel={data diff rel}, ymode={log}] %, ymode={log}
+\nextgroupplot[ylabel={data diff rel}, ymode={log}] %, ymode={log} % , ymin=0.0000001
 \Loop{
+    % \directlua{tex.print('\string\\message{vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_0.csv}')}
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_0.csv};

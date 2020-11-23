@@ -19,7 +19,7 @@
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\datapath{output/vs_6_25/results}
+\def\datapath{output/vs_0.01_6_25/results}
 % 
 \begin{document}
 \pgfmathsetmacro{\ng}{7}
@@ -128,7 +128,7 @@
 \nextgroupplot[ylabel={dir},]
 \Loop{
     \addplot+[fill, draw=black] table[%
-        y={epa_dir_diff}, col sep=comma, row sep=newline,
+        y expr=\thisrow{epa_dir_diff}*180/3.141, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};
 }
 \xachse

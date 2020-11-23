@@ -110,7 +110,8 @@ if __name__ == "__main__":
 
     # print(len(parameter))
 
-    for file, f0_inc, f1_rot in [parameter[comm.Get_rank() + args.start]]:
+    for file, f0_inc, f1_rot in tqdm.tqdm(
+            parameter[comm.Get_rank() + args.start::comm.Get_size()]):
         # ::comm.Get_size()
         # file, f0_inc, f1_rot = parameter[comm.Get_rank() + args.start]
 
