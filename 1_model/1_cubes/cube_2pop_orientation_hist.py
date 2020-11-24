@@ -81,19 +81,20 @@ def run(df):
     phi_init_x, phi_init_h, incl_init_x, incl_init_h = polar_hist(phi, theta)
 
     return pd.DataFrame([[
-        df.omega, df.psi, df.r, phi_x, phi_h, incl_x, incl_h, phi_init_x,
+        df.omega, df.psi, df.radius, phi_x, phi_h, incl_x, incl_h, phi_init_x,
         phi_init_h, incl_init_x, incl_init_h, h, x, y
     ]],
                         columns=[
-                            "omega", "psi", "r", "phi_x", "phi_h", "incl_x",
-                            "incl_h", "phi_init_x", "phi_init_h", "incl_init_x",
-                            "incl_init_h", "hist_2d_h", "hist_2d_x", "hist_2d_y"
+                            "omega", "psi", "radius", "phi_x", "phi_h",
+                            "incl_x", "incl_h", "phi_init_x", "phi_init_h",
+                            "incl_init_x", "incl_init_h", "hist_2d_h",
+                            "hist_2d_x", "hist_2d_y"
                         ])
 
 
 if __name__ == "__main__":
 
-    if True or not os.path.isfile(
+    if False or not os.path.isfile(
             os.path.join(args.input, "hist", "cube_2pop.pkl")):
         df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
         df = df[df.state != "init"]
@@ -103,7 +104,7 @@ if __name__ == "__main__":
         with mp.Pool(processes=args.num_proc) as pool:
             df = [
                 _ for _ in tqdm.tqdm(
-                    pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
+                    pool.imap_unordered(run, df), total=len(df), smoothing=0)
             ]
 
         df = pd.concat(df, ignore_index=True)
@@ -114,9 +115,10 @@ if __name__ == "__main__":
     for omega in df.omega.unique():
         for psi in df[df.omega == omega].psi.unique():
             df_ = pd.DataFrame()
-            for r in df.r.unique():
+            for r in df.radius.unique():
 
-                df_sub = df.query("r == @r & omega == @omega & psi == @psi")
+                df_sub = df.query(
+                    "radius == @r & omega == @omega & psi == @psi")
                 if len(df_sub) != 1:
                     warnings.warn(f"len(df_sub) != 1: {r} {omega} {psi}")
                     continue

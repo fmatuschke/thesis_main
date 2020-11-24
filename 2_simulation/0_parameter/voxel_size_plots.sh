@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-rm -rf output/tmp
+# rm -rf output/tmp
 mkdir -p output/tmp
 mkdir -p output/tikz
 
