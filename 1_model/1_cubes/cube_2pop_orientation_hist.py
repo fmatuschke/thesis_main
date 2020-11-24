@@ -151,6 +151,35 @@ if __name__ == "__main__":
                             f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
                         f.write('\n')
 
+                with open(
+                        os.path.join(
+                            args.input, "hist",
+                            f"cube_stats_p_{psi}_o_{omega}_r_{r}_.dat"),
+                        "w") as f:
+
+                    H = df_sub.hist_2d_h.iloc[0]
+                    x_axis = df_sub.hist_2d_x.iloc[0]
+                    y_axis = df_sub.hist_2d_y.iloc[0]
+
+                    x_axis = x_axis + (x_axis[1] - x_axis[0]) / 2
+                    y_axis = y_axis[1:] + (y_axis[1] - y_axis[0]) / 2
+                    # y_axis = y_axis + (y_axis[1] - y_axis[0]) / 2
+                    H = np.vstack([H, H[0, :]])
+                    # H = np.hstack(
+                    #     [H, np.roll(H[:, 0], H.shape[1] // 2)[:, None]])
+                    H = H / np.sum(H.ravel())
+
+                    X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
+
+                    # print(X.shape)
+                    # print(Y.shape)
+                    # print(H.shape)
+                    H /= np.amax(H)
+                    for h_array, x_array, y_array in zip(H.T, X, Y):
+                        for h, x, y in zip(h_array, x_array, y_array):
+                            f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
+                        f.write('\n')
+
                 # polar hist
                 df_[f"x"] = np.rad2deg(df_sub.phi_x.iloc[0])
                 df_[f"r_{r:.2f}_s_solved_phi_h"] = df_sub.phi_h.iloc[0]

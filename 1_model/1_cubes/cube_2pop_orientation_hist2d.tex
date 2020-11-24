@@ -16,7 +16,7 @@
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
 % 
-\def\datapath{output/cube_2pop_1}
+\def\datapath{output/cube_2pop_120}
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
@@ -68,7 +68,8 @@
     % }
     % /pgf/number format/sci subscript
 ]
-\addplot3 [surf] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat};
+\addplot3 [surf] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat}; %, contour filled={number=9}
+% \addplot3 [contour gnuplot={number=14},thick,] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat};
 \end{polaraxis}
 \end{scope}
 \begin{scope}[]

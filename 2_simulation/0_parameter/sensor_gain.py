@@ -9,59 +9,43 @@ from sklearn import linear_model
 #     del h5f['mean']
 #     del h5f['var']
 
-# LAP
-h5f = h5py.File("../../data/LAP/test500.h5", 'r')
-# # dset = h5py.Dataset(h5f['data'].id)
-# # dset._local.astype = np.float32
-# # mean = []
-# # var = []
-# # for i in tqdm.tqdm(range(dset.shape[0] // 208)):
-# #     data = dset[i * 208:(i + 1) * 208, :, :]
-# #     mean.extend(np.mean(data, -1).ravel())
-# #     var.extend(np.var(data, -1).ravel())
-# # print(h5f['data'].shape)
-# data = h5f['data'][600:1200, 550:1800, :]
-# # mean = np.array(mean)
-# # var = np.array(var)
-# mean = np.mean(data, -1)
-# var = np.var(data, -1)
-# h5f['mean'] = mean.ravel()
-# h5f['var'] = var.ravel()
+# # LAP
+# h5f = h5py.File("../../data/LAP/repo/test500.h5", 'r')
+# mean = h5f['mean'][...]
+# var = h5f['var'][...]
+# mean = mean[var < 50000]
+# var = var[var < 50000]
+# var = var[mean > 400]
+# mean = mean[mean > 400]
+'''
+'''
+
+# PM
+h5f = h5py.File("../../data/PM/repo/Test500.h5", 'a')
+
+if 'mean' not in h5f:
+    dset = h5py.Dataset(h5f['data'].id)
+    dset._local.astype = np.float32
+    mean = []
+    var = []
+    for i in tqdm.tqdm(range(dset.shape[0] // 128)):
+        data = dset[i * 128:(i + 1) * 128, :, :]
+        mean.extend(np.mean(data, -1).ravel())
+        var.extend(np.var(data, -1).ravel())
+    mean = np.array(mean)
+    var = np.array(var)
+    h5f['mean'] = mean
+    h5f['var'] = var
 
 mean = h5f['mean'][...]
 var = h5f['var'][...]
-# h5f.close()
-mean = mean[var < 50000]
-var = var[var < 50000]
-var = var[mean > 400]
-mean = mean[mean > 400]
+
+mean = mean[var < 300]
+var = var[var < 300]
+var = var[mean > 25]
+mean = mean[mean > 25]
 '''
 '''
-
-# # # PM
-# # h5f = h5py.File("../../data/PM/Test500.h5", 'a')
-# # dset = h5py.Dataset(h5f['data'].id)
-# # dset._local.astype = np.float32
-# # mean = []
-# # var = []
-# # for i in tqdm.tqdm(range(dset.shape[0] // 128)):
-# #     data = dset[i * 128:(i + 1) * 128, :, :]
-# #     mean.extend(np.mean(data, -1).ravel())
-# #     var.extend(np.var(data, -1).ravel())
-# # mean = np.array(mean)
-# # var = np.array(var)
-# # h5f['mean'] = mean
-# # h5f['var'] = var
-
-# # mean = h5f['mean'][...]
-# # var = h5f['var'][...]
-
-# # mean = mean[var < 300]
-# # var = var[var < 300]
-# # var = var[mean > 25]
-# # mean = mean[mean > 25]
-# # '''
-# # '''
 
 reg = linear_model.LinearRegression()
 reg.fit(mean.reshape((-1, 1)), var)

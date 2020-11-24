@@ -106,7 +106,7 @@ if __name__ == "__main__":
         os.path.join(args.input, "analysis", f"cube_2pop_simulation.pkl"))
 
     df_org = pd.read_pickle(
-        f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_1/cube_2pop.pkl"
+        f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/cube_2pop.pkl"
     )  # TODO: same number as simulation
 
     # df_org = df_org[df_org.r == df.r.unique()[0]]
