@@ -19,6 +19,7 @@ import tqdm
 
 # from simulation_repeat import run_simulation_pipeline_n
 import helper.mpi
+import helper.file
 import fibers
 
 from mpi4py import MPI
@@ -99,21 +100,38 @@ if __name__ == "__main__":
     # simulation loop
     parameter = []
     fiber_inc = [(f, i) for f in file_list for i in fibers.inclinations(4)]
-    for file, f0_inc in fiber_inc:
+    for file, f0_inc in tqdm.tqdm(fiber_inc):
         # logger.info(f"input file: {file}")
 
-        with h5py.File(file, 'r') as h5f:
-            omega = h5f['/'].attrs["omega"]
+        # h5py to slow
+        # with h5py.File(file, 'r') as h5f:
+        #     omega = h5f['/'].attrs["omega"]
+        omega = helper.file.value(file, "omega")
 
         for f1_rot in fibers.omega_rotations(omega, 15):
             parameter.append((file, f0_inc, f1_rot))
 
-    # print(len(parameter))
+    def filter_existing_files(p):
+        file, f0_inc, f1_rot = p
+        _, file_name = os.path.split(file)
+        file_name = os.path.splitext(file_name)[0]
+        file_name += f'_vs_{args.voxel_size:.4f}'
+        file_name += f'_inc_{f0_inc:.2f}'
+        file_name += f'_rot_{f1_rot:.2f}'
+        file_name = os.path.join(args.output, file_name)
+        return not os.path.isfile(file_name + '.h5')
 
-    for file, f0_inc, f1_rot in tqdm.tqdm(
-            parameter[comm.Get_rank() + args.start::comm.Get_size()]):
-        # ::comm.Get_size()
-        # file, f0_inc, f1_rot = parameter[comm.Get_rank() + args.start]
+    print(len(parameter))
+    logger.info(f"len parameter {len(parameter)}")
+    parameter = list(filter(filter_existing_files, parameter))
+    logger.info(f"len parameter {len(parameter)}")
+    print(len(parameter))
+
+    if comm.Get_rank() + args.start < len(parameter):
+        # for file, f0_inc, f1_rot in tqdm.tqdm(
+        #         parameter[comm.Get_rank() + args.start::comm.Get_size()]):
+        #     # ::comm.Get_size()
+        file, f0_inc, f1_rot = parameter[comm.Get_rank() + args.start]
 
         _, file_name = os.path.split(file)
         file_name = os.path.splitext(file_name)[0]
@@ -124,16 +142,12 @@ if __name__ == "__main__":
         logger.info(f"input file: {file}")
         logger.info(f"output file: {file_name}")
 
-        if os.path.isfile(file_name + '.h5'):
-            logger.info(f"file exists : {file_name}.h5")
-            continue
-
         with h5py.File(file, 'r') as h5f:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
             psi = h5f['/'].attrs["psi"]
             omega = h5f['/'].attrs["omega"]
-            radius = h5f['/'].attrs["radius"]  # FIXME: change
-            v0 = h5f['/'].attrs["v0"]  # FIXME: change
+            radius = h5f['/'].attrs["radius"]
+            v0 = h5f['/'].attrs["v0"]
 
         logger.info(f"omega: {omega}")
         logger.info(f"psi: {psi}")
