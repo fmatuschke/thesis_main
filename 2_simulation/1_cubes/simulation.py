@@ -119,7 +119,7 @@ if __name__ == "__main__":
         file_name += f'_inc_{f0_inc:.2f}'
         file_name += f'_rot_{f1_rot:.2f}'
         file_name = os.path.join(args.output, file_name)
-        return not os.path.isfile(file_name + '.h5')
+        return not h5py.is_hdf5(file_name + '.h5')
 
     print(len(parameter))
     logger.info(f"len parameter {len(parameter)}")
@@ -158,7 +158,7 @@ if __name__ == "__main__":
         rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
         rot = np.dot(rot_inc, rot_phi)
 
-        with h5py.File(file_name + '.h5', 'w-') as h5f:
+        with h5py.File(file_name + '.h5', 'w') as h5f:
             with open(os.path.abspath(__file__), 'r') as script:
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
