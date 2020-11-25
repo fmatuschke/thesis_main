@@ -16,11 +16,17 @@ import tqdm
 
 # arguments
 parser = argparse.ArgumentParser()
+# parser.add_argument("-i",
+#                     "--input",
+#                     type=str,
+#                     required=True,
+#                     help="input files.")
+
 parser.add_argument("-i",
                     "--input",
-                    type=str,
+                    nargs='+',
                     required=True,
-                    help="input files.")
+                    help="input string.")
 
 parser.add_argument("-v",
                     "--volume",
@@ -32,7 +38,8 @@ parser.add_argument("-p", "--num_proc", type=int, required=True, help="")
 
 args = parser.parse_args()
 
-os.makedirs(os.path.join(args.input, "images"), exist_ok=True)
+os.makedirs(os.path.join(os.path.dirname(args.input[0]), "images"),
+            exist_ok=True)
 
 solver = fastpli.model.solver.Solver()
 
@@ -50,7 +57,8 @@ def run(file):
     solver.set_view_center(0, -5, 0)
     solver.draw_scene()
 
-    file = os.path.join(os.path.abspath(args.input), "images",
+    file = os.path.join(os.path.abspath(os.path.dirname(args.input[0])),
+                        "images",
                         os.path.splitext(os.path.basename(file))[0])
     solver.save_ppm(file + ".ppm")
     subprocess.run(f"convert {file}.ppm {file}.png && rm {file}.ppm",
@@ -59,7 +67,9 @@ def run(file):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(args.input, "*.h5"))
+    # files = glob.glob(os.path.join(args.input, "*.h5"))
+    files = args.input
+
     with mp.Pool(processes=args.num_proc) as pool:
         [
             f for f in tqdm.tqdm(pool.imap_unordered(run, files),

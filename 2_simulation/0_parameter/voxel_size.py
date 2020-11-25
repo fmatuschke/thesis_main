@@ -202,7 +202,7 @@ def run(parameter):
                             logger.info("memory: " +
                                         str(round(simpli.memory_usage(), 2)) +
                                         'MB')
-                            if simpli.memory_usage() * args.num_proc > 100000:
+                            if simpli.memory_usage() * args.num_proc > 150000:
                                 print(
                                     str(round(simpli.memory_usage(), 2)) + 'MB')
                                 return

@@ -224,6 +224,8 @@ if __name__ == "__main__":
                         # f1_phi = np.arctan2(v[1], v[0])
                         # dset.attrs['parameter/f1_theta'] = f1_theta
                         # dset.attrs['parameter/f1_phi'] = f1_phi
+
+                        dset.attrs['parameter/radius'] = radius
                         dset.attrs['parameter/psi'] = psi
                         dset.attrs['parameter/omega'] = omega
                         dset.attrs['parameter/fiber_path'] = file
