@@ -1,4 +1,4 @@
-for start in {0..199..20}; do
+for start in {0..3999..20}; do
    file=$(cat simulation_juron.sh)
    file=$(sed 's/$1/0.125/g' <<<"$file")
    # file=$(sed 's/$2/'"$radius"'/g' <<<"$file")
