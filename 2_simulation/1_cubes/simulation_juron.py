@@ -110,6 +110,7 @@ if __name__ == "__main__":
             parameter.append((file, f0_inc, f1_rot))
 
     # print(len(parameter))
+    # exit(0)
     logger.info(f"len parameter {len(parameter)}")
 
     if comm.Get_rank() + args.start < len(parameter):
