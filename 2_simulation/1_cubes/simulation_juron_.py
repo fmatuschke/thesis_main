@@ -223,8 +223,10 @@ if __name__ == "__main__":
 
                                 # absorption
                                 tissue_thickness = np.sum(tissue > 0, -1)
-                                images = images * np.exp(
-                                    -mu * tissue_thickness * 1e-6)
+                                images = np.multiply(
+                                    images,
+                                    np.exp(-mu * tissue_thickness * 1e-6)[:, :,
+                                                                          None])
 
                                 images = simpli.rm_crop_tilt_halo(images)
 
