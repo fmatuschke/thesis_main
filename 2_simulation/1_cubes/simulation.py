@@ -258,6 +258,7 @@ if __name__ == "__main__":
                             'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel(
                             )
 
+                        h5f.flush()
                         del label_field
                         del vector_field
                         del simpli

@@ -192,6 +192,7 @@ if __name__ == "__main__":
                         # save += ['tissue'] if m == 0 and name == 'LAP' else []
                         tissue, optical_axis, tissue_properties = simpli.run_tissue_pipeline(
                         )
+                        tissue_thickness = np.sum(tissue > 0, -1)
 
                         for species, mu in [('Roden', 10), ('Vervet', 20),
                                             ('Human', 50)]:
@@ -222,11 +223,10 @@ if __name__ == "__main__":
                                     theta, phi)
 
                                 # absorption
-                                tissue_thickness = np.sum(tissue > 0, -1)
                                 images = np.multiply(
                                     images,
-                                    np.exp(-mu * tissue_thickness * 1e-6)[:, :,
-                                                                          None])
+                                    np.exp(-mu * tissue_thickness * 1e-3 *
+                                           simpli.voxel_size)[:, :, None])
 
                                 images = simpli.rm_crop_tilt_halo(images)
 
@@ -268,9 +268,7 @@ if __name__ == "__main__":
                                 'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel(
                                 )
 
+                        h5f.flush()
                         del tissue
                         del optical_axis
                         del simpli
-
-                h5f.flush()
-    comm.Barrier()
