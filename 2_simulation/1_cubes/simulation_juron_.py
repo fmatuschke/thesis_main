@@ -194,37 +194,40 @@ if __name__ == "__main__":
                         )
                         tissue_thickness = np.sum(tissue > 0, -1)
 
-                        for species, mu in [('Roden', 10), ('Vervet', 20),
-                                            ('Human', 50)]:
-                            dset = h5f.create_group(f'{name}/{model}/{species}')
+                        # Simulate PLI Measurement
+                        logger.info(f"simulation_pipeline: model:{model}")
 
+                        simpli.light_intensity = intensity  # a.u.
+                        simpli.noise_model = lambda x: np.round(
+                            np.random.normal(x, np.sqrt(gain * x))).astype(
+                                np.uint16)
+
+                        dset = h5f.create_group(f'{name}/{model}')
+                        simpli.save_parameter_h5(h5f=dset)
+                        if 'tissue_stats' not in dset:
                             unique_elements, counts_elements = np.unique(
                                 tissue, return_counts=True)
                             dset.attrs['tissue_stats'] = np.asarray(
                                 (unique_elements, counts_elements))
 
-                            # Simulate PLI Measurement
-                            logger.info(f"simulation_pipeline: model:{model}")
+                        images_stack = [None] * 5
+                        print('Run Simulation:')
+                        for t, (theta, phi) in enumerate(simpli.tilts):
+                            print(round(np.rad2deg(theta), 1),
+                                  round(np.rad2deg(phi), 1))
+                            images_stack[t] = simpli.run_simulation(
+                                tissue, optical_axis, tissue_properties, theta,
+                                phi)
 
-                            simpli.light_intensity = intensity  # a.u.
-                            simpli.noise_model = lambda x: np.round(
-                                np.random.normal(x, np.sqrt(gain * x))).astype(
-                                    np.uint16)
-
-                            simpli.save_parameter_h5(h5f=dset)
+                        for species, mu in [('Roden', 10), ('Vervet', 20),
+                                            ('Human', 50)]:
+                            dset = h5f.create_group(f'{name}/{model}/{species}')
 
                             tilting_stack = [None] * 5
-                            print('Run Simulation:')
                             for t, (theta, phi) in enumerate(simpli.tilts):
-                                print(round(np.rad2deg(theta), 1),
-                                      round(np.rad2deg(phi), 1))
-                                images = simpli.run_simulation(
-                                    tissue, optical_axis, tissue_properties,
-                                    theta, phi)
-
                                 # absorption
                                 images = np.multiply(
-                                    images,
+                                    images_stack[t],
                                     np.exp(-mu * tissue_thickness * 1e-3 *
                                            simpli.voxel_size)[:, :, None])
 
