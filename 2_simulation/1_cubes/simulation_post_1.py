@@ -1,14 +1,10 @@
 import numpy as np
 import multiprocessing as mp
-import itertools
 import argparse
 import os
 
 import pandas as pd
 import tqdm
-
-import fastpli.io
-import fastpli.analysis
 
 import helper.spherical_harmonics
 import helper.schilling
@@ -38,7 +34,8 @@ def calcGroundTruth(parameter):
     psi, omega, f0_inc, f1_rot, radius = parameter
 
     # ground truth
-    sub = (df_org.psi == psi) & (df_org.omega == omega) & (df_org.r == radius)
+    sub = (df_org.psi == psi) & (df_org.omega == omega) & (df_org.radius
+                                                           == radius)
 
     if len(df_org[sub]) != 1:
         df_ = df_org[sub]
@@ -67,7 +64,7 @@ def run(parameter):
     psi, omega, f0_inc, f1_rot, microscope, species, model, radius = parameter
     sub = (df.psi == psi) & (df.omega == omega) & (df.f0_inc == f0_inc) & (
         df.f1_rot == f1_rot) & (df.microscope == microscope) & (
-            df.species == species) & (df.model == model) & (df.r == radius)
+            df.species == species) & (df.model == model) & (df.radius == radius)
 
     if len(df[sub]) != 1:
         print("FOOO:2")
@@ -95,7 +92,9 @@ def run(parameter):
             'f1_rot': f1_rot,
             'omega': omega,
             'psi': psi,
-            'acc': acc
+            'acc': acc,
+            'R': df[sub].R.to_numpy(float),
+            'R2': df[sub].R2.to_numpy(float)
         },
         index=[0])
 
@@ -113,7 +112,7 @@ if __name__ == "__main__":
     df_org = df_org[df_org.state != "init"]
     if len(df_org) == 0:
         print("FOOO:1")
-        sys.exit(1)
+        exit(1)
 
     # TEST
     # df = df[df.omega == 30]
@@ -123,15 +122,15 @@ if __name__ == "__main__":
 
     # GROUND TRUTH sh coeff
     parameters_gt = []
-    for radius in df.r.unique():
-        for psi in df.psi.unique():
-            for omega in df[df.psi == psi].omega.unique():
-                df_sub = df[(df.psi == psi) & (df.omega == omega)]
-                for f0_inc in df_sub.f0_inc.unique():
-                    for f1_rot in df_sub[df_sub.f0_inc ==
-                                         f0_inc].f1_rot.unique():
-                        parameters_gt.append(
-                            (psi, omega, f0_inc, f1_rot, radius))
+
+    for _, p in df[[
+            "radius",
+            "psi",
+            "omega",
+            "f0_inc",
+            "f1_rot",
+    ]].drop_duplicates().iterrows():
+        parameters_gt.append((p.psi, p.omega, p.f0_inc, p.f1_rot, p.radius))
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
@@ -143,19 +142,18 @@ if __name__ == "__main__":
 
     # schilling
     parameters = []
-    for radius in df.r.unique():
-        for microscope in df.microscope.unique():
-            for species in df.species.unique():
-                for model in df.model.unique():
-                    for psi in df.psi.unique():
-                        for omega in df[df.psi == psi].omega.unique():
-                            df_sub = df[(df.psi == psi) & (df.omega == omega)]
-                            for f0_inc in df_sub.f0_inc.unique():
-                                for f1_rot in df_sub[df_sub.f0_inc ==
-                                                     f0_inc].f1_rot.unique():
-                                    parameters.append(
-                                        (psi, omega, f0_inc, f1_rot, microscope,
-                                         species, model, radius))
+    for _, p in df[[
+            "radius",
+            "microscope",
+            "species",
+            "model",
+            "psi",
+            "omega",
+            "f0_inc",
+            "f1_rot",
+    ]].drop_duplicates().iterrows():
+        parameters.append((p.psi, p.omega, p.f0_inc, p.f1_rot, p.microscope,
+                           p.species, p.model, p.radius))
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [

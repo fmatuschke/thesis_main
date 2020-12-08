@@ -4,14 +4,16 @@ import numpy as np
 import multiprocessing as mp
 import itertools
 import argparse
-import warnings
 import h5py
 import os
 import glob
+import numba
 
 import helper.file
 import pandas as pd
-from tqdm import tqdm
+import tqdm
+
+import fastpli.tools
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -28,22 +30,58 @@ parser.add_argument("-p",
 args = parser.parse_args()
 
 
+# @numba.njit(cache=True)
+def _calc_intensity(phi, alpha, t_rel, theta, phii):
+    '''
+    Calculates intensity curves in all tilting directions
+    @Params:
+    phi - np.array(float)
+    alpha - np.array(float)
+    t_rel - np.array(float)
+    num_rotations - int
+    =====
+    Returns: flattened array of size len(phi)  * num_rotations
+    '''
+    num_rotations = 9
+    number_tilts = 5
+    rotation_angles = np.linspace(0, np.pi, num_rotations + 1)[:-1]
+
+    v = np.array([
+        np.cos(phi) * np.cos(alpha),
+        np.sin(phi) * np.cos(alpha),
+        np.sin(alpha)
+    ])
+    # v_ = []
+    # v_.append(v.copy())
+    # for phi in np.deg2rad([0, 90, 180, 270]):
+    rot = np.dot(fastpli.tools.rotation.z(phii),
+                 fastpli.tools.rotation.y(theta))
+    v = np.dot(rot, v)
+
+    # I = np.empty((number_tilts, num_rotations))
+    phi = np.arctan2(v[1], v[0])
+    alpha = np.arcsin(v[2])
+    I = np.sin(np.pi / 2 * t_rel * np.cos(alpha)**2) * np.sin(
+        2 * (rotation_angles - phi))
+    return I
+
+
 def run(file):
     df = []
     # radius = helper.file.value(file, "r")  # FIXME: new versions in h5 file
-    if not h5py.is_hdf5(file):
-        # os.remove(file)
-        return df
+    # if not h5py.is_hdf5(file):
+    #     # os.remove(file)
+    #     return df
 
-    radius = helper.file.value(file, "r")
-    with h5py.File(file, 'a') as h5f:
-        for microscope, species, model in list(
-                itertools.product(["PM", "LAP"], ["Roden", "Vervet", "Human"],
-                                  ["r", "p"])):
-            h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
-            if "parameter/radius" not in h5f_sub.attrs.keys():
-                print("foo")
-                h5f_sub.attrs['parameter/radius'] = radius
+    # radius = helper.file.value(file, "r")
+    # with h5py.File(file, 'a') as h5f:
+    #     for microscope, species, model in list(
+    #             itertools.product(["PM", "LAP"], ["Roden", "Vervet", "Human"],
+    #                               ["r", "p"])):
+    #         h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
+    #         if "parameter/radius" not in h5f_sub.attrs.keys():
+    #             print("foo")
+    #             h5f_sub.attrs['parameter/radius'] = radius
 
     with h5py.File(file, 'r') as h5f:
         for microscope, species, model in list(
@@ -51,7 +89,41 @@ def run(file):
                                   ["r", "p"])):
             h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
 
-            # radius = 1  # FIXME: !!!
+            # R
+            rofl_direction = h5f_sub['analysis/rofl/direction'][...]
+            rofl_inclination = h5f_sub['analysis/rofl/inclination'][...]
+            rofl_trel = h5f_sub['analysis/rofl/t_rel'][...]
+
+            fit_data = np.empty(
+                (5, rofl_direction.shape[0], rofl_direction.shape[1], 9))
+
+            theta = 5.5 if microscope == "LAP" else 3.9
+
+            optic_data = []
+            phis = [0, 0, 90, 180, 270]
+            for t, phi in enumerate(phis):
+                for i in range(fit_data.shape[1]):
+                    for j in range(fit_data.shape[2]):
+                        fit_data[t, i, j, :] = _calc_intensity(
+                            rofl_direction[i, j], rofl_inclination[i, j],
+                            rofl_trel[i, j], theta, np.deg2rad(phi))
+
+                optic_data.append(h5f_sub[f'simulation/optic/{t}'][...].ravel())
+
+            optic_data = np.array(optic_data)
+
+            R = np.mean(
+                np.abs(fit_data.ravel() - (
+                    (optic_data.ravel() / np.mean(optic_data.ravel()) - 1))))
+            R2 = np.mean(
+                np.power(
+                    fit_data.ravel() -
+                    ((optic_data.ravel() / np.mean(optic_data.ravel()) - 1)),
+                    2))
+
+            # print("R:", R, "R2:", R2)
+            # print(fit_data.ravel())
+            # print(((optic_data.ravel() / np.mean(optic_data.ravel()) - 1)))
 
             df.append(
                 pd.DataFrame([[
@@ -66,13 +138,13 @@ def run(file):
                     h5f_sub['analysis/rofl/t_rel'][...].ravel(),
                     h5f_sub['analysis/epa/0/transmittance'][...].ravel(),
                     h5f_sub['analysis/epa/0/direction'][...].ravel(),
-                    h5f_sub['analysis/epa/0/retardation'][...].ravel()
+                    h5f_sub['analysis/epa/0/retardation'][...].ravel(), R, R2
                 ]],
                              columns=[
                                  "microscope", "species", "model", "radius",
                                  "omega", "psi", "f0_inc", "f1_rot", "rofl_dir",
                                  "rofl_inc", "rofl_trel", "epa_trans",
-                                 "epa_dir", "epa_ret"
+                                 "epa_dir", "epa_ret", "R", "R2"
                              ]))
     return df
 
@@ -83,9 +155,9 @@ if __name__ == "__main__":
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [
-            d for d in tqdm(pool.imap_unordered(run, files),
-                            total=len(files),
-                            smoothing=0.1)
+            d for d in tqdm.tqdm(pool.imap_unordered(run, files),
+                                 total=len(files),
+                                 smoothing=0.1)
         ]
 
     df = [item for sublist in df for item in sublist]

@@ -163,8 +163,9 @@ if __name__ == "__main__":
         rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
         rot = np.dot(rot_inc, rot_phi)
 
-        if os.path.isfile(file_name + '.h5'):
-            continue
+        # see comm.bcast
+        # if os.path.isfile(file_name + '.h5'):
+        #     continue
 
         with h5py.File(file_name + '.h5', 'w') as h5f:
             with open(os.path.abspath(__file__), 'r') as script:
@@ -210,7 +211,7 @@ if __name__ == "__main__":
 
                         logger.info(f"tissue_pipeline: model:{model}")
 
-                        save = ['optic', 'epa', 'rofl']
+                        save = ['optic', 'epa', 'rofl', 'rofl_conf']
                         # save += ['tissue'] if m == 0 and name == 'LAP' else []
                         label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                             h5f=dset, save=save)

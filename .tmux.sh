@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if ! type "tmux" > /dev/null; then
+	# echo "tmux not found"
+	exit 1
+fi
+
 if [ $# -eq 0 ]; then
 	SESSIONNAME=${PWD##*/}
 else
@@ -19,6 +24,7 @@ if [ $? != 0 ] ; then
 
 	# configure panes
 	tmux select-pane -t 1
+	tmux resize-pane -t 1 -y 5
 	tmux send-keys 'htop -s PERCENT_CPU' Enter
 
 
