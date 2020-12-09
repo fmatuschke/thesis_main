@@ -95,3 +95,8 @@ clean: clean-fastpli
 clean-fastpli:
 	cd fastpli
 	make clean
+
+# SYNC
+.PHONY: rsync
+rsync:
+	rsync -au --no-owner --no-group --info=progress2 --filter="- .git" /data/PLI-Group/felix/data/thesis /p/fastdata/pli/Projects/Felix/
