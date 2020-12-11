@@ -16,7 +16,7 @@ install-sc: clean env-sc env-update requirements-sc git-submodules-update clean-
 
 .PHONY: env
 env:
-	python3 -m venv $(VENV)
+	python3.8 -m venv $(VENV)
 
 .PHONY: env-sc
 env-sc:
