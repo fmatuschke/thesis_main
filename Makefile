@@ -9,13 +9,12 @@ FLAG.install=--system-site-packages
 FLAG.install-sc=--system-site-packages
 
 .PHONY: install
-install: env env-update requirements git-submodules-update clean-fastpli fastpli
+install: $(VENV) env-update requirements git-submodules-update clean-fastpli fastpli
 
 .PHONY: install-sc
 install-sc: clean env-sc env-update requirements-sc git-submodules-update clean-fastpli fastpli
 
-.PHONY: env
-env:
+$(VENV):
 	python3.8 -m venv $(VENV)
 
 .PHONY: env-sc
@@ -60,18 +59,14 @@ git-submodules:
 
 .PHONY: fastpli/setup
 .ONESHELL:
-fastpli/setup: fastpli/
+fastpli/setup: clean-fastpli
 	cd fastpli
-	# rm -r build/
 	make BUILD=$(BUILD) fastpli
 
 .PHONY: fastpli
 fastpli: fastpli/setup
 	$(PIP) uninstall fastpli -y -q
 	$(PIP) install fastpli/.
-
-.PHONY: fastpli-
-fastpli-: clean-fastpli fastpli
 
 .PHONY: jupyter
 jupyter:

@@ -64,6 +64,9 @@ def tikz_sphere(x,
     #         data = data[:, data[i, :].argsort()]
     #     x, y, z, data = data[0, :], data[1, :], data[2, :], data[3, :]
 
+    if x.size != y.size or x.size != z.size or x.size != data.size or x2.size != y2.size or x2.size != z2.size or x2.size != data2.size:
+        raise TypeError("FOOO type")
+
     file_path = os.path.dirname(file)
     file_base = os.path.basename(file)
     file_name, _ = os.path.splitext(file_base)
@@ -180,7 +183,20 @@ def run(p):
                  f"_model_{model}_psi_{psi:.2f}_f0_inc_{f0_inc:.2f}")
 
     sub = (df_acc.radius == radius) & (df_acc.microscope == microscope) & (
-        df_acc.model == model) & (df_acc.psi == psi) & (df_acc.f0_inc == f0_inc)
+        df_acc.species == species) & (df_acc.model == model) & (
+            df_acc.psi == psi) & (df_acc.f0_inc == f0_inc)
+
+    sub_ref = (df_acc.radius == radius) & (df_acc.microscope == microscope) & (
+        df_acc.species == species) & (df_acc.model == model) & (
+            df_acc.psi == 0.0) & (df_acc.f0_inc == 0.0)
+
+    if len(df_acc[sub_ref]) != 1:
+        print(df_acc[sub_ref])
+        raise ValueError(f"FOOO:1: {len(df_acc[sub_ref])}")
+    if psi != 0.0:
+        if len(df_acc[sub]) != 22:
+            print(df_acc[sub])
+            raise ValueError(f"FOOO:22: {len(df_acc[sub])}")
 
     f1_rot = df_acc[sub].f1_rot.to_numpy(float)
     omega = df_acc[sub].omega.to_numpy(float)
@@ -188,9 +204,10 @@ def run(p):
     for name in ["acc", "R", "R2"]:
 
         data = df_acc[sub][name].to_numpy(float)
-        # data = df_acc[sub].acc.to_numpy(float)
-        # data = df_acc[sub].R.to_numpy(float)
-        # data = df_acc[sub].R2.to_numpy(float)
+
+        # norm R and R2 to ref
+        if name != "acc":
+            data /= np.mean(df_acc[sub_ref][name].to_numpy(float))
 
         # get points on sphere
         phi = []
@@ -204,48 +221,70 @@ def run(p):
             theta.extend([np.arccos(v[2])])
             phi.extend([np.arctan2(v[1], v[0])])
 
+        phi = np.array(phi)
+        theta = np.array(theta)
+
         phi_ = phi.copy()
         theta_ = theta.copy()
         data_ = data.copy()
 
-        # apply symmetries
-        phi = np.array(phi)
-        theta = np.array(theta)
-
-        phi = np.concatenate((phi, -phi), axis=0)
-        theta = np.concatenate((theta, theta), axis=0)
-        data = np.concatenate((data, data), axis=0)
-
-        phi = np.concatenate((phi, phi), axis=0)
-        theta = np.concatenate((theta, np.pi + theta), axis=0)
-        data = np.concatenate((data, data), axis=0)
+        # # apply symmetry
+        phi_ = phi.copy()
+        theta_ = theta.copy()
+        data_ = data.copy()
+        # measurement symmetry
+        phi_ = np.concatenate((phi_, -phi_), axis=0)
+        theta_ = np.concatenate((theta_, theta_), axis=0)
+        data_ = np.concatenate((data_, data_), axis=0)
+        # orientation symmetry
+        phi_ = np.concatenate((phi_, phi_), axis=0)
+        theta_ = np.concatenate((theta_, np.pi + theta_), axis=0)
+        data_ = np.concatenate((data_, data_), axis=0)
 
         # rm multiple
-        phi, theta = helper.spherical_interpolation.remap_sph_angles(phi, theta)
-        tmp = np.concatenate(
-            (np.atleast_2d(phi), np.atleast_2d(theta), np.atleast_2d(data)),
-            axis=0)
-        tmp = np.unique(tmp, axis=1)
-        phi, theta, data = tmp[0, :], tmp[1, :], tmp[2, :]
+        phi_, theta_ = helper.spherical_interpolation.remap_spherical(
+            phi_, theta_)
+
+        x_ = np.multiply(np.cos(phi_), np.sin(theta_))
+        y_ = np.multiply(np.sin(phi_), np.sin(theta_))
+        z_ = np.cos(theta_)
+
+        data__ = []
+        for i in range(phi_.size):
+            flag = True
+            for j in range(i + 1, phi_.size):
+                dist = np.linalg.norm(
+                    np.array((x_[i] - x_[j], y_[i] - y_[j], z_[i] - z_[j])))
+
+                if dist < 1e-6:
+                    flag = False
+                    break
+            if flag:
+                data__.append((phi_[i], theta_[i], data_[i]))
+
+        data__ = np.array(data__)
+        phi_ = data__[:, 0]
+        theta_ = data__[:, 1]
+        data_ = data__[:, 2]
 
         # interplate mesh on sphere
-        x, y, z, data_i = helper.spherical_interpolation.on_mesh(
-            phi, theta, data, 40, 40)
+        x_i, y_i, z_i, data_i = helper.spherical_interpolation.on_mesh(
+            phi_, theta_, data_, 20, 20)
 
         r = 1
-        x2 = np.multiply(np.cos(phi_), np.sin(theta_)) * r
-        y2 = np.multiply(np.sin(phi_), np.sin(theta_)) * r
-        z2 = np.cos(theta_) * r
+        x = np.multiply(np.cos(phi), np.sin(theta)) * r
+        y = np.multiply(np.sin(phi), np.sin(theta)) * r
+        z = np.cos(theta) * r
 
-        tikz_sphere(x,
-                    y,
-                    z,
+        tikz_sphere(x_i,
+                    y_i,
+                    z_i,
                     data_i,
                     f"{os.path.join(sim_path,'images',file_name)}_{name}.tikz",
-                    x2,
-                    y2,
-                    z2,
-                    data_,
+                    x,
+                    y,
+                    z,
+                    data,
                     f0_inc,
                     path_to_data="\\currfiledir",
                     standalone=False)

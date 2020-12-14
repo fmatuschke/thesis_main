@@ -19,23 +19,24 @@ def center_mean(data, high=2 * np.pi, low=0, margin=0):
     return data
 
 
-def orientation_sph_plot(phi, theta):
-    # rotate phi [0,360), theta [0,90) to [-90, 90), [0,180)
-    phi, theta = remap_orientation(phi, theta)
+# TODO: check
+# def orientation_sph_plot(phi, theta):
+#     # rotate phi [0,360), theta [0,90) to [-90, 90), [0,180)
+#     phi, theta = remap_orientation(phi, theta)
 
-    # phi > 180 to [-180,180)
-    mask = phi >= np.pi
-    phi[mask] -= 2 * np.pi
+#     # phi > 180 to [-180,180)
+#     mask = phi >= np.pi
+#     phi[mask] -= 2 * np.pi
 
-    # phi > 90, phi < 90 to theta > 90
-    mask = phi >= np.pi / 2
-    theta[mask] = np.pi - theta[mask]
-    phi[mask] -= np.pi
-    mask = phi < -np.pi / 2
-    theta[mask] = np.pi - theta[mask]
-    phi[mask] += np.pi
-    theta[theta >= np.pi] -= np.pi
+#     # phi > 90, phi < 90 to theta > 90
+#     mask = phi >= np.pi / 2
+#     theta[mask] = np.pi - theta[mask]
+#     phi[mask] -= np.pi
+#     mask = phi < -np.pi / 2
+#     theta[mask] = np.pi - theta[mask]
+#     phi[mask] += np.pi
+#     theta[theta >= np.pi] -= np.pi
 
-    phi_theta = np.pi - (np.pi / 2 - theta)
+#     phi_theta = np.pi - (np.pi / 2 - theta)
 
-    return phi, phi_theta
+#     return phi, phi_theta

@@ -8,11 +8,11 @@ cd output/tmp
 
 folder="sim_120_new/0.125"
 
-for name in acc R R2; do
-   for radius in 0.5 1.0 2.0 5.0 10.0; do
-      for microscope in PM LAP; do
-         for species in Roden Vervet Human; do
-            for model in r p; do
+for radius in 0.5 1.0 2.0 5.0 10.0; do
+   for microscope in PM LAP; do
+      for species in Roden Vervet Human; do
+         for model in r p; do
+            for name in acc R R2; do
                cp ../../simulation_analysis_spheres.tex .
                sed -i 's=__SIMULATION__='"$folder"'=g' simulation_analysis_spheres.tex
                sed -i 's/__MICROSCOPE__/'"$microscope"'/g' simulation_analysis_spheres.tex

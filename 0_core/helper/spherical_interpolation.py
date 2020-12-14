@@ -1,27 +1,31 @@
 import numpy as np
 from . import sknni
 
+from fastpli.analysis.orientation import remap_spherical
 
-def remap_sph_angles(phi, theta):
-    phi = np.array(phi, copy=False)
-    theta = np.array(theta, copy=False)
+# def remap_sph_angles(phi, theta):
+#     phi = np.array(phi, copy=False)
+#     theta = np.array(theta, copy=False)
 
-    phi %= 2 * np.pi
-    theta %= 2 * np.pi
+#     phi %= 2 * np.pi
+#     theta %= 2 * np.pi
 
-    phi[phi < 0] += 2 * np.pi
-    theta[theta < 0] += 2 * np.pi
+#     phi[phi < 0] += 2 * np.pi
+#     theta[theta < 0] += 2 * np.pi
 
-    phi[theta > np.pi] += np.pi
-    theta[theta > np.pi] -= 2 * (theta[theta > np.pi] - np.pi)
+#     phi[theta > np.pi] += np.pi
+#     theta[theta > np.pi] = np.pi - theta[theta > np.pi]
 
-    phi %= 2 * np.pi
+#     phi[theta > np.pi / 2] += np.pi
+#     theta[theta > np.pi / 2] = np.pi - theta[theta > np.pi / 2]
 
-    return phi, theta
+#     phi %= 2 * np.pi
+
+#     return phi, theta
 
 
 def radii_to_lati_long(phi, theta):
-    phi, theta = remap_sph_angles(phi, theta)
+    phi, theta = remap_spherical(phi, theta)
     lati = 90 - np.rad2deg(theta)
     long = np.rad2deg(phi)
     long[long > 180] -= 360

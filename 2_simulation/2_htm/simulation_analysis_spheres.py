@@ -225,7 +225,7 @@ if __name__ == "__main__":
             data = np.concatenate((data, data), axis=0)
 
             # rm multiple
-            phi, theta = helper.spherical_interpolation.remap_sph_angles(
+            phi, theta = helper.spherical_interpolation.remap_orientation(
                 phi, theta)
             tmp = np.concatenate(
                 (np.atleast_2d(phi), np.atleast_2d(theta), np.atleast_2d(data)),
