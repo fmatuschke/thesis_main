@@ -150,10 +150,10 @@ if __name__ == "__main__":
                     h5f.attrs['script'] = script.read()
                     h5f.attrs['input_file'] = file
 
-                for species, mu in [('Roden', 10), ('Vervet', 20),
-                                    ('Human', 50)]:
+                for species, mu in [('Roden', 10->8), ('Vervet', 20->30),
+                                    ('Human', 50->60)]: TODO: increase value?
                     for m, (dn, model) in enumerate([(-0.008 / 2, 'p'),
-                                                     (0.008, 'r')]):
+                                                     (0.008, 'r')]): TODO: BECAUSE OF RADII?
                         for name, gain, intensity, res, tilt_angle, sigma in [
                             ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
                             ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
