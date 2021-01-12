@@ -28,6 +28,7 @@
 \def\model{__MODEL__}
 \def\radius{__RADIUS__}
 \def\name{__NAME__}
+\def\norm{__NORM__}
 % 
 % \def\radius{10.0}
 % \def\setup{PM}
@@ -65,9 +66,9 @@
     axis on top=true,
    %  colorbar,
 ]
-\addplot3 [surf] file[] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_hist.dat}; %, contour filled={number=9}
-\addplot [only marks, mark=o, thin, dash pattern=on 1pt off 1pt] file[skip first, x index={0}, y index={1}] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_data.dat}; %, contour filled={number=9}
-\addplot [only marks, mark=o, thick] file[x index={0}, y index={1}] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_init.dat}; %, contour filled={number=9}
+\addplot3 [surf] file[] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_hist.dat}; %, contour filled={number=9}
+\addplot [only marks, mark=o, thin, dash pattern=on 1pt off 1pt] file[skip first, x index={0}, y index={1}] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_data.dat}; %, contour filled={number=9}
+\addplot [only marks, mark=o, thick] file[x index={0}, y index={1}] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_init.dat}; %, contour filled={number=9}
 \end{polaraxis}
 \end{scope}
 % \begin{scope}[]
