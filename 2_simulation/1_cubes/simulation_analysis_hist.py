@@ -135,7 +135,7 @@ def run(p):
 
         # interplate mesh on sphere
         x_i, y_i, z_i, data_i = helper.spherical_interpolation.on_mesh(
-            phi_, theta_, data_, 46, 31)
+            phi_, theta_, data_, 37, 19)
 
         # 2d hist
         with open(
