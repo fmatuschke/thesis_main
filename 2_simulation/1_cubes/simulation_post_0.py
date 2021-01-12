@@ -88,11 +88,12 @@ def run(file):
                             rofl_direction[i, j], rofl_inclination[i, j],
                             rofl_trel[i, j], theta, np.deg2rad(phi))
 
-                optic_data.append(h5f_sub[f'simulation/optic/{t}'][...].ravel())
+                optic_data.append(h5f_sub[f'simulation/optic/{t}'][...])
 
             optic_data = np.array(optic_data)
-            optic_data = np.divide(
-                optic_data / np.mean(optic_data, axis=-1)[:, :, :, None]) - 1
+            optic_data = np.divide(optic_data,
+                                   np.mean(optic_data, axis=-1)[:, :, :,
+                                                                None]) - 1
 
             R = np.mean(np.abs(fit_data.ravel() - optic_data.ravel()))
             R2 = np.mean(np.power(fit_data.ravel() - optic_data.ravel(), 2))
