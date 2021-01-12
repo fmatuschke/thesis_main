@@ -30,58 +30,38 @@ parser.add_argument("-p",
 args = parser.parse_args()
 
 
-# @numba.njit(cache=True)
 def _calc_intensity(phi, alpha, t_rel, theta, phii):
-    '''
-    Calculates intensity curves in all tilting directions
-    @Params:
-    phi - np.array(float)
-    alpha - np.array(float)
-    t_rel - np.array(float)
-    num_rotations - int
-    =====
-    Returns: flattened array of size len(phi)  * num_rotations
-    '''
     num_rotations = 9
     number_tilts = 5
     rotation_angles = np.linspace(0, np.pi, num_rotations + 1)[:-1]
 
+    # tilt orientation
+    u = np.array([
+        np.cos(phii) * np.sin(theta),
+        np.sin(phii) * np.sin(theta),
+        np.cos(theta)
+    ])
+
+    # fiber orientation
     v = np.array([
         np.cos(phi) * np.cos(alpha),
         np.sin(phi) * np.cos(alpha),
         np.sin(alpha)
     ])
-    # v_ = []
-    # v_.append(v.copy())
-    # for phi in np.deg2rad([0, 90, 180, 270]):
-    rot = np.dot(fastpli.tools.rotation.z(phii),
-                 fastpli.tools.rotation.y(theta))
-    v = np.dot(rot, v)
 
-    # I = np.empty((number_tilts, num_rotations))
-    phi = np.arctan2(v[1], v[0])
-    alpha = np.arcsin(v[2])
-    I = np.sin(np.pi / 2 * t_rel * np.cos(alpha)**2) * np.sin(
-        2 * (rotation_angles - phi))
+    # tilted fiber orientation
+    rot = fastpli.tools.rotation.a_on_b([0, 0, 1], v)
+    v = np.dot(rot, u)
+    phi_v = np.arctan2(v[1], v[0])
+    alpha_v = np.arcsin(v[2])
+
+    I = np.sin(np.pi / 2 * t_rel * np.cos(alpha_v)**2) * np.sin(
+        2 * (rotation_angles - phi_v))
     return I
 
 
 def run(file):
     df = []
-    # radius = helper.file.value(file, "r")  # FIXME: new versions in h5 file
-    # if not h5py.is_hdf5(file):
-    #     # os.remove(file)
-    #     return df
-
-    # radius = helper.file.value(file, "r")
-    # with h5py.File(file, 'a') as h5f:
-    #     for microscope, species, model in list(
-    #             itertools.product(["PM", "LAP"], ["Roden", "Vervet", "Human"],
-    #                               ["r", "p"])):
-    #         h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
-    #         if "parameter/radius" not in h5f_sub.attrs.keys():
-    #             print("foo")
-    #             h5f_sub.attrs['parameter/radius'] = radius
 
     with h5py.File(file, 'r') as h5f:
         for microscope, species, model in list(
@@ -111,15 +91,11 @@ def run(file):
                 optic_data.append(h5f_sub[f'simulation/optic/{t}'][...].ravel())
 
             optic_data = np.array(optic_data)
+            optic_data = np.divide(
+                optic_data / np.mean(optic_data, axis=-1)[:, :, :, None]) - 1
 
-            R = np.mean(
-                np.abs(fit_data.ravel() - (
-                    (optic_data.ravel() / np.mean(optic_data.ravel()) - 1))))
-            R2 = np.mean(
-                np.power(
-                    fit_data.ravel() -
-                    ((optic_data.ravel() / np.mean(optic_data.ravel()) - 1)),
-                    2))
+            R = np.mean(np.abs(fit_data.ravel() - optic_data.ravel()))
+            R2 = np.mean(np.power(fit_data.ravel() - optic_data.ravel(), 2))
 
             # print("R:", R, "R2:", R2)
             # print(fit_data.ravel())
