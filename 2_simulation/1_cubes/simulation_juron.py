@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
                             logger.info(f"tissue_pipeline: model:{model}")
 
-                            save = ['optic', 'epa', 'rofl']
+                            save = ['optic', 'epa', 'rofl', 'rofl_conf']
                             # save += ['tissue'] if m == 0 and name == 'LAP' else []
                             label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
                                 h5f=dset, save=save)
