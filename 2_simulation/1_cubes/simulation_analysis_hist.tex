@@ -42,9 +42,9 @@
 % 
 % 
 \begin{page}
-\foreach \psi in {0.0, 0.3, 0.6, 0.9} {
+\foreach \psi in {0.3, 0.6, 0.9} { % 0.0, unecesarry, because other psi at omega==0 (should) have the same value
 \resizebox{\textwidth}{!}{
-\foreach \fnull in {0.0, 30.0,60.0,90.0} {
+\foreach \fnull in {0.0,30.0,60.0,90.0} {
 % 
 \begin{tikzpicture}
 % 
@@ -58,6 +58,8 @@
     yticklabels={30,60},
     yticklabel style=white,
     colormap/viridis,
+    point meta min = 0,
+    point meta max = 1,
     tickwidth=0,
     xtick distance = 45,
     separate axis lines,
@@ -67,14 +69,14 @@
    %  colorbar,
 ]
 \addplot3 [surf] file[] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_hist.dat}; %, contour filled={number=9}
-\addplot [only marks, mark=o, thin, dash pattern=on 1pt off 1pt] file[skip first, x index={0}, y index={1}] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_data.dat}; %, contour filled={number=9}
-\addplot [only marks, mark=o, thick] file[x index={0}, y index={1}] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_init.dat}; %, contour filled={number=9}
+\addplot [only marks, scatter, scatter src=explicit] file[skip first, x index={0}, y index={1}, meta index={2}] {
+  \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_data.dat}; %, contour filled={number=9}
+\addplot [ only marks, mark=o, thin, dash pattern=on 1pt off 1pt] file[skip first, x index={0}, y index={1}, meta index={2}] {
+  \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_data.dat}; %, contour filled={number=9}
+\addplot [only marks, mark=o, thick] file[x index={0}, y index={1}] {
+  \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_init.dat}; %, contour filled={number=9}
 \end{polaraxis}
 \end{scope}
-% \begin{scope}[]
-% \ifthenelse{\i=1}{\node[anchor=south] at (bb.north) {$\Psi = \psivalue$};}{}
-% \ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (bb.west) {$\Omega = \SI{\omegavalue}{\degree}$};}{}
-% \end{scope}
 % 
 \end{tikzpicture}
 }}

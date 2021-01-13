@@ -62,11 +62,12 @@ def run(p):
 
     for name, norm in [
         ("acc", False),
-        ("R", False),
-        ("R2", False),
-        ("acc", True),
-        ("R", True),
-        ("R2", True),
+            # ("R", False),
+            # ("R2", False),
+            # ("angle", False),
+            # ("acc", True),
+            # ("R", True),
+            # ("R2", True),
     ]:
 
         data = df_acc[sub][name].to_numpy(float)
@@ -159,6 +160,7 @@ def run(p):
                 ), "w") as f:
 
             f.write(f'{0} {90-f0_inc} {np.deg2rad(data[0])}\n')
+            f.write('\n')
 
         with open(
                 os.path.join(
@@ -170,6 +172,7 @@ def run(p):
 
             for d, p, t in zip(data_, phi_, theta_):
                 f.write(f'{np.rad2deg(p):.2f} {np.rad2deg(t):.2f} {d:.6f}\n')
+            f.write('\n')
 
 
 if __name__ == "__main__":
