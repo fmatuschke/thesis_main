@@ -23,8 +23,8 @@ sed -i 's/__NAME__/'"$name"'/g' simulation_analysis_hist.tex
 sed -i 's/__NORM__/'"$norm"'/g' simulation_analysis_hist.tex
 
 lualatex -interaction=nonstopmode -halt-on-error --shell-escape simulation_analysis_hist.tex
-make -j4 -f simulation_analysis_hist.makefile
-lualatex -interaction=nonstopmode -halt-on-error --shell-escape simulation_analysis_hist.tex
+# make -j4 -f simulation_analysis_hist.makefile
+# lualatex -interaction=nonstopmode -halt-on-error --shell-escape simulation_analysis_hist.tex
 mv simulation_analysis_hist.pdf ../tikz/simulation_analysis_hist_${radius}_${microscope}_${species}_${model}_${name}_${norm}.pdf
 
 xdg-open ../tikz/simulation_analysis_hist_${radius}_${microscope}_${species}_${model}_${name}_${norm}.pdf
@@ -36,6 +36,7 @@ for radius in 0.5 1.0 2.0 5.0 10.0; do
          for model in r p; do
             for name in acc; do
                for norm in False; do
+
                   cp ../../simulation_analysis_hist.tex .
                   rm -rf tikz/*
                   sed -i 's/__MICROSCOPE__/'"$microscope"'/g' simulation_analysis_hist.tex
@@ -46,8 +47,8 @@ for radius in 0.5 1.0 2.0 5.0 10.0; do
                   sed -i 's/__NORM__/'"$norm"'/g' simulation_analysis_hist.tex
 
                   lualatex -interaction=nonstopmode -halt-on-error --shell-escape simulation_analysis_hist.tex
-                  make -j4 -f simulation_analysis_hist.makefile
-                  lualatex -interaction=nonstopmode -halt-on-error --shell-escape simulation_analysis_hist.tex
+                  # make -j4 -f simulation_analysis_hist.makefile
+                  # lualatex -interaction=nonstopmode -halt-on-error --shell-escape simulation_analysis_hist.tex
                   mv simulation_analysis_hist.pdf ../tikz/simulation_analysis_hist_${radius}_${microscope}_${species}_${model}_${name}_${norm}.pdf
 
                   # xdg-open ../tikz/simulation_analysis_hist_${radius}_${microscope}_${species}_${model}_${name}_${norm}.pdf

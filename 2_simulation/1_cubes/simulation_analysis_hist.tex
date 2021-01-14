@@ -1,4 +1,4 @@
-\documentclass[varwidth, multi=page]{standalone}
+\documentclass[tikz]{standalone}
 % 
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
@@ -13,10 +13,10 @@
 \usetikzlibrary{external}
 \usetikzlibrary{calc}
 % 
-\tikzexternalize[prefix=./tikz/,
-               %   figure name=\radius_\setup_\species_\model_,
-                 mode=list and make, 
-                 ]
+% \tikzexternalize[prefix=./tikz/,
+%                %   figure name=\radius_\setup_\species_\model_,
+%                 %  mode=list and make, 
+%                  ]
 % 
 \def\datapath{../../output/sim_120_new/0.125}
 % 
@@ -30,33 +30,30 @@
 \def\name{__NAME__}
 \def\norm{__NORM__}
 % 
-% \def\radius{10.0}
-% \def\setup{PM}
-% \def\species{Human}
-% \def\model{p}
-% \def\psi{0.3}
-% \def\fnull{30.0}
-% \def\name{R}
-% 
 \begin{document}
 % 
 % 
-\begin{page}
-\foreach \psi in {0.3, 0.6, 0.9} { % 0.0, unecesarry, because other psi at omega==0 (should) have the same value
-\resizebox{\textwidth}{!}{
-\foreach \fnull in {0.0,30.0,60.0,90.0} {
+\def\delta{4.25}
+\pgfplotsset{every tick label/.append style={font=\footnotesize}}
 % 
 \begin{tikzpicture}
 % 
-\pgfplotsset{every tick label/.append style={font=\footnotesize}}
-%    
 \begin{scope}[local bounding box=bb]
+% 
+\foreach [count=\i from 0] \fnull in {0.0,30.0,60.0,90.0} {
+\foreach [count=\j from 0] \psi in {0.3, 0.6, 0.9} { % 0.0, unecesarry, because other psi at omega==0 (should) have the same value
+% 
+\begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
 \begin{polaraxis}[
-    width=6cm, height = 6cm,
+    width=3.25cm, height = 3.25cm,
+    scale only axis=true,
     xtick={0,45,...,315},
     ytick={60,30},
+    xlabel style={overlay},
+    xticklabel style={overlay},
     yticklabels={30,60},
-    yticklabel style=white,
+    ylabel style={overlay},
+    yticklabel style={white, overlay},
     colormap/viridis,
     point meta min = 0,
     point meta max = 1,
@@ -66,7 +63,6 @@
     y axis line style= { draw opacity=0 },
     ymin=0, ymax=90,
     axis on top=true,
-   %  colorbar,
 ]
 \addplot3 [surf] file[] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_hist.dat}; %, contour filled={number=9}
 \addplot [only marks, scatter, scatter src=explicit] file[skip first, x index={0}, y index={1}, meta index={2}] {
@@ -76,11 +72,25 @@
 \addplot [only marks, mark=o, thick] file[x index={0}, y index={1}] {
   \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_init.dat}; %, contour filled={number=9}
 \end{polaraxis}
+% 
+\end{scope}
+\begin{pgfinterruptboundingbox}
+\ifthenelse{\i=0}{\node[anchor=south] at ($(\i\j.north)+(0,0.42)$) {$\Psi = \psi$};}{}
+\ifthenelse{\j=0}{\node[anchor=south, rotate=90] at ($(\i\j.west)-(0.55,0)$) {$inc = \fnull$};}{}
+% \draw (\i\j.north west) rectangle (\i\j.south east);
+\end{pgfinterruptboundingbox}
+% 
+}}
+% 
+% \draw ($(current bounding box.north west)$) rectangle ($(current bounding box.south east)$);
+\path ($(current bounding box.north west)+(-1,1)$) rectangle ($(current bounding box.south east)+(1,-0.42)$);
+% 
 \end{scope}
 % 
+% \begin{pgfinterruptboundingbox}
+% \draw[very thick, blue, dashed] (bb.north west) rectangle ++ (\width, -\height);
+% \end{pgfinterruptboundingbox}
+% 
 \end{tikzpicture}
-}}
-}
-\end{page}
 % 
 \end{document}
