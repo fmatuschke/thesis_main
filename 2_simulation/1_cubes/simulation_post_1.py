@@ -10,6 +10,8 @@ import helper.spherical_harmonics
 import helper.schilling
 import fibers
 
+import fastpli.analysis
+
 # arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-i",
@@ -27,6 +29,26 @@ args = parser.parse_args()
 # share data
 manager = mp.Manager()
 gt_dict = manager.dict()
+
+
+def save2dHist(file, H, x, y, norm=False):
+    with open(file, "w") as f:
+
+        x = x + (x[1] - x[0]) / 2
+        y = y[1:] + (y[1] - y[0]) / 2
+        H = np.vstack([H, H[0, :]])
+        H = H / np.sum(H.ravel())
+
+        X, Y = np.meshgrid(np.rad2deg(x), np.rad2deg(x))
+
+        # norm
+        if norm:
+            H /= np.amax(H)
+
+        for h_array, x_array, y_array in zip(H.T, X, Y):
+            for h, x, y in zip(h_array, x_array, y_array):
+                f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
+            f.write('\n')
 
 
 def calcGroundTruth(parameter):
@@ -55,6 +77,18 @@ def calcGroundTruth(parameter):
         f0_inc, f1_rot)
     sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
+    # hist
+    h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
+                                                        theta,
+                                                        n_phi=36,
+                                                        n_theta=18,
+                                                        weight_area=True)
+    save2dHist(
+        os.path.join(
+            args.input, "analysis",
+            f"orientation_hist_r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_org.dat"
+        ), h, x, y)
+
     gt_dict[
         f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}'] = sh1
 
@@ -74,6 +108,18 @@ def run(parameter):
     theta = np.pi / 2 - df[sub].explode("rofl_inc").rofl_inc.to_numpy(
         dtype=float)
     sh0 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
+
+    #hist
+    h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
+                                                        theta,
+                                                        n_phi=36,
+                                                        n_theta=18,
+                                                        weight_area=True)
+    save2dHist(
+        os.path.join(
+            args.input, "analysis",
+            f"orientation_hist_r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rofl.dat"
+        ), h, x, y)
 
     # ground truth
     sh1 = gt_dict[
