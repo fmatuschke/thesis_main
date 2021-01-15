@@ -68,7 +68,11 @@
     % }
     % /pgf/number format/sci subscript
 ]
-\addplot3 [surf] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat}; %, contour filled={number=9}
+\addplot [%
+matrix plot*,
+point meta=\thisrowno{2},
+] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat}; %, contour filled={number=9}
+% \addplot3 [surf] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat}; %, contour filled={number=9}
 % \addplot3 [contour gnuplot={number=14},thick,] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat};
 \end{polaraxis}
 \end{scope}

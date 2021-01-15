@@ -133,13 +133,9 @@ if __name__ == "__main__":
                     x_axis = df_sub.hist_2d_x.iloc[0]
                     y_axis = df_sub.hist_2d_y.iloc[0]
 
-                    x_axis = x_axis + (x_axis[1] - x_axis[0]) / 2
-                    y_axis = y_axis[1:] + (y_axis[1] - y_axis[0]) / 2
-                    # y_axis = y_axis + (y_axis[1] - y_axis[0]) / 2
-                    H = np.vstack([H, H[0, :]])
-                    # H = np.hstack(
-                    #     [H, np.roll(H[:, 0], H.shape[1] // 2)[:, None]])
-                    H = H / np.sum(H.ravel())
+                    x_axis = x[:-1] + (x[1] - x[0]) / 2
+                    y_axis = y[:-1] + (y[1] - y[0]) / 2
+                    H = h.T / np.sum(h.ravel())
 
                     X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
 
@@ -161,13 +157,9 @@ if __name__ == "__main__":
                     x_axis = df_sub.hist_2d_x.iloc[0]
                     y_axis = df_sub.hist_2d_y.iloc[0]
 
-                    x_axis = x_axis + (x_axis[1] - x_axis[0]) / 2
-                    y_axis = y_axis[1:] + (y_axis[1] - y_axis[0]) / 2
-                    # y_axis = y_axis + (y_axis[1] - y_axis[0]) / 2
-                    H = np.vstack([H, H[0, :]])
-                    # H = np.hstack(
-                    #     [H, np.roll(H[:, 0], H.shape[1] // 2)[:, None]])
-                    H = H / np.sum(H.ravel())
+                    x_axis = x[:-1] + (x[1] - x[0]) / 2
+                    y_axis = y[:-1] + (y[1] - y[0]) / 2
+                    H = h.T / np.sum(h.ravel())
 
                     X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
 
