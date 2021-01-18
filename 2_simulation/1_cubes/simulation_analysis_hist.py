@@ -150,7 +150,9 @@ def run(p):
                 for h, x, y, z in zip(h_array, x_array, y_array, z_array):
                     p = np.rad2deg(np.arctan2(y, x))
                     t = np.rad2deg(np.arccos(z))
-                    f.write(f'{p:.2f} {t:.2f} {h:.6f}\n')
+
+                    if t <= 90:
+                        f.write(f'{p:.2f} {t:.2f} {h:.6f}\n')
                 f.write('\n')
 
         with open(
@@ -171,7 +173,9 @@ def run(p):
             # f.write(f'{0} {f0_inc} {np.deg2rad(data[0])}\n')
 
             for d, p, t in zip(data_, phi_, theta_):
-                f.write(f'{np.rad2deg(p):.2f} {np.rad2deg(t):.2f} {d:.6f}\n')
+                if t <= np.pi / 2:
+                    f.write(
+                        f'{np.rad2deg(p):.2f} {np.rad2deg(t):.2f} {d:.6f}\n')
             f.write('\n')
 
 

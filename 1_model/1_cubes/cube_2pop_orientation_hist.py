@@ -72,6 +72,8 @@ def run(df):
     # 2d hist
     h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
                                                         theta,
+                                                        n_phi=36,
+                                                        n_theta=18,
                                                         weight_area=True)
 
     # INIT
@@ -133,18 +135,19 @@ if __name__ == "__main__":
                     x_axis = df_sub.hist_2d_x.iloc[0]
                     y_axis = df_sub.hist_2d_y.iloc[0]
 
-                    x_axis = x[:-1] + (x[1] - x[0]) / 2
-                    y_axis = y[:-1] + (y[1] - y[0]) / 2
-                    H = h.T / np.sum(h.ravel())
+                    x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
+                    y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
+                    H = H.T / np.sum(H.ravel())
 
                     X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
 
                     # print(X.shape)
                     # print(Y.shape)
                     # print(H.shape)
-                    for h_array, x_array, y_array in zip(H.T, X, Y):
+                    for h_array, x_array, y_array in zip(H, X, Y):
                         for h, x, y in zip(h_array, x_array, y_array):
-                            f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
+                            if y <= 90:
+                                f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
                         f.write('\n')
 
                 with open(
@@ -157,9 +160,9 @@ if __name__ == "__main__":
                     x_axis = df_sub.hist_2d_x.iloc[0]
                     y_axis = df_sub.hist_2d_y.iloc[0]
 
-                    x_axis = x[:-1] + (x[1] - x[0]) / 2
-                    y_axis = y[:-1] + (y[1] - y[0]) / 2
-                    H = h.T / np.sum(h.ravel())
+                    x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
+                    y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
+                    H = H.T / np.sum(H.ravel())
 
                     X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
 
@@ -167,9 +170,10 @@ if __name__ == "__main__":
                     # print(Y.shape)
                     # print(H.shape)
                     H /= np.amax(H)
-                    for h_array, x_array, y_array in zip(H.T, X, Y):
+                    for h_array, x_array, y_array in zip(H, X, Y):
                         for h, x, y in zip(h_array, x_array, y_array):
-                            f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
+                            if y <= 90:
+                                f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
                         f.write('\n')
 
                 # polar hist
