@@ -64,12 +64,13 @@
     ymin=0, ymax=90,
     axis on top=true,
 ]
-\addplot [surf] file[] {\datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_hist.dat}; %, contour filled={number=9}
-\addplot [only marks, scatter, scatter src=explicit] file[skip first, x index={0}, y index={1}, meta index={2}] {
+\addplot [surf,point meta=\thisrowno{2},] table {%
+  \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_hist.dat}; %, contour filled={number=9}
+\addplot [only marks, scatter, scatter src=explicit] file[] {%
   \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_data.dat}; %, contour filled={number=9}
-\addplot [ only marks, mark=o, thin, dash pattern=on 1pt off 1pt] file[skip first, x index={0}, y index={1}, meta index={2}] {
+\addplot [ only marks, mark=o, thin, dash pattern=on 1pt off 1pt] file[] {%
   \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_data.dat}; %, contour filled={number=9}
-\addplot [only marks, mark=o, thick] file[x index={0}, y index={1}] {
+\addplot [only marks, mark=o, thick] file[] {%
   \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_init.dat}; %, contour filled={number=9}
 \end{polaraxis}
 % 
