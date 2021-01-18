@@ -72,7 +72,7 @@ def run(df):
     # 2d hist
     h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
                                                         theta,
-                                                        n_phi=36,
+                                                        n_phi=36 * 2,
                                                         n_theta=18,
                                                         weight_area=True)
 
@@ -96,8 +96,9 @@ def run(df):
 
 if __name__ == "__main__":
 
-    if False or not os.path.isfile(
+    if True or not os.path.isfile(
             os.path.join(args.input, "hist", "cube_2pop.pkl")):
+        print("calculating data")
         df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
         df = df[df.state != "init"]
         df = [df.iloc[i] for i in range(df.shape[0])]
@@ -112,6 +113,7 @@ if __name__ == "__main__":
         df = pd.concat(df, ignore_index=True)
         df.to_pickle(os.path.join(args.input, "hist", "cube_2pop.pkl"))
     else:
+        print("loading data")
         df = pd.read_pickle(os.path.join(args.input, "hist", "cube_2pop.pkl"))
 
     for omega in df.omega.unique():
