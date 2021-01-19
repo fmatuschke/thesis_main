@@ -7,41 +7,72 @@ jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-import fastpli.tools
 import pandas as pd
+import os
 
+import fibers
+import fastpli.tools
 
 #%%
-def _calc_intensity(phi, alpha, t_rel, theta, phii):
-    num_rotations = 9
-    number_tilts = 5
-    rotation_angles = np.linspace(0, np.pi, num_rotations + 1)[:-1]
+df_model = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..",
+                 "1_model/1_cubes/output/cube_2pop_120/cube_2pop.pkl"))
+print("df_model:", df_model.columns)
 
-    # tilt orientation
-    u = np.array([
-        np.cos(phii) * np.sin(theta),
-        np.sin(phii) * np.sin(theta),
-        np.cos(theta)
-    ])
+df_model_hist = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..",
+                 "1_model/1_cubes/output/cube_2pop_120/hist/cube_2pop.pkl"))
+print("df_model_hist:", df_model_hist.columns)
 
-    # fiber orientation
-    v = np.array([
-        np.cos(phi) * np.cos(alpha),
-        np.sin(phi) * np.cos(alpha),
-        np.sin(alpha)
-    ])
+df_sim = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..",
+                 "2_simulation/1_cubes/output/sim_120_new/0.125/",
+                 "analysis/cube_2pop_simulation.pkl"))
+print("df_sim:", df_sim.columns)
 
-    # tilted fiber orientation
-    rot = fastpli.tools.rotation.a_on_b([0, 0, 1], v)
-    v = np.dot(rot, u)
-    phi_v = np.arctan2(v[1], v[0])
-    alpha_v = np.arcsin(v[2])
+df_sim_sch = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..",
+                 "2_simulation/1_cubes/output/sim_120_new/0.125/",
+                 "analysis/cube_2pop_simulation_schilling.pkl"))
+print("df_sim_sch:", df_sim_sch.columns)
 
-    # print(np.rad2deg(phi), np.rad2deg(alpha), np.rad2deg(phi_v),
-    #       np.rad2deg(alpha_v))
-    I = np.sin(np.pi / 2 * t_rel * np.cos(alpha_v)**2) * np.sin(
-        2 * (rotation_angles - phi_v))
-    return I
+#%%
+
+
+def get_file_from_parameter(psi="0.30",
+                            omega="30.00",
+                            r="0.50",
+                            incl="30.00",
+                            rot="0.00"):
+
+    model_str = os.path.join(
+        os.getcwd(), "../..", "1_model/1_cubes/output/cube_2pop_120",
+        f"cube_2pop_psi_{psi}_omega_{omega}_r_{r}_v0_120_.solved.h5")
+
+    sim_str = os.path.join(
+        os.getcwd(), "../..", "2_simulation/1_cubes/output/sim_120_new/0.125",
+        f"cube_2pop_psi_{psi}_omega_{omega}_r_{r}_v0_120_.solved_vs_0.1250_inc_{incl}_rot_{rot}.h5"
+    )
+
+    return model_str, sim_str
+
+
+def get_rotations(omega):
+    return fibers.omega_rotations(omega)
+
+
+def get_sim(microscope="PM",
+            species="Vervet",
+            model="r",
+            psi="0.30",
+            omega="30.00",
+            r="0.50",
+            incl="30.00",
+            rot="0.00"):
+
+    _, sim_str = get_file_from_parameter(psi, omega, r, incl, rot)
+
+    return h5py.File(sim_str)[f"{microscope}/{species}/{model}"]
 
 
 #%%
@@ -54,52 +85,4 @@ r = "0.50"
 incl = "30.00"
 rot = "0.00"
 
-h5f = h5py.File(
-    f"output/sim_120_new/0.125/cube_2pop_psi_{psi}_omega_{omega}_r_{r}_v0_120_.solved_vs_0.1250_inc_{incl}_rot_{rot}.h5",
-    "r")
-h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
-
-data = [h5f_sub[f'simulation/optic/{i}'][...] for i in range(5)]
-data = np.array(data)
-data = data[:, data.shape[1] // 2, data.shape[2] // 2, :].T
-data = (data / np.mean(data)) - 1
-
-# #%%
-# R
-rofl_direction = h5f_sub['analysis/rofl/direction'][...]
-rofl_inclination = h5f_sub['analysis/rofl/inclination'][...]
-rofl_trel = h5f_sub['analysis/rofl/t_rel'][...]
-
-fit_data = np.empty((5, rofl_direction.shape[0], rofl_direction.shape[1], 9))
-
-theta = 5.5 if microscope == "LAP" else 3.9
-
-phis = [0, 0, 90, 180, 270]
-for t, phi in enumerate(phis):
-    for i in range(fit_data.shape[1]):
-        for j in range(fit_data.shape[2]):
-            fit_data[t, i, j, :] = _calc_intensity(rofl_direction[i, j],
-                                                   rofl_inclination[i, j],
-                                                   rofl_trel[i, j],
-                                                   np.deg2rad(theta),
-                                                   np.deg2rad(phi))
-
-fit_data = fit_data[:, fit_data.shape[1] // 2, fit_data.shape[2] // 2, :].T
-
-# #%%
-# plot
-plt.plot(data)
-plt.plot(fit_data)
-
-# %%
-
-df = pd.DataFrame()
-df['rho'] = np.linspace(0, 180, 9, False)
-for i in range(data.shape[-1]):
-    df[f'y{i}'] = data[:, i]
-    df[f'f{i}'] = fit_data[:, i]
-df.to_csv(
-    f"data_rofl_{microscope}_{species}_{model}_{psi}_{omega}_{r}_{incl}_{rot}.csv",
-    index=False,
-    float_format='%.6f')
 # %%
