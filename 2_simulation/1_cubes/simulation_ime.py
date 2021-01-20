@@ -184,8 +184,6 @@ if __name__ == "__main__":
 
                     logger.info(f"tissue_pipeline: model:{model}")
 
-                    save = ['optic', 'epa', 'rofl']
-                    # save += ['tissue'] if m == 0 and name == 'LAP' else []
                     tissue, optical_axis, tissue_properties = simpli.run_tissue_pipeline(
                     )
                     tissue_thickness = np.sum(tissue > 0, -1)
@@ -216,7 +214,7 @@ if __name__ == "__main__":
 
                     for species, mu in [('Roden', 8), ('Vervet', 30),
                                         ('Human', 65)]:
-                        dset = h5f.create_group(f'{name}/{model}/{species}')
+                        dset = h5f.create_group(f'{name}/{species}/{model}')
 
                         tilting_stack = [None] * 5
                         for t, (theta, phi) in enumerate(simpli.tilts):
@@ -247,14 +245,20 @@ if __name__ == "__main__":
                         mask = None  # keep analysing all pixels
 
                         # print('Run ROFL analysis:')
-                        rofl_direction, rofl_incl, rofl_t_rel, _ = simpli.apply_rofl(
+                        rofl_direction, rofl_incl, rofl_t_rel, param = simpli.apply_rofl(
                             tilting_stack, mask=mask)
 
                         dset['analysis/rofl/direction'] = np.rad2deg(
                             rofl_direction)
                         dset['analysis/rofl/inclination'] = np.rad2deg(
                             rofl_incl)
-                        dset['analysis/rofl/trel'] = rofl_t_rel
+                        dset['analysis/rofl/t_rel'] = rofl_t_rel
+
+                        dset['analysis/rofl/direction_conf'] = param[0]
+                        dset['analysis/rofl/inclination_conf'] = param[1]
+                        dset['analysis/rofl/t_rel_conf'] = param[2]
+                        dset['analysis/rofl/func'] = param[3]
+                        dset['analysis/rofl/n_iter'] = param[4]
 
                         dset.attrs['parameter/radius'] = radius
                         dset.attrs['parameter/psi'] = psi
