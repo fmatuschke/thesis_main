@@ -107,57 +107,62 @@ def calcShSim(parameter):
 
 
 def calcACC(parameter):
-    psi, omega, f0_inc, f1_rot, microscope, species, model, radius0 = parameter
+    psi, omega, f0_inc, f1_rot, microscope, species, model, radius1 = parameter
 
     df = []
-    for radius1 in sorted(df_sim.radius.unique()):
+    # for radius1/ in sorted(df_sim.radius.unique()):
 
-        sh0 = gt_dict[
-            f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
-        sh1 = gt_dict[
-            f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
-        accGtGt = helper.schilling.angular_correlation_coefficient(sh0, sh1)
+    # if radius1 <= radius0:
+    #     continue
 
-        sh0 = gt_dict[
-            f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
-        sh1 = sim_dict[
-            f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-            + f'microscope_{microscope}_species_{species}_model_{model}_']
-        accGtSim = helper.schilling.angular_correlation_coefficient(sh0, sh1)
+    radius0 = 0.5
 
-        sh0 = sim_dict[
-            f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-            + f'microscope_{microscope}_species_{species}_model_{model}_']
-        sh1 = gt_dict[
-            f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
-        accSimGt = helper.schilling.angular_correlation_coefficient(sh0, sh1)
+    sh0 = gt_dict[
+        f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
+    sh1 = gt_dict[
+        f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
+    accGtGt = helper.schilling.angular_correlation_coefficient(sh0, sh1)
 
-        sh0 = sim_dict[
-            f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-            + f'microscope_{microscope}_species_{species}_model_{model}_']
-        sh1 = sim_dict[
-            f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-            + f'microscope_{microscope}_species_{species}_model_{model}_']
-        accSimSim = helper.schilling.angular_correlation_coefficient(sh0, sh1)
+    sh0 = gt_dict[
+        f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
+    sh1 = sim_dict[
+        f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
+        + f'microscope_{microscope}_species_{species}_model_{model}_']
+    accGtSim = helper.schilling.angular_correlation_coefficient(sh0, sh1)
 
-        df.append(
-            pd.DataFrame(
-                {
-                    'microscope': microscope,
-                    'species': species,
-                    'model': model,
-                    'f0_inc': f0_inc,
-                    'f1_rot': f1_rot,
-                    'omega': omega,
-                    'psi': psi,
-                    'radius0': radius0,
-                    'radius1': radius1,
-                    'accGtGt': accGtGt,
-                    'accGtSim': accGtSim,
-                    'accSimGt': accSimGt,
-                    'accSimSim': accSimSim,
-                },
-                index=[0]))
+    sh0 = sim_dict[
+        f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
+        + f'microscope_{microscope}_species_{species}_model_{model}_']
+    sh1 = gt_dict[
+        f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}']
+    accSimGt = helper.schilling.angular_correlation_coefficient(sh0, sh1)
+
+    sh0 = sim_dict[
+        f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
+        + f'microscope_{microscope}_species_{species}_model_{model}_']
+    sh1 = sim_dict[
+        f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
+        + f'microscope_{microscope}_species_{species}_model_{model}_']
+    accSimSim = helper.schilling.angular_correlation_coefficient(sh0, sh1)
+
+    df.append(
+        pd.DataFrame(
+            {
+                'microscope': microscope,
+                'species': species,
+                'model': model,
+                'f0_inc': f0_inc,
+                'f1_rot': f1_rot,
+                'omega': omega,
+                'psi': psi,
+                'radius0': radius0,
+                'radius1': radius1,
+                'accGtGt': accGtGt,
+                'accGtSim': accGtSim,
+                'accSimGt': accSimGt,
+                'accSimSim': accSimSim,
+            },
+            index=[0]))
 
     return df
 

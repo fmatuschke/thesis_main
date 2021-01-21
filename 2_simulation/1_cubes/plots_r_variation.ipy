@@ -1,0 +1,76 @@
+#%%
+from IPython import get_ipython
+get_ipython().run_line_magic('matplotlib', 'inline')
+from jupyterthemes import jtplot
+jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
+#%%
+import h5py
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import seaborn as sns
+
+import fibers
+import fastpli.tools
+
+#%%
+
+df_acc = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..",
+                 "2_simulation/1_cubes/output/sim_120_ime_/",
+                 "analysis/cube_2pop_simulation_accs.pkl"))
+print("df_acc:", df_acc.columns)
+
+#%%
+
+for model in ["p", "r"]:
+    fig, axs = plt.subplots(3, figsize=(15, 15))
+    microscope = "PM"
+    species = "Vervet"
+    # model = "r"
+    # f0_inc = 0.00
+    # f1_rot = 0.00
+
+    # omega = 30
+
+    df_ = df_acc.query('microscope == @microscope & species == @species & ' +
+                       'model == @model & radius0 == 0.5')
+
+    # df_ = df_acc.query('microscope == @microscope & species == @species & ' +
+    #                    'model == @model & omega == @omega & ' +
+    #                    'f0_inc == @f0_inc & f1_rot == @f1_rot')
+
+    # for col in df_.columns:
+    #     if len(df_[col].unique()) == 1:
+    #         df_.drop(col, inplace=True, axis=1)
+
+    # print(df_)
+
+    sns.lineplot(data=df_,
+                 x="radius1",
+                 y="accGtGt",
+                 hue="psi",
+                 style="omega",
+                 palette="mako_r",
+                 markers=True,
+                 ax=axs[0])
+    sns.lineplot(data=df_,
+                 x="radius1",
+                 y="accGtSim",
+                 hue="psi",
+                 style="omega",
+                 palette="mako_r",
+                 markers=True,
+                 ax=axs[1],
+                 legend=False)
+    sns.lineplot(data=df_,
+                 x="radius1",
+                 y="accSimSim",
+                 hue="psi",
+                 style="omega",
+                 palette="mako_r",
+                 markers=True,
+                 ax=axs[2],
+                 legend=False)
+# %%
