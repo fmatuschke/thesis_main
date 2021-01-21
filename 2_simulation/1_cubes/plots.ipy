@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+import seaborn as sns
 
 import fibers
 import fastpli.tools
@@ -79,10 +80,69 @@ def get_sim(microscope="PM",
 microscope = "PM"
 species = "Vervet"
 model = "r"
-psi = "0.30"
-omega = "30.00"
-r = "0.50"
-incl = "30.00"
-rot = "0.00"
+# r = 0.50
+incl = 0.00
+rot = 0.00
+
+#%%
+df_res = []
+
+for r in sorted(df_sim['radius'].unique()):
+    for psi in sorted(df_sim['psi'].unique()):
+        for omega in sorted(df_sim[df_sim['psi'] == psi]['omega'].unique()):
+            df_ = df_sim.query(
+                'microscope == @microscope & species == @species & ' +
+                'model == @model & radius == @r & omega == @omega & ' +
+                'psi == @psi & f0_inc == @incl & f1_rot == @rot')
+
+            df = pd.DataFrame({
+                'microscope': microscope,
+                'species': species,
+                'model': model,
+                'radius': r,
+                'f0_inc': incl,
+                'f1_rot': rot,
+                'omega': omega,
+                'psi': psi,
+                'trans': df_.epa_trans.to_numpy()[0],
+                'dir': np.rad2deg(df_.epa_dir.to_numpy()[0]),
+                'ret': df_.epa_ret.to_numpy()[0],
+            })
+            df = df.apply(pd.Series.explode).reset_index()
+            df_res.append(df)
+
+df_res = pd.concat(df_res)
+df_res = df_res.apply(pd.Series.explode).reset_index()
+
+#%%
+
+sns.pointplot(x="omega", y="trans", hue="psi", data=df_res, ci=68)
+# sns.pointplot(
+#     x="trans",
+#     hue="trans",
+#     data=df_res[df_res.psi == 0.3],
+# )
+
+#     line = plt.errorbar(omegas, signal, std)
+#     line.set_label(f'psi:{psi}')
+# plt.legend()
+
+# %%
+for r in sorted(df_sim_sch['radius'].unique()):
+    for psi in sorted(df_sim_sch['psi'].unique()):
+        for omega in sorted(
+                df_sim_sch[df_sim_sch['psi'] == psi]['omega'].unique()):
+            pass
+
+# %%
+microscope = "PM"
+species = "Vervet"
+model = "r"
+incl = 0.00
+rot = 0.00
+
+df_ = df_sim_sch.query('microscope == @microscope & species == @species & ' +
+                   'model == @model & radius == @r &' +
+                   'f0_inc == @incl & f1_rot == @rot')
 
 # %%

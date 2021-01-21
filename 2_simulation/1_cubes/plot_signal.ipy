@@ -10,6 +10,23 @@ import matplotlib.pyplot as plt
 import fastpli.tools
 import pandas as pd
 
+#%% Absorption
+gain = 0.1175
+# gain = 3
+# lambda x: np.round(np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
+
+x = np.array([115, 574, 1608])
+y = np.divide(np.sqrt(gain * x), x)
+for i, j in zip(x, y):
+    print(f"{i}, {j}")
+
+x = np.logspace(0, 11, 21, base=2)
+y = np.divide(np.sqrt(gain * x), x)
+
+plt.plot(x, y)
+plt.xscale("log")
+plt.yscale("log")
+
 
 #%%
 def _calc_intensity(phi, alpha, t_rel, theta, phii):
