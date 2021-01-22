@@ -28,7 +28,7 @@
 # # radien eliminierung
 mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
    -m mpi4py simulation_ime.py \
-   -i /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*r_1.00*.solved.h5 \
-   -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/sim_120_ime_radius_1 \
+   -i /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*r_0.50*.solved.h5 \
+   -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/sim_120_ime_radius_0.5 \
    -v 0.125 \
    --start 0
