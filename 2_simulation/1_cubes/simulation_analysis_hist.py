@@ -161,7 +161,7 @@ def run(p):
                     f"sim_r_{radius}_setup_{microscope}_s_{species}_m_{model}_psi_{psi}_f0_{f0_inc}_{name}_{norm}_init.dat"
                 ), "w") as f:
 
-            f.write(f'{0} {90-f0_inc} {np.deg2rad(data[0])}\n')
+            f.write(f'{0} {90-f0_inc}\n')
             f.write('\n')
 
         with open(

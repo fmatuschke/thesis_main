@@ -103,51 +103,6 @@ df = df.infer_objects()
 gain = 0.1175 if microscope == "PM" else 3
 df['noise'] = np.sqrt(df['epa_trans'].to_numpy() / 2 * gain)
 
-#%%
-
-# sns.lineplot(data=df, x="omega", y="epa_ret", palette="mako_r", markers=True)
-
-# fig, axs = plt.subplots(figsize=(15, 15))
-# sns.lineplot(data=df,
-#              x="omega",
-#              y="epa_ret",
-#              hue="psi",
-#              style="f0_inc",
-#              palette="mako_r",
-#              markers=True)
-
-for psi in sorted(df.psi.unique()):
-    print(psi)
-    for f0_inc in sorted(df[(df.psi == psi)].f0_inc.unique()):
-        for omega in sorted(df[(df.psi == psi) &
-                               (df.f0_inc == f0_inc)].omega.unique()):
-            print(df[(df.f0_inc == f0_inc) & (df.psi == psi) &
-                     (df.omega == omega)].f1_rot.unique())
-    # print(df[df.f0_inc == f0_inc])
-    # fig, axs = plt.subplots(figsize=(15, 15))
-    # print(f0_inc)
-    # sns.lineplot(
-    #     data=df[(df.f0_inc == f0_inc) & (df.psi > 0)],
-    #     x="omega",
-    #     y="epa_ret",
-    #     hue="psi",
-    #     style="f1_rot",
-    #     palette="mako_r",
-    #     markers=True,
-    # )
-    # plt.title(f"f0_inc: {f0_inc}")
-
-# sns.pointplot(x="omega", y="trans", hue="psi", data=df_res, ci=68)
-# sns.pointplot(
-#     x="trans",
-#     hue="trans",
-#     data=df_res[df_res.psi == 0.3],
-# )
-
-#     line = plt.errorbar(omegas, signal, std)
-#     line.set_label(f'psi:{psi}')
-# plt.legend()
-
 
 #%%
 def theta_from_inc_rot(omega, inc, rot):
@@ -212,13 +167,6 @@ for psi in sorted(df.psi.unique()):
                         index=[0]))
 
 df_mean = pd.concat(df_mean, ignore_index=True)
-
-# df['plot_theta'] = df.apply(
-#     lambda row: theta_from_inc_rot(row['omega'], row['f0_inc'], row['f1_rot']),
-#     axis=1)
-# df['plot_phi'] = df.apply(
-#     lambda row: phi_from_inc_rot(row['omega'], row['f0_inc'], row['f1_rot']),
-#     axis=1)
 
 # %%
 import matplotlib
