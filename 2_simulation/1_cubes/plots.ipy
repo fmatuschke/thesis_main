@@ -15,6 +15,9 @@ import fibers
 import fastpli.tools
 
 #%%
+
+sim_path = "2_simulation/1_cubes/output/sim_120_ime_/"
+
 # df_model = pd.read_pickle(
 #     os.path.join(os.getcwd(), "../..",
 #                  "1_model/1_cubes/output/cube_2pop_120/cube_2pop.pkl"))
@@ -25,23 +28,22 @@ import fastpli.tools
 #                  "1_model/1_cubes/output/cube_2pop_120/hist/cube_2pop.pkl"))
 # print("df_model_hist:", df_model_hist.columns)
 
-# df_sim = pd.read_pickle(
-#     os.path.join(os.getcwd(), "../..",
-#                  "2_simulation/1_cubes/output/sim_120_new/0.125/",
-#                  "analysis/cube_2pop_simulation.pkl"))
-# print("df_sim:", df_sim.columns)
+df_sim = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..", sim_path,
+                 "analysis/cube_2pop_simulation.pkl"))
+print("df_sim:", df_sim.columns)
 
 # df_sim_sch = pd.read_pickle(
 #     os.path.join(os.getcwd(), "../..",
-#                  "2_simulation/1_cubes/output/sim_120_new/0.125/",
+#                  sim_path,
 #                  "analysis/cube_2pop_simulation_schilling.pkl"))
 # print("df_sim_sch:", df_sim_sch.columns)
 
-df_acc = pd.read_pickle(
-    os.path.join(os.getcwd(), "../..",
-                 "2_simulation/1_cubes/output/sim_120_ime_/",
-                 "analysis/cube_2pop_simulation_accs.pkl"))
-print("df_acc:", df_acc.columns)
+# df_acc = pd.read_pickle(
+#     os.path.join(os.getcwd(), "../..",
+#                  sim_pathh,
+#                  "analysis/cube_2pop_simulation_accs.pkl"))
+# print("df_acc:", df_acc.columns)
 
 #%%
 
@@ -86,43 +88,56 @@ def get_sim(microscope="PM",
 microscope = "PM"
 species = "Vervet"
 model = "r"
-# r = 0.50
-incl = 0.00
+radius = 0.50
+# incl = 0.00
 rot = 0.00
 
 #%%
-df_res = []
-
-for r in sorted(df_sim['radius'].unique()):
-    for psi in sorted(df_sim['psi'].unique()):
-        for omega in sorted(df_sim[df_sim['psi'] == psi]['omega'].unique()):
-            df_ = df_sim.query(
-                'microscope == @microscope & species == @species & ' +
-                'model == @model & radius == @r & omega == @omega & ' +
-                'psi == @psi & f0_inc == @incl & f1_rot == @rot')
-
-            df = pd.DataFrame({
-                'microscope': microscope,
-                'species': species,
-                'model': model,
-                'radius': r,
-                'f0_inc': incl,
-                'f1_rot': rot,
-                'omega': omega,
-                'psi': psi,
-                'trans': df_.epa_trans.to_numpy()[0],
-                'dir': np.rad2deg(df_.epa_dir.to_numpy()[0]),
-                'ret': df_.epa_ret.to_numpy()[0],
-            })
-            df = df.apply(pd.Series.explode).reset_index()
-            df_res.append(df)
-
-df_res = pd.concat(df_res)
-df_res = df_res.apply(pd.Series.explode).reset_index()
+df = df_sim.query('microscope == @microscope & species == @species & ' +
+                  'model == @model & radius == @radius')
+df = df.apply(pd.Series.explode).reset_index()
+for col in df.columns:
+    if len(df[col].unique()) == 1:
+        df.drop(col, inplace=True, axis=1)
+df = df.infer_objects()
+gain = 0.1175 if microscope == "PM" else 3
+df['noise'] = np.sqrt(df['epa_trans'].to_numpy() / 2 * gain)
 
 #%%
 
-sns.pointplot(x="omega", y="trans", hue="psi", data=df_res, ci=68)
+# sns.lineplot(data=df, x="omega", y="epa_ret", palette="mako_r", markers=True)
+
+# fig, axs = plt.subplots(figsize=(15, 15))
+# sns.lineplot(data=df,
+#              x="omega",
+#              y="epa_ret",
+#              hue="psi",
+#              style="f0_inc",
+#              palette="mako_r",
+#              markers=True)
+
+for psi in sorted(df.psi.unique()):
+    print(psi)
+    for f0_inc in sorted(df[(df.psi == psi)].f0_inc.unique()):
+        for omega in sorted(df[(df.psi == psi) &
+                               (df.f0_inc == f0_inc)].omega.unique()):
+            print(df[(df.f0_inc == f0_inc) & (df.psi == psi) &
+                     (df.omega == omega)].f1_rot.unique())
+    # print(df[df.f0_inc == f0_inc])
+    # fig, axs = plt.subplots(figsize=(15, 15))
+    # print(f0_inc)
+    # sns.lineplot(
+    #     data=df[(df.f0_inc == f0_inc) & (df.psi > 0)],
+    #     x="omega",
+    #     y="epa_ret",
+    #     hue="psi",
+    #     style="f1_rot",
+    #     palette="mako_r",
+    #     markers=True,
+    # )
+    # plt.title(f"f0_inc: {f0_inc}")
+
+# sns.pointplot(x="omega", y="trans", hue="psi", data=df_res, ci=68)
 # sns.pointplot(
 #     x="trans",
 #     hue="trans",
@@ -133,75 +148,93 @@ sns.pointplot(x="omega", y="trans", hue="psi", data=df_res, ci=68)
 #     line.set_label(f'psi:{psi}')
 # plt.legend()
 
-# %%
-for r in sorted(df_sim_sch['radius'].unique()):
-    for psi in sorted(df_sim_sch['psi'].unique()):
-        for omega in sorted(
-                df_sim_sch[df_sim_sch['psi'] == psi]['omega'].unique()):
-            pass
-
-# %%
-microscope = "PM"
-species = "Vervet"
-model = "r"
-incl = 0.00
-rot = 0.00
-
-df_ = df_sim_sch.query('microscope == @microscope & species == @species & ' +
-                       'model == @model & radius == @r &' +
-                       'f0_inc == @incl & f1_rot == @rot')
-
-# %%
 
 #%%
+def theta_from_inc_rot(omega, inc, rot):
+    v = np.array([np.cos(np.deg2rad(omega)), np.sin(np.deg2rad(omega)), 0])
+    rot_inc = fastpli.tools.rotation.y(-np.deg2rad(inc))
+    rot_phi = fastpli.tools.rotation.x(np.deg2rad(rot))
+    rot = np.dot(rot_inc, rot_phi)
+    v = np.dot(rot, v)
+    return np.arccos(v[2])
 
-for model in ["p", "r"]:
-    fig, axs = plt.subplots(3, figsize=(15, 15))
-    microscope = "PM"
-    species = "Vervet"
-    # model = "r"
-    # f0_inc = 0.00
-    # f1_rot = 0.00
 
-    # omega = 30
+def phi_from_inc_rot(omega, inc, rot):
+    v = np.array([np.cos(np.deg2rad(omega)), np.sin(np.deg2rad(omega)), 0])
+    rot_inc = fastpli.tools.rotation.y(-np.deg2rad(inc))
+    rot_phi = fastpli.tools.rotation.x(np.deg2rad(rot))
+    rot = np.dot(rot_inc, rot_phi)
+    v = np.dot(rot, v)
+    return np.arctan2(v[1], v[0])
 
-    df_ = df_acc.query('microscope == @microscope & species == @species & ' +
-                       'model == @model & radius0 == 0.5')
 
-    # df_ = df_acc.query('microscope == @microscope & species == @species & ' +
-    #                    'model == @model & omega == @omega & ' +
-    #                    'f0_inc == @f0_inc & f1_rot == @f1_rot')
+def theta_phi_from_inc_rot(omega, inc, rot):
+    v = np.array([np.cos(np.deg2rad(omega)), np.sin(np.deg2rad(omega)), 0])
+    rot_inc = fastpli.tools.rotation.y(-np.deg2rad(inc))
+    rot_phi = fastpli.tools.rotation.x(np.deg2rad(rot))
+    rot = np.dot(rot_inc, rot_phi)
+    v = np.dot(rot, v)
+    return np.arccos(v[2]), np.arctan2(v[1], v[0])
 
-    # for col in df_.columns:
-    #     if len(df_[col].unique()) == 1:
-    #         df_.drop(col, inplace=True, axis=1)
 
-    # print(df_)
+df_mean = []
+for psi in sorted(df.psi.unique()):
+    for f0_inc in sorted(df[(df.psi == psi)].f0_inc.unique()):
+        for omega in sorted(df[(df.psi == psi) &
+                               (df.f0_inc == f0_inc)].omega.unique()):
+            for f1_rot in sorted(df[(df.psi == psi) & (df.f0_inc == f0_inc) &
+                                    (df.omega == omega)].f1_rot.unique()):
+                df_ = df_sim.query(
+                    'microscope == @microscope & species == @species & ' +
+                    'model == @model & radius == @radius & ' +
+                    'psi == @psi & f0_inc == @f0_inc & ' +
+                    'omega == @omega & f1_rot == @f1_rot')
 
-    sns.lineplot(data=df_,
-                 x="radius1",
-                 y="accGtGt",
-                 hue="psi",
-                 style="omega",
-                 palette="mako_r",
-                 markers=True,
-                 ax=axs[0])
-    sns.lineplot(data=df_,
-                 x="radius1",
-                 y="accGtSim",
-                 hue="psi",
-                 style="omega",
-                 palette="mako_r",
-                 markers=True,
-                 ax=axs[1],
-                 legend=False)
-    sns.lineplot(data=df_,
-                 x="radius1",
-                 y="accSimSim",
-                 hue="psi",
-                 style="omega",
-                 palette="mako_r",
-                 markers=True,
-                 ax=axs[2],
-                 legend=False)
+                if len(df_) != 1:
+                    print("FOOOOO")
+                    exit(1)
+
+                theta, phi = theta_phi_from_inc_rot(omega, f0_inc, f1_rot)
+                df_mean.append(
+                    pd.DataFrame(
+                        {
+                            'psi': psi,
+                            'f0_inc': f0_inc,
+                            'omega': omega,
+                            'f1_rot': f1_rot,
+                            'epa_trans': np.mean(df_.epa_trans.iloc[0]),
+                            'epa_trans_std': np.std(df_.epa_trans.iloc[0]),
+                            'epa_ret': np.mean(df_.epa_ret.iloc[0]),
+                            'epa_ret_std': np.std(df_.epa_ret.iloc[0]),
+                            'plot_theta': theta,
+                            'plot_phi': phi
+                        },
+                        index=[0]))
+
+df_mean = pd.concat(df_mean, ignore_index=True)
+
+# df['plot_theta'] = df.apply(
+#     lambda row: theta_from_inc_rot(row['omega'], row['f0_inc'], row['f1_rot']),
+#     axis=1)
+# df['plot_phi'] = df.apply(
+#     lambda row: phi_from_inc_rot(row['omega'], row['f0_inc'], row['f1_rot']),
+#     axis=1)
+
+# %%
+import matplotlib
+fig, axs = plt.subplots(nrows=len(df_mean.f0_inc.unique()),
+                        ncols=len(df_mean.psi.unique()),
+                        subplot_kw={'projection': 'polar'},
+                        figsize=(20, 20))
+for j, psi in enumerate(sorted(df_mean.psi.unique())):
+    for i, inc in enumerate(sorted(df_mean.f0_inc.unique())):
+        df_ = df_mean[(df_mean.psi == psi) & (df_mean.f0_inc == inc)]
+        cmap = matplotlib.colors.Normalize(vmin=0, vmax=1)
+        axs[i, j].scatter(df_["plot_phi"].to_numpy(),
+                          np.rad2deg(df_["plot_theta"].to_numpy()),
+                          c=cmap(df_["epa_ret"].to_numpy()))
+        axs[i, j].set_rmax(90)
+        axs[i, j].set_rticks([0, 30, 60, 90])
+        axs[i, j].set_rlabel_position(0)
+
 # %%
