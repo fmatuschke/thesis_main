@@ -10,6 +10,7 @@ mpi.*.err
 *.dat
 *.out
 *.err
+*.nfs*
 
 literatur/*
 !literatur/readme.md
