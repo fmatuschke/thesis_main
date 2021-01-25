@@ -48,6 +48,18 @@ parser.add_argument("-v",
                     required=True,
                     help="voxel_size in um.")
 
+parser.add_argument(
+    "--n_inc",  #4
+    type=int,
+    required=True,
+    help="number of fiber inclinations")
+
+parser.add_argument(
+    "--d_rot",  #15
+    type=int,
+    required=True,
+    help="number of fiber inclinations")
+
 parser.add_argument("--start", type=int, required=True, help="mpi start.")
 
 args = parser.parse_args()
@@ -99,14 +111,16 @@ if __name__ == "__main__":
 
     # simulation loop
     parameter = []
-    fiber_inc = [(f, i) for f in file_list for i in fibers.inclinations(4)]
+    fiber_inc = [
+        (f, i) for f in file_list for i in fibers.inclinations(args.n_inc)
+    ]
     for file, f0_inc in fiber_inc:
         # h5py to slow
         # with h5py.File(file, 'r') as h5f:
         #     omega = h5f['/'].attrs["omega"]
         omega = helper.file.value(file, "omega")
 
-        for f1_rot in fibers.omega_rotations(omega, 15):
+        for f1_rot in fibers.omega_rotations(omega, args.d_rot):
             parameter.append((file, f0_inc, f1_rot))
 
     # print(len(parameter))

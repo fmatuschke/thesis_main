@@ -5,6 +5,7 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 import os
+import glob
 import fastpli.tools
 import helper.spherical_interpolation
 import subprocess
@@ -47,12 +48,25 @@ def omega_rot_to_spherical(omega, f1_rot):
     theta = np.array(theta)
 
 
-def generate(df, value, file_name, crange=None, size=None):
+def generate(df,
+             value,
+             file_name,
+             crange=None,
+             size=None,
+             delta=None,
+             d_theta=19,
+             d_phi=37,
+             f0_list=None,
+             psi_list=None):
 
-    f0_list = sorted(df.f0_inc.unique())
-    psi_list = np.array(sorted(df.psi.unique()))
+    if f0_list is None:
+        f0_list = sorted(df.f0_inc.unique())
+    if psi_list is None:
+        psi_list = np.array(sorted(df.psi.unique()))
+        psi_list = psi_list[psi_list > 0]  # redundant
 
-    psi_list = psi_list[psi_list > 0]  # redundant
+    f0_list = np.array(f0_list, float)
+    psi_list = np.array(psi_list, float)
 
     f0_list_str = ["%.2f" % x for x in f0_list]
     f0_list_str = ",".join(f0_list_str)
@@ -65,9 +79,12 @@ def generate(df, value, file_name, crange=None, size=None):
     if size is None:
         size = 0.9 * 13.8 / len(psi_list)
 
+    if delta is None:
+        delta = 4.25  # for 4
+
     sed("@file_name", file_name, f"polar_hist_to_tikz.tex",
         f"output/tmp/{file_name}.tex")
-    sed("@delta_img", "4.25", f"output/tmp/{file_name}.tex")
+    sed("@delta_img", str(delta), f"output/tmp/{file_name}.tex")
     sed("@fnull_list", f0_list_str, f"output/tmp/{file_name}.tex")
     sed("@psi_list", psi_list_str, f"output/tmp/{file_name}.tex")
     sed("@cmin", str(crange[0]), f"output/tmp/{file_name}.tex")
@@ -142,7 +159,7 @@ def generate(df, value, file_name, crange=None, size=None):
 
             # interplate mesh on sphere
             x_i, y_i, z_i, data_i = helper.spherical_interpolation.on_mesh(
-                phi_, theta_, data_, 37, 19)
+                phi_, theta_, data_, d_phi, d_theta)
 
             with open(
                     f"output/tmp/{file_name}_psi_{psi:.2f}_f0_{f0_inc:.2f}_hist.dat",
@@ -173,14 +190,22 @@ def generate(df, value, file_name, crange=None, size=None):
                         )
                 f.write('\n')
 
-    subprocess.run(
-        [
-            "lualatex", "-interaction=nonstopmode", "-halt-on-error",
-            f"{file_name}.tex"
-        ],
-        # shell=True,
-        check=True,
-        cwd="output/tmp")
+    with open(f"output/tmp/{file_name}.out",
+              "wb") as out, open(f"output/tmp/{file_name}.err", "wb") as err:
+        subprocess.run(
+            [
+                "lualatex", "-interaction=nonstopmode", "-halt-on-error",
+                f"{file_name}.tex"
+            ],
+            # shell=True,
+            check=True,
+            stdout=out,
+            stderr=err,
+            cwd="output/tmp")
 
     shutil.copyfile(f"output/tmp/{file_name}.pdf",
                     f"output/tikz/{file_name}.pdf")
+
+    fileList = glob.glob(f'output/tmp/{file_name}*')
+    for file in fileList:
+        os.remove(file)
