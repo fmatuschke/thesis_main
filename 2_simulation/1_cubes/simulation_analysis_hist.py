@@ -53,8 +53,8 @@ def run(p):
         print(df_acc[sub_ref])
         raise ValueError(f"FOOO:1: {len(df_acc[sub_ref])}")
     if psi != 0.0:
-        if len(df_acc[sub]) != 22:
-            print(df_acc[sub])
+        if len(df_acc[sub]) != len(df_acc[sub].groupby(['f1_rot', 'omega'
+                                                       ]).size()):
             raise ValueError(f"FOOO:22: {len(df_acc[sub])}")
 
     f1_rot = df_acc[sub].f1_rot.to_numpy(float)
