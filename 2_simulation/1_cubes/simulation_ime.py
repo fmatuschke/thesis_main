@@ -236,7 +236,7 @@ if __name__ == "__main__":
                             dset['analysis/epa/' + str(t) +
                                  '/transmittance'] = epa[0]
                             dset['analysis/epa/' + str(t) +
-                                 '/direction'] = np.rad2deg(epa[1])
+                                 '/direction'] = epa[1]
                             dset['analysis/epa/' + str(t) +
                                  '/retardation'] = epa[2]
 
@@ -248,10 +248,8 @@ if __name__ == "__main__":
                         rofl_direction, rofl_incl, rofl_t_rel, param = simpli.apply_rofl(
                             tilting_stack, mask=mask)
 
-                        dset['analysis/rofl/direction'] = np.rad2deg(
-                            rofl_direction)
-                        dset['analysis/rofl/inclination'] = np.rad2deg(
-                            rofl_incl)
+                        dset['analysis/rofl/direction'] = rofl_direction
+                        dset['analysis/rofl/inclination'] = rofl_incl
                         dset['analysis/rofl/t_rel'] = rofl_t_rel
 
                         dset['analysis/rofl/direction_conf'] = param[0]
