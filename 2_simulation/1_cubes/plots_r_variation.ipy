@@ -18,7 +18,7 @@ import fastpli.tools
 
 df_acc = pd.read_pickle(
     os.path.join(os.getcwd(), "../..",
-                 "2_simulation/1_cubes/output/sim_120_ime_/",
+                 "2_simulation/1_cubes/output/sim_120_ime/",
                  "analysis/cube_2pop_simulation_accs.pkl"))
 print("df_acc:", df_acc.columns)
 
@@ -73,4 +73,5 @@ for model in ["p", "r"]:
                  markers=True,
                  ax=axs[2],
                  legend=False)
+    plt.savefig(f"output/radius_acc_compare_{species}_{microscope}_{model}.pdf")
 # %%

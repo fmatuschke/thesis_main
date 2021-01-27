@@ -16,7 +16,7 @@ import fastpli.tools
 
 #%%
 
-sim_path = "2_simulation/1_cubes/output/sim_120_ime_/"
+sim_path = "2_simulation/1_cubes/output/sim_120_ime/"
 
 # df_model = pd.read_pickle(
 #     os.path.join(os.getcwd(), "../..",
