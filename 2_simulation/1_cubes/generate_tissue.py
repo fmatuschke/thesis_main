@@ -87,9 +87,9 @@ if __name__ == "__main__":
             print(f"file: {file_name}.h5 does not exist")
             exit(1)
 
-        if os.path.isfile(file_name + '.tissue.h5'):
-            print(f"file: {file_name}.tissue.h5 already exists")
-            continue
+        # if os.path.isfile(file_name + '.tissue.h5'):
+        #     print(f"file: {file_name}.tissue.h5 already exists")
+        #     continue
 
         with h5py.File(file, 'r') as h5f:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
         rot = np.dot(rot_inc, rot_phi)
 
-        with h5py.File(file_name + '.tissue.h5', 'w-') as h5f:
+        with h5py.File(file_name + '.tissue.h5', 'w') as h5f:
             with open(os.path.abspath(__file__), 'r') as script:
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
@@ -137,19 +137,38 @@ if __name__ == "__main__":
                                           tissue.shape,
                                           dtype=np.uint16,
                                           compression='gzip',
-                                          compression_opts=1)
+                                          compression_opts=4)
 
                 dset[:] = tissue
-                h5f[f"/tissue_max_proj"] = np.max(tissue,
-                                                  axis=-1).astype(np.uint16)
-                h5f[f"/tissue_mean_proj"] = np.mean(tissue,
-                                                    axis=-1).astype(np.uint16)
-                h5f[f"/tissue_sum_proj"] = np.sum(tissue,
-                                                  axis=-1).astype(np.uint16)
+                # h5f[f"/tissue_max_proj"] = np.max(tissue,
+                #                                   axis=-1).astype(np.uint16)
+                # h5f[f"/tissue_mean_proj"] = np.mean(tissue,
+                #                                     axis=-1).astype(np.float32)
+                # h5f[f"/tissue_sum_proj"] = np.sum(tissue,
+                #                                   axis=-1).astype(np.uint16)
 
-                h5f[f"/tissue_bin_max_proj"] = np.max(tissue,
-                                                      axis=-1).astype(np.uint16)
-                h5f[f"/tissue_bin_mean_proj"] = np.mean(tissue, axis=-1).astype(
-                    np.uint16)
-                h5f[f"/tissue_bin_sum_proj"] = np.sum(tissue,
-                                                      axis=-1).astype(np.uint16)
+                tissue = tissue.astype(np.float32)
+                tmp = tissue.ravel()
+                tmp[tmp > 0] = ((tmp[tmp > 0] - 1) // 2) + 1
+                tmp[tmp == 0] = np.nan
+
+                with warnings.catch_warnings():
+                    warnings.simplefilter(
+                        "ignore", message='RuntimeWarning: Mean of empty slice')
+                    h5f[f"/tissue_bin_median"] = np.nanmedian(tissue, axis=-1)
+                    h5f[f"/tissue_bin_mean"] = np.nanmean(tissue, axis=-1)
+
+                # dset = h5f.create_dataset('tissue_bin',
+                #                           tissue.shape,
+                #                           dtype=np.uint16,
+                #                           compression='gzip',
+                #                           compression_opts=4)
+
+                # dset[:] = tissue
+
+                # h5f[f"/tissue_bin_max_proj"] = np.max(tissue,
+                #                                       axis=-1).astype(np.uint16)
+                # h5f[f"/tissue_bin_mean_proj"] = np.mean(tissue, axis=-1).astype(
+                #     np.float32)
+                # h5f[f"/tissue_bin_sum_proj"] = np.sum(tissue,
+                #                                       axis=-1).astype(np.uint16)

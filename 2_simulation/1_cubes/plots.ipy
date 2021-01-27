@@ -16,28 +16,27 @@ import fastpli.tools
 
 #%%
 
-sim_path = "2_simulation/1_cubes/output/sim_120_ime_/"
+sim_path = "2_simulation/1_cubes/output/sim_120_ime/"
 
-# df_model = pd.read_pickle(
-#     os.path.join(os.getcwd(), "../..",
-#                  "1_model/1_cubes/output/cube_2pop_120/cube_2pop.pkl"))
-# print("df_model:", df_model.columns)
+df_model = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..",
+                 "1_model/1_cubes/output/cube_2pop_120/cube_2pop.pkl"))
+print("df_model:", df_model.columns)
 
-# df_model_hist = pd.read_pickle(
-#     os.path.join(os.getcwd(), "../..",
-#                  "1_model/1_cubes/output/cube_2pop_120/hist/cube_2pop.pkl"))
-# print("df_model_hist:", df_model_hist.columns)
+df_model_hist = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..",
+                 "1_model/1_cubes/output/cube_2pop_120/hist/cube_2pop.pkl"))
+print("df_model_hist:", df_model_hist.columns)
 
 df_sim = pd.read_pickle(
     os.path.join(os.getcwd(), "../..", sim_path,
                  "analysis/cube_2pop_simulation.pkl"))
 print("df_sim:", df_sim.columns)
 
-# df_sim_sch = pd.read_pickle(
-#     os.path.join(os.getcwd(), "../..",
-#                  sim_path,
-#                  "analysis/cube_2pop_simulation_schilling.pkl"))
-# print("df_sim_sch:", df_sim_sch.columns)
+df_sim_sch = pd.read_pickle(
+    os.path.join(os.getcwd(), "../..", sim_path,
+                 "analysis/cube_2pop_simulation_schilling.pkl"))
+print("df_sim_sch:", df_sim_sch.columns)
 
 # df_acc = pd.read_pickle(
 #     os.path.join(os.getcwd(), "../..",
@@ -59,7 +58,7 @@ def get_file_from_parameter(psi="0.30",
         f"cube_2pop_psi_{psi}_omega_{omega}_r_{r}_v0_120_.solved.h5")
 
     sim_str = os.path.join(
-        os.getcwd(), "../..", "2_simulation/1_cubes/output/sim_120_new/0.125",
+        os.getcwd(), "../..", sim_path,
         f"cube_2pop_psi_{psi}_omega_{omega}_r_{r}_v0_120_.solved_vs_0.1250_inc_{incl}_rot_{rot}.h5"
     )
 
@@ -82,6 +81,20 @@ def get_sim(microscope="PM",
     _, sim_str = get_file_from_parameter(psi, omega, r, incl, rot)
 
     return h5py.File(sim_str)[f"{microscope}/{species}/{model}"]
+
+
+def get_tissue(microscope="PM",
+               species="Vervet",
+               model="r",
+               psi="0.30",
+               omega="30.00",
+               r="0.50",
+               incl="30.00",
+               rot="0.00"):
+
+    _, sim_str = get_file_from_parameter(psi, omega, r, incl, rot)
+
+    return h5py.File(f"{sim_str[:-3]}.tissue.h5")["tissue"][...]
 
 
 #%%
