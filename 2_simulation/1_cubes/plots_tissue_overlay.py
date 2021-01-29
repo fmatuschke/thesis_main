@@ -7,6 +7,8 @@ import os
 import tqdm
 import fastpli.analysis
 
+import pretty_errors
+
 import models
 
 sim_path = "2_simulation/1_cubes/output/sim_120_ime/"
@@ -87,7 +89,9 @@ def get_tissue(psi="0.30",
                                          to_str(radius), to_str(incl),
                                          to_str(rot))
 
-    return h5py.File(f"{sim_str[:-3]}.tissue.h5")["tissue"][...]
+    path, file = os.path.split(sim_str)
+    return h5py.File(os.path.join(path, "tissue",
+                                  f"{file[:-3]}.tissue.h5"))["tissue"][...]
 
 
 def plot(p):
@@ -188,9 +192,11 @@ def plot(p):
             )
 
     plt.savefig(
-        "output/" +
-        f"tissue_overlay_{microscope}_{species}_{model}_{to_str(psi)}_" +
-        f"{to_str(omega)}_{to_str(radius)}_{to_str(incl)}_{to_str(rot)}_.pdf")
+        os.path.join(
+            os.getcwd(), "../..", sim_path, "tissue",
+            f"tissue_overlay_{microscope}_{species}_{model}_{to_str(psi)}_" +
+            f"{to_str(omega)}_{to_str(radius)}_{to_str(incl)}_{to_str(rot)}_.pdf"
+        ))
 
     plt.close(fig)
 

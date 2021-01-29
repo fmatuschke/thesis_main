@@ -101,7 +101,9 @@ def get_tissue(psi="0.30",
                                          to_str(radius), to_str(incl),
                                          to_str(rot))
 
-    return h5py.File(f"{sim_str[:-3]}.tissue.h5")["tissue"][...]
+    path, file = os.path.split(sim_str)
+    return h5py.File(os.path.join(path, "tissue",
+                                  f"{file[:-3]}.tissue.h5"))["tissue"][...]
 
 
 #%%
