@@ -42,7 +42,7 @@ def table(file_name,
         for i in range(odf.shape[0]):
             for j in range(odf.shape[1]):
                 file.write(
-                    f"{odf[i,j,0]:.2f} {odf[i,j,1]:.2f} {odf[i,j,2]:.2f} {odf[i,j,3]:.2f},{odf[i,j,4]:.2f},{odf[i,j,5]:.2f}\n"
+                    f"{odf[i,j,0]:.3f} {odf[i,j,1]:.3f} {odf[i,j,2]:.3f} {odf[i,j,3]:.3f},{odf[i,j,4]:.3f},{odf[i,j,5]:.3f}\n"
                 )
             file.write("\n")
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         for i in range(odf.shape[0]):
             for j in range(odf.shape[1]):
                 file.write(
-                    f"{odf[i,j,0]:.2f} {odf[i,j,1]:.2f} {odf[i,j,2]:.2f} {odf[i,j,3]:.2f},{odf[i,j,4]:.2f},{odf[i,j,5]:.2f}\n"
+                    f"{odf[i,j,0]:.3f} {odf[i,j,1]:.3f} {odf[i,j,2]:.3f} {odf[i,j,3]:.3f},{odf[i,j,4]:.3f},{odf[i,j,5]:.3f}\n"
                 )
             file.write("\n")
 
