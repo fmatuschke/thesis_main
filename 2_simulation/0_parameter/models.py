@@ -39,7 +39,7 @@ def rotate(fbs, f0_inc, f1_rot):
     return fbs
 
 
-def ori_from_fbs(fbs, f0_inc=0, f1_rot=0, cut=None):
+def ori_from_fbs(fbs, f0_inc, f1_rot, cut):
     fbs = rotate(fbs, f0_inc, f1_rot)
     if cut:
         if isinstance(cut, (int, float)):
@@ -48,6 +48,6 @@ def ori_from_fbs(fbs, f0_inc=0, f1_rot=0, cut=None):
     return fastpli.analysis.orientation.fiber_bundles(fbs)
 
 
-def ori_from_file(file, f0_inc, f1_rot, cut=None):
+def ori_from_file(file, f0_inc, f1_rot, cut):
     fbs = fastpli.io.fiber_bundles.load(file)
     return ori_from_fbs(fbs, f0_inc, f1_rot, cut)

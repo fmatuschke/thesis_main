@@ -13,7 +13,7 @@ import warnings
 import tqdm
 import pandas as pd
 
-import fibers
+import models
 import fastpli.analysis
 
 import matplotlib.pyplot as plt
@@ -34,7 +34,7 @@ print(df_model[sub].fiber.iloc[0])
 print(os.path.join(os.getcwd(), "1_model/1_cubes/",
                    df_model[sub].fiber.iloc[0]))
 
-phi, theta = fibers.ori_from_file(
+phi, theta = models.ori_from_file(
     os.path.join(os.getcwd(), "1_model/1_cubes/", df_model[sub].fiber.iloc[0]),
     f0_inc, f1_rot)
 

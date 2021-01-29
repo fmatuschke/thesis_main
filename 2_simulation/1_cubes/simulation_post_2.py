@@ -10,7 +10,7 @@ import tqdm
 
 import helper.spherical_harmonics
 import helper.schilling
-import fibers
+import models
 
 import fastpli.analysis
 
@@ -75,9 +75,9 @@ def calcShGT(parameter):
         print("FOOO:3")
         exit(1)
 
-    phi, theta = fibers.ori_from_file(
+    phi, theta = models.ori_from_file(
         f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/{df_org[sub].fiber.iloc[0]}",
-        f0_inc, f1_rot)
+        f0_inc, f1_rot, 60)
     sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
     gt_dict[

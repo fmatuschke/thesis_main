@@ -11,7 +11,7 @@ import warnings
 import tqdm
 import pandas as pd
 
-import fibers
+import models
 import fastpli.analysis
 
 # arguments
@@ -66,7 +66,7 @@ def polar_hist(phi, theta):
 def run(df):
 
     file = df["fiber"]
-    phi, theta = fibers.ori_from_file(file, 0, 0, 60)
+    phi, theta = models.ori_from_file(file, 0, 0, 60)
     phi_x, phi_h, incl_x, incl_h = polar_hist(phi, theta)
 
     # 2d hist
@@ -79,7 +79,7 @@ def run(df):
     # INIT
     file = file.replace("solved", "init")
     file = file.replace("tmp", "init")
-    phi, theta = fibers.ori_from_file(file, 0, 0, 60)
+    phi, theta = models.ori_from_file(file, 0, 0, 60)
     phi_init_x, phi_init_h, incl_init_x, incl_init_h = polar_hist(phi, theta)
 
     return pd.DataFrame([[

@@ -11,7 +11,7 @@ import warnings
 import tqdm
 import pandas as pd
 
-import fibers
+import models
 # import esag
 import acg
 import fastpli.analysis
@@ -36,7 +36,7 @@ os.makedirs(os.path.join(args.input, "esag"), exist_ok=True)
 def run(df):
 
     file = df["fiber"]
-    vecs = fibers.vec_from_file(file, 0, 0, 60)
+    vecs = models.vec_from_file(file, 0, 0, 60)
     # print(file)
 
     vec = vecs[0]
@@ -66,7 +66,7 @@ def run(df):
     # INIT
     file = file.replace("solved", "init")
     file = file.replace("tmp", "init")
-    vec = fibers.vec_from_file(file, 0, 0, 60)
+    vec = models.vec_from_file(file, 0, 0, 60)
 
     vec = vecs[0]
     if vec.size > 3 * 10:

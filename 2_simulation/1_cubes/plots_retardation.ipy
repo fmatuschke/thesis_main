@@ -11,7 +11,7 @@ import pandas as pd
 import os
 import seaborn as sns
 
-import fibers
+import models
 import fastpli.tools
 
 #%%
@@ -67,7 +67,7 @@ def get_file_from_parameter(psi="0.30",
 
 
 def get_rotations(omega):
-    return fibers.omega_rotations(omega)
+    return models.omega_rotations(omega)
 
 
 def get_sim(microscope="PM",

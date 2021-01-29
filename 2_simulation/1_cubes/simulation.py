@@ -20,7 +20,7 @@ import tqdm
 # from simulation_repeat import run_simulation_pipeline_n
 import helper.mpi
 import helper.file
-import fibers
+import models
 
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     # simulation loop
     parameters = []
-    fiber_inc = [(f, i) for f in file_list for i in fibers.inclinations(4)]
+    fiber_inc = [(f, i) for f in file_list for i in models.inclinations(4)]
     for file, f0_inc in fiber_inc:
         # logger.info(f"input file: {file}")
 
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         #     omega = h5f['/'].attrs["omega"]
         omega = helper.file.value(file, "omega")
 
-        for f1_rot in fibers.omega_rotations(omega, 15):
+        for f1_rot in models.omega_rotations(omega, 15):
             parameters.append((file, f0_inc, f1_rot))
 
     def filter_existing_files(p):

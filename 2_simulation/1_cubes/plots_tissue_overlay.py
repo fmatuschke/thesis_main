@@ -7,7 +7,7 @@ import os
 import tqdm
 import fastpli.analysis
 
-import fibers
+import models
 
 sim_path = "2_simulation/1_cubes/output/sim_120_ime/"
 
@@ -51,7 +51,7 @@ def get_file_from_parameter(psi="0.30",
 
 
 def get_rotations(omega):
-    return fibers.omega_rotations(omega)
+    return models.omega_rotations(omega)
 
 
 def to_str(value):

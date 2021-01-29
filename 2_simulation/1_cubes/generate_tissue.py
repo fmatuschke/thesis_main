@@ -12,7 +12,7 @@ import fastpli.objects
 import fastpli.tools
 import fastpli.io
 
-import fibers
+import models
 import helper.file
 
 from mpi4py import MPI
@@ -65,12 +65,12 @@ if __name__ == "__main__":
     # simulation loop
     parameter = []
     fiber_inc = [
-        (f, i) for f in file_list for i in fibers.inclinations(args.n_inc)
+        (f, i) for f in file_list for i in models.inclinations(args.n_inc)
     ]
     for file, f0_inc in fiber_inc:
         omega = helper.file.value(file, "omega")
 
-        for f1_rot in fibers.omega_rotations(omega, args.d_rot):
+        for f1_rot in models.omega_rotations(omega, args.d_rot):
             parameter.append((file, f0_inc, f1_rot))
 
     for file, f0_inc, f1_rot in tqdm.tqdm(

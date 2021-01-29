@@ -19,7 +19,6 @@ import fastpli.analysis
 
 import helper.file
 import helper.circular
-import fibers
 
 # arguments
 parser = argparse.ArgumentParser()
