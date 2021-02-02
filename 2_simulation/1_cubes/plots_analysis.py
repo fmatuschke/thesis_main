@@ -1,9 +1,3 @@
-#%%
-from IPython import get_ipython
-get_ipython().run_line_magic('matplotlib', 'inline')
-from jupyterthemes import jtplot
-jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
-#%%
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,37 +9,11 @@ import fastpli.analysis
 import models
 import odf
 
-#%%
-
 sim_path = "2_simulation/1_cubes/output/sim_120_ime/"
-
-df_model = pd.read_pickle(
-    os.path.join(os.getcwd(), "../..",
-                 "1_model/1_cubes/output/cube_2pop_120/cube_2pop.pkl"))
-print("df_model:", df_model.columns)
-
-df_model_hist = pd.read_pickle(
-    os.path.join(os.getcwd(), "../..",
-                 "1_model/1_cubes/output/cube_2pop_120/hist/cube_2pop.pkl"))
-print("df_model_hist:", df_model_hist.columns)
 
 df_sim = pd.read_pickle(
     os.path.join(os.getcwd(), "../..", sim_path,
                  "analysis/cube_2pop_simulation.pkl"))
-print("df_sim:", df_sim.columns)
-
-df_sim_sch = pd.read_pickle(
-    os.path.join(os.getcwd(), "../..", sim_path,
-                 "analysis/cube_2pop_simulation_schilling.pkl"))
-print("df_sim_sch:", df_sim_sch.columns)
-
-# df_acc = pd.read_pickle(
-#     os.path.join(os.getcwd(), "../..",
-#                  sim_pathh,
-#                  "analysis/cube_2pop_simulation_accs.pkl"))
-# print("df_acc:", df_acc.columns)
-
-#%%
 
 
 def get_file_from_parameter(psi="0.30",
@@ -64,10 +32,6 @@ def get_file_from_parameter(psi="0.30",
     )
 
     return model_str, sim_str
-
-
-def get_rotations(omega):
-    return models.omega_rotations(omega)
 
 
 def to_str(value):
@@ -121,13 +85,14 @@ def get_tissue(psi="0.30",
                                   f"{file[:-3]}.tissue.h5"))["tissue"][...]
 
 
-#%%
 microscope = "PM"
 species = "Vervet"
-model = "p"
+model = "r"
 radius = 0.50
+
 incl = 0.00
-rot = 90
+rot = 0
+# rot = 90
 psi = 0.5
 omega = 90.00
 
@@ -137,18 +102,18 @@ if omega == 0:
 h5_sim = get_sim(microscope, species, model, psi, omega, radius, incl, rot)
 data = h5_sim["analysis/epa/0/retardation"][...]
 
-TISSUE = True
+TISSUE = False
 
-if TISSUE:
-    tissue = get_tissue(psi, omega, radius, incl, rot)
-    # tissue_b = tissue.flatten().astype(np.float32)
-    # # tissue_b[tissue_b == 0] = np.nan
-    # tissue_b -= 1
-    # tissue_b //= 2
-    # tissue_b += 1
-    # tissue_b.shape = tissue.shape
+# if TISSUE:
+tissue = get_tissue(psi, omega, radius, incl, rot)
+# tissue_b = tissue.flatten().astype(np.float32)
+# # tissue_b[tissue_b == 0] = np.nan
+# tissue_b -= 1
+# tissue_b //= 2
+# tissue_b += 1
+# tissue_b.shape = tissue.shape
 
-    tissue_b = np.array(np.logical_and(tissue > 0, tissue < 3), np.uint8)
+tissue_b = np.array(np.logical_and(tissue > 0, tissue < 3), np.uint8)
 
 # fig.colorbar(pcm, ax=axs[1], shrink=0.275)
 
@@ -232,26 +197,30 @@ for i, name in enumerate(["inclination", "t_rel", "fom"]):
                 extent=extent,
             )
 
-# %%
+axs[-1, -1].imshow(
+    np.flip(np.mean(tissue_b, -1).T, 0),
+    cmap=plt.cm.gray,
+    alpha=.5,
+    interpolation='nearest',
+    extent=extent,
+)
+
 # plot odfs
 phi, theta = models.ori_from_file(get_model(psi, omega, radius, incl, rot),
                                   incl, rot, 60)
 odf_table = odf.table(phi, np.pi / 2 - theta)
 
 odf.plot(odf_table)
-# plt.savefig("/tmp/tmp_odf_gt.png")
-# axs[2, 0].imshow(mpimg.imread("/tmp/tmp_odf_gt.png"))
+plt.savefig("/tmp/tmp_odf_gt.png")
+axs[2, 0].imshow(mpimg.imread("/tmp/tmp_odf_gt.png"))
 
 odf_table = odf.table(h5_sim[f"analysis/rofl/direction"][...].ravel(),
                       h5_sim[f"analysis/rofl/inclination"][...].ravel())
 
 odf.plot(odf_table)
-# plt.savefig("/tmp/tmp_odf_sim.png")
-# axs[2, 1].imshow(mpimg.imread("/tmp/tmp_odf_sim.png"))
+plt.savefig("/tmp/tmp_odf_sim.png")
+axs[2, 1].imshow(mpimg.imread("/tmp/tmp_odf_sim.png"))
 
-# plt.savefig(
-#     "output/" +
-#     f"tissue_overlay_{microscope}_{species}_{model}_{to_str(psi)}_" +
-#     f"{to_str(omega)}_{to_str(radius)}_{to_str(incl)}_{to_str(rot)}_.pdf")
-
-# %%
+fig.savefig(
+    "output/" + f"test_{microscope}_{species}_{model}_{to_str(psi)}_" +
+    f"{to_str(omega)}_{to_str(radius)}_{to_str(incl)}_{to_str(rot)}_.pdf")
