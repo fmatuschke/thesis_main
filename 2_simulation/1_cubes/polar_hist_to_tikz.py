@@ -209,3 +209,5 @@ def generate(df,
     fileList = glob.glob(f'output/tmp/{file_name}*')
     for file in fileList:
         os.remove(file)
+
+    return crange
