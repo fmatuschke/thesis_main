@@ -1,0 +1,49 @@
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
+#%%
+#%%
+
+r = 0.5
+R = 4.0296019301161834974827410413 / 2
+density = 0.739021297514213772343815403033
+phi_inner = np.linspace(0, 2 * np.pi, 3, False)
+
+x = np.cos(phi_inner) * r / np.cos(np.deg2rad(30))
+y = np.sin(phi_inner) * r / np.cos(np.deg2rad(30))
+
+fix, ax = plt.subplots(1, 1)
+ax.set(xlim=(-R, R), ylim=(-R, R))
+for i, j in zip(x, y):
+    c = plt.Circle((i, j), radius=r, color='b')
+    ax.add_patch(c)
+
+# outer segment
+d_outer = 4.029 / 2
+xc = -(d_outer - r)
+yc = 0
+
+phi_out = 2 * np.arctan((r / (R - r)))
+
+
+def rot(phi):
+    return np.array(((np.cos(phi), -np.sin(phi)), (np.sin(phi), np.cos(phi))),
+                    float)
+
+
+v = (xc, yc)
+for i in range(3):
+    v_rot = np.dot(rot(np.deg2rad(120) * i), (xc, yc))
+
+    v0 = np.dot(rot(phi_out), v_rot)
+    v1 = np.dot(rot(-phi_out), v_rot)
+    x = [v_rot[0], v0[0], v1[0]]
+    y = [v_rot[1], v0[1], v1[1]]
+    for i, j in zip(x, y):
+        c = plt.Circle((i, j), radius=r, color='r')
+        ax.add_patch(c)
+
+ax.set_aspect('equal', 'box')
+plt.show()
+
+# %%
