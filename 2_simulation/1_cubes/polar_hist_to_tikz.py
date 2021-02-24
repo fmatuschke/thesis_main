@@ -32,7 +32,7 @@ def sed(pattern, replace, source, dest=None):
         shutil.copy(name, source)
 
 
-def omega_rot_to_spherical(omega, f1_rot):
+def omega_rot_to_spherical(omega, f0_inc, f1_rot):
     phi = []
     theta = []
     for f1, om in zip(f1_rot, omega):

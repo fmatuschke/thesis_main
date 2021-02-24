@@ -1,0 +1,209 @@
+#%%
+import os
+import multiprocessing as mp
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+import fastpli.tools
+import helper.spherical_interpolation
+
+#%%
+sim_path = "/data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/sim_120_ime"
+df_acc = pd.read_pickle(
+    os.path.join(sim_path, "analysis", f"cube_2pop_simulation_schilling.pkl"))
+df_mean = pd.read_pickle(
+    os.path.join(sim_path, "analysis", f"cube_2pop_simulation.pkl"))
+df_mean["trel_mean"] = df_mean["rofl_trel"].apply(lambda x: np.mean(x))
+df_mean["ret_mean"] = df_mean["epa_ret"].apply(lambda x: np.mean(x))
+df_mean["trans_mean"] = df_mean["epa_trans"].apply(lambda x: np.mean(x))
+
+# df = pd.concat([
+#     df_mean[[
+#         'microscope', 'species', 'model', 'radius', 'omega', 'psi', 'f0_inc',
+#         'f1_rot', 'R', 'R2', 'trel_mean', 'ret_mean', 'trans_mean'
+#     ]], df_acc
+# ],
+#                axis=1)
+
+# df = df.drop_duplicates()
+
+df_acc = df_acc.sort_values(by=[
+    'microscope', 'species', 'model', 'radius', 'omega', 'psi', 'f0_inc',
+    'f1_rot'
+]).reset_index()
+df_mean = df_mean.sort_values(by=[
+    'microscope', 'species', 'model', 'radius', 'omega', 'psi', 'f0_inc',
+    'f1_rot'
+]).reset_index()
+
+if not df_acc[[
+        'microscope', 'species', 'model', 'radius', 'omega', 'psi', 'f0_inc',
+        'f1_rot'
+]].equals(df_mean[[
+        'microscope', 'species', 'model', 'radius', 'omega', 'psi', 'f0_inc',
+        'f1_rot'
+]]):
+    print("FOOOO")
+
+df = df_acc.copy()
+df[['trel_mean', 'ret_mean',
+    'trans_mean']] = df_mean[['trel_mean', 'ret_mean', 'trans_mean']]
+
+psi_list = [0.30, 0.50, 0.60, 0.90]
+f0_list = [0, 30, 60, 90]
+
+
+#%%
+def generate_data(
+    df,
+    value,
+    f0_inc,
+    psi,
+    d_theta=19,
+    d_phi=37,
+):
+
+    df_ = df[(df["psi"] == psi) & (df["f0_inc"] == f0_inc)]
+    data = df_[value].to_numpy(float)
+
+    if len(df_[df_.omega == 0]) != 1:
+        print(df_)
+        print("FOOOOO")
+        exit(1)
+
+    # get points on sphere
+    phi = []
+    theta = []
+    for f1, om in zip(df_.f1_rot, df_.omega):
+        v = np.array([np.cos(np.deg2rad(om)), np.sin(np.deg2rad(om)), 0])
+        rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
+        rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1))
+        rot = np.dot(rot_inc, rot_phi)
+        v = np.dot(rot, v)
+        theta.extend([np.arccos(v[2])])
+        phi.extend([np.arctan2(v[1], v[0])])
+
+    phi = np.array(phi)
+    theta = np.array(theta)
+
+    ## apply symmetries
+    phi_ = phi.copy()
+    theta_ = theta.copy()
+    data_ = data.copy()
+    # measurement symmetry
+    phi_ = np.concatenate((phi_, -phi_), axis=0)
+    theta_ = np.concatenate((theta_, theta_), axis=0)
+    data_ = np.concatenate((data_, data_), axis=0)
+    # orientation symmetry
+    phi_ = np.concatenate((phi_, phi_), axis=0)
+    theta_ = np.concatenate((theta_, np.pi + theta_), axis=0)
+    data_ = np.concatenate((data_, data_), axis=0)
+
+    # rm multiple
+    phi_, theta_ = helper.spherical_interpolation.remap_spherical(phi_, theta_)
+
+    x_ = np.multiply(np.cos(phi_), np.sin(theta_))
+    y_ = np.multiply(np.sin(phi_), np.sin(theta_))
+    z_ = np.cos(theta_)
+
+    # remove multiple by checking distance
+    data__ = []
+    for i in range(phi_.size):
+        flag = True
+        for j in range(i + 1, phi_.size):
+            dist = np.linalg.norm(
+                np.array((x_[i] - x_[j], y_[i] - y_[j], z_[i] - z_[j])))
+
+            if dist < 1e-6:
+                flag = False
+                break
+        if flag:
+            data__.append((phi_[i], theta_[i], data_[i]))
+
+    data__ = np.array(data__)
+    phi_ = data__[:, 0]
+    theta_ = data__[:, 1]
+    data_ = data__[:, 2]
+
+    x_ = np.multiply(np.cos(phi_), np.sin(theta_))
+    y_ = np.multiply(np.sin(phi_), np.sin(theta_))
+    z_ = np.cos(theta_)
+
+
+    # interplate mesh on sphere
+    x_i, y_i, z_i, data_i = helper.spherical_interpolation.on_mesh(
+        phi_, theta_, data_, d_phi, d_theta)
+
+    return x_i, y_i, z_i, data_i, x_, y_, z_, data_
+
+
+#%%
+def generate(df, radius, microscope, species, model, psi, f0_inc):
+    sub = (df.radius == radius) & (df.microscope == microscope) & (
+        df.species == species) & (df.model == model)
+
+    results = {}
+    for name in ["acc", "trel_mean", "ret_mean", "trans_mean"]:
+        results[name] = generate_data(df[sub], name, f0_inc, psi)
+
+    return results
+
+
+#%%
+def plot_sphere(x, y, z, data):
+    # fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
+    # ax.pcolormesh(x, y, h)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(x, y, z, facecolors=plt.cm.viridis(data))
+    # ax.plot_surface(x, y, z, facecolors=plt.cm.jet(data / data.max()))
+    ax.set_xlabel('$X$')
+    ax.set_ylabel('$Y$')
+
+    # x = np.multiply(np.cos(phi), np.sin(theta)) * 1.1
+    # y = np.multiply(np.sin(phi), np.sin(theta)) * 1.1
+    # z = np.cos(theta) * 1.1
+    # ax.scatter(x,
+    #            y,
+    #            z,
+    #            marker='o',
+    #            s=50,
+    #            c=plt.cm.jet(data / data.max()),
+    #            alpha=1,
+    #            cmap="jet")
+
+    plt.show()
+
+#%%
+def plot_polar(x, y, z, data, x_, y_, z_, data_):
+    fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
+    phi = np.arctan2(y, x)
+    theta = np.arccos(z)
+
+    phi = phi[:,theta[0,:]<=np.pi/2]
+    data = data[:,theta[0,:]<=np.pi/2]
+    theta = theta[:,theta[0,:]<=np.pi/2]
+
+    phi=phi-((phi[1,0]-phi[0,0])/2)
+    ax.pcolormesh(phi, theta, data)
+
+    phi_ = np.arctan2(y_, x_)
+    theta_ = np.arccos(z_)
+
+    phi_ = phi_[theta_<=np.pi/2]
+    data_ = data_[theta_<=np.pi/2]
+    theta_ = theta_[theta_<=np.pi/2]
+    ax.scatter(phi_, theta_, s=42, c = plt.cm.viridis(data_))
+
+    plt.show()
+
+
+#%%
+r = generate(df, 0.5, "PM", "Vervet", "r", 0.6, 30)
+x, y, z, d, x_, y_, z_, d_ = r["acc"]
+plot_polar(x, y, z, d, x_, y_, z_, d_)
+# %%
