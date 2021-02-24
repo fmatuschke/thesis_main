@@ -62,6 +62,9 @@ parser.add_argument(
 
 parser.add_argument("--start", type=int, required=True, help="mpi start.")
 
+parser.add_argument('--Vervet', default=False, action='store_true')
+parser.add_argument('--radial', default=False, action='store_true')
+
 args = parser.parse_args()
 os.makedirs(args.output, exist_ok=True)
 
@@ -164,7 +167,10 @@ if __name__ == "__main__":
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
 
-            for m, (dn, model) in enumerate([(-0.008 / 2, 'p'), (0.008, 'r')]):
+            model_list = [(-0.008 / 2, 'p'), (0.008, 'r')]
+            if args.radial:
+                model_list = [(0.008, 'r')]
+            for m, (dn, model) in enumerate(model_list):
                 for name, gain, intensity, res, tilt_angle, sigma in [
                     ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
                     ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
@@ -226,8 +232,11 @@ if __name__ == "__main__":
                         images_stack[t] = simpli.run_simulation(
                             tissue, optical_axis, tissue_properties, theta, phi)
 
-                    for species, mu in [('Roden', 8), ('Vervet', 30),
-                                        ('Human', 65)]:
+                    species_list = [('Roden', 8), ('Vervet', 30), ('Human', 65)]
+                    if args.Vervet:
+                        species_list = [('Vervet', 30)]
+
+                    for species, mu in species_list:
                         dset = h5f.create_group(f'{name}/{species}/{model}')
 
                         tilting_stack = [None] * 5
