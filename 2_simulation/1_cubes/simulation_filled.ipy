@@ -23,7 +23,7 @@ d_outer = 4.029 / 2
 xc = -(d_outer - r)
 yc = 0
 
-phi_out = 2 * np.arctan((r / (R - r)))
+phi_out = 2 * np.arcsin((r / (R - r)))
 
 
 def rot(phi):
