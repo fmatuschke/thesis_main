@@ -39,5 +39,4 @@ mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
    --start 0 \
    --n_inc 4 \
    --d_rot 15 \
-   --Vervet \
-   --radial
+   --Vervet
