@@ -10,3 +10,4 @@ mpi4py
 pyyaml
 clang-format
 imageio
+sklearn
