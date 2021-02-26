@@ -80,6 +80,7 @@ def run(p):
             crange=crange,
             psi_list=[0.30, 0.50, 0.60, 0.90],
             f0_list=[0, 30, 60, 90])
+        print(name, crange)
 
 
 if __name__ == "__main__":
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     ]].drop_duplicates()
 
     df_p = df_p[df_p.radius == 0.5]
-    # df_p = df_p[df_p.species == "Vervet"]
+    df_p = df_p[df_p.species == "Vervet"]
     df_p = df_p[df_p.model == "r"]
     df_p = df_p[df_p.microscope == "PM"]
 
