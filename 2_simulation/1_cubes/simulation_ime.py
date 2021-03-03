@@ -172,7 +172,7 @@ if __name__ == "__main__":
                 model_list = [(0.008, 'r')]
             for m, (dn, model) in enumerate(model_list):
                 for name, gain, intensity, res, tilt_angle, sigma in [
-                    ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
+                        # ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75), -> requires 180um modelle
                     ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
                 ]:
                     mu = 0

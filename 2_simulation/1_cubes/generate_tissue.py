@@ -84,9 +84,8 @@ if __name__ == "__main__":
                 tissue, _, _ = simpli.generate_tissue(only_tissue=True)
                 dset = h5f.create_dataset('tissue',
                                           tissue.shape,
-                                          dtype=np.uint16,
-                                          compression='gzip',
-                                          compression_opts=4)
+                                          dtype=np.uint8,
+                                          compression='gzip')
 
                 dset[:] = tissue
 

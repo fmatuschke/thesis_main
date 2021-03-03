@@ -89,6 +89,8 @@ logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
 if __name__ == "__main__":
 
+    FLAG_TISSUE = True
+
     # PARAMETER
     PIXEL_PM = 1.25
     PIXEL_LAP = 20
@@ -172,7 +174,7 @@ if __name__ == "__main__":
             dn, model = (-0.008 / 2, 'p') if radius > 0.5 else (0.008, 'r')
 
             for name, gain, intensity, res, tilt_angle, sigma in [
-                ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),
+                    # ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75), -> requires 180 um models
                 ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
             ]:
                 mu = 0
@@ -209,6 +211,15 @@ if __name__ == "__main__":
                 tissue, optical_axis, tissue_properties = simpli.run_tissue_pipeline(
                 )
                 tissue_thickness = np.sum(tissue > 0, -1)
+
+                if FLAG_TISSUE:
+                    FLAG_TISSUE = False
+                    h5f.create_group(f'{name}')
+                    dset = h5f[f'{name}'].create_dataset("tissue",
+                                                         tissue.shape,
+                                                         dtype=np.uint8,
+                                                         compression="gzip")
+                    dset[:, :, :] = tissue
 
                 # Simulate PLI Measurement
                 logger.info(f"simulation_pipeline: model:{model}")
