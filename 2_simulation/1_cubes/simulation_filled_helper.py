@@ -76,11 +76,12 @@ def fill_fb(fbs, r_mean, r_target):
             for _, f in enumerate(fb):
                 seeds, r = seeds_3()
                 r_rel = f[:, -1] / r_mean
-                fbs_[-1].extend(
-                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, 0,
-                                                       f[:, -1]))
-                for i, _ in enumerate(fbs_[-1]):
-                    fbs_[-1][i][:, -1] = r_rel * r_mean * r
+
+                new_fibers = fastpli.model.sandbox.build.bundle(
+                    f[:, :-1], seeds, 0, f[:, -1])
+                for i, _ in enumerate(new_fibers):
+                    new_fibers[i][:, -1] = r_rel * r_mean * r
+                fbs_[-1].extend(new_fibers)
 
     # r_mean / r_target <= 3.0 mit seeds_7 existiert, aber wird hier nicht benötigt
 
@@ -91,11 +92,11 @@ def fill_fb(fbs, r_mean, r_target):
             for _, f in enumerate(fb):
                 seeds, r = seeds_12()
                 r_rel = f[:, -1] / r_mean
-                fbs_[-1].extend(
-                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, 0,
-                                                       f[:, -1]))
-                for i, _ in enumerate(fbs_[-1]):
-                    fbs_[-1][i][:, -1] = r_rel * r_mean * r
+                new_fibers = fastpli.model.sandbox.build.bundle(
+                    f[:, :-1], seeds, 0, f[:, -1])
+                for i, _ in enumerate(new_fibers):
+                    new_fibers[i][:, -1] = r_rel * r_mean * r
+                fbs_[-1].extend(new_fibers)
     else:
         for _, fb in enumerate(fbs):
             fbs_.append([])
@@ -104,22 +105,29 @@ def fill_fb(fbs, r_mean, r_target):
                 r_rel = f[:, -1] / r_mean
                 seeds = fastpli.model.sandbox.seeds.triangular_circle(
                     r_mean, 2 * r_target, radii=r_target)
-                fbs_[-1].extend(
-                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, 0,
-                                                       f[:, -1] / r_mean))
-                for i, _ in enumerate(fbs_[-1]):
-                    fbs_[-1][i][:, -1] = r_target * r_rel
+                new_fibers = fastpli.model.sandbox.build.bundle(
+                    f[:, :-1], seeds, 0, f[:, -1] / r_mean)
+                for i, _ in enumerate(new_fibers):
+                    new_fibers[i][:, -1] = r_target * r_rel
+                fbs_[-1].extend(new_fibers)
 
     return fbs_
 
 
 # %%
 
+# import fastpli.io
+
+# fbs = fastpli.io.fiber_bundles.load(
+#     '/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/cube_2pop_psi_0.50_omega_30.00_r_5.00_v0_120_.solved.h5'
+# )
+# asd = fill_fb(fbs, 5, 5 / 5)
+
 if __name__ == "__main__":
     R = 5
     fbs_0 = [[
         np.array([[0, 0, 0, R * 1.5], [0, 0, 100, R * .75], [0, 0, 200, R * 1]])
-    ],
+    ] * 2,
              [
                  np.array([[0, 0, 0, R * 0.25], [0, 0, 100, R * .75],
                            [0, 0, 200, R * 2]])
