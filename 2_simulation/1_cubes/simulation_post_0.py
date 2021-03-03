@@ -8,6 +8,7 @@ import h5py
 import os
 import glob
 import numba
+# import pretty_errors
 
 import helper.file
 import pandas as pd
@@ -67,7 +68,11 @@ def run(file):
         for microscope, species, model in list(
                 itertools.product(["PM", "LAP"], ["Roden", "Vervet", "Human"],
                                   ["r", "p"])):
-            h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
+
+            try:
+                h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
+            except:
+                continue
 
             # R
             rofl_direction = h5f_sub['analysis/rofl/direction'][...]

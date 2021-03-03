@@ -24,7 +24,18 @@ def plot_seeds(seeds, r):
 #%%
 
 
-def seeds_12(r):
+def seeds_3():
+    # 3 seeds for radius == 1
+    r = 1 / (1 + 2 / np.sqrt(3))
+    phi = np.linspace(0, 2 * np.pi, 3, False)
+    x = np.cos(phi) * r / np.cos(np.deg2rad(30))
+    y = np.sin(phi) * r / np.cos(np.deg2rad(30))
+    seeds = np.array([x, y])
+    return seeds.T.copy(), r
+
+
+def seeds_12():
+    # 12 seeds for radius == 1
     R = 1
     r = 1 / 4.0296019301161834974827410413
     # density = 0.739021297514213772343815403033
@@ -39,7 +50,6 @@ def seeds_12(r):
 
     phi_out = 2 * np.arcsin((r / (R - r)))
 
-    v = (xc, yc)
     for i in range(3):
         v_rot = np.dot(rot(np.deg2rad(120) * i), (xc, yc))
         v0 = np.dot(rot(phi_out), v_rot)
@@ -47,51 +57,58 @@ def seeds_12(r):
         x = [v_rot[0], v0[0], v1[0]]
         y = [v_rot[1], v0[1], v1[1]]
         seeds = np.hstack([seeds, np.array([x, y])])
-    return seeds.T
+    return seeds.T.copy(), r
 
 
 # %%
-def fill_fb(fbs, r_mean):
+def fill_fb(fbs, r_mean, r_target):
 
-    if r_mean == 0.5:
+    if r_mean / r_target < 1.0:
+        return None
+    if r_mean / r_target == 1.0:
         return fbs
-
     fbs_ = []
 
-    if r_mean == 1.0:
-        for i, fb in enumerate(fbs):
+    if r_mean / r_target <= 2.0:
+        # 3 fibers
+        for _, fb in enumerate(fbs):
             fbs_.append([])
-            for j, f in enumerate(fb):
-                r = 1 / (1 + 2 / np.sqrt(3))
-                phi = np.linspace(0, 2 * np.pi, 3, False)
-                x = np.cos(phi) * r / np.cos(np.deg2rad(30))
-                y = np.sin(phi) * r / np.cos(np.deg2rad(30))
-                seeds = np.array([x, y]).T
+            for _, f in enumerate(fb):
+                seeds, r = seeds_3()
+                r_rel = f[:, -1] / r_mean
+                fbs_[-1].extend(
+                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, 0,
+                                                       f[:, -1]))
+                for i, _ in enumerate(fbs_[-1]):
+                    fbs_[-1][i][:, -1] = r_rel * r_mean * r
 
-                fbs_.append(
-                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, r,
-                                                       f[:, -1]))
-    elif r_mean == 2.0:
-        r = 2 / 4.0296019301161834974827410413
-        for i, fb in enumerate(fbs):
+    # r_mean / r_target <= 3.0 mit seeds_7 existiert, aber wird hier nicht benötigt
+
+    elif r_mean / r_target <= 4.0:
+        # 12 fibers
+        for _, fb in enumerate(fbs):
             fbs_.append([])
-            for j, f in enumerate(fb):
-                seeds = seeds_12(1)
-                fbs_.append(
-                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, r,
+            for _, f in enumerate(fb):
+                seeds, r = seeds_12()
+                r_rel = f[:, -1] / r_mean
+                fbs_[-1].extend(
+                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, 0,
                                                        f[:, -1]))
+                for i, _ in enumerate(fbs_[-1]):
+                    fbs_[-1][i][:, -1] = r_rel * r_mean * r
     else:
-        for i, fb in enumerate(fbs):
+        for _, fb in enumerate(fbs):
             fbs_.append([])
-            for j, f in enumerate(fb):
+            for _, f in enumerate(fb):
                 r_mean = np.mean(f[:, -1])
                 r_rel = f[:, -1] / r_mean
-                seeds = fastpli.model.sandbox.seeds.triangular_circle(r_mean,
-                                                                      1,
-                                                                      radii=0.5)
-                fbs_.append(
-                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, 0.5,
-                                                       r_rel))
+                seeds = fastpli.model.sandbox.seeds.triangular_circle(
+                    r_mean, 2 * r_target, radii=r_target)
+                fbs_[-1].extend(
+                    fastpli.model.sandbox.build.bundle(f[:, :-1], seeds, 0,
+                                                       f[:, -1] / r_mean))
+                for i, _ in enumerate(fbs_[-1]):
+                    fbs_[-1][i][:, -1] = r_target * r_rel
 
     return fbs_
 
@@ -100,20 +117,37 @@ def fill_fb(fbs, r_mean):
 
 if __name__ == "__main__":
     R = 5
-    fbs = fill_fb([[np.array([[0, 0, 0, R], [0, 0, 100, R]])]], R)
+    fbs_0 = [[
+        np.array([[0, 0, 0, R * 1.5], [0, 0, 100, R * .75], [0, 0, 200, R * 1]])
+    ],
+             [
+                 np.array([[0, 0, 0, R * 0.25], [0, 0, 100, R * .75],
+                           [0, 0, 200, R * 2]])
+             ]]
+    fbs_1 = fill_fb(fbs_0, R, R / 2)
+    fbs_2 = fill_fb(fbs_1, R / 2, R / 10)
 
-    fix, ax = plt.subplots(1, 1)
-    ax.set(xlim=(-R * 2, R * 2), ylim=(-R * 2, R * 2))
-    c = plt.Circle((0, 0), radius=R, color='r')
-    ax.add_patch(c)
+    for j in range(len(fbs_0)):
+        for i in range(fbs_0[j][-1].shape[0]):
 
-    for fb in fbs:
-        for f in fb:
-            for x, y, r in zip(f[:, 0], f[:, 1], f[:, -1]):
+            fix, ax = plt.subplots(1, 1, figsize=(5, 5))
+            ax.set(xlim=(-R * 2, R * 2), ylim=(-R * 2, R * 2))
+            c = plt.Circle((0, 0), radius=fbs_0[j][-1][i, -1], color='r')
+            ax.add_patch(c)
+
+            for f in fbs_1[j]:
+                x, y, r = f[i, 0], f[i, 1], f[i, -1]
                 c = plt.Circle((x, y), radius=r, color='b')
                 ax.add_patch(c)
 
-    ax.set_aspect('equal', 'box')
-    plt.show()
+            for f in fbs_2[j]:
+                x, y, r = f[i, 0], f[i, 1], f[i, -1]
+                c = plt.Circle((x, y), radius=r, color='g')
+                ax.add_patch(c)
+
+            ax.set_aspect('equal', 'box')
+            plt.show()
+
+# %%
 
 # %%
