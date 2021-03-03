@@ -62,7 +62,6 @@ if __name__ == "__main__":
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
 
-            # for m, (dn, model) in enumerate([(-0.008 / 2, 'p'), (0.008, 'r')]):
             for m, (dn, model) in enumerate([(-0.008 / 2, 'p')]):
                 mu = 0
 
@@ -71,11 +70,6 @@ if __name__ == "__main__":
                 warnings.filterwarnings("ignore", message="objects overlap")
                 simpli.omp_num_threads = 1
                 simpli.voxel_size = voxel_size
-                simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
-                simpli.interpolate = "Slerp"
-                simpli.wavelength = 525  # in nm
-                simpli.optical_sigma = 0.75  # in pixel size
-                simpli.verbose = 0
 
                 simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
                                0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
