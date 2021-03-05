@@ -85,11 +85,11 @@ def calcGroundTruth(parameter):
                                                         n_phi=36,
                                                         n_theta=18,
                                                         weight_area=True)
-    save2dHist(
-        os.path.join(
-            args.input, "analysis",
-            f"orientation_hist_r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_org.dat"
-        ), h, x, y)
+    # save2dHist(
+    #     os.path.join(
+    #         args.input, "analysis",
+    #         f"orientation_hist_r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_org.dat"
+    #     ), h, x, y)
 
     gt_dict[
         f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}'] = sh1
@@ -117,11 +117,11 @@ def run(parameter):
                                                         n_phi=36,
                                                         n_theta=18,
                                                         weight_area=True)
-    save2dHist(
-        os.path.join(
-            args.input, "analysis",
-            f"orientation_hist_r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rofl.dat"
-        ), h, x, y)
+    # save2dHist(
+    #     os.path.join(
+    #         args.input, "analysis",
+    #         f"orientation_hist_r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rofl.dat"
+    #     ), h, x, y)
 
     # ground truth
     sh1 = gt_dict[
