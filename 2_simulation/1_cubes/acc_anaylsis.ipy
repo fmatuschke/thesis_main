@@ -1,0 +1,84 @@
+# %%
+import itertools
+
+import numpy as np
+from numpy.core.fromnumeric import product
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import fastpli.tools
+import helper.spherical_harmonics
+import helper.schilling
+
+# %%
+df = []
+
+theta_list = np.linspace(0, 0.5 * np.pi, 18)
+phi_list = np.linspace(0, 2 * np.pi, 36)
+
+for theta_, phi_ in itertools.product(theta_list, phi_list):
+
+    N = 48**2
+    dtheta = np.deg2rad(5)
+
+    vz = np.array([0, 0, 1])
+    v0 = np.array([
+        np.cos(phi_) * np.sin(theta_),
+        np.sin(phi_) * np.sin(theta_),
+        np.cos(theta_)
+    ])
+    rot = fastpli.tools.rotation.a_on_b(vz, v0)
+    phi = np.random.uniform(0, 2 * np.pi, N)
+    theta = np.random.normal(0, dtheta, N)
+    v = np.array([
+        np.multiply(np.cos(phi), np.sin(theta)),
+        np.multiply(np.sin(phi), np.sin(theta)),
+        np.cos(theta)
+    ])
+    v = np.dot(rot, v)
+    phi_0 = np.arctan2(v[1, :], v[0, :])
+    theta_0 = np.arcsin(v[2, :])
+    sh0 = helper.spherical_harmonics.real_spherical_harmonics(phi_0, theta_0, 6)
+
+    rot = fastpli.tools.rotation.a_on_b(vz, v0)
+    phi = np.random.uniform(0, 2 * np.pi, N)
+    theta = np.random.normal(0, dtheta, N)
+    v = np.array([
+        np.multiply(np.cos(phi), np.sin(theta)),
+        np.multiply(np.sin(phi), np.sin(theta)),
+        np.cos(theta)
+    ])
+    v = np.dot(rot, v)
+    phi_1 = np.arctan2(v[1, :], v[0, :])
+    theta_1 = np.arcsin(v[2, :])
+    sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi_1, theta_1, 6)
+
+    acc = helper.schilling.angular_correlation_coefficient(sh0, sh1)
+    df.append(
+        pd.DataFrame({
+            "phi": phi_,
+            "theta": theta_,
+            "acc": acc
+        }, index=[0]))
+
+df = pd.concat(df, ignore_index=True)
+
+ax = plt.subplot(111, projection='polar')
+ax = plt.subplot(111)
+theta = df.theta.to_numpy()
+phi = df.phi.to_numpy()
+acc = df.acc.to_numpy()
+
+theta = theta.reshape(len(df.theta.unique()), len(df.phi.unique()))
+phi = phi.reshape(len(df.theta.unique()), len(df.phi.unique()))
+acc = np.atleast_2d(acc).reshape(len(df.theta.unique()), len(df.phi.unique()))
+
+# phi = np.vstack((phi, phi[0, :]))
+# theta = np.vstack((theta, theta[0, :]))
+# phi = np.hstack((phi, phi[0, :]))
+# theta = np.hstack((theta, theta[0, :]))
+
+ax.pcolormesh(phi, np.rad2deg(theta), acc, vmin=0.99, vmax=1)
+
+# %%

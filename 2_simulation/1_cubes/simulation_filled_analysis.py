@@ -56,6 +56,6 @@ for radius in df_.radius.unique():
     polar_hist_to_tikz.generate(df_[df_.radius == radius],
                                 "acc",
                                 f"simulation_analysis_filled_hist_{radius}_acc",
-                                crange=[0, 1],
+                                crange=[0.95, 1],
                                 psi_list=[0.30, 0.50, 0.60, 0.90],
                                 f0_list=[0, 30, 60, 90])
