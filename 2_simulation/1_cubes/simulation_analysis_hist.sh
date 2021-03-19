@@ -30,10 +30,17 @@ mv simulation_analysis_hist.pdf ../tikz/simulation_analysis_hist_${radius}_${mic
 xdg-open ../tikz/simulation_analysis_hist_${radius}_${microscope}_${species}_${model}_${name}_${norm}.pdf
 # exit 1
 
-for radius in 0.5 1.0 2.0 5.0 10.0; do
-   for microscope in PM LAP; do
-      for species in Roden Vervet Human; do
-         for model in r p; do
+# for radius in 0.5 1.0 2.0 5.0 10.0; do
+#    for microscope in PM LAP; do
+#       for species in Roden Vervet Human; do
+#          for model in r p; do
+#             for name in acc; do
+#                for norm in False; do
+
+for radius in 0.5; do
+   for microscope in PM; do
+      for species in Vervet; do
+         for model in r; do
             for name in acc; do
                for norm in False; do
 

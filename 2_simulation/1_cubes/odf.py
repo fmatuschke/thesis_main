@@ -73,7 +73,7 @@ def table(directions,
         return hist
 
 
-def plot(odf_table):
+def plot(odf_table, ax=None):
     # plot
     def set_axes_equal(ax):
         x_limits = ax.get_xlim3d()
@@ -93,8 +93,9 @@ def plot(odf_table):
         ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
-    fig = plt.figure()  # figsize=(10, 10)
-    ax = fig.add_subplot(111, projection='3d')
+    if ax is None:
+        fig = plt.figure()  # figsize=(10, 10)
+        ax = fig.add_subplot(111, projection='3d')
 
     X = odf_table[:, :, 0]
     Y = odf_table[:, :, 1]

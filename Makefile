@@ -1,7 +1,7 @@
 default: install
 
 VENV := $(if $(venv),$(venv),env)
-PYTHON=$(VENV)/bin/python3
+PYTHON=python3.8
 PIP=$(VENV)/bin/python3 -m pip
 BUILD=thesis
 
@@ -15,7 +15,7 @@ install: $(VENV) env-update requirements git-submodules-update clean-fastpli fas
 install-sc: clean env-sc env-update requirements-sc git-submodules-update clean-fastpli fastpli
 
 $(VENV):
-	python3.8 -m venv $(VENV)
+	$(PYTHON) -m venv $(VENV)
 
 .PHONY: env-sc
 env-sc:
