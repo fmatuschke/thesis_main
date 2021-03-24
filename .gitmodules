@@ -4,9 +4,3 @@
 [submodule "fastpli"]
 	path = fastpli
 	url = git@jugit.fz-juelich.de:inm-1/fa/general/fastpli.git
-[submodule "fastpli_paper"]
-	path = fastpli_paper
-	url = git@jugit.fz-juelich.de:f.matuschke/paper_fastpli.git
-[submodule "fastpli_wiki"]
-	path = fastpli_wiki
-	url = git@jugit.fz-juelich.de:f.matuschke/fastpli.wiki.git
