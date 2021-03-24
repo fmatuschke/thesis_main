@@ -46,8 +46,7 @@ solver = fastpli.model.solver.Solver()
 def run(file):
     fbs = fastpli.io.fiber_bundles.load(file)
 
-    fbs = fastpli.objects.fiber_bundles.Cut(
-        fbs, [[-args.volume / 2] * 3, [args.volume / 2] * 3])
+    fbs = fbs.cut([[-args.volume / 2] * 3, [args.volume / 2] * 3])
 
     solver.fiber_bundles = fbs
     # solver.reset_view()

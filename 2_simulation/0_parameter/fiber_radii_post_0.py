@@ -48,9 +48,8 @@ def run_orientation(file):
                 raise ValueError("FAIL")
 
     fiber_bundles = models.rotate(fiber_bundles, f0_inc, f1_rot)
-    fiber_bundles = fastpli.objects.fiber_bundles.Cut(
-        fiber_bundles, [[-pixel_size / 2, -pixel_size / 2, -30],
-                        [pixel_size / 2, pixel_size / 2, 30]])
+    fiber_bundles = fiber_bundles.cut([[-pixel_size / 2, -pixel_size / 2, -30],
+                                       [pixel_size / 2, pixel_size / 2, 30]])
     phi, theta = fastpli.analysis.orientation.fiber_bundles(fiber_bundles)
 
     return pd.DataFrame([[

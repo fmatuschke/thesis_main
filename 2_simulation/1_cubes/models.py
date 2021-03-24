@@ -46,7 +46,7 @@ def ori_from_fbs(fbs, f0_inc, f1_rot, cut):
     if cut:
         if isinstance(cut, (int, float)):
             cut = [[-cut / 2] * 3, [cut / 2] * 3]
-        fbs = fastpli.objects.fiber_bundles.Cut(fbs, cut)
+        fbs = fbs.cut(cut)
     return fastpli.analysis.orientation.fiber_bundles(fbs)
 
 

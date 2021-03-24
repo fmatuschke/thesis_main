@@ -18,6 +18,7 @@ from tqdm import tqdm
 import helper.mpi
 
 from mpi4py import MPI
+
 comm = MPI.COMM_WORLD
 
 # reproducibility
@@ -213,11 +214,10 @@ def run(parameters):
                         h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
 
             if i != args.max_steps:
-                solver.fiber_bundles = fastpli.objects.fiber_bundles.Cut(
-                    solver.fiber_bundles, [
-                        -0.5 * np.array([SIZE + 2 * radius] * 3),
-                        0.5 * np.array([SIZE + 2 * radius] * 3)
-                    ])
+                solver.fiber_bundles = solver.fiber_bundles.cut([
+                    -0.5 * np.array([SIZE + 2 * radius] * 3),
+                    0.5 * np.array([SIZE + 2 * radius] * 3)
+                ])
 
     end_time = time.time()
 

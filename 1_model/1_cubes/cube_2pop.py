@@ -18,6 +18,7 @@ from tqdm import tqdm
 import helper.mpi
 
 from mpi4py import MPI
+
 comm = MPI.COMM_WORLD
 
 # reproducability
@@ -182,8 +183,8 @@ with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
 # Run Solver
 logger.info(f"run solver")
 start_time = time.time()
-solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-    solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
+solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
+    0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
 for i in tqdm(range(1, args.max_steps + 1)):
     if solver.step():
         break
@@ -214,8 +215,8 @@ for i in tqdm(range(1, args.max_steps + 1)):
                     h5f['/'].attrs['time'] = time.time() - start_time
 
         if i != args.max_steps:
-            solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-                solver.fiber_bundles, 0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
+            solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
+                0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
 
 overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
 

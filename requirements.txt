@@ -11,3 +11,4 @@ pyyaml
 clang-format
 imageio
 sklearn
+ipykernel

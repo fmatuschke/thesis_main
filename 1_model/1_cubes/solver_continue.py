@@ -20,6 +20,7 @@ import helper.mpi
 import helper.file
 
 from mpi4py import MPI
+
 comm = MPI.COMM_WORLD
 
 # reproducability
@@ -129,8 +130,7 @@ for file in args.input[args.start + comm.Get_rank()::comm.Get_size()]:
                             h5f['/'].attrs['time'] = time.time() - start_time
 
                 if i != args.max_steps:
-                    solver.fiber_bundles = fastpli.objects.fiber_bundles.CutSphere(
-                        solver.fiber_bundles,
+                    solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
                         0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
 
         overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0

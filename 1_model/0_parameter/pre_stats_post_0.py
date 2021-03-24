@@ -118,7 +118,7 @@ def run(file):
             num_steps = np.nan
             time = np.nan
 
-    fbs_ = fastpli.objects.fiber_bundles.Cut(fbs, [[-30] * 3, [30] * 3])
+    fbs_ = fbs.cut([[-30] * 3, [30] * 3])
 
     if len([f for fb in fbs for f in fb]) == 0:
         raise ValueError(f"FOO: no fibers inside cube: {file}")
