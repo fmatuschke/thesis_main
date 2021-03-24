@@ -99,14 +99,21 @@ sns.set_theme(style="ticks", palette="pastel")
 # Load the example tips dataset
 tips = sns.load_dataset("tips")
 
+df_ = df.apply(pd.Series.explode).reset_index()
+
+phi, theta = df_["rofl_dir"].to_numpy(
+    float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
+phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
+df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
+                                                               theta)
+
+df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
+
 for name in [
         "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_dir", "epa_ret"
 ]:
-    df_ = df.explode(name)
-
     if "dir" in name:
-        df_[name] = df_[name].apply(lambda x: np.rad2deg(
-            helper.circular.remap(x, np.pi / 2, -np.pi / 2)))
+        df_[name] = helper.circular.remap(df_[name], 90, -90)
 
     # Draw a nested boxplot to show bills by day and time
     fig, axs = plt.subplots(1, 1)
