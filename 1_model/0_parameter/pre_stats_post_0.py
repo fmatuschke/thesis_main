@@ -12,7 +12,6 @@ import pandas as pd
 from tqdm import tqdm
 
 import fastpli.io
-import fastpli.objects
 import fastpli.analysis
 import fastpli.simulation
 
@@ -84,7 +83,7 @@ def run(file):
         simpli.voxel_size = 0.1
         simpli.set_voi([-30] * 3, [30] * 3)
         simpli.fiber_bundles = fbs
-        simpli.fiber_bundles_properties = [[(1.0, 0, 0, 'p')]] * len(fbs)
+        simpli.fiber_bundles.layers = [[(1.0, 0, 0, 'p')]] * len(fbs)
 
         if run.flag.value == 0:
             with run.lock:

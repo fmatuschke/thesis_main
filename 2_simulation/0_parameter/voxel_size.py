@@ -16,7 +16,6 @@ import tqdm
 
 import fastpli.simulation
 import fastpli.analysis
-import fastpli.objects
 import fastpli.model.sandbox
 import fastpli.model.solver
 import fastpli.tools
@@ -26,6 +25,7 @@ import helper.file
 import models
 
 from mpi4py import MPI
+
 comm = MPI.COMM_WORLD
 
 # reproducability
@@ -212,7 +212,7 @@ def run(parameter):
                             )
                             dset.attrs['dim_origin'] = rnd_dim_origin
 
-                            simpli.fiber_bundles_properties = [[
+                            simpli.fiber_bundles.layers = [[
                                 (0.75, 0, mu, 'b'), (1.0, dn, mu, model)
                             ]] * len(fiber_bundles)
 

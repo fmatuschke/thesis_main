@@ -11,7 +11,6 @@ import pandas as pd
 import helper.circular
 import fastpli.io
 import fastpli.tools
-import fastpli.objects
 import fastpli.analysis
 
 parser = argparse.ArgumentParser()

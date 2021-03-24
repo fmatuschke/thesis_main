@@ -35,7 +35,7 @@ def rotate(fbs, f0_inc, f1_rot):
         rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
         rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
         rot = np.dot(rot_inc, rot_phi)
-        fbs = fastpli.objects.fiber_bundles.Rotate(fbs, rot)
+        fbs = fbs.rotate(rot)
     return fbs
 
 

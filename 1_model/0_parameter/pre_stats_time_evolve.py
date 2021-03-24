@@ -13,7 +13,6 @@ import pandas as pd
 from tqdm import tqdm
 
 import fastpli.io
-import fastpli.objects
 import fastpli.analysis
 import fastpli.simulation
 

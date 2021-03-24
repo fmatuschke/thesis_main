@@ -11,7 +11,6 @@ import warnings
 
 import fastpli.simulation
 import fastpli.analysis
-import fastpli.objects
 import fastpli.tools
 import fastpli.io
 
@@ -23,6 +22,7 @@ import helper.file
 import models
 
 from mpi4py import MPI
+
 comm = MPI.COMM_WORLD
 import multiprocessing as mp
 
@@ -203,11 +203,10 @@ if __name__ == "__main__":
                                       (tilt_angle, 180), (tilt_angle, 270)]))
                         simpli.add_crop_tilt_halo()
 
-                        simpli.fiber_bundles = fastpli.objects.fiber_bundles.Rotate(
-                            fiber_bundles, rot)
-                        simpli.fiber_bundles_properties = [[
-                            (0.75, 0, mu, 'b'), (1.0, dn, mu, model)
-                        ]] * len(fiber_bundles)
+                        simpli.fiber_bundles = fiber_bundles.rotate(rot)
+                        simpli.fiber_bundles.layers = [[(0.75, 0, mu, 'b'),
+                                                        (1.0, dn, mu, model)]
+                                                      ] * len(fiber_bundles)
 
                         logger.info(f"tissue_pipeline: model:{model}")
 

@@ -17,7 +17,6 @@ import helper.circular
 import fastpli.io
 import fastpli.analysis
 import fastpli.tools
-import fastpli.objects
 ''' OLD VISUALIZATION ???
 '''
 
@@ -73,7 +72,7 @@ for device in ["pm", "lap"]:
                 rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0_inc))
                 rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1_rot))
                 rot = np.dot(rot_inc, rot_phi)
-                fbs = fastpli.objects.fiber_bundles.Rotate(fbs, rot)
+                fbs = fbs.rotate(rot)
                 phi, theta = fastpli.analysis.orientation.fiber_bundles(fbs)
 
                 ax = plt.subplot(111, projection='polar')

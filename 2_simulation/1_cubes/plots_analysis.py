@@ -9,7 +9,6 @@ import itertools
 import multiprocessing as mp
 
 import fastpli.analysis
-import fastpli.objects
 import fastpli.io
 import models
 import odf

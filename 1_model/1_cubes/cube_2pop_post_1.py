@@ -14,7 +14,6 @@ from tqdm import tqdm
 
 import fastpli.io
 import fastpli.tools
-import fastpli.objects
 import fastpli.analysis
 
 import helper.file

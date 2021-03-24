@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import fastpli.model.solver
-import fastpli.objects
 import fastpli.io
 
 import numpy as np

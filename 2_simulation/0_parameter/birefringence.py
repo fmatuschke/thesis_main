@@ -15,7 +15,6 @@ import os
 
 import fastpli.simulation
 import fastpli.analysis
-import fastpli.objects
 import fastpli.model.sandbox
 import fastpli.model.solver
 import fastpli.tools
@@ -93,8 +92,8 @@ def run(parameter):
     # simpli.dim_origin[:2] = rnd_dim_origin
     # print(simpli.dim_origin)
 
-    simpli.fiber_bundles_properties = [[(0.75, 0, mu, 'b'), (1.0, dn, mu, model)
-                                       ]] * len(fiber_bundles)
+    simpli.fiber_bundles.layers = [[(0.75, 0, mu, 'b'),
+                                    (1.0, dn, mu, model)]] * len(fiber_bundles)
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="objects overlap")
