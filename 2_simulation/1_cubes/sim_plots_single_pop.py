@@ -125,6 +125,20 @@ for name in [
         data=df_)
     sns.despine(offset=10, trim=True)
     # plt.tight_layout()
+
+    if "epa_ret" == name:
+        x = np.linspace(0, np.pi, 42)
+        y = (np.cos(x) + 1) / 2
+        # plt.plot(x / np.pi * 3, y, linewidth=4.2)
+        plt.plot(x / np.pi * 3,
+                 y * np.mean(df_[df_.f0_inc == 0].epa_ret),
+                 linewidth=4.2)
+
+    if "rofl_inc" == name:
+        x = [0, 3]
+        y = [0, 90]
+        plt.plot(x, y, linewidth=4.2)
+
     plt.tight_layout(pad=0, w_pad=0, h_pad=0)
     plt.savefig(f"output/{os.path.basename(__file__)[:-3]}_{name}.pdf")
 
