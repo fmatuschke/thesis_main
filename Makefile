@@ -1,7 +1,7 @@
 default: install
 
 VENV := $(if $(venv),$(venv),env)
-PYTHON=python3.8
+PYTHON3=python3.8
 PIP=$(VENV)/bin/python3 -m pip
 BUILD=release
 
@@ -15,7 +15,7 @@ install: $(VENV) env-update requirements clean-fastpli fastpli
 install-sc: clean env-sc env-update requirements-sc clean-fastpli fastpli
 
 $(VENV):
-	$(PYTHON) -m venv $(VENV)
+	$(PYTHON3) -m venv $(VENV)
 
 .PHONY: env-sc
 env-sc:
@@ -57,7 +57,7 @@ requirements-sc:
 .ONESHELL:
 fastpli/setup: clean-fastpli
 	cd fastpli
-	make BUILD=$(BUILD) fastpli
+	make BUILD=$(BUILD) PYTHON3=$(PYTHON3) fastpli
 
 .PHONY: fastpli
 fastpli: fastpli/setup

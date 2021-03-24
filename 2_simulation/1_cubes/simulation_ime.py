@@ -123,7 +123,6 @@ if __name__ == "__main__":
         #     omega = h5f['/'].attrs["omega"]
         omega = helper.file.value(file, "omega")
 
-        print("ROTATEAFASASD")
         for f1_rot in models.omega_rotations(omega, args.d_rot):
             parameter.append((file, f0_inc, f1_rot))
 
