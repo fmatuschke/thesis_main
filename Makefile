@@ -3,16 +3,16 @@ default: install
 VENV := $(if $(venv),$(venv),env)
 PYTHON=python3.8
 PIP=$(VENV)/bin/python3 -m pip
-BUILD=thesis
+BUILD=release
 
 FLAG.install=--system-site-packages
 FLAG.install-sc=--system-site-packages
 
 .PHONY: install
-install: $(VENV) env-update requirements git-submodules-update clean-fastpli fastpli
+install: $(VENV) env-update requirements clean-fastpli fastpli
 
 .PHONY: install-sc
-install-sc: clean env-sc env-update requirements-sc git-submodules-update clean-fastpli fastpli
+install-sc: clean env-sc env-update requirements-sc clean-fastpli fastpli
 
 $(VENV):
 	$(PYTHON) -m venv $(VENV)
@@ -35,27 +35,23 @@ requirements-sc:
 	$(PIP) install -r requirements-sc.txt -q
 	$(PIP) install 0_core/. -q
 
-.PHONY: git-submodules-update
-git-submodules-update:
-	git submodule update --init --recursive
-
-.PHONY: git-submodules
-git-submodules:
-	cd fastpli
-	git checkout development
-	git pull
-	cd ..
-	cd fastpli_paper
-	git checkout master
-	git pull
-	cd ..
-	cd fastpli_wiki
-	git checkout master
-	git pull
-	cd ..
-	cd thesis
-	git checkout master
-	git pull
+# .PHONY: git-submodules
+# git-submodules:
+# 	cd fastpli
+# 	git checkout development
+# 	git pull
+# 	cd ..
+# 	cd fastpli_paper
+# 	git checkout master
+# 	git pull
+# 	cd ..
+# 	cd fastpli_wiki
+# 	git checkout master
+# 	git pull
+# 	cd ..
+# 	cd thesis
+# 	git checkout master
+# 	git pull
 
 .PHONY: fastpli/setup
 .ONESHELL:
