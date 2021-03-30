@@ -11,6 +11,7 @@ mpi.*.err
 *.out
 *.err
 *.nfs*
+*.pdf
 
 literatur/*
 !literatur/readme.md

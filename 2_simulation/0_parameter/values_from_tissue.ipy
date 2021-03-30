@@ -1,0 +1,68 @@
+#%%
+import matplotlib.pyplot as plt
+# import scipy.stats
+import numpy as np
+# import pandas as pd
+# import seaborn as sns
+# import os
+import h5py
+
+#%% measure values from tissue
+
+h5f = h5py.File(
+    '../../data/PM/Vervet1818/Vervet1818a_60mu_70ms_s0549_x00-25_y00-33.h5',
+    'r')
+
+factor = 25
+ret = h5f['Retardation'][::factor, ::factor]
+trans = h5f['Transmittance'][::factor, ::factor]
+mask = h5f['Mask'][::factor, ::factor] > 0
+# %%
+plt.imshow(np.multiply(ret, mask))
+
+# %%
+ret_mask = np.multiply(np.multiply(ret, mask), ret < 0.04)
+plt.hist(np.multiply(ret, mask).ravel(), 256)
+plt.show()
+plt.imshow(ret_mask)
+plt.show()
+
+# %%
+trans_fg = np.multiply(trans, mask)
+plt.hist(trans_fg.ravel()[trans_fg.ravel() > 0], 256)
+# print(np.mean(trans_fg.ravel()[trans_fg.ravel() > 0]))
+# print(np.std(trans_fg.ravel()[trans_fg.ravel() > 0]))
+plt.show()
+
+trans_bg = np.multiply(trans, mask == 0)
+plt.hist(trans_bg.ravel()[trans_bg.ravel() > 0], 256)
+print(np.mean(trans_bg.ravel()[trans_bg.ravel() > 0]))
+print(np.std(trans_bg.ravel()[trans_bg.ravel() > 0]))
+plt.show()
+
+# plt.imshow(np.multiply(trans, mask))
+# plt.show()
+
+trans_gm = np.multiply(np.multiply(trans, mask), trans > 2000)
+plt.imshow(trans_gm)
+plt.show()
+plt.hist(trans_gm.ravel()[trans_gm.ravel() > 0], 256)
+plt.show()
+
+# WHITEMATTER nur von CC!
+trans_wm = np.multiply(np.multiply(trans, mask), trans < 2000)
+plt.imshow(trans_wm)
+plt.show()
+plt.hist(trans_wm.ravel()[trans_wm.ravel() > 0], 256)
+plt.show()
+
+trans_wm = np.multiply(np.multiply(trans, mask), trans < 2000)
+plt.imshow(trans_wm)
+plt.show()
+plt.hist(trans_wm.ravel()[ret.ravel() > 0.6], 256)
+plt.show()
+
+# # plt.imshow(trans)
+# # plt.show()
+
+# %%

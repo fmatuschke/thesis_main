@@ -158,14 +158,16 @@ if __name__ == "__main__":
 
     parameters = []
     for file in files:
-        for fn in np.arange(1, 5.001, 0.125):  # [1, 2, 3, 3.75, 4, 5]:
+        for fn in np.arange(1, 5.001, 1):
             for dn, model in [(-0.001 * fn, 'p'), (0.002 * fn, 'r')]:
                 for name, gain, intensity, res, tilt_angle, sigma in [
-                    ('LAP', 3, 35000, 20, 5.5, 0.75),
+                        # ('LAP', 3, 35000, 20, 5.5, 0.75),
                     ('PM', 0.1175, 8000, 1.25, 3.9, 0.75)
                 ]:
-                    for species, mu in [('Roden', 8), ('Vervet', 30),
-                                        ('Human', 65)]:
+                    # for species, mu in [('Roden', 8), ('Vervet', 30),
+                    #                     ('Human', 65)]:
+                    for species, mu in [('Roden', 10), ('Vervet', 20),
+                                        ('Human', 50)]:
                         parameters.append(
                             (file, dn, model, name, gain, intensity, res,
                              tilt_angle, sigma, species, mu))
