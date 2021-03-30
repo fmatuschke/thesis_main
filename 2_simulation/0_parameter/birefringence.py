@@ -153,7 +153,7 @@ def run(parameter):
 if __name__ == "__main__":
 
     files = glob.glob(
-        "../../1_model/1_cubes/output/cube_2pop_1/cube_2pop_psi_1.00_omega_0.00_r_*.solved.h5"
+        "../../1_model/1_cubes/output/cube_2pop_120/cube_2pop_psi_1.00_omega_0.00_r_*.solved.h5"
     )
 
     parameters = []
@@ -164,10 +164,8 @@ if __name__ == "__main__":
                         # ('LAP', 3, 35000, 20, 5.5, 0.75),
                     ('PM', 0.1175, 8000, 1.25, 3.9, 0.75)
                 ]:
-                    # for species, mu in [('Roden', 8), ('Vervet', 30),
-                    #                     ('Human', 65)]:
-                    for species, mu in [('Roden', 10), ('Vervet', 20),
-                                        ('Human', 50)]:
+                    for species, mu in [('Roden', 8), ('Vervet', 30),
+                                        ('Human', 65)]:
                         parameters.append(
                             (file, dn, model, name, gain, intensity, res,
                              tilt_angle, sigma, species, mu))
