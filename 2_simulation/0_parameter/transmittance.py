@@ -112,7 +112,7 @@ def run(parameter):
         simpli.noise_model = lambda x: np.round(
             np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
 
-        images_ = simpli.apply_optic(images)
+        _, images_ = simpli.apply_optic(images)
         t, d, r = simpli.apply_epa(images_)
 
         df = pd.DataFrame([[

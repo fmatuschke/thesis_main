@@ -231,7 +231,7 @@ if __name__ == "__main__":
                                 images = simpli.rm_crop_tilt_halo(images)
 
                                 # apply optic to simulation
-                                images = simpli.apply_optic(images)
+                                _, images = simpli.apply_optic(images)
                                 dset['simulation/optic/' + str(t)] = images
 
                                 # calculate modalities

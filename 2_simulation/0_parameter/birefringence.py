@@ -101,7 +101,7 @@ def run(parameter):
         )
 
     # Simulate PLI Measurement
-    for t, tilt in enumerate(simpli._tilts):
+    for tilt in simpli._tilts:
         theta, phi = tilt[0], tilt[1]
         images = simpli.run_simulation(label_field, vector_field,
                                        tissue_properties, theta, phi)
@@ -112,8 +112,8 @@ def run(parameter):
         simpli.noise_model = lambda x: np.round(
             np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
 
-        images_ = simpli.apply_optic(images)
-        t, d, r = simpli.apply_epa(images_)
+        _, images = simpli.apply_optic(images)
+        t, d, r = simpli.apply_epa(images)
 
         df = pd.DataFrame([[
             species,

@@ -239,7 +239,7 @@ def run(parameter):
                                 ).astype(np.uint16)
                             # apply optic to simulation
                             logger.info(f"apply_optic")
-                            images_ = simpli.apply_optic(images)
+                            _, images_ = simpli.apply_optic(images)
                             dset[f'simulation/optic/{t}/{m}'] = images_
                             # calculate modalities
                             logger.info(f"epa")
