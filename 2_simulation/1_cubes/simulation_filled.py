@@ -178,8 +178,6 @@ if __name__ == "__main__":
                         # ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75), -> requires 180 um models
                     ('PM', 0.1175, 8000, PIXEL_PM, 3.9, 0.75)
                 ]:
-                    mu = 0
-
                     # Setup Simpli
                     simpli = fastpli.simulation.Simpli()
                     warnings.filterwarnings("ignore", message="objects overlap")
@@ -206,8 +204,8 @@ if __name__ == "__main__":
                         fiber_bundles = fiber_bundles_h5
 
                     simpli.fiber_bundles = fiber_bundles.rotate(rot)
-                    simpli.fiber_bundles.layers = [[(0.75, 0, mu, 'b'),
-                                                    (1.0, dn, mu, model)]
+                    simpli.fiber_bundles.layers = [[(0.75, 0, 0, 'b'),
+                                                    (1.0, dn, 0, model)]
                                                   ] * len(fiber_bundles)
 
                     logger.info(f"tissue_pipeline: model:{model}")
@@ -259,10 +257,8 @@ if __name__ == "__main__":
                         tilting_stack = [None] * 5
                         for t, (theta, phi) in enumerate(simpli.tilts):
                             # absorption
-                            images = np.multiply(
-                                images_stack[t],
-                                np.exp(-mu * tissue_thickness * 1e-3 *
-                                       simpli.voxel_size)[:, :, None])
+                            images = images_stack[t] * np.exp(
+                                -mu * THICKNESS * 1e-3 * simpli.voxel_size)
 
                             images = simpli.rm_crop_tilt_halo(images)
 

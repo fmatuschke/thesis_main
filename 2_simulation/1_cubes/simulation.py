@@ -203,6 +203,8 @@ if __name__ == "__main__":
                                       (tilt_angle, 180), (tilt_angle, 270)]))
                         simpli.add_crop_tilt_halo()
 
+                        FIXME wrong mu!!
+
                         simpli.fiber_bundles = fiber_bundles.rotate(rot)
                         simpli.fiber_bundles.layers = [[(0.75, 0, mu, 'b'),
                                                         (1.0, dn, mu, model)]

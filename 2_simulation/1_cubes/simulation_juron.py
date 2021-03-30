@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
                             simpli.fiber_bundles = fiber_bundles.rotate(rot)
                             simpli.fiber_bundles.layers = [[
-                                (0.75, 0, mu, 'b'), (1.0, dn, mu, model)
+                                (0.75, 0, 0, 'b'), (1.0, dn, 0, model)
                             ]] * len(fiber_bundles)
 
                             logger.info(f"tissue_pipeline: model:{model}")

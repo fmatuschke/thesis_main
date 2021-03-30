@@ -29,7 +29,7 @@ from mpi4py import MPI
 comm = MPI.COMM_WORLD
 
 # reproducability
-# np.random.seed(42)
+np.random.seed(42)
 
 # path
 FILE_NAME = os.path.abspath(__file__)
@@ -212,9 +212,9 @@ def run(parameter):
                             )
                             dset.attrs['dim_origin'] = rnd_dim_origin
 
-                            simpli.fiber_bundles.layers = [[
-                                (0.75, 0, mu, 'b'), (1.0, dn, mu, model)
-                            ]] * len(fiber_bundles)
+                            simpli.fiber_bundles.layers = [[(0.75, 0, 0, 'b'),
+                                                            (1.0, dn, 0, model)]
+                                                          ] * len(fiber_bundles)
 
                             with warnings.catch_warnings():
                                 warnings.filterwarnings(
@@ -240,6 +240,10 @@ def run(parameter):
                                 images = simpli.run_simulation(
                                     label_field, vector_field,
                                     tissue_properties, theta, phi)
+
+                                # absorption
+                                images *= np.exp(-mu * THICKNESS * 1e-3 *
+                                                 simpli.voxel_size)
 
                                 dset['simulation/data/' + str(t)] = images
                                 dset['simulation/data/' +

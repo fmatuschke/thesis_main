@@ -63,8 +63,6 @@ if __name__ == "__main__":
                 h5f.attrs['input_file'] = file
 
             for m, (dn, model) in enumerate([(-0.008 / 2, 'p')]):
-                mu = 0
-
                 # Setup Simpli
                 simpli = fastpli.simulation.Simpli()
                 warnings.filterwarnings("ignore", message="objects overlap")
@@ -76,8 +74,8 @@ if __name__ == "__main__":
                 simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
                 simpli.fiber_bundles = fiber_bundles.rotate(rot)
-                simpli.fiber_bundles.layers = [[(0.75, 0, mu, 'b'),
-                                                (1.0, dn, mu, model)]
+                simpli.fiber_bundles.layers = [[(0.75, 0, 0, 'b'),
+                                                (1.0, dn, 0, model)]
                                               ] * len(fiber_bundles)
 
                 tissue, _, _ = simpli.generate_tissue(only_tissue=True)
