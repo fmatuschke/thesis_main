@@ -1,0 +1,81 @@
+# To add a new cell, type '# %%'
+# To add a new markdown cell, type '# %% [markdown]'
+# %%
+# %matplotlib inline
+# from jupyterthemes import jtplot
+# jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
+
+import matplotlib.pyplot as plt
+import scipy.stats
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import os
+
+from decimal import Decimal
+
+# %%
+df = pd.read_pickle(os.path.join("output/bf_0.125/bf.pkl"))
+df = df.apply(pd.Series.explode).reset_index().apply(
+    pd.Series.explode).reset_index()
+df['x'] = np.round(df.dn, 4)
+# df['x'] = df.apply(lambda x: f"{np.round(x['dn'],4)}",axis=1)
+
+# %%
+df_ = df[df.dn % 0.001 == 0]
+for setup in df_.setup.unique():
+    for dn in sorted(df_.dn.unique()):
+        for radius in sorted(df_.radius.unique()):
+
+            sub = (df_.radius == radius) & (df_.dn == dn) & (df_.setup == setup)
+
+            #             print(np.mean(df_[(df_.species == "Roden") & sub].transmittance),
+            #                   np.mean(df_[(df_.species == "Vervet") & sub].transmittance),
+            #                   np.mean(df_[(df_.species == "Human") & sub].transmittance))
+            res = scipy.stats.kruskal(
+                df_[(df_.species == "Roden") & sub].retardation,
+                df_[(df_.species == "Vervet") & sub].retardation,
+                df_[(df_.species == "Human") & sub].retardation)
+            print(setup, radius, dn, res[0], res[1])
+        print()
+
+# %%
+for parameter in ["transmittance", "retardation"]:
+    for setup in df_.setup.unique():
+        f = plt.figure()
+        ax = sns.boxplot(x="x",
+                         y=parameter,
+                         data=df[(((df.dn % 0.0010 == 0) & (df.dn < 0)) |
+                                  ((df.dn % 0.0020 == 0) & (df.dn > 0))) &
+                                 (df.setup == setup)],
+                         hue="radius",
+                         palette=sns.color_palette())
+        # ax.ticklabel_format(scilimits=(5,5))
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+        if parameter == "retardation":
+            ax.set(ylim=(0, 1.05))
+        f.set_size_inches(15, 10)
+        # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
+        plt.savefig(f"{parameter}_{setup}_.pdf", dpi=300)
+        for species in ["Roden", "Vervet", "Human"]:
+            f = plt.figure()
+            ax = sns.boxplot(x="x",
+                             y=parameter,
+                             data=df[(((df.dn % 0.0010 == 0) & (df.dn < 0)) |
+                                      ((df.dn % 0.0020 == 0) &
+                                       (df.dn > 0))) & (df.species == species) &
+                                     (df.setup == setup)],
+                             hue="radius",
+                             palette=sns.color_palette())
+            # ax.ticklabel_format(scilimits=(5,5))
+            ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+            if parameter == "retardation":
+                ax.set(ylim=(0, 1.05))
+            f.set_size_inches(15, 10)
+            # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
+            plt.savefig(f"{parameter}_{setup}_{species}.pdf", dpi=300)
+
+# %%
+((df.dn % 0.0010 == 0) & (df.dn < 0)) | ((df.dn % 0.0020 == 0) & (df.dn > 0))
+
+# %%

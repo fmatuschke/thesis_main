@@ -1,46 +1,29 @@
 #!/bin/bash -x
 
+NAME=sim_120_new
+MODEL_PATH=/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120
+
 #  # Vorauswahl
-mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
-   -m mpi4py simulation_ime.py \
-   -i /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.00*omega_0.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.30*omega_0.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.30*omega_30.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.30*omega_60.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.30*omega_90.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.50*omega_0.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.50*omega_30.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.50*omega_60.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.50*omega_90.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.60*omega_0.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.60*omega_30.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.60*omega_60.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.60*omega_90.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.90*omega_0.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.90*omega_30.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.90*omega_60.00*.solved.h5 \
-   /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.90*omega_90.00*.solved.h5 \
-   -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/sim_120_new \
-   -v 0.125 \
-   --start 0 \
-   --n_inc 4 \
-   --d_rot 15
-#
-#
-# # radien eliminierung, alle psi
 # mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
 #    -m mpi4py simulation_ime.py \
-#    -i /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.40_omega_90.00*r_0.50*.solved.h5 \
-#    /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.40_omega_80.00*r_0.50*.solved.h5 \
-#    /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.50_omega_90.00*r_0.50*.solved.h5 \
-#    /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.50_omega_80.00*r_0.50*.solved.h5 \
-#    /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.60_omega_90.00*r_0.50*.solved.h5 \
-#    /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*psi_0.60_omega_80.00*r_0.50*.solved.h5 \
-#    -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/sim_120_ime_r_0.5_ \
+#    -i \
+#    ${MODEL_PATH}/*psi_0.[03569]0*omega_0.00*.solved.h5 \
+#    ${MODEL_PATH}/*psi_0.[03569]0*omega_[369]0.00*.solved.h5 \
+#    -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME} \
 #    -v 0.125 \
 #    --start 0 \
 #    --n_inc 4 \
-#    --d_rot 15 \
-#    --Vervet \
-#    --radial # /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*omega_60.00*r_0.50*.solved.h5 \
-# # /data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/*omega_90.00*r_0.50*.solved.h5 \
+#    --d_rot 15
+#
+#
+# radien eliminierung
+mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
+   -m mpi4py simulation_ime.py \
+   -i ${MODEL_PATH}/*r_0.50*.solved.h5 \
+   -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_r_0.5 \
+   -v 0.125 \
+   --start 0 \
+   --n_inc 4 \
+   --d_rot 15 \
+   --Vervet \
+   --radial

@@ -25,6 +25,7 @@ import helper.file
 import models
 
 from mpi4py import MPI
+
 comm = MPI.COMM_WORLD
 
 # reproducability
@@ -94,7 +95,7 @@ logger.addHandler(fh)
 
 # VOXEL_SIZES = [0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
-VOXEL_SIZES = output/vs_120_0.25_6_25/results
+# VOXEL_SIZES = output/vs_120_0.25_6_25/results
 # VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10
@@ -162,8 +163,8 @@ def run(parameter):
             logger.info(f"n_repeat: {n}")
             for voxel_size in VOXEL_SIZES:
                 logger.info(f"voxel_size: {voxel_size}")
-                for species, mu in [('Roden', 10), ('Vervet', 20),
-                                    ('Human', 50)]:
+                for species, mu in [('Roden', 8), ('Vervet', 30),
+                                    ('Human', 65)]:
                     logger.info(f"species: {species}")
                     for dn, model in [(-0.004, 'p'), (0.008, 'r')]:
                         logger.info(f"model: {model}")

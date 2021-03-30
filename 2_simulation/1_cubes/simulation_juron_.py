@@ -218,8 +218,8 @@ if __name__ == "__main__":
                                 tissue, optical_axis, tissue_properties, theta,
                                 phi)
 
-                        for species, mu in [('Roden', 10), ('Vervet', 20),
-                                            ('Human', 50)]:
+                        for species, mu in [('Roden', 8), ('Vervet', 30),
+                                            ('Human', 65)]:
                             dset = h5f.create_group(f'{name}/{model}/{species}')
 
                             tilting_stack = [None] * 5

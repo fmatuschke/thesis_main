@@ -163,8 +163,8 @@ def run(parameter):
             logger.info(f"n_repeat: {n}")
             for voxel_size in VOXEL_SIZES:
                 logger.info(f"voxel_size: {voxel_size}")
-                for species, mu in [('Roden', 10), ('Vervet', 20),
-                                    ('Human', 50)]:
+                for species, mu in [('Roden', 8), ('Vervet', 30),
+                                    ('Human', 65)]:
                     logger.info(f"species: {species}")
                     for dn, model in [(-0.004, 'p'), (0.008, 'r')]:
                         logger.info(f"model: {model}")

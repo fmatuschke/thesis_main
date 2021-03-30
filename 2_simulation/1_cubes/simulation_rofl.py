@@ -36,7 +36,7 @@ def run(file):
 
     with h5py.File(file, "r") as h5f:  #r+
 
-        for species, mu in [('Roden', 10), ('Vervet', 20), ('Human', 50)]:
+        for species, mu in [('Roden', 8), ('Vervet', 30), ('Human', 65)]:
             for m, (dn, model) in enumerate([(-0.008 / 2, 'p'), (0.008, 'r')]):
                 for name, gain, intensity, res, tilt_angle, sigma in [
                     ('LAP', 3, 35000, PIXEL_LAP, 5.5, 0.75),

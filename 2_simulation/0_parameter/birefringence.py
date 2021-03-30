@@ -161,8 +161,8 @@ if __name__ == "__main__":
                     ('LAP', 3, 35000, 20, 5.5, 0.75),
                     ('PM', 0.1175, 8000, 1.25, 3.9, 0.75)
                 ]:
-                    for species, mu in [('Roden', 10), ('Vervet', 20),
-                                        ('Human', 50)]:
+                    for species, mu in [('Roden', 8), ('Vervet', 30),
+                                        ('Human', 65)]:
                         parameters.append(
                             (file, dn, model, name, gain, intensity, res,
                              tilt_angle, sigma, species, mu))

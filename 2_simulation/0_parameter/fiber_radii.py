@@ -25,6 +25,7 @@ import helper.file
 import models
 
 from mpi4py import MPI
+
 comm = MPI.COMM_WORLD
 
 # reproducability
@@ -151,7 +152,7 @@ def run(parameter):
         # rnd_dim_origin = np.array(
         #     (-30 + (n % nstep) * step, -30 + (n // nstep) * step))
         # logger.info(f"n_repeat: {n}")
-        for species, mu in [('Roden', 10), ('Vervet', 20), ('Human', 50)]:
+        for species, mu in [('Roden', 8), ('Vervet', 30), ('Human', 65)]:
             logger.info(f"species: {species}")
             for dn, model in [(-0.004, 'p'), (0.008, 'r')]:
                 logger.info(f"model: {model}")
