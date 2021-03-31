@@ -153,12 +153,12 @@ def run(parameter):
 if __name__ == "__main__":
 
     files = glob.glob(
-        "../../1_model/1_cubes/output/cube_2pop_120/cube_2pop_psi_1.00_omega_0.00_r_*.solved.h5"
+        "/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/cube_2pop_psi_1.00_omega_0.00_r_*.solved.h5"
     )
 
     parameters = []
     for file in files:
-        for fn in np.arange(1, 5.001, 1):
+        for fn in np.arange(1, 5.001, 0.125):
             for dn, model in [(-0.001 * fn, 'p'), (0.002 * fn, 'r')]:
                 for name, gain, intensity, res, tilt_angle, sigma in [
                         # ('LAP', 3, 35000, 20, 5.5, 0.75),

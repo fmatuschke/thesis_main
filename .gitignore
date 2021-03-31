@@ -1,5 +1,6 @@
 env*/
 **/output/
+.worktrees/
 data/
 .numba_config.yaml
 thesis.zip

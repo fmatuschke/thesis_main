@@ -1,19 +1,19 @@
 #!/bin/bash -x
 
-NAME=sim_120_new
+NAME=sim_120_newest
 MODEL_PATH=/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120
 
-#  # Vorauswahl
-# mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
-#    -m mpi4py simulation_ime.py \
-#    -i \
-#    ${MODEL_PATH}/*psi_0.[03569]0*omega_0.00*.solved.h5 \
-#    ${MODEL_PATH}/*psi_0.[03569]0*omega_[369]0.00*.solved.h5 \
-#    -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME} \
-#    -v 0.125 \
-#    --start 0 \
-#    --n_inc 4 \
-#    --d_rot 15
+# Vorauswahl
+mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
+   -m mpi4py simulation_ime.py \
+   -i \
+   ${MODEL_PATH}/*psi_0.[03569]0*omega_0.00*.solved.h5 \
+   ${MODEL_PATH}/*psi_0.[03569]0*omega_[369]0.00*.solved.h5 \
+   -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME} \
+   -v 0.125 \
+   --start 0 \
+   --n_inc 4 \
+   --d_rot 15
 #
 #
 # radien eliminierung
