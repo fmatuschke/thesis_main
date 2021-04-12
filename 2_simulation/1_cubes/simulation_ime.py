@@ -204,7 +204,8 @@ if __name__ == "__main__":
 
                     tissue, optical_axis, tissue_properties = simpli.run_tissue_pipeline(
                     )
-                    tissue_thickness = np.sum(tissue > 0, -1)
+                    tissue_thickness = np.sum(tissue > 0,
+                                              -1) / tissue.shape[-1] * THICKNESS
 
                     # Simulate PLI Measurement
                     logger.info(f"simulation_pipeline: model:{model}")
@@ -240,9 +241,11 @@ if __name__ == "__main__":
                         tilting_stack = [None] * 5
                         for t, (theta, phi) in enumerate(simpli.tilts):
                             # absorption
-                            images = images_stack[t] * np.exp(
-                                -mu * tissue_thickness * 1e-3 / np.cos(theta) *
-                                simpli.voxel_size)
+                            images = np.multiply(
+                                images_stack[t],
+                                np.exp(-mu * tissue_thickness[:, :, None] *
+                                       1e-3 / np.cos(theta) *
+                                       simpli.voxel_size))
 
                             images = simpli.rm_crop_tilt_halo(images)
 

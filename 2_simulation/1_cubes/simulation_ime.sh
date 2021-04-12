@@ -1,4 +1,5 @@
 #!/bin/bash -x
+set -euo pipefail
 
 NAME=sim_cube_2pop_120
 MODEL_PATH=/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120
