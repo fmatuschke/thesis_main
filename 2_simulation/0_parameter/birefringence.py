@@ -1,16 +1,12 @@
+#! /usr/bin/env python3
+
 import numpy as np
 import multiprocessing as mp
-import subprocess
-import itertools
 import argparse
-import logging
 import pandas as pd
-import datetime
 import warnings
-import time
 import h5py
 import glob
-import sys
 import os
 
 import fastpli.simulation
@@ -161,7 +157,7 @@ if __name__ == "__main__":
         for fn in np.arange(1, 5.001, 0.125):
             for dn, model in [(-0.001 * fn, 'p'), (0.002 * fn, 'r')]:
                 for name, gain, intensity, res, tilt_angle, sigma in [
-                        # ('LAP', 3, 35000, 20, 5.5, 0.75),
+                    ('LAP', 3, 35000, 20, 5.5, 0.75),
                     ('PM', 0.1175, 8000, 1.25, 3.9, 0.75)
                 ]:
                     for species, mu in [('Roden', 8), ('Vervet', 30),
