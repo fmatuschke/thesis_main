@@ -241,7 +241,7 @@ if __name__ == "__main__":
                         for t, (theta, phi) in enumerate(simpli.tilts):
                             # absorption
                             images = images_stack[t] * np.exp(
-                                -mu * tissue_thickness * 1e-3 *
+                                -mu * tissue_thickness * 1e-3 / np.cos(theta) *
                                 simpli.voxel_size)
 
                             images = simpli.rm_crop_tilt_halo(images)
