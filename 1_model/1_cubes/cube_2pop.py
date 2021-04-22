@@ -63,12 +63,6 @@ parser.add_argument("-p",
                     required=True,
                     help="Number of threads.")
 
-parser.add_argument("-t",
-                    "--time",
-                    type=float,
-                    required=True,
-                    help="allocation time in hours.")
-
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
 os.makedirs(args.output, exist_ok=True)
@@ -185,7 +179,7 @@ logger.info(f"run solver")
 start_time = time.time()
 solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
     0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
-for i in tqdm(range(1, args.max_steps + 1)):
+for i in tqdm(range(1, args.max_steps + 1), leave=False):
     if solver.step():
         break
 
@@ -195,24 +189,23 @@ for i in tqdm(range(1, args.max_steps + 1)):
             f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
         )
 
-        if i % 100 == 0:
-            if (time.time() - start_time) > 0.9 * args.time * 60 * 60:
-                with h5py.File(f'{file_pref}.tmp.h5', 'w') as h5f:
-                    solver.save_h5(h5f,
-                                   script=open(os.path.abspath(__file__),
-                                               'r').read())
-                    h5f['/'].attrs['psi'] = psi
-                    h5f['/'].attrs['omega'] = omega
-                    h5f['/'].attrs['v0'] = SIZE
-                    h5f['/'].attrs['radius'] = RADIUS_LOGMEAN
-                    h5f['/'].attrs['step'] = i
-                    h5f['/'].attrs['overlap'] = solver.overlap
-                    h5f['/'].attrs['num_obj'] = solver.num_obj
-                    h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
-                    h5f['/'].attrs['num_steps'] = solver.num_steps
-                    h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
-                    h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
-                    h5f['/'].attrs['time'] = time.time() - start_time
+        if i % 250 == 0:
+            with h5py.File(f'{file_pref}.tmp.h5', 'w') as h5f:
+                solver.save_h5(h5f,
+                               script=open(os.path.abspath(__file__),
+                                           'r').read())
+                h5f['/'].attrs['psi'] = psi
+                h5f['/'].attrs['omega'] = omega
+                h5f['/'].attrs['v0'] = SIZE
+                h5f['/'].attrs['radius'] = RADIUS_LOGMEAN
+                h5f['/'].attrs['step'] = i
+                h5f['/'].attrs['overlap'] = solver.overlap
+                h5f['/'].attrs['num_obj'] = solver.num_obj
+                h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
+                h5f['/'].attrs['num_steps'] = solver.num_steps
+                h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
+                h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
+                h5f['/'].attrs['time'] = time.time() - start_time
 
         if i != args.max_steps:
             solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
