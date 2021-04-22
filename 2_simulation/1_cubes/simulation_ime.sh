@@ -15,6 +15,9 @@ mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
    --n_inc 4 \
    --d_rot 15
 #
+python3 simulation_post_0.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME} -p 48
+python3 simulation_post_1.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME} -p 48
+python3 simulation_post_2.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME} -p 48
 #
 # radien eliminierung
 mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
@@ -27,3 +30,7 @@ mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
    --d_rot 15 \
    --Vervet \
    --radial
+#
+python3 simulation_post_0.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_r_0.5 -p 48
+python3 simulation_post_1.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_r_0.5 -p 48
+python3 simulation_post_2.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_r_0.5 -p 48
