@@ -1,0 +1,128 @@
+#%%
+import numpy as np
+import skimage.io
+import os
+import matplotlib.pyplot as plt
+import cv2
+
+PATH = os.path.dirname(os.path.realpath(__file__))
+THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+
+#%%
+retardation = skimage.io.imread(os.path.join(
+    THESIS, 'data/PM/Vervet1818',
+    'Vervet1818a_60mu_70ms_s0549_x00-25_y00-33_Retardation.mhd'),
+                                plugin='simpleitk')
+
+# %%
+transmittance = skimage.io.imread(os.path.join(
+    THESIS, 'data/PM/Vervet1818',
+    'Vervet1818a_60mu_70ms_s0549_x00-25_y00-33_Transmittance.mhd'),
+                                  plugin='simpleitk')
+
+# %%
+
+# xleft	yleft	xright	yright
+# 25830	22097	22076	22290
+# 25458	23025	22442	23136
+# 25026	22881	21938	23292
+# 24453	22913	21494	23640
+# 24469	21909	20939	22788
+
+leftroi = np.array([[25830, 22097], [25458, 23025], [25026, 22881],
+                    [24453, 22913], [24469, 21909]])
+leftroi = np.vstack((leftroi, leftroi[0, :]))
+
+rightroi = np.array([[22076, 22290], [22442, 23136], [21938, 23292],
+                     [21494, 23640], [20939, 22788]])
+rightroi = np.vstack((rightroi, rightroi[0, :]))
+
+clip = [21000, 20000]
+skip = 5
+
+# transmittance
+plt.subplots()
+plt.imshow(transmittance[clip[0]:24500:skip, clip[1]:27000:skip],
+           cmap=plt.get_cmap('cividis'),
+           origin='lower')
+cval = (np.amin(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]),
+        np.amax(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]))
+print(cval)
+plt.plot((leftroi[:, 0] - clip[1]) / skip, (leftroi[:, 1] - clip[0]) / skip,
+         c='red')
+plt.plot((rightroi[:, 0] - clip[1]) / skip, (rightroi[:, 1] - clip[0]) / skip,
+         c='red')
+plt.axis('off')
+plt.tight_layout()
+plt.savefig(os.path.join(
+    PATH, f'output/transmittance_vervet_cc_{cval[0]:.0f}_{cval[1]:.0f}.png'),
+            bbox_inches='tight')
+
+# retardation
+plt.subplots()
+plt.imshow(retardation[clip[0]:24500:skip, clip[1]:27000:skip],
+           cmap=plt.get_cmap('cividis'),
+           origin='lower')
+cval = (np.amin(retardation[clip[0]:24500:skip, clip[1]:27000:skip]),
+        np.amax(retardation[clip[0]:24500:skip, clip[1]:27000:skip]))
+print(cval)
+plt.plot((leftroi[:, 0] - clip[1]) / skip, (leftroi[:, 1] - clip[0]) / skip,
+         c='red')
+plt.plot((rightroi[:, 0] - clip[1]) / skip, (rightroi[:, 1] - clip[0]) / skip,
+         c='red')
+plt.axis('off')
+plt.tight_layout()
+plt.savefig(os.path.join(
+    PATH, f'output/retardation_vervet_cc_{cval[0]:.3f}_{cval[1]:.3f}.png'),
+            bbox_inches='tight')
+# %%
+mask_left = np.zeros_like(retardation, dtype=np.uint8)
+cv2.fillPoly(mask_left, [leftroi], 1)
+mask_right = np.zeros_like(retardation, dtype=np.uint8)
+cv2.fillPoly(mask_right, [rightroi], 1)
+
+# plt.subplots()
+# plt.imshow(mask_left[::100, ::100])
+# plt.subplots()
+# plt.imshow(retardation[::100, ::100])
+
+#%%
+
+transmittance_left = np.extract(mask_left, transmittance)
+transmittance_right = np.extract(mask_right, transmittance)
+retardation_left = np.extract(mask_left, retardation)
+retardation_right = np.extract(mask_right, retardation)
+
+# %%
+print(np.mean(transmittance_left), np.std(transmittance_left))
+print(np.mean(transmittance_right), np.std(transmittance_right))
+print(np.mean(retardation_left), np.std(retardation_left))
+print(np.mean(retardation_right), np.std(retardation_right))
+
+# %%
+plt.subplots()
+plt.hist(transmittance_left,
+         int(np.sqrt(transmittance_left.size)),
+         label='left',
+         fc=(239 / 255, 138 / 255, 98 / 255, 0.75))
+plt.hist(transmittance_right,
+         int(np.sqrt(transmittance_right.size)),
+         label='right',
+         fc=(43 / 255, 140 / 255, 190 / 255, 0.75))
+plt.legend()
+plt.savefig(os.path.join(PATH, f'output/transmittance_vervet_cc_hist.png'),
+            bbox_inches='tight')
+
+plt.subplots()
+plt.hist(retardation_left,
+         int(np.sqrt(retardation_left.size)),
+         label='left',
+         fc=(239 / 255, 138 / 255, 98 / 255, 0.75))
+plt.hist(retardation_right,
+         int(np.sqrt(retardation_right.size)),
+         label='right',
+         fc=(43 / 255, 140 / 255, 190 / 255, 0.75))
+plt.legend()
+plt.savefig(os.path.join(PATH, f'output/retardation_vervet_cc_hist.png'),
+            bbox_inches='tight')
+# %%

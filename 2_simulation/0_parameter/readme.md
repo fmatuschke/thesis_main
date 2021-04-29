@@ -14,9 +14,11 @@ python3 resolution.ipy
 ./sensor_gain.py
 ```
 
-# absorption coefficient
+# absorption coefficient / birefringence
 
-# birefringence
+```sh
+python3 measure_vervet.ipy
+```
 
 # voxel size
 
