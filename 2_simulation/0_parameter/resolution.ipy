@@ -1,0 +1,73 @@
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
+import h5py
+import seaborn as sns
+import pandas as pd
+import os
+import imageio
+
+PATH = os.path.dirname(os.path.realpath(__file__))
+THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+
+#%%
+data = [
+    imageio.imread(
+        os.path.join(
+            THESIS,
+            f'data/PM/USAF/taorad/USAF_AB4_LB85_5pct_5ms_a00_t000_{i}.png'))
+    for i in range(1, 6)
+]
+data = np.array(data)
+data = np.moveaxis(data, 0, -1)
+data = np.flip(data, 1)
+
+# %%
+# plt.imshow(data[800:840, 1070:1125, 0])
+#
+data_8_2 = data[802:810, 1071:1086, :]
+data_8_1 = data[822:830, 1083:1100, :]
+data_7_6 = data[825:834, 1107:1124, :]
+
+data_8_2_lr = data[804:808, 1078:1085, :]
+data_8_1_lr = data[823:829, 1084:1092, :]
+data_7_6_lr = data[827:832, 1107:1116, :]
+
+data_8_2_ud = data[802:809, 1073:1078, :]
+data_8_1_ud = data[822:830, 1093:1098, :]
+data_7_6_ud = data[825:834, 1117:1122, :]
+
+#
+plt.imshow(data_7_6_ud[:, :, 0])
+
+# %%
+
+# res = [None] * 6
+res = {}
+for i, d in zip(['82lr', '81lr', '76lr'],
+                [data_8_2_lr, data_8_1_lr, data_7_6_lr]):
+    plt.errorbar(range(d.shape[1]), np.mean(d, (0, -1)), np.std(d, (0, -1)))
+    res['x' + i] = range(d.shape[1])
+    res['y' + i] = np.mean(d, (0, -1))
+    res['e' + i] = np.std(d, (0, -1))
+for i, d in zip(['82ud', '81ud', '76ud'],
+                [data_8_2_ud, data_8_1_ud, data_7_6_ud]):
+    plt.errorbar(range(d.shape[0]), np.mean(d, (1, -1)), np.std(d, (1, -1)))
+    res['x' + i] = range(d.shape[0])
+    res['y' + i] = np.mean(d, (1, -1))
+    res['e' + i] = np.std(d, (1, -1))
+
+# %%
+df = pd.DataFrame.from_dict(res, orient='index').transpose()
+df.to_csv(os.path.join(PATH, 'output/usaf.csv'),
+          index=False,
+          float_format='%.3f')
+
+# with open('file.txt', 'w') as file:
+#     for elm in res:
+#             file.write('')
+#     for i in range(10):
+#         for elm in res:
+#             file.write('')
+
+# %%

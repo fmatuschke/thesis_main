@@ -12,3 +12,4 @@ clang-format
 imageio
 sklearn
 ipykernel
+scikit-image
