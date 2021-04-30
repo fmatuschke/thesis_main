@@ -22,17 +22,17 @@ FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
 # arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("-o",
-                    "--output",
+parser.add_argument('-o',
+                    '--output',
                     type=str,
                     required=True,
-                    help="Output path of solver.")
+                    help='Output path of solver.')
 
-parser.add_argument("-p",
-                    "--num_proc",
+parser.add_argument('-p',
+                    '--num_proc',
                     type=int,
                     required=True,
-                    help="Number of threads.")
+                    help='Number of threads.')
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
@@ -45,10 +45,10 @@ def run(parameters):
 
     radius, mean_length_f, min_radius_f, (psi, omega), n = parameters
 
-    file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
-                               f"{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_" \
-                               f"fr_{min_radius_f:.2f}_n_{n}_"
-    # logger.info(f"file_pref: {file_pref}")
+    file_pref = output_name + f'_psi_{psi:.2f}_omega_{omega:.2f}_r_' \
+                               f'{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_' \
+                               f'fr_{min_radius_f:.2f}_n_{n}_'
+    # logger.info(f'file_pref: {file_pref}')
 
     # setup solver
     solver = fastpli.model.solver.Solver()
@@ -56,7 +56,7 @@ def run(parameters):
     solver.obj_min_radius = radius * min_radius_f
     solver.omp_num_threads = N_OMP_THREADS
 
-    # logger.info(f"seed")
+    # logger.info(f'seed')
     seeds = fastpli.model.sandbox.seeds.triangular_grid(SIZE * 2,
                                                         SIZE * 2,
                                                         2 * radius,
@@ -68,7 +68,7 @@ def run(parameters):
     rnd_radii_0 = radius * np.random.lognormal(0, 0.1, seeds_0.shape[0])
     rnd_radii_1 = radius * np.random.lognormal(0, 0.1, seeds_1.shape[0])
 
-    # logger.info(f"creating fiber_bundles")
+    # logger.info(f'creating fiber_bundles')
     fiber_bundles = [
         fastpli.model.sandbox.build.cuboid(p=-0.5 *
                                            np.array([SIZE, SIZE, SIZE]),
@@ -88,7 +88,7 @@ def run(parameters):
 
     solver.fiber_bundles = fiber_bundles
     fiber_bundles = solver.apply_boundary_conditions(100)
-    # logger.info(f"init: {solver.num_obj}/{solver.num_col_obj}")
+    # logger.info(f'init: {solver.num_obj}/{solver.num_col_obj}')
 
     # add rnd displacement
     for fb in fiber_bundles:
@@ -98,18 +98,18 @@ def run(parameters):
 
     solver.fiber_bundles = fiber_bundles
     fiber_bundles = solver.apply_boundary_conditions(100)
-    # logger.info(f"rnd displacement: {solver.num_obj}/{solver.num_col_obj}")
+    # logger.info(f'rnd displacement: {solver.num_obj}/{solver.num_col_obj}')
 
     # if comm.Get_size() == 1:
     #     solver.draw_scene()
 
     # Save Data
-    # logger.debug(f"save init")
+    # logger.debug(f'save init')
     with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['omega'] = omega
-        # print("OTHER META DATA?")
+        # print('OTHER META DATA?')
         # h5f['/'].attrs['overlap'] = overlap
         # h5f['/'].attrs['num_col_obj'] = solver.num_col_obj
         # h5f['/'].attrs['num_obj'] = solver.num_obj
@@ -119,7 +119,7 @@ def run(parameters):
         h5f['/'].attrs['rnd_seed'] = rnd_seed
 
     # Run Solver
-    # logger.info(f"run solver")
+    # logger.info(f'run solver')
     start_time = time.time()
 
     times = []
@@ -133,7 +133,7 @@ def run(parameters):
 
         if i % 50 == 0:
             # logger.info(
-            #     f"step: {i}, {solver.num_obj}/{solver.num_col_obj}, {solver.overlap}"
+            #     f'step: {i}, {solver.num_obj}/{solver.num_col_obj}, {solver.overlap}'
             # )
 
             times.append(time.time() - start_time)
@@ -179,10 +179,10 @@ def run(parameters):
     num_objs.append(solver.num_obj)
     num_col_objs.append(solver.num_col_obj)
 
-    # logger.info(f"time: {end_time - start_time}")
+    # logger.info(f'time: {end_time - start_time}')
     # logger.info(
-    # f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}, {solver.overlap}")
-    # logger.info(f"saveing solved")
+    # f'solved: {i}, {solver.num_obj}/{solver.num_col_obj}, {solver.overlap}')
+    # logger.info(f'saveing solved')
     with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
@@ -206,22 +206,22 @@ def run(parameters):
     if os.path.isfile(f'{file_pref}.tmp.h5'):
         os.remove(f'{file_pref}.tmp.h5')
 
-    # logger.info(f"done")
+    # logger.info(f'done')
 
 
 def check_file(p):
     radius, mean_length_f, min_radius_f, (psi, omega), n = p
-    file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
-                            f"{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_" \
-                            f"fr_{min_radius_f:.2f}_n_{n}_"
+    file_pref = output_name + f'_psi_{psi:.2f}_omega_{omega:.2f}_r_' \
+                            f'{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_' \
+                            f'fr_{min_radius_f:.2f}_n_{n}_'
     return not os.path.isfile(file_pref + '.solved.h5')
 
 
-if __name__ == "__main__":
-    # logger.info("args: " + " ".join(sys.argv[1:]))
+if __name__ == '__main__':
+    # logger.info('args: ' + ' '.join(sys.argv[1:]))
     # logger.info(
-    # f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
-    # logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
+    # f'git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}')
+    # logger.info('script:\n' + open(os.path.abspath(__file__), 'r').read())
 
     # Fiber Model
     N_OMP_THREADS = 1
@@ -245,5 +245,5 @@ if __name__ == "__main__":
                                total=len(parameters),
                                position=0,
                                ncols=80,
-                               desc=f"radius: {radii}"):
+                               desc=f'radius: {radii}'):
                 pass
