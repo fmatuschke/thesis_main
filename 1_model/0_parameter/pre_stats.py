@@ -14,9 +14,6 @@ import h5py
 import numpy as np
 import tqdm
 
-# reproducibility
-np.random.seed(42)
-
 # path
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
@@ -43,6 +40,9 @@ os.makedirs(args.output, exist_ok=True)
 
 
 def run(parameters):
+    rnd_seed = int.from_bytes(os.urandom(4), byteorder='little')
+    np.random.seed(rnd_seed)
+
     radius, mean_length_f, min_radius_f, (psi, omega), n = parameters
 
     file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
@@ -116,6 +116,7 @@ def run(parameters):
         h5f['/'].attrs['num_steps'] = 0
         h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
         h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
+        h5f['/'].attrs['rnd_seed'] = rnd_seed
 
     # Run Solver
     # logger.info(f"run solver")
@@ -162,6 +163,7 @@ def run(parameters):
                     h5f['/'].attrs['overlaps'] = np.array(overlaps)
                     h5f['/'].attrs['num_objs'] = np.array(num_objs)
                     h5f['/'].attrs['num_col_objs'] = np.array(num_col_objs)
+                    h5f['/'].attrs['rnd_seed'] = rnd_seed
 
             if i != N_MAX_STEPS:
                 solver.fiber_bundles = solver.fiber_bundles.cut([
@@ -199,6 +201,7 @@ def run(parameters):
         h5f['/'].attrs['overlaps'] = overlaps
         h5f['/'].attrs['num_objs'] = num_objs
         h5f['/'].attrs['num_col_objs'] = num_col_objs
+        h5f['/'].attrs['rnd_seed'] = rnd_seed
 
     if os.path.isfile(f'{file_pref}.tmp.h5'):
         os.remove(f'{file_pref}.tmp.h5')
