@@ -14,6 +14,9 @@ import h5py
 import numpy as np
 import tqdm
 
+# reproducability -> see run()
+# np.random.seed(42)
+
 # path
 FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)

@@ -29,7 +29,9 @@ comm = MPI.COMM_WORLD
 import multiprocessing as mp
 
 # reproducability
-np.random.seed(42)
+# np.random.seed(42)
+rnd_seed = int.from_bytes(os.urandom(4), byteorder='little')
+np.random.seed(rnd_seed)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-o",
@@ -170,6 +172,7 @@ if __name__ == "__main__":
             with open(os.path.abspath(__file__), 'r') as script:
                 h5f.attrs['script'] = script.read()
                 h5f.attrs['input_file'] = file
+                h5f.attrs['rnd_seed'] = rnd_seed
 
             model_list = [(-0.008 / 2, 'p'), (0.008, 'r')]
             for m, (dn, model) in enumerate(model_list):

@@ -28,8 +28,8 @@ from mpi4py import MPI
 
 comm = MPI.COMM_WORLD
 
-# reproducability
-np.random.seed(42)
+# reproducability -> see run()
+# np.random.seed(42)
 
 # path
 FILE_NAME = os.path.abspath(__file__)
@@ -95,7 +95,8 @@ logger.addHandler(fh)
 
 # VOXEL_SIZES = [0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
-VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+# VOXEL_SIZES = [0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
+VOXEL_SIZES = [0.01, 0.025, 0.05, 0.1, 0.26, 0.65, 1.3]
 # VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 D_ROT = 10

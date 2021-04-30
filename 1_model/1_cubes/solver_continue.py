@@ -24,7 +24,9 @@ from mpi4py import MPI
 comm = MPI.COMM_WORLD
 
 # reproducability
-np.random.seed(42)
+# np.random.seed(42)
+rnd_seed = int.from_bytes(os.urandom(4), byteorder='little')
+np.random.seed(rnd_seed)
 
 # path
 FILE_NAME = os.path.abspath(__file__)
@@ -128,6 +130,7 @@ for file in args.input[args.start + comm.Get_rank()::comm.Get_size()]:
                             h5f['/'].attrs[
                                 'obj_min_radius'] = solver.obj_min_radius
                             h5f['/'].attrs['time'] = time.time() - start_time
+                            h5f['/'].attrs['rnd_seed'] = rnd_seed
 
                 if i != args.max_steps:
                     solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
@@ -150,6 +153,7 @@ for file in args.input[args.start + comm.Get_rank()::comm.Get_size()]:
             h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
             h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
             h5f['/'].attrs['time'] = time.time() - start_time + dt
+            h5f['/'].attrs['rnd_seed'] = rnd_seed
 
         # if os.path.isfile(f'{file_pref}.tmp.h5'):
         #     os.remove(f'{file_pref}.tmp.h5')

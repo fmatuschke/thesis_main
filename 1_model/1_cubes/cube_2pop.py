@@ -22,7 +22,9 @@ from mpi4py import MPI
 comm = MPI.COMM_WORLD
 
 # reproducability
-np.random.seed(42)
+# np.random.seed(42)
+rnd_seed = int.from_bytes(os.urandom(4), byteorder='little')
+np.random.seed(rnd_seed)
 
 # path
 FILE_NAME = os.path.abspath(__file__)
@@ -173,6 +175,7 @@ with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
     h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
     h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
     h5f['/'].attrs['time'] = 0
+    h5f['/'].attrs['rnd_seed'] = rnd_seed
 
 # Run Solver
 logger.info(f"run solver")
@@ -206,6 +209,7 @@ for i in tqdm(range(1, args.max_steps + 1), leave=False):
                 h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
                 h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
                 h5f['/'].attrs['time'] = time.time() - start_time
+                h5f['/'].attrs['rnd_seed'] = rnd_seed
 
         if i != args.max_steps:
             solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
@@ -229,6 +233,7 @@ with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
     h5f['/'].attrs['obj_mean_length'] = solver.obj_mean_length
     h5f['/'].attrs['obj_min_radius'] = solver.obj_min_radius
     h5f['/'].attrs['time'] = time.time() - start_time
+    h5f['/'].attrs['rnd_seed'] = rnd_seed
 
 if os.path.isfile(f'{file_pref}.tmp.h5'):
     os.remove(f'{file_pref}.tmp.h5')

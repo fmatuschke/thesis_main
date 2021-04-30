@@ -9,7 +9,9 @@ import fastpli.simulation
 import tqdm
 
 # reproducability
-np.random.seed(42)
+# np.random.seed(42)
+rnd_seed = int.from_bytes(os.urandom(4), byteorder='little')
+np.random.seed(rnd_seed)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i",
@@ -34,7 +36,8 @@ def run(file):
     simpli.omp_num_threads = 1
     simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
 
-    with h5py.File(file, "r") as h5f:  #r+
+    with h5py.File(file, "r") as h5f:  #r+ # FIXME WTF???????
+        h5f['/'].attrs['rnd_seed'] = rnd_seed
 
         for species, mu in [('Roden', 8), ('Vervet', 30), ('Human', 65)]:
             for m, (dn, model) in enumerate([(-0.008 / 2, 'p'), (0.008, 'r')]):

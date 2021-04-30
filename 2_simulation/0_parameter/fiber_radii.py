@@ -28,8 +28,8 @@ from mpi4py import MPI
 
 comm = MPI.COMM_WORLD
 
-# reproducability
-np.random.seed(42)
+# reproducability -> see run()
+# np.random.seed(42)
 
 # path
 FILE_NAME = os.path.abspath(__file__)
