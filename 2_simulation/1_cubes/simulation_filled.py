@@ -69,7 +69,9 @@ parser.add_argument("--start", type=int, required=True, help="mpi start.")
 parser.add_argument('--Vervet', default=False, action='store_true')
 
 args = parser.parse_args()
-os.makedirs(args.output, exist_ok=True)
+os.makedirs(args.output, exist_ok=False)
+subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
+subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)

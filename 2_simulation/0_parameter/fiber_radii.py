@@ -72,7 +72,9 @@ parser.add_argument("-t",
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
-os.makedirs(args.output, exist_ok=True)
+os.makedirs(args.output, exist_ok=False)
+subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
+subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
 # logger
 logger = logging.getLogger("rank[%i]" % comm.rank)

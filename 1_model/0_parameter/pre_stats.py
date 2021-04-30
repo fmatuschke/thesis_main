@@ -4,6 +4,7 @@ import argparse
 import itertools
 import multiprocessing as mp
 import os
+import subprocess
 import time
 
 import fastpli.io
@@ -39,7 +40,9 @@ parser.add_argument('-p',
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
-os.makedirs(args.output, exist_ok=True)
+os.makedirs(args.output, exist_ok=False)
+subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
+subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
 
 def run(parameters):
