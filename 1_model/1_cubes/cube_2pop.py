@@ -1,25 +1,21 @@
-import fastpli.model.solver
-import fastpli.model.sandbox
-import fastpli.tools
-import fastpli.io
-
-import numpy as np
-import subprocess
 import argparse
-import datetime
 import itertools
-import logging
-import time
-import h5py
-import sys
+# import logging
 import os
+import subprocess
+import time
 
+import fastpli.io
+import fastpli.model.sandbox
+import fastpli.model.solver
+import fastpli.tools
+import h5py
+import numpy as np
 from tqdm import tqdm
-import helper.mpi
 
-from mpi4py import MPI
-
-comm = MPI.COMM_WORLD
+# import helper.mpi
+# from mpi4py import MPI
+# comm = MPI.COMM_WORLD
 
 # reproducability
 # np.random.seed(42)
@@ -54,10 +50,7 @@ parser.add_argument("-r",
 
 parser.add_argument("-v", "--volume", default=1, type=int, help="volume size")
 
-parser.add_argument("--start",
-                    type=int,
-                    required=True,
-                    help="start value of mpi process")
+parser.add_argument("--index", type=int, required=True, help="index in list")
 
 parser.add_argument("-p",
                     "--num_proc",
@@ -71,22 +64,22 @@ os.makedirs(args.output, exist_ok=True)
 subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
 subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
-# logger
-logger = logging.getLogger("rank[%i]" % comm.rank)
-logger.setLevel(logging.DEBUG)
-log_file = output_name + f'_{args.fiber_radius}_{args.volume}_{args.max_steps}_{args.start}_{comm.Get_size()}.log'
-mh = helper.mpi.FileHandler(
-    log_file,
-    mode=MPI.MODE_WRONLY | MPI.MODE_CREATE  #| MPI.MODE_APPEND
-)
-formatter = logging.Formatter(
-    '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
-mh.setFormatter(formatter)
-logger.addHandler(mh)
-logger.info("args: " + " ".join(sys.argv[1:]))
-logger.info(
-    f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
-logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
+# # logger
+# logger = logging.getLogger("rank[%i]" % comm.rank)
+# # logger.setLevel(logging.DEBUG)
+# log_file = output_name + f'_{args.fiber_radius}_{args.volume}_{args.max_steps}_{args.start}_{comm.Get_size()}.log'
+# mh = helper.mpi.FileHandler(
+#     log_file,
+#     mode=MPI.MODE_WRONLY | MPI.MODE_CREATE  #| MPI.MODE_APPEND
+# )
+# formatter = logging.Formatter(
+#     '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
+# mh.setFormatter(formatter)
+# # logger.addHandler(mh)
+# # logger.info("args: " + " ".join(sys.argv[1:]))
+# # logger.info(
+#     f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
+# # logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
 # Fiber Model
 SIZE = args.volume
@@ -100,13 +93,13 @@ PARAMETER = list(itertools.product(PSI, OMEGA))
 PARAMETER.append((0.0, 0.0))
 PARAMETER.append((1.0, 0.0))
 
-if args.start + comm.Get_rank() >= len(PARAMETER):
-    logger.info("args.start + comm.Get_rank() > len(PARAMETER)")
-    sys.exit(0)
+# if args.start + comm.Get_rank() >= len(PARAMETER):
+#     # logger.info("args.start + comm.Get_rank() > len(PARAMETER)")
+#     sys.exit(0)
 
 # solve
-psi, omega = PARAMETER[args.start + comm.Get_rank()]
-logger.info(f"psi:{psi}, omega:{omega}")
+psi, omega = PARAMETER[args.index]
+# logger.info(f"psi:{psi}, omega:{omega}")
 
 # setup solver
 solver = fastpli.model.solver.Solver()
@@ -116,7 +109,7 @@ solver.omp_num_threads = args.num_proc
 
 file_pref = output_name + f"_psi_{psi:.2f}_omega_{omega:.2f}_r_" \
                             f"{RADIUS_LOGMEAN:.2f}_v0_{SIZE:.0f}_"
-logger.info(f"file_pref: {file_pref}")
+# logger.info(f"file_pref: {file_pref}")
 
 # pick random seeds for fiber population distribution
 seeds_0 = np.random.uniform(-SIZE, SIZE, (int(psi * (2 * SIZE)**2 /
@@ -146,7 +139,7 @@ fiber_bundles = [
 
 solver.fiber_bundles = fiber_bundles
 fiber_bundles = solver.apply_boundary_conditions(100)
-logger.info(f"init: {solver.num_obj}/{solver.num_col_obj}")
+# logger.info(f"init: {solver.num_obj}/{solver.num_col_obj}")
 
 # add rnd displacement
 for fb in fiber_bundles:
@@ -156,13 +149,13 @@ for fb in fiber_bundles:
 
 solver.fiber_bundles = fiber_bundles
 fiber_bundles = solver.apply_boundary_conditions(100)
-logger.info(f"rnd displacement: {solver.num_obj}/{solver.num_col_obj}")
+# logger.info(f"rnd displacement: {solver.num_obj}/{solver.num_col_obj}")
 
 # if comm.Get_size() == 1:
 #     solver.draw_scene()
 
 # Save Data
-logger.debug(f"save init")
+# logger.debug(f"save init")
 with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
     solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
     h5f['/'].attrs['psi'] = psi
@@ -180,7 +173,7 @@ with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
     h5f['/'].attrs['rnd_seed'] = rnd_seed
 
 # Run Solver
-logger.info(f"run solver")
+# logger.info(f"run solver")
 start_time = time.time()
 solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
     0.5 * (SIZE + 10 * RADIUS_LOGMEAN))
@@ -190,9 +183,9 @@ for i in tqdm(range(1, args.max_steps + 1), leave=False):
 
     overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
     if i % 50 == 0:
-        logger.info(
-            f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
-        )
+        # logger.info(
+        #     f"step: {i}, {solver.num_obj}/{solver.num_col_obj} {round(overlap * 100)}%"
+        # )
 
         if i % 250 == 0:
             with h5py.File(f'{file_pref}.tmp.h5', 'w') as h5f:
@@ -219,8 +212,8 @@ for i in tqdm(range(1, args.max_steps + 1), leave=False):
 
 overlap = solver.overlap / solver.num_col_obj if solver.num_col_obj else 0
 
-logger.info(f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}")
-logger.debug(f"save solved")
+# logger.info(f"solved: {i}, {solver.num_obj}/{solver.num_col_obj}")
+# logger.debug(f"save solved")
 with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
     solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
     h5f['/'].attrs['psi'] = psi

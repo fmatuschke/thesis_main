@@ -15,12 +15,12 @@ def run(p):
     output = p[2]
     n_max = p[3]
     n_thread = p[4]
-    start = p[5]
+    index = p[5]
     subprocess.call([
         os.path.join(THESIS, f"env-{HOST}/bin/python3"), "cube_2pop.py", "-o",
         os.path.join(output, f"cube_2pop_{volume}_rc1"), "-r", f"{radius}",
-        "-v", f"{volume}", "-n", f"{n_max}", "-p", f"{n_thread}", "--start",
-        f"{start}"
+        "-v", f"{volume}", "-n", f"{n_max}", "-p", f"{n_thread}", "--index",
+        f"{index}"
     ])
 
 
