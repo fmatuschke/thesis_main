@@ -2,15 +2,20 @@
 set -e
 
 mkdir -p output/tmp
-mkdir -p output/tmp/output/tmp
 mkdir -p output/tikz
 
-# lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp pre_stats_box_plot.tex
-# lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp pre_stats_box_plot.tex
-# mv output/tmp/pre_stats_box_plot.pdf output/tikz/pre_stats_box_plot.pdf
-# xdg-open output/tikz/pre_stats_box_plot.pdf &>/dev/null 2>&1
+cd output/tmp
 
-lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp pre_stats_box_plot_volume.tex
-lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp pre_stats_box_plot_volume.tex
-mv output/tmp/pre_stats_box_plot_volume.pdf output/tikz/parameter_statistic_box_plot_volume.pdf
-xdg-open output/tikz/pre_stats_box_plot_volume.pdf &>/dev/null 2>&1
+cp ../../pre_stats_box_plot.tex .
+sed -i 's/__PATH__/'"$1"'/g' pre_stats_box_plot.tex
+# lualatex -interaction=nonstopmode -halt-on-error pre_stats_box_plot.tex
+# lualatex -interaction=nonstopmode -halt-on-error pre_stats_box_plot.tex
+# mv pre_stats_box_plot.pdf ../tikz/pre_stats_box_plot.pdf
+# xdg-open ../tikz/pre_stats_box_plot.pdf &>/dev/null 2>&1
+
+cp ../../pre_stats_box_plot_volume.tex .
+sed -i 's/__PATH__/'"$1"'/g' pre_stats_box_plot_volume.tex
+lualatex -interaction=nonstopmode -halt-on-error pre_stats_box_plot_volume.tex
+lualatex -interaction=nonstopmode -halt-on-error pre_stats_box_plot_volume.tex
+mv pre_stats_box_plot_volume.pdf ../tikz/parameter_statistic_box_plot_volume.pdf
+xdg-open ../tikz/pre_stats_box_plot_volume.pdf &>/dev/null 2>&1

@@ -19,7 +19,10 @@
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\datapath{output/parameter_statistic/time_evolve}
+\def\datapath{__PATH__}
+\directlua0{
+  pdf.setinfo ("/Path: (__PATH__)")
+}
 % 
 % 
 \begin{document}
