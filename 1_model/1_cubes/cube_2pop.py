@@ -67,7 +67,7 @@ parser.add_argument("-p",
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
-os.makedirs(args.output, exist_ok=False)
+os.makedirs(args.output, exist_ok=True)
 subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
 subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
