@@ -36,12 +36,12 @@ os.makedirs(os.path.join(args.input, "esag"), exist_ok=True)
 def run(df):
 
     file = df["fiber"]
-    print(file)
+    # print(file)
 
     # calculate acg from file
     vecs = models.vec_from_file(file, 0, 0, [65, 65, 60])
     vec = vecs[0]
-    if vec.size > 3 * 10:
+    if vec.shape[0] >= 3:
         vec = np.divide(vec, np.linalg.norm(vec, axis=1)[:, None])
         cov_mat = acg.fit(vec)
         w0, v0 = np.linalg.eig(cov_mat)
@@ -50,8 +50,7 @@ def run(df):
         v0 = np.zeros((3, 3))
 
     vec = vecs[1]
-
-    if vec.size > 3:
+    if vec.shape[0] >= 3:
         vec = np.divide(vec, np.linalg.norm(vec, axis=1)[:, None])
         cov_mat = acg.fit(vec)
         w1, v1 = np.linalg.eig(cov_mat)
@@ -70,7 +69,7 @@ def run(df):
     vec = models.vec_from_file(file, 0, 0, [65, 65, 60])
 
     vec = vecs[0]
-    if vec.size > 3 * 10:
+    if vec.shape[0] >= 3:
         vec = np.divide(vec, np.linalg.norm(vec, axis=1)[:, None])
         cov_mat = acg.fit(vec)
         w0_init, v0_init = np.linalg.eig(cov_mat)
@@ -80,7 +79,7 @@ def run(df):
 
     vec = vecs[1]
 
-    if vec.size > 0:
+    if vec.shape[0] >= 3:
         vec = np.divide(vec, np.linalg.norm(vec, axis=1)[:, None])
         cov_mat = acg.fit(vec)
         w1_init, v1_init = np.linalg.eig(cov_mat)
@@ -106,14 +105,14 @@ if __name__ == "__main__":
         df = df[df.state != "init"]
         df = [df.iloc[i] for i in range(df.shape[0])]  # -> row iterator
 
-        df = [df[22]]  # debug
-        [run(d) for d in tqdm.tqdm(df)]
+        # df = [df[22]]  # debug
+        # [run(d) for d in tqdm.tqdm(df)]
 
-        # with mp.Pool(processes=args.num_proc) as pool:
-        #     df = [
-        #         _ for _ in tqdm.tqdm(
-        #             pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
-        #     ]
+        with mp.Pool(processes=args.num_proc) as pool:
+            df = [
+                _ for _ in tqdm.tqdm(
+                    pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
+            ]
 
         df = pd.concat(df, ignore_index=True)
         df.to_pickle(os.path.join(args.input, "esag", "cube_2pop.pkl"))
