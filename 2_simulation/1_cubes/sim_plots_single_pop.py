@@ -77,7 +77,7 @@ for (_, row), ax in zip(df.sort_values("f0_inc").iterrows(), axs):
     #
     #
     phi, theta = models.ori_from_file(
-        get_file_from_series(row)[0], row.f0_inc, row.f1_rot, 60)
+        get_file_from_series(row)[0], row.f0_inc, row.f1_rot, [65,65,60])
     phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
     ax[1].hist2d(
         phi,

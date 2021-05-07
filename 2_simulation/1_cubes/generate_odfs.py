@@ -57,7 +57,7 @@ def run(file):
             f0_inc = h5f_sub.attrs["parameter/f0_inc"]
             f1_rot = h5f_sub.attrs["parameter/f1_rot"]
             m_phi, m_theta = models.ori_from_file(
-                h5f_sub.attrs['parameter/fiber_path'], f0_inc, f1_rot, 60)
+                h5f_sub.attrs['parameter/fiber_path'], f0_inc, f1_rot, [65,65,60])
 
             path, name = os.path.split(file)
             odf.table(

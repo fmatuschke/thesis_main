@@ -36,9 +36,10 @@ os.makedirs(os.path.join(args.input, "esag"), exist_ok=True)
 def run(df):
 
     file = df["fiber"]
-    vecs = models.vec_from_file(file, 0, 0, 60)
-    # print(file)
+    print(file)
 
+    # calculate acg from file
+    vecs = models.vec_from_file(file, 0, 0, [65, 65, 60])
     vec = vecs[0]
     if vec.size > 3 * 10:
         vec = np.divide(vec, np.linalg.norm(vec, axis=1)[:, None])
@@ -63,10 +64,10 @@ def run(df):
     # w, v = np.linalg.eig(cov_mat)
     # print(w, v)
 
-    # INIT
+    # calculate acg from init
     file = file.replace("solved", "init")
     file = file.replace("tmp", "init")
-    vec = models.vec_from_file(file, 0, 0, 60)
+    vec = models.vec_from_file(file, 0, 0, [65, 65, 60])
 
     vec = vecs[0]
     if vec.size > 3 * 10:
@@ -88,11 +89,11 @@ def run(df):
         v1_init = np.zeros((3, 3))
 
     return pd.DataFrame([[
-        df.omega, df.psi, df.r, w0, v0, w1, v1, w0_init, v0_init, w1_init,
+        df.omega, df.psi, df.radius, w0, v0, w1, v1, w0_init, v0_init, w1_init,
         v1_init
     ]],
                         columns=[
-                            "omega", "psi", "r", "w0", "v0", "w1", "v1",
+                            "omega", "psi", "radius", "w0", "v0", "w1", "v1",
                             "w0_init", "v0_init", "w1_init", "v1_init"
                         ])
 
@@ -103,16 +104,16 @@ if __name__ == "__main__":
             os.path.join(args.input, "esag", "cube_2pop.pkl")):
         df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
         df = df[df.state != "init"]
-        df = [df.iloc[i] for i in range(df.shape[0])]
+        df = [df.iloc[i] for i in range(df.shape[0])]  # -> row iterator
 
-        # df = df[241:250]
-        # df = [df[0]]  # debug
+        df = [df[22]]  # debug
+        [run(d) for d in tqdm.tqdm(df)]
 
-        with mp.Pool(processes=args.num_proc) as pool:
-            df = [
-                _ for _ in tqdm.tqdm(
-                    pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
-            ]
+        # with mp.Pool(processes=args.num_proc) as pool:
+        #     df = [
+        #         _ for _ in tqdm.tqdm(
+        #             pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
+        #     ]
 
         df = pd.concat(df, ignore_index=True)
         df.to_pickle(os.path.join(args.input, "esag", "cube_2pop.pkl"))

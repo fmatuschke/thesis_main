@@ -235,7 +235,7 @@ for i, name in enumerate(["inclination", "t_rel", "fom"]):
 # %%
 # plot odfs
 phi, theta = models.ori_from_file(get_model(psi, omega, radius, incl, rot),
-                                  incl, rot, 60)
+                                  incl, rot, [65,65,60])
 odf_table = odf.table(phi, np.pi / 2 - theta)
 
 odf.plot(odf_table)

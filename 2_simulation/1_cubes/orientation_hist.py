@@ -34,6 +34,7 @@ print(df_model[sub].fiber.iloc[0])
 print(os.path.join(os.getcwd(), "1_model/1_cubes/",
                    df_model[sub].fiber.iloc[0]))
 
+print("WARNING: CHECK NO CUT")
 phi, theta = models.ori_from_file(
     os.path.join(os.getcwd(), "1_model/1_cubes/", df_model[sub].fiber.iloc[0]),
     f0_inc, f1_rot)
