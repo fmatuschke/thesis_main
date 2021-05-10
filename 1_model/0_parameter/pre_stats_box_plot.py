@@ -1,17 +1,10 @@
-#!/usr/bin/env python3
-
-import numpy as np
-import os
-import sys
-import glob
 import argparse
+import os
 
-import pandas as pd
-
-import helper.circular
 import fastpli.io
 import fastpli.tools
-import fastpli.analysis
+import numpy as np
+import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i",
@@ -31,8 +24,10 @@ df = df[df.state != "init"]
 df['volume'] = df.count_elements.map(
     lambda x: np.sum(x[1:])) / df.count_elements.map(np.sum)
 df['frac_num_col_obj'] = df.num_col_obj / df.num_obj
+df['frac_num_col_obj'] = df['frac_num_col_obj'].replace(np.nan, 0)
 df['frac_overlap'] = df.overlap / df.num_col_obj
-df = df.replace([np.inf, np.nan], 0)
+df['frac_overlap'] = df['frac_overlap'].replace(np.nan, 0)
+# df = df.replace([np.inf, np.nan], 0)
 
 for r in df.r.unique():
     df_ = pd.DataFrame()
