@@ -1,0 +1,117 @@
+# To add a new cell, type '# %%'
+# To add a new markdown cell, type '# %% [markdown]'
+# %%
+from IPython import get_ipython
+
+# %%
+get_ipython().run_line_magic('matplotlib', 'inline')
+from jupyterthemes import jtplot
+
+jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
+
+import numpy as np
+import itertools
+import h5py
+import os
+import sys
+import glob
+
+import matplotlib.pyplot as plt
+import scipy.stats
+import seaborn as sns
+import pandas as pd
+import tikzplotlib
+
+# from tqdm import tqdm
+from tqdm.notebook import tqdm_notebook as tqdm
+
+import helper.circular
+import fastpli.io
+import fastpli.tools
+import fastpli.objects
+import fastpli.analysis
+
+model_path_A = "output/models/0"
+model_path_B = "output/models/1_rnd_seed/"
+
+# %%
+hist_bin = lambda n: np.linspace(0, np.pi, n + 1, endpoint=True)
+# theta_bin = lambda n: np.linspace(-np.pi / 2, np.pi / 2, n + 1, endpoint=True)
+
+fig, axs = plt.subplots(11,
+                        10,
+                        subplot_kw={'projection': 'polar'},
+                        figsize=(20, 20))
+axs = np.atleast_2d(axs)
+for i in range(axs.shape[0]):
+    for j in range(axs.shape[1]):
+        axs[i, j].set_xticklabels([])
+        axs[i, j].set_yticklabels([])
+
+for i, psi in enumerate(tqdm(np.linspace(0, 1, 11))):
+    for j, omega in enumerate(np.linspace(0, 90, 10)):
+        for m, model in enumerate([model_path_A, model_path_B]):
+            for state, color in [("init", ["tab:blue", "tab:orange"]),
+                                 ("solved", ["tab:green", "tab:red"])]:
+                if model is model_path_A:
+                    file = os.path.join(
+                        model_path_A,
+                        f"cube_2pop_psi_{psi:.1f}_omega_{omega:.1f}_.{state}.pkl"
+                    )
+                else:
+                    file = os.path.join(
+                        model_path_B,
+                        f"cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_r_1.00_v0_210_.{state}.pkl"
+                    )
+                if not os.path.isfile(file):
+                    #                     print(file)
+                    continue
+                df = pd.read_pickle(file)
+                sub = (df.f0_inc == 0.0) & (df.f1_rot == 0.0) & (df.v == 60)
+                if len(df[sub]) != 1:
+                    print("FOO")
+
+                phi = df[sub].explode("phi").phi.to_numpy(float)
+                theta = df[sub].explode("theta").theta.to_numpy(float)
+
+                theta[phi > np.pi] = np.pi - theta[phi > np.pi]
+                phi = helper.circular.remap(phi, np.pi, 0)
+
+                h, x = np.histogram(phi, hist_bin(180), density=True)
+                x = x[:-1] + (x[1] - x[0]) / 2
+                x = np.append(np.concatenate((x, x + np.pi), axis=0), x[0])
+                h = np.append(np.concatenate((h, h), axis=0), h[0])
+                h = h / np.max(h)
+                h = h[(x > np.pi * 3 / 2) | (x < np.pi / 2)]
+                x = x[(x > np.pi * 3 / 2) | (x < np.pi / 2)]
+                if m == 0:
+                    axs[i, j].plot(x, h, color[m])
+                else:
+                    axs[i, j].plot(x, h, color[m], "--")
+
+                h, x = np.histogram(theta, hist_bin(180), density=True)
+                x = np.pi - (np.pi / 2 - x[:-1] +
+                             (x[1] - x[0]) / 2)  # np/2 for incl, - for plot
+                h = h / np.max(h)
+                h = h[x > np.pi / 2]
+                x = x[x > np.pi / 2]
+                if m == 0:
+                    axs[i, j].plot(x, h, color[m])
+                else:
+                    axs[i, j].plot(x, h, color[m], "--")
+
+        axs[i, j].set_title(f"psi:{psi:.0f}, o:{omega:.1f}")
+
+# %%
+df = pd.read_pickle("output/cube_2pop_120/cube_2pop.pkl")
+
+# %%
+df[df.radius == 0.5].state.value_counts()
+df_ = df[df.state == "not_solved"]
+print(df_.num_col_obj / df_.num_obj)
+
+# %%
+df_ = df[(df.radius == 1.0) & (df.state != "init")]
+df_.time_min = df_.time / 60
+df_.time_h = df_.time_min / 60
+df_.time_h.hist(bins=42)
