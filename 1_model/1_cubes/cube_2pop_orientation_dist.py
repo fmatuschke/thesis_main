@@ -1,20 +1,21 @@
 #! /usr/bin/env python3
 
-import numpy as np
-import multiprocessing as mp
 import argparse
+import glob
+import multiprocessing as mp
 import os
 import sys
-import glob
 import warnings
 
-import tqdm
+import fastpli.analysis
+import numpy as np
 import pandas as pd
+import tqdm
+import yaml
 
-import models
 # import esag
 import acg
-import fastpli.analysis
+import models
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -32,8 +33,33 @@ args = parser.parse_args()
 
 os.makedirs(os.path.join(args.input, "esag"), exist_ok=True)
 
-# THICKNESS = 60
-# LENGTH = 65
+THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+FILE_NAME = os.path.abspath(__file__)
+FILE_PATH = os.path.dirname(FILE_NAME)
+FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
+
+with open(os.path.join(THESIS, '2_simulation', 'parameter.yaml'),
+          'r') as stream:
+    PARA = yaml.safe_load(stream)
+
+    class imdict(dict):
+
+        def __hash__(self):
+            return id(self)
+
+        def _immutable(self, *args, **kws):
+            raise TypeError('object is immutable')
+
+        __setitem__ = _immutable
+        __delitem__ = _immutable
+        clear = _immutable
+        update = _immutable
+        setdefault = _immutable
+        pop = _immutable
+        popitem = _immutable
+
+    PARA = imdict(PARA)
 
 
 def run(df):
@@ -42,7 +68,7 @@ def run(df):
     # print(file)
 
     # calculate acg from file
-    vecs = models.vec_from_file(file, 0, 0, [LENGTH, LENGTH, THICKNESS])
+    vecs = models.vec_from_file(file, 0, 0, PARA['simulation']['voi'])
     vec = vecs[0]
     if vec.shape[0] >= 3:
         vec = np.divide(vec, np.linalg.norm(vec, axis=1)[:, None])
@@ -69,7 +95,7 @@ def run(df):
     # calculate acg from init
     file = file.replace("solved", "init")
     file = file.replace("tmp", "init")
-    vec = models.vec_from_file(file, 0, 0, [LENGTH, LENGTH, THICKNESS])
+    vec = models.vec_from_file(file, 0, 0, PARA['simulation']['voi'])
 
     vec = vecs[0]
     if vec.shape[0] >= 3:
@@ -100,27 +126,26 @@ def run(df):
                         ])
 
 
-if __name__ == "__main__":
-
+def main():
     if True or not os.path.isfile(
             os.path.join(args.input, "esag", "cube_2pop.pkl")):
         df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
         df = df[df.state != "init"]
         df = [df.iloc[i] for i in range(df.shape[0])]  # -> row iterator
 
-        # df = [df[22]]  # debug
-        # [run(d) for d in tqdm.tqdm(df)]
+        df = [df[22]]  # debug
+        [run(d) for d in tqdm.tqdm(df)]
 
-        with mp.Pool(processes=args.num_proc) as pool:
-            df = [
-                _ for _ in tqdm.tqdm(
-                    pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
-            ]
+        # with mp.Pool(processes=args.num_proc) as pool:
+        #     df = [
+        #         _ for _ in tqdm.tqdm(
+        #             pool.imap_unordered(run, df), total=len(df), smoothing=0.1)
+        #     ]
 
         df = pd.concat(df, ignore_index=True)
         df.to_pickle(os.path.join(args.input, "esag", "cube_2pop.pkl"))
-    else:
-        df = pd.read_pickle(os.path.join(args.input, "esag", "cube_2pop.pkl"))
+
+    # df = pd.read_pickle(os.path.join(args.input, "esag", "cube_2pop.pkl"))
 
     # for omega in df.omega.unique():
     #     for psi in df[df.omega == omega].psi.unique():
@@ -171,3 +196,7 @@ if __name__ == "__main__":
     #                                 f"cube_stats_p_{psi}_o_{omega}_.csv"),
     #                    index=False,
     #                    float_format='%.4f')
+
+
+if __name__ == "__main__":
+    main()

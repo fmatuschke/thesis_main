@@ -1,18 +1,19 @@
 #! /usr/bin/env python3
 
-import numpy as np
-import multiprocessing as mp
 import argparse
+import glob
+import multiprocessing as mp
 import os
 import sys
-import glob
 import warnings
 
-import tqdm
+import fastpli.analysis
+import numpy as np
 import pandas as pd
+import tqdm
+import yaml
 
 import models
-import fastpli.analysis
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -29,6 +30,34 @@ parser.add_argument("-p",
 args = parser.parse_args()
 
 os.makedirs(os.path.join(args.input, "hist"), exist_ok=True)
+
+THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+FILE_NAME = os.path.abspath(__file__)
+FILE_PATH = os.path.dirname(FILE_NAME)
+FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
+
+with open(os.path.join(THESIS, '2_simulation', 'parameter.yaml'),
+          'r') as stream:
+    PARA = yaml.safe_load(stream)
+
+    class imdict(dict):
+
+        def __hash__(self):
+            return id(self)
+
+        def _immutable(self, *args, **kws):
+            raise TypeError('object is immutable')
+
+        __setitem__ = _immutable
+        __delitem__ = _immutable
+        clear = _immutable
+        update = _immutable
+        setdefault = _immutable
+        pop = _immutable
+        popitem = _immutable
+
+    PARA = imdict(PARA)
 
 hist_polar_bin = lambda n: np.linspace(
     -np.pi / 2, np.pi / 2, n + 1, endpoint=True)
@@ -66,7 +95,7 @@ def polar_hist(phi, theta):
 def run(df):
 
     file = df["fiber"]
-    phi, theta = models.ori_from_file(file, 0, 0, [65,65,60])
+    phi, theta = models.ori_from_file(file, 0, 0, PARA['simulation']['voi'])
     phi_x, phi_h, incl_x, incl_h = polar_hist(phi, theta)
 
     # 2d hist
@@ -79,7 +108,7 @@ def run(df):
     # INIT
     file = file.replace("solved", "init")
     file = file.replace("tmp", "init")
-    phi, theta = models.ori_from_file(file, 0, 0, [65,65,60])
+    phi, theta = models.ori_from_file(file, 0, 0, PARA['simulation']['voi'])
     phi_init_x, phi_init_h, incl_init_x, incl_init_h = polar_hist(phi, theta)
 
     return pd.DataFrame([[
