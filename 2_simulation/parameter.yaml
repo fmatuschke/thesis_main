@@ -1,21 +1,21 @@
 simulation:
   voxel_size: 0.1
-  # volume: [65, 65, 60]
+  volume: [65, 65, 60]
   voi: [[-32.5, -32.5, -30], [32.5, 32.5, 30]]
   num_filter_rot: 9
   interpolation: "Slerp"
   wavelength: 525 # nm
   optical_sigma: 0.75 # in pixel_size
-  noise_model: "lambda x: np.round(np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)"
+  # noise_model: "lambda x: np.round(np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)"
 
   setup:
-    - pm:
+    pm:
       pixel_size: 1.3
       tilt_angle: 3.9
       light_intensity: 8000
       sigma: 0.75
       gain: 0.1175
-    - lap:
+    lap:
       pixel_size: 22.5 # dividable to 65
       tilt_angle: 5.5
       light_intensity: 35000
@@ -25,18 +25,30 @@ simulation:
 models:
   layers:
     # mu modeled after simpli
-    -layer_0:
+    b:
       radius: 0.75
       dn: 0
       mu: 0
       model: "b"
-    -layer_r:
+    r:
       radius: 1
       dn: 0.008
       mu: 0
       model: "r"
-    -layer_b:
+    p:
       radius: 1
       dn: 0
       mu: -0.004
-      model: "b"
+      model: "p"
+
+cube:
+  n_inc: 4
+  d_rot: 15
+
+species:
+  roden:
+    mu: 8
+  vervet:
+    mu: 30
+  human:
+    mu: 65
