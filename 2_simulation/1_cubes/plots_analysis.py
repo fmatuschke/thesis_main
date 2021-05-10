@@ -236,7 +236,7 @@ def run(p):
 
     # plot odfs
     phi, theta = models.ori_from_file(get_model(psi, omega, radius, incl, rot),
-                                      incl, rot, [65,65,60])
+                                      incl, rot, [LENGTH, LENGTH, THICKNESS])
     odf_table = odf.table(phi, np.pi / 2 - theta)
 
     process = mp.current_process()

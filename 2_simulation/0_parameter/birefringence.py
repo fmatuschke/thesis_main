@@ -18,9 +18,10 @@ import fastpli.io
 
 import tqdm
 
-VOXEL_SIZE = 0.125
-PIXEL_SIZE = 1.25
-THICKNESS = 60
+# VOXEL_SIZE = 0.125
+# PIXEL_SIZE = 1.25
+# THICKNESS = 60
+# LENGTH = 65
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -83,8 +84,8 @@ def run(parameter):
     simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
     simpli.voxel_size = VOXEL_SIZE
-    simpli.set_voi(-0.5 * np.array([60, 60, THICKNESS]),
-                   0.5 * np.array([60, 60, THICKNESS]))
+    simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
+                   0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
 
     # print(simpli.dim_origin)
     # simpli.dim_origin[:2] = rnd_dim_origin

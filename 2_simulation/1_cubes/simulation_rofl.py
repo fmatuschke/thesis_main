@@ -26,8 +26,8 @@ parser.add_argument("-p",
                     help="Number of processes.")
 args = parser.parse_args()
 
-PIXEL_PM = 1.25
-PIXEL_LAP = 20
+# PIXEL_PM = 1.25
+# PIXEL_LAP = 20
 
 
 def run(file):

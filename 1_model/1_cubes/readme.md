@@ -8,7 +8,8 @@ python3 cube_2pop_ime.py
 
 python3 cube_2pop_post_1.py -i output/cube_2pop_... -p 48
 python3 cube_2pop_post_1.py -i output/cube_2pop_... -p 48
-python3 cube_2pop_orientation_dist.py -i output/cube_2pop_... -p 48
+# python3 cube_2pop_orientation_dist.py -i output/cube_2pop_... -p 48
+
 
 ```
 

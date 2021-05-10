@@ -1,7 +1,9 @@
 #%%
 from IPython import get_ipython
+
 get_ipython().run_line_magic('matplotlib', 'inline')
 from jupyterthemes import jtplot
+
 jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
 #%%
 import h5py
@@ -44,6 +46,9 @@ print("df_sim_sch:", df_sim_sch.columns)
 #                  sim_pathh,
 #                  "analysis/cube_2pop_simulation_accs.pkl"))
 # print("df_acc:", df_acc.columns)
+
+THICKNESS = 60
+LENGTH = 65
 
 #%%
 
@@ -235,7 +240,7 @@ for i, name in enumerate(["inclination", "t_rel", "fom"]):
 # %%
 # plot odfs
 phi, theta = models.ori_from_file(get_model(psi, omega, radius, incl, rot),
-                                  incl, rot, [65,65,60])
+                                  incl, rot, [LENGTH, LENGTH, THICKNESS])
 odf_table = odf.table(phi, np.pi / 2 - theta)
 
 odf.plot(odf_table)

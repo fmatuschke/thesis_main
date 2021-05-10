@@ -29,10 +29,10 @@ os.makedirs(os.path.join(args.input, "tissue"), exist_ok=True)
 if __name__ == "__main__":
 
     # PARAMETER
-    PIXEL_PM = 1.25
-    PIXEL_LAP = 20
-    LENGTH = 60
-    THICKNESS = 60
+    # PIXEL_PM = 1.25
+    # PIXEL_LAP = 20
+    # LENGTH = 60
+    # THICKNESS = 60
 
     file_list = glob.glob(os.path.join(args.input, '*.h5'))
 

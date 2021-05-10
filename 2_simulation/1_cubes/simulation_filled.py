@@ -96,10 +96,10 @@ if __name__ == "__main__":
     FLAG_TISSUE = True
 
     # PARAMETER
-    PIXEL_PM = 1.25
-    PIXEL_LAP = 20
-    LENGTH = 60
-    THICKNESS = 60
+    # PIXEL_PM = 1.25
+    # PIXEL_LAP = 20
+    # LENGTH = 60
+    # THICKNESS = 60
 
     file_list = args.input
     # print Memory

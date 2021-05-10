@@ -1,11 +1,14 @@
 #!/bin/bash
-set -e
+set -ex
 
 mkdir -p output/tmp
-mkdir -p output/tmp/output/tmp
 mkdir -p output/tikz
 
-lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp --shell-escape cube_2pop_orientation_hist.tex
-lualatex -interaction=nonstopmode -halt-on-error -output-directory=output/tmp --shell-escape cube_2pop_orientation_hist.tex
+cd output/tmp
+
+cp ../../cube_2pop_orientation_hist.tex .
+sed -i 's?__PATH__?'"$1"'?g' cube_2pop_orientation_hist.tex
+lualatex -interaction=nonstopmode -halt-on-error cube_2pop_orientation_hist.tex
+lualatex -interaction=nonstopmode -halt-on-error cube_2pop_orientation_hist.tex
 mv output/tmp/cube_2pop_orientation_hist.pdf output/tikz/cube_2pop_orientation_hist.pdf
-xdg-open output/tikz/cube_2pop_orientation_hist.pdf &> /dev/null 2>&1
+xdg-open output/tikz/cube_2pop_orientation_hist.pdf &>/dev/null 2>&1

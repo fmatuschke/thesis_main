@@ -67,7 +67,7 @@ parser.add_argument('--Vervet', default=False, action='store_true')
 parser.add_argument('--radial', default=False, action='store_true')
 
 args = parser.parse_args()
-os.makedirs(args.output, exist_ok=False)
+os.makedirs(args.output, exist_ok=True)
 subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
 subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
@@ -92,10 +92,10 @@ logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 if __name__ == "__main__":
 
     # PARAMETER
-    PIXEL_PM = 1.25
-    PIXEL_LAP = 20
-    LENGTH = 60
-    THICKNESS = 60
+    # PIXEL_PM = 1.25
+    # PIXEL_LAP = 20
+    # LENGTH = 60
+    # THICKNESS = 60
 
     file_list = args.input
     # print Memory

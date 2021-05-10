@@ -3,6 +3,7 @@ env*/
 .worktrees/
 data/
 **/old/
+**/*_old/
 .numba_config.yaml
 thesis.zip
 mpi.*.out

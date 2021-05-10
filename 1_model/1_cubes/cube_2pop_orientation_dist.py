@@ -32,6 +32,9 @@ args = parser.parse_args()
 
 os.makedirs(os.path.join(args.input, "esag"), exist_ok=True)
 
+# THICKNESS = 60
+# LENGTH = 65
+
 
 def run(df):
 
@@ -39,7 +42,7 @@ def run(df):
     # print(file)
 
     # calculate acg from file
-    vecs = models.vec_from_file(file, 0, 0, [65, 65, 60])
+    vecs = models.vec_from_file(file, 0, 0, [LENGTH, LENGTH, THICKNESS])
     vec = vecs[0]
     if vec.shape[0] >= 3:
         vec = np.divide(vec, np.linalg.norm(vec, axis=1)[:, None])
@@ -66,7 +69,7 @@ def run(df):
     # calculate acg from init
     file = file.replace("solved", "init")
     file = file.replace("tmp", "init")
-    vec = models.vec_from_file(file, 0, 0, [65, 65, 60])
+    vec = models.vec_from_file(file, 0, 0, [LENGTH, LENGTH, THICKNESS])
 
     vec = vecs[0]
     if vec.shape[0] >= 3:

@@ -233,7 +233,7 @@ if __name__ == '__main__':
     N_OMP_THREADS = 1
     N_MAX_STEPS = 100000
     N_REPEAT = range(5)
-    SIZE = 60
+    SIZE = 60  # <- for pre stats ok, no simulation required
     FIBER_RADII = [0.5, 1.0, 2.0, 5.0, 10]
     OBJ_MEAN_LENGTH_F = [1.0, 2.0, 4.0, 8.0]
     OBJ_MIN_RADIUS_F = [1.0, 2.0, 4.0, 8.0]

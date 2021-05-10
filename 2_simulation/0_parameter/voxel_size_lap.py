@@ -100,10 +100,10 @@ logger.addHandler(fh)
 # VOXEL_SIZES = output/vs_120_0.25_6_25/results
 # VOXEL_SIZES = [0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
 # VOXEL_SIZES = [0.0025, 0.005, 0.01, 0.025, 0.05, 0.125, 0.25, 0.625, 1.25]
-D_ROT = 10
-N_INC = 10
-PIXEL_SIZE = 20.00  # PM
-THICKNESS = 60
+# D_ROT = 10
+# N_INC = 10
+# PIXEL_SIZE = 20.00  # PM
+# THICKNESS = 60
 
 
 def get_file_pref(parameter):

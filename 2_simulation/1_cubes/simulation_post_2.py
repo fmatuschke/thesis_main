@@ -77,7 +77,7 @@ def calcShGT(parameter):
 
     phi, theta = models.ori_from_file(
         f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/{df_org[sub].fiber.iloc[0]}",
-        f0_inc, f1_rot, [65, 65, 60])
+        f0_inc, f1_rot, [LENGTH, LENGTH, THICKNESS])
     sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
     gt_dict[
