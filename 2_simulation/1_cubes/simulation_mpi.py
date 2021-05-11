@@ -1,7 +1,5 @@
 import argparse
-import glob
 import logging
-import multiprocessing as mp
 import os
 import subprocess
 import sys
@@ -17,7 +15,6 @@ import h5py
 import helper.file
 import helper.mpi
 import numpy as np
-import tqdm
 from mpi4py import MPI
 from mpi4py.futures import MPIPoolExecutor
 
@@ -329,9 +326,10 @@ def main():
                           vervet_only=args.vervet,
                           radial_only=args.radial))
 
+    # DEBUGGING
     # run(parameters[0])
+    # parameters = parameters[:10]
 
-    parameters = parameters[:10]
     with MPIPoolExecutor() as executor:
         executor.map(run, parameters)
 
