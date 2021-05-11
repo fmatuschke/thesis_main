@@ -1,7 +1,7 @@
 import yaml
 import os
 import collections
-from types import SimpleNamespace
+import types
 
 FILE_NAME = os.path.abspath(os.path.realpath(__file__))
 FILE_PATH = os.path.dirname(FILE_NAME)
@@ -29,7 +29,7 @@ def tupleware(obj):
         return obj
 
 
-class RecursiveNamespace(SimpleNamespace):
+class RecursiveNamespace(types.SimpleNamespace):
 
     @staticmethod
     def map_entry(entry):
