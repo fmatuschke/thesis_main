@@ -2,10 +2,8 @@ import argparse
 import logging
 import os
 import subprocess
-import sys
 import typing
 import warnings
-import yaml
 
 import fastpli.analysis
 import fastpli.io
@@ -15,10 +13,12 @@ import h5py
 import helper.file
 import helper.mpi
 import numpy as np
+import yaml
 from mpi4py import MPI
 from mpi4py.futures import MPIPoolExecutor
 
 import models
+import parameter
 
 THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
 FILE_NAME = os.path.abspath(__file__)
@@ -26,27 +26,11 @@ FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
-with open(os.path.join(THESIS, '2_simulation', 'parameter.yaml'),
-          'r') as stream:
-    CONFIG = yaml.safe_load(stream)
+CONFIG = parameter.get_tupleware()
 
-    class imdict(dict):
-
-        def __hash__(self):
-            return id(self)
-
-        def _immutable(self, *args, **kws):
-            raise TypeError('object is immutable')
-
-        __setitem__ = _immutable
-        __delitem__ = _immutable
-        clear = _immutable
-        update = _immutable
-        setdefault = _immutable
-        pop = _immutable
-        popitem = _immutable
-
-    CONFIG = imdict(CONFIG)
+# # DEBUG
+# CONFIG = parameter.get_namespace()
+# CONFIG.simulation.voxel_size = 1.3
 
 
 class Parameter(typing.NamedTuple):
@@ -62,7 +46,7 @@ class Parameter(typing.NamedTuple):
 
 def run(p):
     # logger
-    logger = logging.getLogger("rank[%i]" % MPI.COMM_WORLD.rank)
+    logger = logging.getLogger(f"rank[{MPI.COMM_WORLD.Get_rank()}]")
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler(
         os.path.join(
@@ -74,10 +58,8 @@ def run(p):
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
-    logger.info("args: " + " ".join(sys.argv[1:]))
     logger.info(
         f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()}")
-    logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
 
     # reproducability
     # np.random.seed(42)
@@ -95,7 +77,7 @@ def run(p):
 
     if os.path.isfile(file_name + '.h5'):
         logger.info(f"file exists: {file_name}.h5")
-        raise ValueError("GNAA")
+        raise ValueError("file exists")
 
     with h5py.File(p.file, 'r') as h5f:
         fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f)
@@ -124,23 +106,24 @@ def run(p):
             model_list = ['r']
         for model in model_list:
 
+            setup_name = 'pm'
+            SETUP = CONFIG.simulation.setup.pm
+
             # Setup Simpli
             simpli = fastpli.simulation.Simpli()
             warnings.filterwarnings("ignore", message="objects overlap")
             simpli.omp_num_threads = 1
-            simpli.voxel_size = CONFIG['simulation']['voxel_size']
-            simpli.pixel_size = CONFIG['simulation']['setup']['pm'][
-                'pixel_size']
+            simpli.voxel_size = CONFIG.simulation.voxel_size
+            simpli.pixel_size = SETUP.pixel_size
             simpli.filter_rotations = np.linspace(
-                0, np.pi, CONFIG['simulation']['num_filter_rot'], False)
+                0, np.pi, CONFIG.simulation.num_filter_rot, False)
             simpli.interpolate = "Slerp"
             simpli.wavelength = 525  # in nm
             simpli.optical_sigma = 0.75  # in pixel size
             simpli.verbose = 0
 
-            simpli.set_voi(CONFIG['simulation']['voi'][0],
-                           CONFIG['simulation']['voi'][1])
-            tilt_angle = CONFIG['simulation']['setup']['pm']['tilt_angle']
+            simpli.set_voi(CONFIG.simulation.voi[0], CONFIG.simulation.voi[1])
+            tilt_angle = SETUP.tilt_angle
             simpli.tilts = np.deg2rad(
                 np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
                           (tilt_angle, 180), (tilt_angle, 270)]))
@@ -148,9 +131,11 @@ def run(p):
 
             simpli.fiber_bundles = fiber_bundles.rotate(rot)
 
-            layers = CONFIG['models']['layers']
-            layers = [(ly['radius'], ly['dn'], ly['mu'], ly['model'])
-                      for ly in [layers['b'], layers['r']]]
+            layers = CONFIG.models.layers
+            layers = [
+                (layers.b.radius, layers.b.dn, layers.b.mu, layers.b.model),
+                (layers.r.radius, layers.r.dn, layers.r.mu, layers.r.model)
+            ]
 
             simpli.fiber_bundles.layers = [layers] * len(fiber_bundles)
             logger.info(
@@ -160,19 +145,18 @@ def run(p):
             )
             tissue_thickness = np.sum(
                 tissue > 0,
-                -1) / tissue.shape[-1] * CONFIG['simulation']['volume'][-1]
+                -1) / tissue.shape[-1] * CONFIG.simulation.volume[-1]
 
             # Simulate PLI Measurement
             logger.info(f"simulation_pipeline: model:{model}")
 
-            simpli.light_intensity = CONFIG['simulation']['setup']['pm'][
-                'light_intensity']  # a.u.
+            simpli.light_intensity = SETUP.light_intensity  # a.u.
 
-            gain = CONFIG['simulation']['setup']['pm']['gain']
+            gain = SETUP.gain
             simpli.noise_model = lambda x: np.round(
                 np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
 
-            dset = h5f.create_group(f'pm/{model}')
+            dset = h5f.create_group(f'{setup_name}/{model}')
             simpli.save_parameter_h5(h5f=dset)
             if 'tissue_stats' not in dset:
                 unique_elements, counts_elements = np.unique(tissue,
@@ -189,13 +173,14 @@ def run(p):
                                                         tissue_properties,
                                                         theta, phi)
 
-            species_list = [(name, values['mu'])
-                            for name, values in CONFIG['species'].items()]
+            species_list = [('vervet', CONFIG.species.vervet.mu),
+                            ('roden', CONFIG.species.roden.mu),
+                            ('human', CONFIG.species.human.mu)]
             if p.vervet_only:
-                species_list = [('vervet', CONFIG['species']['vervet']['mu'])]
+                species_list = [('vervet', CONFIG.species.vervet.mu)]
 
             for species, mu in species_list:
-                dset = h5f.create_group(f'pm/{species}/{model}')
+                dset = h5f.create_group(f'{setup_name}/{species}/{model}')
 
                 tilting_stack = [None] * 5
                 for t, (theta, phi) in enumerate(simpli.tilts):
@@ -246,7 +231,7 @@ def run(p):
                 dset.attrs['parameter/psi'] = psi
                 dset.attrs['parameter/omega'] = omega
                 dset.attrs['parameter/fiber_path'] = p.file
-                dset.attrs['parameter/volume'] = CONFIG['simulation']['volume']
+                dset.attrs['parameter/volume'] = CONFIG.simulation.volume
                 dset.attrs['parameter/f0_inc'] = p.f0_inc
                 dset.attrs['parameter/f1_rot'] = p.f1_rot
                 dset.attrs[
@@ -256,6 +241,7 @@ def run(p):
             del tissue
             del optical_axis
             del simpli
+    print(f"rank {MPI.COMM_WORLD.Get_rank()}: finished {p}")
 
 
 def main():
@@ -293,13 +279,11 @@ def main():
 
     # Memory Check
     simpli = fastpli.simulation.Simpli()
-    simpli.voxel_size = CONFIG['simulation']['voxel_size']  # in mu meter
-    simpli.pixel_size = CONFIG['simulation']['setup']['pm'][
-        'pixel_size']  # in mu meter
-    simpli.set_voi(CONFIG['simulation']['voi'][0],
-                   CONFIG['simulation']['voi'][1])
+    simpli.voxel_size = CONFIG.simulation.voxel_size  # in mu meter
+    simpli.pixel_size = CONFIG.simulation.setup.pm.pixel_size  # in mu meter
+    simpli.set_voi(CONFIG.simulation.voi[0], CONFIG.simulation.voi[1])
     simpli.tilts = np.deg2rad(
-        np.array([(CONFIG['simulation']['setup']['pm']['tilt_angle'], 0)]))
+        np.array([(CONFIG.simulation.setup.pm.tilt_angle, 0)]))
     simpli.add_crop_tilt_halo()
 
     print(f"Single Memory: {simpli.memory_usage():.0f} MB")
@@ -312,21 +296,21 @@ def main():
     file_list = args.input
     fiber_inc = [(f, i)
                  for f in file_list
-                 for i in models.inclinations(CONFIG['cube']['n_inc'])]
+                 for i in models.inclinations(CONFIG.cube.n_inc)]
     for file, f0_inc in fiber_inc:
         omega = helper.file.value(file, "omega")
 
-        for f1_rot in models.omega_rotations(omega, CONFIG['cube']['d_rot']):
+        for f1_rot in models.omega_rotations(omega, CONFIG.cube.d_rot):
             parameters.append(
                 Parameter(file=file,
                           output=args.output,
-                          voxel_size=CONFIG['simulation']['voxel_size'],
+                          voxel_size=CONFIG.simulation.voxel_size,
                           f0_inc=f0_inc,
                           f1_rot=f1_rot,
                           vervet_only=args.vervet,
                           radial_only=args.radial))
 
-    # DEBUGGING
+    # DEBUG
     # run(parameters[0])
     # parameters = parameters[:10]
 
