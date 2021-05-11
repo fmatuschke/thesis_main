@@ -13,6 +13,7 @@ import h5py
 import helper.file
 import helper.mpi
 import numpy as np
+import tqdm
 import yaml
 from mpi4py import MPI
 from mpi4py.futures import MPIPoolExecutor
@@ -241,7 +242,7 @@ def run(p):
             del tissue
             del optical_axis
             del simpli
-    print(f"rank {MPI.COMM_WORLD.Get_rank()}: finished {p}")
+    # print(f"rank {MPI.COMM_WORLD.Get_rank()}: finished {p}")
 
 
 def main():
@@ -315,7 +316,10 @@ def main():
     # parameters = parameters[:10]
 
     with MPIPoolExecutor() as executor:
-        executor.map(run, parameters)
+        [
+            _ for _ in tqdm.tqdm(executor.map(run, parameters),
+                                 total=len(parameters))
+        ]
 
 
 if __name__ == "__main__":
