@@ -6,6 +6,7 @@ import glob
 import itertools
 import multiprocessing as mp
 import os
+import warnings
 
 # import pretty_errors
 import fastpli.tools
@@ -85,14 +86,15 @@ def run(file):
             fit_data = np.empty(
                 (5, rofl_direction.shape[0], rofl_direction.shape[1], 9))
 
-            theta = ast.literal_eval(str(
-                h5f_sub.attrs['parameter/simpli'][...]))
-
-            if microscope == "PM":
-                SETUP = CONFIG.simulation.setup.pm
-            elif microscope == "LAP":
-                SETUP = CONFIG.simulation.setup.lap
-            tilt_angle = SETUP.tilt_angle
+            try:
+                tilt_angle = h5f_sub['simulation'].attrs['tilt_angle']
+            except:
+                warnings.warn("using config value")
+                if microscope == "PM":
+                    SETUP = CONFIG.simulation.setup.pm
+                elif microscope == "LAP":
+                    SETUP = CONFIG.simulation.setup.lap
+                tilt_angle = SETUP.tilt_angle
 
             optic_data = []
             phis = [0, 0, 90, 180, 270]
@@ -101,7 +103,8 @@ def run(file):
                     for j in range(fit_data.shape[2]):
                         fit_data[t, i, j, :] = _calc_intensity(
                             rofl_direction[i, j], rofl_inclination[i, j],
-                            rofl_trel[i, j], np.deg2rad(tilt_angle), np.deg2rad(phi))
+                            rofl_trel[i, j], np.deg2rad(tilt_angle),
+                            np.deg2rad(phi))
 
                 optic_data.append(h5f_sub[f'simulation/optic/{t}'][...])
 
