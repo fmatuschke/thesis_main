@@ -43,6 +43,7 @@ class Parameter(typing.NamedTuple):
     f1_rot: float
     vervet_only: bool
     radial_only: bool
+    pm_only: bool
 
 
 def run(p):
@@ -107,142 +108,144 @@ def run(p):
             model_list = ['r']
         for model in model_list:
 
-            setup_name = 'pm'
-            SETUP = CONFIG.simulation.setup.pm
+            setup_list = [('PM', CONFIG.simulation.setup.pm)]
+            if not p.pm_only:
+                setup_list.append(('LAP', CONFIG.simulation.setup.lap))
 
-            # Setup Simpli
-            simpli = fastpli.simulation.Simpli()
-            warnings.filterwarnings("ignore", message="objects overlap")
-            simpli.omp_num_threads = 1
-            simpli.voxel_size = CONFIG.simulation.voxel_size
-            simpli.pixel_size = SETUP.pixel_size
-            simpli.filter_rotations = np.linspace(
-                0, np.pi, CONFIG.simulation.num_filter_rot, False)
-            simpli.interpolate = "Slerp"
-            simpli.wavelength = 525  # in nm
-            simpli.optical_sigma = 0.75  # in pixel size
-            simpli.verbose = 0
+            for setup_name, SETUP in setup_list:
 
-            simpli.set_voi(CONFIG.simulation.voi[0], CONFIG.simulation.voi[1])
-            tilt_angle = SETUP.tilt_angle
-            simpli.tilts = np.deg2rad(
-                np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
-                          (tilt_angle, 180), (tilt_angle, 270)]))
-            simpli.add_crop_tilt_halo()
+                # Setup Simpli
+                simpli = fastpli.simulation.Simpli()
+                warnings.filterwarnings("ignore", message="objects overlap")
+                simpli.omp_num_threads = 1
+                simpli.voxel_size = CONFIG.simulation.voxel_size
+                simpli.pixel_size = SETUP.pixel_size
+                simpli.filter_rotations = np.linspace(
+                    0, np.pi, CONFIG.simulation.num_filter_rot, False)
+                simpli.interpolate = "Slerp"
+                simpli.wavelength = 525  # in nm
+                simpli.optical_sigma = 0.75  # in pixel size
+                simpli.verbose = 0
 
-            simpli.fiber_bundles = fiber_bundles.rotate(rot)
+                simpli.set_voi(CONFIG.simulation.voi[0], CONFIG.simulation.voi[1])
+                tilt_angle = SETUP.tilt_angle
+                simpli.tilts = np.deg2rad(
+                    np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
+                            (tilt_angle, 180), (tilt_angle, 270)]))
+                simpli.add_crop_tilt_halo()
 
-            layers = CONFIG.models.layers
-            layers = [
-                (layers.b.radius, layers.b.dn, layers.b.mu, layers.b.model),
-                (layers.r.radius, layers.r.dn, layers.r.mu, layers.r.model)
-            ]
+                simpli.fiber_bundles = fiber_bundles.rotate(rot)
 
-            simpli.fiber_bundles.layers = [layers] * len(fiber_bundles)
-            logger.info(
-                f"tissue_pipeline: model: {[layers] * len(fiber_bundles)}")
+                layers = CONFIG.models.layers
+                layers = [
+                    (layers.b.radius, layers.b.dn, layers.b.mu, layers.b.model),
+                    (layers.r.radius, layers.r.dn, layers.r.mu, layers.r.model)
+                ]
 
-            tissue, optical_axis, tissue_properties = simpli.run_tissue_pipeline(
-            )
-            tissue_thickness = np.sum(
-                tissue > 0,
-                -1) / tissue.shape[-1] * CONFIG.simulation.volume[-1]
+                simpli.fiber_bundles.layers = [layers] * len(fiber_bundles)
+                logger.info(
+                    f"tissue_pipeline: model: {[layers] * len(fiber_bundles)}")
 
-            # Simulate PLI Measurement
-            logger.info(f"simulation_pipeline: model:{model}")
+                tissue, optical_axis, tissue_properties = simpli.run_tissue_pipeline(
+                )
+                tissue_thickness = np.sum(
+                    tissue > 0,
+                    -1) / tissue.shape[-1] * CONFIG.simulation.volume[-1]
 
-            simpli.light_intensity = SETUP.light_intensity  # a.u.
+                # Simulate PLI Measurement
+                logger.info(f"simulation_pipeline: model:{model}")
 
-            gain = SETUP.gain
-            simpli.noise_model = lambda x: np.round(
-                np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
+                simpli.light_intensity = SETUP.light_intensity  # a.u.
 
-            dset = h5f.create_group(f'{setup_name}/{model}')
-            simpli.save_parameter_h5(h5f=dset)
-            if 'tissue_stats' not in dset:
-                unique_elements, counts_elements = np.unique(tissue,
-                                                             return_counts=True)
-                dset.attrs['tissue_stats'] = np.asarray(
-                    (unique_elements, counts_elements))
+                gain = SETUP.gain
+                simpli.noise_model = lambda x: np.round(
+                    np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
 
-            images_stack = [None] * 5
-            # print('Run Simulation:')
-            for t, (theta, phi) in enumerate(simpli.tilts):
-                # print(round(np.rad2deg(theta), 1),
-                #       round(np.rad2deg(phi), 1))
-                images_stack[t] = simpli.run_simulation(tissue, optical_axis,
-                                                        tissue_properties,
-                                                        theta, phi)
+                dset = h5f.create_group(f'{setup_name}/{model}')
+                simpli.save_parameter_h5(h5f=dset)
+                if 'tissue_stats' not in dset:
+                    unique_elements, counts_elements = np.unique(tissue,
+                                                                return_counts=True)
+                    dset.attrs['tissue_stats'] = np.asarray(
+                        (unique_elements, counts_elements))
 
-            species_list = [('vervet', CONFIG.species.vervet.mu),
-                            ('roden', CONFIG.species.roden.mu),
-                            ('human', CONFIG.species.human.mu)]
-            if p.vervet_only:
-                species_list = [('vervet', CONFIG.species.vervet.mu)]
-
-            for species, mu in species_list:
-                dset = h5f.create_group(f'{setup_name}/{species}/{model}')
-
-                tilting_stack = [None] * 5
+                images_stack = [None] * 5
+                # print('Run Simulation:')
                 for t, (theta, phi) in enumerate(simpli.tilts):
-                    # absorption
-                    images = np.multiply(
-                        images_stack[t],
-                        np.exp(-mu * tissue_thickness[:, :, None] * 1e-3 /
-                               np.cos(theta) * simpli.voxel_size))
+                    # print(round(np.rad2deg(theta), 1),
+                    #       round(np.rad2deg(phi), 1))
+                    images_stack[t] = simpli.run_simulation(tissue, optical_axis,
+                                                            tissue_properties,
+                                                            theta, phi)
 
-                    images = simpli.rm_crop_tilt_halo(images)
+                species_list = [('vervet', CONFIG.species.vervet.mu),
+                                ('roden', CONFIG.species.roden.mu),
+                                ('human', CONFIG.species.human.mu)]
+                if p.vervet_only:
+                    species_list = [('vervet', CONFIG.species.vervet.mu)]
 
-                    # apply optic to simulation
-                    resample, images = simpli.apply_optic(images)
-                    dset['simulation/optic/' + str(t)] = images
-                    dset['simulation/resample/' + str(t)] = resample
+                for species, mu in species_list:
+                    dset = h5f.create_group(f'{setup_name}/{species}/{model}')
 
-                    # calculate modalities
-                    epa = simpli.apply_epa(images)
-                    dset['analysis/epa/' + str(t) + '/transmittance'] = epa[0]
-                    dset['analysis/epa/' + str(t) + '/direction'] = epa[1]
-                    dset['analysis/epa/' + str(t) + '/retardation'] = epa[2]
+                    tilting_stack = [None] * 5
+                    for t, (theta, phi) in enumerate(simpli.tilts):
+                        # absorption
+                        images = np.multiply(
+                            images_stack[t],
+                            np.exp(-mu * tissue_thickness[:, :, None] * 1e-3 /
+                                np.cos(theta) * simpli.voxel_size))
 
-                    tilting_stack[t] = images
+                        images = simpli.rm_crop_tilt_halo(images)
 
-                mask = None  # keep analysing all pixels
+                        # apply optic to simulation
+                        resample, images = simpli.apply_optic(images)
+                        dset['simulation/optic/' + str(t)] = images
+                        dset['simulation/resample/' + str(t)] = resample
 
-                # print('Run ROFL analysis:')
-                rofl_direction, rofl_incl, rofl_t_rel, param = simpli.apply_rofl(
-                    tilting_stack, mask=mask)
+                        # calculate modalities
+                        epa = simpli.apply_epa(images)
+                        dset['analysis/epa/' + str(t) + '/transmittance'] = epa[0]
+                        dset['analysis/epa/' + str(t) + '/direction'] = epa[1]
+                        dset['analysis/epa/' + str(t) + '/retardation'] = epa[2]
 
-                dset['analysis/rofl/direction'] = rofl_direction
-                dset['analysis/rofl/inclination'] = rofl_incl
-                dset['analysis/rofl/t_rel'] = rofl_t_rel
+                        tilting_stack[t] = images
 
-                dset['analysis/rofl/direction_conf'] = param[0]
-                dset['analysis/rofl/inclination_conf'] = param[1]
-                dset['analysis/rofl/t_rel_conf'] = param[2]
-                dset['analysis/rofl/func'] = param[3]
-                dset['analysis/rofl/n_iter'] = param[4]
+                    mask = None  # keep analysing all pixels
 
-                dset.attrs['parameter/CONFIG'] = yaml.dump(CONFIG)
+                    # print('Run ROFL analysis:')
+                    rofl_direction, rofl_incl, rofl_t_rel, param = simpli.apply_rofl(
+                        tilting_stack, mask=mask)
 
-                for name, value in p._asdict().items():
-                    dset.attrs[f'parameter/p/{name}'] = value
+                    dset['analysis/rofl/direction'] = rofl_direction
+                    dset['analysis/rofl/inclination'] = rofl_incl
+                    dset['analysis/rofl/t_rel'] = rofl_t_rel
 
-                dset.attrs['parameter/v0'] = v0
-                dset.attrs['parameter/radius'] = radius
-                dset.attrs['parameter/psi'] = psi
-                dset.attrs['parameter/omega'] = omega
-                dset.attrs['parameter/fiber_path'] = p.file
-                dset.attrs['parameter/volume'] = CONFIG.simulation.volume
-                dset.attrs['parameter/f0_inc'] = p.f0_inc
-                dset.attrs['parameter/f1_rot'] = p.f1_rot
-                dset.attrs[
-                    'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel()
+                    dset['analysis/rofl/direction_conf'] = param[0]
+                    dset['analysis/rofl/inclination_conf'] = param[1]
+                    dset['analysis/rofl/t_rel_conf'] = param[2]
+                    dset['analysis/rofl/func'] = param[3]
+                    dset['analysis/rofl/n_iter'] = param[4]
 
-            h5f.flush()
-            del tissue
-            del optical_axis
-            del simpli
-    # print(f"rank {MPI.COMM_WORLD.Get_rank()}: finished {p}")
+                    dset.attrs['parameter/CONFIG'] = yaml.dump(CONFIG)
+
+                    for name, value in p._asdict().items():
+                        dset.attrs[f'parameter/p/{name}'] = value
+
+                    dset.attrs['parameter/v0'] = v0
+                    dset.attrs['parameter/radius'] = radius
+                    dset.attrs['parameter/psi'] = psi
+                    dset.attrs['parameter/omega'] = omega
+                    dset.attrs['parameter/fiber_path'] = p.file
+                    dset.attrs['parameter/volume'] = CONFIG.simulation.volume
+                    dset.attrs['parameter/f0_inc'] = p.f0_inc
+                    dset.attrs['parameter/f1_rot'] = p.f1_rot
+                    dset.attrs[
+                        'parameter/crop_tilt_voxel'] = simpli.crop_tilt_voxel()
+
+                h5f.flush()
+                del tissue
+                del optical_axis
+                del simpli
 
 
 def main():
@@ -268,6 +271,7 @@ def main():
     # parser.add_argument("--start", type=int, required=True, help="mpi start.")
     parser.add_argument('--vervet', default=False, action='store_true')
     parser.add_argument('--radial', default=False, action='store_true')
+    parser.add_argument('--pm', default=False, action='store_true')
 
     args = parser.parse_args()
     os.makedirs(args.output, exist_ok=True)
@@ -309,7 +313,8 @@ def main():
                           f0_inc=f0_inc,
                           f1_rot=f1_rot,
                           vervet_only=args.vervet,
-                          radial_only=args.radial))
+                          radial_only=args.radial,
+                          pm_only=args.pm))
 
     # DEBUG
     # run(parameters[0])
