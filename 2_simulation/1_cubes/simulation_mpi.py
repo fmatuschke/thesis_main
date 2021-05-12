@@ -173,10 +173,7 @@ def run(p):
                         (unique_elements, counts_elements))
 
                 images_stack = [None] * 5
-                # print('Run Simulation:')
                 for t, (theta, phi) in enumerate(simpli.tilts):
-                    # print(round(np.rad2deg(theta), 1),
-                    #       round(np.rad2deg(phi), 1))
                     images_stack[t] = simpli.run_simulation(
                         tissue, optical_axis, tissue_properties, theta, phi)
 
@@ -189,6 +186,8 @@ def run(p):
 
                 for species, mu in species_list:
                     dset = h5f.create_group(f'{setup_name}/{species}/{model}')
+                    dset.create_group('simulation')
+                    dset['simulation'].attrs['tilt_angle'] = tilt_angle
 
                     tilting_stack = [None] * 5
                     for t, (theta, phi) in enumerate(simpli.tilts):
@@ -202,15 +201,16 @@ def run(p):
 
                         # apply optic to simulation
                         resample, images = simpli.apply_optic(images)
-                        dset['simulation/optic/' + str(t)] = images
-                        dset['simulation/resample/' + str(t)] = resample
+                        dset[f'simulation/optic/{t}'] = images
+                        dset[f'simulation/resample/{t}'] = resample
+                        dset['simulation/optic'].attrs['theta'] = theta
+                        dset['simulation/optic'].attrs['phi'] = phi
 
                         # calculate modalities
                         epa = simpli.apply_epa(images)
-                        dset['analysis/epa/' + str(t) +
-                             '/transmittance'] = epa[0]
-                        dset['analysis/epa/' + str(t) + '/direction'] = epa[1]
-                        dset['analysis/epa/' + str(t) + '/retardation'] = epa[2]
+                        dset[f'analysis/epa/{t}/transmittance'] = epa[0]
+                        dset[f'analysis/epa/{t}/direction'] = epa[1]
+                        dset[f'analysis/epa/{t}/retardation'] = epa[2]
 
                         tilting_stack[t] = images
 
@@ -235,6 +235,7 @@ def run(p):
                     for name, value in p._asdict().items():
                         dset.attrs[f'parameter/p/{name}'] = value
 
+                    dset.attrs['parameter/simpli'] = str(simpli.get_dict())
                     dset.attrs['parameter/v0'] = v0
                     dset.attrs['parameter/radius'] = radius
                     dset.attrs['parameter/psi'] = psi
