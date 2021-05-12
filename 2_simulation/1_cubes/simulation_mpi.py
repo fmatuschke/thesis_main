@@ -127,11 +127,12 @@ def run(p):
                 simpli.optical_sigma = 0.75  # in pixel size
                 simpli.verbose = 0
 
-                simpli.set_voi(CONFIG.simulation.voi[0], CONFIG.simulation.voi[1])
+                simpli.set_voi(CONFIG.simulation.voi[0],
+                               CONFIG.simulation.voi[1])
                 tilt_angle = SETUP.tilt_angle
                 simpli.tilts = np.deg2rad(
                     np.array([(0, 0), (tilt_angle, 0), (tilt_angle, 90),
-                            (tilt_angle, 180), (tilt_angle, 270)]))
+                              (tilt_angle, 180), (tilt_angle, 270)]))
                 simpli.add_crop_tilt_halo()
 
                 simpli.fiber_bundles = fiber_bundles.rotate(rot)
@@ -164,8 +165,8 @@ def run(p):
                 dset = h5f.create_group(f'{setup_name}/{model}')
                 simpli.save_parameter_h5(h5f=dset)
                 if 'tissue_stats' not in dset:
-                    unique_elements, counts_elements = np.unique(tissue,
-                                                                return_counts=True)
+                    unique_elements, counts_elements = np.unique(
+                        tissue, return_counts=True)
                     dset.attrs['tissue_stats'] = np.asarray(
                         (unique_elements, counts_elements))
 
@@ -174,15 +175,13 @@ def run(p):
                 for t, (theta, phi) in enumerate(simpli.tilts):
                     # print(round(np.rad2deg(theta), 1),
                     #       round(np.rad2deg(phi), 1))
-                    images_stack[t] = simpli.run_simulation(tissue, optical_axis,
-                                                            tissue_properties,
-                                                            theta, phi)
+                    images_stack[t] = simpli.run_simulation(
+                        tissue, optical_axis, tissue_properties, theta, phi)
 
-                species_list = [('vervet', CONFIG.species.vervet.mu),
-                                ('roden', CONFIG.species.roden.mu),
-                                ('human', CONFIG.species.human.mu)]
-                if p.vervet_only:
-                    species_list = [('vervet', CONFIG.species.vervet.mu)]
+                species_list = [('Vervet', CONFIG.species.vervet.mu)]
+                if not p.vervet_only:
+                    species_list.append(('Roden', CONFIG.species.roden.mu))
+                    species_list.append(('Human', CONFIG.species.human.mu))
 
                 for species, mu in species_list:
                     dset = h5f.create_group(f'{setup_name}/{species}/{model}')
@@ -193,7 +192,7 @@ def run(p):
                         images = np.multiply(
                             images_stack[t],
                             np.exp(-mu * tissue_thickness[:, :, None] * 1e-3 /
-                                np.cos(theta) * simpli.voxel_size))
+                                   np.cos(theta) * simpli.voxel_size))
 
                         images = simpli.rm_crop_tilt_halo(images)
 
@@ -204,7 +203,8 @@ def run(p):
 
                         # calculate modalities
                         epa = simpli.apply_epa(images)
-                        dset['analysis/epa/' + str(t) + '/transmittance'] = epa[0]
+                        dset['analysis/epa/' + str(t) +
+                             '/transmittance'] = epa[0]
                         dset['analysis/epa/' + str(t) + '/direction'] = epa[1]
                         dset['analysis/epa/' + str(t) + '/retardation'] = epa[2]
 
