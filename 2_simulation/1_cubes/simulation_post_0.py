@@ -1,20 +1,24 @@
 #! /usr/bin/env python3
 
-import numpy as np
-import multiprocessing as mp
-import itertools
 import argparse
-import h5py
-import os
+import ast
 import glob
-import numba
-# import pretty_errors
+import itertools
+import multiprocessing as mp
+import os
 
+# import pretty_errors
+import fastpli.tools
+import h5py
 import helper.file
+import numba
+import numpy as np
 import pandas as pd
 import tqdm
 
-import fastpli.tools
+import parameter
+
+CONFIG = parameter.get_tupleware()
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -69,10 +73,9 @@ def run(file):
                 itertools.product(["PM", "LAP"], ["Roden", "Vervet", "Human"],
                                   ["r", "p"])):
 
-            try:
-                h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
-            except:
+            if f"/{microscope}/{species}/{model}/" not in h5f:
                 continue
+            h5f_sub = h5f[f"/{microscope}/{species}/{model}/"]
 
             # R
             rofl_direction = h5f_sub['analysis/rofl/direction'][...]
@@ -82,7 +85,14 @@ def run(file):
             fit_data = np.empty(
                 (5, rofl_direction.shape[0], rofl_direction.shape[1], 9))
 
-            theta = 5.5 if microscope == "LAP" else 3.9
+            theta = ast.literal_eval(str(
+                h5f_sub.attrs['parameter/simpli'][...]))
+
+            if microscope == "PM":
+                SETUP = CONFIG.simulation.setup.pm
+            elif microscope == "LAP":
+                SETUP = CONFIG.simulation.setup.lap
+            tilt_angle = SETUP.tilt_angle
 
             optic_data = []
             phis = [0, 0, 90, 180, 270]
@@ -91,7 +101,7 @@ def run(file):
                     for j in range(fit_data.shape[2]):
                         fit_data[t, i, j, :] = _calc_intensity(
                             rofl_direction[i, j], rofl_inclination[i, j],
-                            rofl_trel[i, j], theta, np.deg2rad(phi))
+                            rofl_trel[i, j], tilt_angle, np.deg2rad(phi))
 
                 optic_data.append(h5f_sub[f'simulation/optic/{t}'][...])
 
