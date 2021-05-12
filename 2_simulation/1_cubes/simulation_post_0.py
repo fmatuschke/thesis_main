@@ -101,7 +101,7 @@ def run(file):
                     for j in range(fit_data.shape[2]):
                         fit_data[t, i, j, :] = _calc_intensity(
                             rofl_direction[i, j], rofl_inclination[i, j],
-                            rofl_trel[i, j], tilt_angle, np.deg2rad(phi))
+                            rofl_trel[i, j], np.deg2rad(tilt_angle), np.deg2rad(phi))
 
                 optic_data.append(h5f_sub[f'simulation/optic/{t}'][...])
 
