@@ -103,14 +103,16 @@ def run(p):
             h5f.attrs['input_file'] = p.file
             h5f.attrs['rnd_seed'] = rnd_seed
 
-        model_list = ['p', 'r']
+        model_list = ['r', 'p']
         if p.radial_only:
             model_list = ['r']
+
         for model in model_list:
 
-            setup_list = [('PM', CONFIG.simulation.setup.pm)]
-            if not p.pm_only:
-                setup_list.append(('LAP', CONFIG.simulation.setup.lap))
+            setup_list = [('PM', CONFIG.simulation.setup.pm),
+                          ('LAP', CONFIG.simulation.setup.lap)]
+            if p.pm_only:
+                setup_list = [('PM', CONFIG.simulation.setup.pm)]
 
             for setup_name, SETUP in setup_list:
 
@@ -178,10 +180,12 @@ def run(p):
                     images_stack[t] = simpli.run_simulation(
                         tissue, optical_axis, tissue_properties, theta, phi)
 
-                species_list = [('Vervet', CONFIG.species.vervet.mu)]
-                if not p.vervet_only:
-                    species_list.append(('Roden', CONFIG.species.roden.mu))
-                    species_list.append(('Human', CONFIG.species.human.mu))
+                species_list = [('Human', CONFIG.species.human.mu),
+                                ('Vervet', CONFIG.species.vervet.mu),
+                                ('Roden', CONFIG.species.roden.mu)]
+
+                if p.vervet_only:
+                    species_list = [('Vervet', CONFIG.species.vervet.mu)]
 
                 for species, mu in species_list:
                     dset = h5f.create_group(f'{setup_name}/{species}/{model}')
