@@ -257,12 +257,12 @@ def run(parameter):
                                     logger.info(f"m_repeat_noise: {m}")
                                     if m == 0:
                                         simpli.noise_model = lambda x: np.round(
-                                            x).astype(np.uint16)
+                                            x).astype(np.float32)
                                     else:
                                         simpli.noise_model = lambda x: np.round(
                                             np.random.normal(
                                                 x, np.sqrt(gain * x))).astype(
-                                                    np.uint16)
+                                                    np.float32)
                                     # apply optic to simulation
                                     logger.info(f"apply_optic")
                                     _, images_ = simpli.apply_optic(images)

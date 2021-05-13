@@ -1,7 +1,9 @@
 #%%
 from IPython import get_ipython
+
 get_ipython().run_line_magic('matplotlib', 'inline')
 from jupyterthemes import jtplot
+
 jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
 #%%
 import h5py
@@ -13,7 +15,7 @@ import pandas as pd
 #%% Absorption
 gain = 0.1175
 # gain = 3
-# lambda x: np.round(np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
+# lambda x: np.round(np.random.normal(x, np.sqrt(gain * x))).astype(np.float32)
 
 x = np.array([115, 574, 1608])
 y = np.divide(np.sqrt(gain * x), x)

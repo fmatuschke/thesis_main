@@ -239,12 +239,12 @@ def run(parameter):
                                 for m in range(args.repeat_noise):
                                     if m == 0:
                                         simpli.noise_model = lambda x: np.round(
-                                            x).astype(np.uint16)
+                                            x).astype(np.float32)
                                     else:
                                         simpli.noise_model = lambda x: np.round(
                                             np.random.normal(
                                                 x, np.sqrt(SETUP.gain * x))
-                                        ).astype(np.uint16)
+                                        ).astype(np.float32)
                                     # apply optic to simulation
                                     _, images_ = simpli.apply_optic(images)
                                     dset[f'simulation/optic/{t}/{m}'] = images_

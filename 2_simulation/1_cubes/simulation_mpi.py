@@ -167,7 +167,7 @@ def run(p):
 
                 gain = SETUP.gain
                 simpli.noise_model = lambda x: np.round(
-                    np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
+                    np.random.normal(x, np.sqrt(gain * x))).astype(np.float32)
 
                 dset = h5f.create_group(f'{setup_name}/{model}')
                 simpli.save_parameter_h5(h5f=dset)

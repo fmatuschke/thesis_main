@@ -109,7 +109,7 @@ def run(parameter):
         images *= np.exp(-mu * THICKNESS * 1e-3 * simpli.voxel_size)
 
         simpli.noise_model = lambda x: np.round(
-            np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)
+            np.random.normal(x, np.sqrt(gain * x))).astype(np.float32)
 
         _, images = simpli.apply_optic(images)
         t, d, r = simpli.apply_epa(images)

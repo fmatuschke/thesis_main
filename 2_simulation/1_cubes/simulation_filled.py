@@ -233,8 +233,8 @@ if __name__ == "__main__":
 
                     simpli.light_intensity = intensity  # a.u.
                     simpli.noise_model = lambda x: np.round(
-                        np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16
-                                                                      )
+                        np.random.normal(x, np.sqrt(gain * x))).astype(np.
+                                                                       float32)
 
                     dset = h5f.create_group(f'{name}/{model}')
                     simpli.save_parameter_h5(h5f=dset)

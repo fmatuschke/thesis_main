@@ -6,7 +6,7 @@ simulation:
   interpolation: "Slerp"
   wavelength: 525 # nm
   optical_sigma: 0.75 # in pixel_size
-  # noise_model: "lambda x: np.round(np.random.normal(x, np.sqrt(gain * x))).astype(np.uint16)"
+  # noise_model: "lambda x: np.round(np.random.normal(x, np.sqrt(gain * x))).astype(np.float32)"
 
   setup:
     pm:
