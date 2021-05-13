@@ -1,0 +1,76 @@
+# %%
+# %matplotlib inline
+# from jupyterthemes import jtplot
+# jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
+
+import numpy as np
+import os
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+# %%
+df = pd.read_pickle(
+    os.path.join("output/vs_135_0.01_6_25_rc1/voxel_size_post_1.pkl"))
+df = df[df.m == 0]
+# df = df[df.f1_rot == 0]
+# df['epa_dir_diff'] = np.rad2deg(df['epa_dir_diff'])
+# df['epa_trans_diff_rel'] = df['epa_trans_diff']
+# df['epa_ret_diff_rel'] = df['epa_ret_diff']
+
+# %%
+
+parameters = list(df[["f0_inc", "omega", "psi",
+                      "model"]].drop_duplicates().iterrows())
+
+for _, p in parameters:
+    f0_inc = p['f0_inc']
+    omega = p['omega']
+    psi = p['psi']
+    model = p['model']
+    sub = (df.f0_inc == f0_inc) & (df.omega == omega) & (df.psi == psi) & (
+        df.model == model)
+
+    string = [str(elm) for elm in p]
+    string = '-'.join(string)
+
+    fig, axs = plt.subplots(5, 1, figsize=(15, 7))
+    fig.suptitle(string, fontsize=21)
+
+    sns.boxplot(x="radius",
+                y="epa_trans_diff_rel",
+                hue='voxel_size',
+                data=df[sub],
+                ax=axs[0])
+    axs[0].legend([], [], frameon=False)
+    sns.boxplot(x="radius",
+                y="epa_dir_diff",
+                hue='voxel_size',
+                data=df[sub],
+                ax=axs[1])
+    axs[1].legend([], [], frameon=False)
+    #     sns.stripplot(x="voxel_size", y="epa_dir_diff", hue='radius', data=df[sub], ax=axs[1], dodge=True)
+    ax = sns.boxplot(x="radius",
+                     y="epa_ret_diff_rel",
+                     hue='voxel_size',
+                     data=df[sub],
+                     ax=axs[2])
+    ax.set_ylim(0, 1)
+    #     axs[2].legend([],[], frameon=False
+
+    ax = sns.boxplot(x="radius",
+                     y="data_diff",
+                     hue='voxel_size',
+                     data=df[sub],
+                     ax=axs[3])
+    ax = sns.boxplot(x="radius",
+                     y="data_diff_sqr",
+                     hue='voxel_size',
+                     data=df[sub],
+                     ax=axs[4])
+
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+#     plt.savefig(f'omega_{omega}_f0_inc_{f0_inc}_psi_{psi}_model_{model}.pdf')
+
+# %%
