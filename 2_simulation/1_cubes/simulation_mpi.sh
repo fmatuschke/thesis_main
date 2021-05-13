@@ -21,7 +21,7 @@ mpirun -n 48 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
    -m mpi4py.futures simulation_mpi.py \
    -i ${MODEL_PATH}/*r_0.50*.solved.h5 \
    -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_r_0.5 \
-   --Vervet \
+   --vervet \
    --radial \
    --pm
 #

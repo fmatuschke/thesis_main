@@ -126,7 +126,7 @@ def run(parameter):
         h5f.attrs['v0'] = v0
         h5f.attrs['f0_inc'] = f0_inc
         h5f.attrs['f1_rot'] = f1_rot
-        h5f.attrs['pixel_size'] = SETUP.pixel_size
+        h5f.attrs['pixel_size'] = CONFIG.simulation.setup.pm.pixel_size
         h5f.attrs['rnd_seed'] = rnd_seed
         h5f['fiber_bundles'] = file
 
@@ -138,41 +138,58 @@ def run(parameter):
             rnd_dim_origin = np.array(
                 (-30 + (n % nstep) * step, -30 + (n // nstep) * step))
             for voxel_size in VOXEL_SIZES:
-                for species, mu in [('Roden', 8), ('Vervet', 30),
-                                    ('Human', 65)]:
-                    for dn, model in [(-0.004, 'p'), (0.008, 'r')]:
-                        for setup, gain, intensity in [('PM', 0.1175, 8000)]:
-                            # ('LAP', 3, 35000), SETUP.pixel_size!!!
+
+                species_list = [('Human', CONFIG.species.human.mu),
+                                ('Vervet', CONFIG.species.vervet.mu),
+                                ('Roden', CONFIG.species.roden.mu)]
+                for species, mu in species_list:
+                    model_list = ['r', 'p']
+                    for model in model_list:
+                        LAYERS = CONFIG.models.layers
+                        layers = [(LAYERS.b.radius, LAYERS.b.dn, LAYERS.b.mu,
+                                   LAYERS.b.model)]
+                        if model == 'r':
+                            layers.append((LAYERS.r.radius, LAYERS.r.dn,
+                                           LAYERS.r.mu, LAYERS.r.model))
+                        elif model == 'p':
+                            layers.append((LAYERS.p.radius, LAYERS.p.dn,
+                                           LAYERS.p.mu, LAYERS.p.model))
+                        else:
+                            raise ValueError('FOOO')
+
+                        setup_list = [
+                            ('PM', CONFIG.simulation.setup.pm),
+                            #('LAP', CONFIG.simulation.setup.lap) SETUP.pixel_size!!!
+                        ]
+                        for setup, SETUP in setup_list:
 
                             # Setup Simpli
                             simpli = fastpli.simulation.Simpli()
                             simpli.omp_num_threads = args.num_threads
                             simpli.pixel_size = SETUP.pixel_size
-                            simpli.optical_sigma = 0.75  # in voxel size
                             simpli.filter_rotations = np.linspace(
-                                0, np.pi, 9, False)
+                                0, np.pi, CONFIG.simulation.num_filter_rot,
+                                False)
                             simpli.interpolate = "Slerp"
                             simpli.untilt_sensor_view = True
-                            simpli.wavelength = 525  # in nm
-                            simpli.light_intensity = intensity  # a.u.
+                            simpli.wavelength = CONFIG.simulation.wavelength  # in nm
+                            simpli.optical_sigma = CONFIG.simulation.optical_sigma  # in pixel size
+                            simpli.light_intensity = SETUP.light_intensity  # a.u.
                             simpli.fiber_bundles = fiber_bundles
                             simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
                             simpli.voxel_size = voxel_size
-                            simpli.set_voi(
-                                -0.5 * np.array([
-                                    2 * SETUP.pixel_size, 2 * SETUP.pixel_size,
-                                    CONFIG.simulation.volume[-1]
-                                ]), 0.5 * np.array([
-                                    2 * SETUP.pixel_size, 2 * SETUP.pixel_size,
-                                    CONFIG.simulation.volume[-1]
-                                ]))
+
+                            voi = (3 * SETUP.pixel_size, 3 * SETUP.pixel_size,
+                                   CONFIG.simulation.volume[-1])
+                            simpli.set_voi(-0.5 * np.array(voi),
+                                           0.5 * np.array(voi))
 
                             # print(simpli.dim_origin)
                             simpli.dim_origin[:2] = rnd_dim_origin
                             # print(simpli.dim_origin)
 
-                            if simpli.memory_usage() * args.num_proc > 150000:
+                            if simpli.memory_usage() * args.num_proc > 200000:
                                 print(
                                     str(round(simpli.memory_usage(), 2)) + 'MB')
                                 return
@@ -182,15 +199,11 @@ def run(parameter):
                             )
                             dset.attrs['dim_origin'] = rnd_dim_origin
 
-                            simpli.fiber_bundles.layers = [[(0.75, 0, 0, 'b'),
-                                                            (1.0, dn, 0, model)]
+                            simpli.fiber_bundles.layers = [layers
                                                           ] * len(fiber_bundles)
 
-                            with warnings.catch_warnings():
-                                warnings.filterwarnings(
-                                    "ignore", message="objects overlap")
-                                label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
-                                )
+                            label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
+                            )
 
                             unique_elements, counts_elements = np.unique(
                                 label_field, return_counts=True)
@@ -281,8 +294,9 @@ if __name__ == "__main__":
         parameters.append((file, f0_inc, 0))
 
     print("total:", len(parameters))
-    # parameter = parameters[comm.Get_rank()::comm.Get_size()]
 
+    # DEBUG
+    # run(parameters[0])
     with mp.Pool(processes=args.num_proc) as pool:
         [
             d for d in tqdm.tqdm(pool.imap_unordered(run, parameters),

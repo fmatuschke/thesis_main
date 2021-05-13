@@ -108,6 +108,17 @@ def run(p):
             model_list = ['r']
 
         for model in model_list:
+            LAYERS = CONFIG.models.layers
+            layers = [(LAYERS.b.radius, LAYERS.b.dn, LAYERS.b.mu,
+                       LAYERS.b.model)]
+            if model == 'r':
+                layers.append(
+                    (LAYERS.r.radius, LAYERS.r.dn, LAYERS.r.mu, LAYERS.r.model))
+            elif model == 'p':
+                layers.append(
+                    (LAYERS.p.radius, LAYERS.p.dn, LAYERS.p.mu, LAYERS.p.model))
+            else:
+                raise ValueError('FOOO')
 
             setup_list = [('PM', CONFIG.simulation.setup.pm),
                           ('LAP', CONFIG.simulation.setup.lap)]
@@ -125,8 +136,8 @@ def run(p):
                 simpli.filter_rotations = np.linspace(
                     0, np.pi, CONFIG.simulation.num_filter_rot, False)
                 simpli.interpolate = "Slerp"
-                simpli.wavelength = 525  # in nm
-                simpli.optical_sigma = 0.75  # in pixel size
+                simpli.wavelength = CONFIG.simulation.wavelength  # in nm
+                simpli.optical_sigma = CONFIG.simulation.optical_sigma  # in pixel size
                 simpli.verbose = 0
 
                 simpli.set_voi(CONFIG.simulation.voi[0],
@@ -138,12 +149,6 @@ def run(p):
                 simpli.add_crop_tilt_halo()
 
                 simpli.fiber_bundles = fiber_bundles.rotate(rot)
-
-                layers = CONFIG.models.layers
-                layers = [
-                    (layers.b.radius, layers.b.dn, layers.b.mu, layers.b.model),
-                    (layers.r.radius, layers.r.dn, layers.r.mu, layers.r.model)
-                ]
 
                 simpli.fiber_bundles.layers = [layers] * len(fiber_bundles)
                 logger.info(
