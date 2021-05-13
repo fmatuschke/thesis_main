@@ -96,6 +96,10 @@ def run(file):
                     SETUP = CONFIG.simulation.setup.lap
                 tilt_angle = SETUP.tilt_angle
 
+            # TODO:
+            warnings.warn('LOOK AT THIS')
+            print(tilt_angle)  # For safty
+
             optic_data = []
             phis = [0, 0, 90, 180, 270]
             for t, phi in enumerate(phis):
