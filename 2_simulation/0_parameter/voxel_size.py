@@ -139,11 +139,13 @@ def run(parameter):
                 (-30 + (n % nstep) * step, -30 + (n // nstep) * step))
             for voxel_size in VOXEL_SIZES:
 
-                species_list = [('Human', CONFIG.species.human.mu),
-                                ('Vervet', CONFIG.species.vervet.mu),
-                                ('Roden', CONFIG.species.roden.mu)]
+                species_list = [
+                    #('Human', CONFIG.species.human.mu),
+                    ('Vervet', CONFIG.species.vervet.mu),
+                    #('Roden', CONFIG.species.roden.mu)
+                ]
                 for species, mu in species_list:
-                    model_list = ['r', 'p']
+                    model_list = ['r']  # , 'p']
                     for model in model_list:
                         LAYERS = CONFIG.models.layers
                         layers = [(LAYERS.b.radius, LAYERS.b.dn, LAYERS.b.mu,
@@ -241,8 +243,8 @@ def run(parameter):
                                     else:
                                         simpli.noise_model = lambda x: np.round(
                                             np.random.normal(
-                                                x, np.sqrt(gain * x))).astype(
-                                                    np.uint16)
+                                                x, np.sqrt(SETUP.gain * x))
+                                        ).astype(np.uint16)
                                     # apply optic to simulation
                                     _, images_ = simpli.apply_optic(images)
                                     dset[f'simulation/optic/{t}/{m}'] = images_
