@@ -85,7 +85,7 @@ clean: clean-fastpli
 .ONESHELL:
 clean-fastpli:
 	cd fastpli
-	make clean
+	make clean-all
 
 # SYNC
 .PHONY: rsync
