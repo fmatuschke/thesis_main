@@ -37,8 +37,8 @@ models:
       model: "r"
     p:
       radius: 1
-      dn: 0
-      mu: -0.004
+      dn: -0.004
+      mu: 0
       model: "p"
 
 cube:
