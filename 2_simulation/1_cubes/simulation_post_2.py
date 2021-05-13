@@ -1,18 +1,19 @@
 #! /usr/bin/env python3
 
-import numpy as np
-import multiprocessing as mp
 import argparse
+import multiprocessing as mp
 import os
 
+import helper.schilling
+import helper.spherical_harmonics
+import numpy as np
 import pandas as pd
 import tqdm
 
-import helper.spherical_harmonics
-import helper.schilling
 import models
+import parameter
 
-import fastpli.analysis
+CONFIG = parameter.get_tupleware()
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -77,7 +78,7 @@ def calcShGT(parameter):
 
     phi, theta = models.ori_from_file(
         f"/data/PLI-Group/felix/data/thesis/1_model/1_cubes/{df_org[sub].fiber.iloc[0]}",
-        f0_inc, f1_rot, [LENGTH, LENGTH, THICKNESS])
+        f0_inc, f1_rot, [CONFIG.simulation.voi[0], CONFIG.simulation.voi[1]])
     sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
     gt_dict[
