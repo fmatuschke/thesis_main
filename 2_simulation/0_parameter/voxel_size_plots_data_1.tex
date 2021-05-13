@@ -19,7 +19,10 @@
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\datapath{output/vs_120_0.01_6_25/results}
+\def\datapath{../../__PATH__/results}
+\directlua0{
+  pdf.setinfo ("/Path: (__PATH__)")
+}
 % 
 \begin{document}
 \pgfmathsetmacro{\ng}{6}
@@ -76,17 +79,11 @@
 % 
 \newcommand{\Loop}[1]{
 \foreach \r in {0.5,1.0,2.0,5.0,10.0} {
-% \foreach \vs in {0.025,0.05,0.125,0.25,0.625,1.25} {#1}}} %0.01, 
+\foreach \vs in {0.01,0.025,0.05,0.1,0.26,0.65,1.3} {#1}}}
 % 
 \foreach \setup [count=\k] in {PM} { % LAP
 \foreach \species [count=\l] in {Roden,Vervet,Human} { %
 \foreach \mode [count=\m] in {p,r} { %
-% \foreach \omega/\psi/\finc [count=\i] in {0.0/1.0/0,0.0/1.0/90,90.0/0.5/0,90.0/0.5/90} { %
-% 
-% \foreach \setup [count=\k] in {PM} { %
-% \foreach \species [count=\l] in {Human} { %
-% \foreach \mode [count=\m] in {p} { %
-% \foreach \omega/\psi/\finc [count=\i] in {0.0/1.0/0,0.0/1.0/90,90.0/0.5/0,90.0/0.5/90} { %
 % 
 \begin{tikzpicture}[]
 \begin{groupplot}[%
@@ -101,27 +98,27 @@
    Boxplot,
 ]
 % 
-\nextgroupplot[ylabel={data diff rel}, ymode={log}, ymin=0.003, ymax=0.1,
-               legend to name={legend\currfilebase\k\l\m},
-               legend image post style={mark=square*},
-               legend columns=2,
-               legend cell align={left},
-               legend image post style={scale=1},
-               legend transposed=true,
-               legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
-               legend entries={%
-                  % {$vs=0.01$},
-                  {$vs=0.025$},
-                  {$vs=0.05$},
-                  {$vs=0.125$},
-                  {$vs=0.25$},
-                  {$vs=0.625$},
-                  {$vs=1.25$}}]
+\nextgroupplot[%
+    ylabel={data diff rel}, ymode={log}, 
+    % ymin=0.003, ymax=0.1,
+    legend to name={legend\currfilebase\k\l\m},
+    legend image post style={mark=square*},
+    legend columns=2,
+    legend cell align={left},
+    legend image post style={scale=1},
+    legend transposed=true,
+    legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
+    legend entries={%
+        {$vs=0.025$},
+        {$vs=0.05$},
+        {$vs=0.1$},
+        {$vs=0.26$},
+        {$vs=0.65$},
+        {$vs=1.3$}}]
 \def\omega{0.0}
 \def\psi{1.0}
 \def\finc{0}
 \Loop{
-   %  \directlua{tex.print('\string\\message{vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv}')}
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};
@@ -131,36 +128,39 @@
 % 
 
 % 
-\nextgroupplot[ylabel={data diff rel}, ymode={log}, ymin=0.003, ymax=0.1,] %, ymode={log} % , ymin=0.0000001
+\nextgroupplot[%
+    ylabel={data diff rel},
+    ] 
 \def\omega{0.0}
 \def\psi{1.0}
 \def\finc{90}
 \Loop{
-   %  \directlua{tex.print('\string\\message{vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv}')}
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};
 }
 \xachse
 % 
-\nextgroupplot[ylabel={data diff rel}, ymode={log}, ymin=0.003, ymax=0.1,] %, ymode={log} % , ymin=0.0000001
+\nextgroupplot[%
+    ylabel={data diff rel},
+    ] 
 \def\omega{90.0}
 \def\psi{0.5}
 \def\finc{0}
 \Loop{
-   %  \directlua{tex.print('\string\\message{vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv}')}
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};
 }
 \xachse
 % 
-\nextgroupplot[ylabel={data diff rel}, ymode={log}, ymin=0.003, ymax=0.1,] %, ymode={log} % , ymin=0.0000001
+\nextgroupplot[%
+    ylabel={data diff rel}
+]
 \def\omega{90.0}
 \def\psi{0.5}
 \def\finc{90}
 \Loop{
-   %  \directlua{tex.print('\string\\message{vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv}')}
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};

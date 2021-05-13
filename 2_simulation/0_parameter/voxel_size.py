@@ -1,32 +1,29 @@
-import numpy as np
-import multiprocessing as mp
-import subprocess
-import itertools
 import argparse
-import logging
 import datetime
-import warnings
-import time
-import h5py
 import glob
-import sys
+import itertools
+import logging
+import multiprocessing as mp
 import os
+import subprocess
+import sys
+import time
+import warnings
 
-import tqdm
-
-import fastpli.simulation
 import fastpli.analysis
+import fastpli.io
 import fastpli.model.sandbox
 import fastpli.model.solver
+import fastpli.simulation
 import fastpli.tools
-import fastpli.io
-
+import h5py
 import helper.file
-import models
-
+import numpy as np
+import parameter
+import tqdm
 from mpi4py import MPI
 
-comm = MPI.COMM_WORLD
+import models
 
 # reproducability -> see run()
 # np.random.seed(42)
@@ -36,7 +33,7 @@ FILE_NAME = os.path.abspath(__file__)
 FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 FILE_NAME = os.path.splitext(FILE_BASE)[0]
-
+CONFIG = parameter.get_tupleware()
 # arguments
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -82,24 +79,8 @@ os.makedirs(args.output, exist_ok=False)
 subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
 subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
-# logger
-logger = logging.getLogger("rank[%i]" % comm.rank)
-logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler(
-    os.path.join(
-        args.output,
-        f'voxel_size_{args.repeat}_{args.repeat_noise}_{comm.Get_size()}_{comm.Get_rank()}.log'
-    ))
-formatter = logging.Formatter(
-    '%(asctime)s:%(name)s:%(levelname)s:\t%(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-
-# VOXEL_SIZES = [0.01, 0.025, 0.05, 0.1, 0.26, 0.65, 1.3]
-# D_ROT = 10
-# N_INC = 10
-# PIXEL_SIZE = 1.3  # PM
-# THICKNESS = 60
+VOXEL_SIZES = [0.01, 0.025, 0.05, 0.1, 0.26, 0.65, 1.3]
+SETUP = CONFIG.simulation.setup.pm
 
 
 def get_file_pref(parameter):
@@ -115,19 +96,17 @@ def get_file_pref(parameter):
         f"r_{r:.2f}_" \
         f"f0_inc_{f0_inc:.2f}_" \
         f"f1_rot_{f1_rot:.2f}_" \
-        f"p0_{PIXEL_SIZE:.2f}_"
+        f"p0_{SETUP.pixel_size:.2f}_"
 
 
 def run(parameter):
     file, f0_inc, f1_rot = parameter
 
-    # generate model
     file_pref = get_file_pref(parameter)
-    logger.info(f"file_pref: {file_pref}")
-
     rnd_seed = int.from_bytes(os.urandom(4), byteorder='little')
-    logger.info(f"rnd seed: {rnd_seed}")
     np.random.seed(rnd_seed)
+
+    # generate model
     with h5py.File(file_pref + '.h5', 'w-') as h5f:
 
         h5f.attrs['script'] = open(os.path.abspath(__file__), 'r').read()
@@ -136,9 +115,10 @@ def run(parameter):
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
             psi = h5f_['/'].attrs["psi"]
             omega = h5f_['/'].attrs["omega"]
-            # radius = h5f_['/'].attrs["radius"] # FIXME
-            radius = float(file.split("_r_")[1].split("_")[0])
-            v0 = float(file.split("_v0_")[1].split("_")[0])
+            radius = h5f_['/'].attrs["radius"]  # FIXME
+            v0 = h5f_['/'].attrs["v0"]  # FIXME
+            # radius = float(file.split("_r_")[1].split("_")[0])
+            # v0 = float(file.split("_v0_")[1].split("_")[0])
 
         h5f.attrs['psi'] = psi
         h5f.attrs['omega'] = omega
@@ -146,7 +126,7 @@ def run(parameter):
         h5f.attrs['v0'] = v0
         h5f.attrs['f0_inc'] = f0_inc
         h5f.attrs['f1_rot'] = f1_rot
-        h5f.attrs['pixel_size'] = PIXEL_SIZE
+        h5f.attrs['pixel_size'] = SETUP.pixel_size
         h5f.attrs['rnd_seed'] = rnd_seed
         h5f['fiber_bundles'] = file
 
@@ -155,26 +135,19 @@ def run(parameter):
         nstep = int(np.round(np.sqrt(args.repeat)))
         step = 60 / nstep  # 60er cube
         for n in tqdm.tqdm(list(range(args.repeat))):
-            # rnd_dim_origin = np.random.uniform(-30, 30 - 2 * PIXEL_SIZE, [2])
             rnd_dim_origin = np.array(
                 (-30 + (n % nstep) * step, -30 + (n // nstep) * step))
-            logger.info(f"n_repeat: {n}")
             for voxel_size in VOXEL_SIZES:
-                logger.info(f"voxel_size: {voxel_size}")
                 for species, mu in [('Roden', 8), ('Vervet', 30),
                                     ('Human', 65)]:
-                    logger.info(f"species: {species}")
                     for dn, model in [(-0.004, 'p'), (0.008, 'r')]:
-                        logger.info(f"model: {model}")
                         for setup, gain, intensity in [('PM', 0.1175, 8000)]:
-                            # ('LAP', 3, 35000), PIXEL_SIZE!!!
-                            logger.info(f"setup: {setup}")
+                            # ('LAP', 3, 35000), SETUP.pixel_size!!!
 
                             # Setup Simpli
-                            logger.info(f"prepair simulation")
                             simpli = fastpli.simulation.Simpli()
                             simpli.omp_num_threads = args.num_threads
-                            simpli.pixel_size = PIXEL_SIZE
+                            simpli.pixel_size = SETUP.pixel_size
                             simpli.optical_sigma = 0.75  # in voxel size
                             simpli.filter_rotations = np.linspace(
                                 0, np.pi, 9, False)
@@ -188,18 +161,17 @@ def run(parameter):
                             simpli.voxel_size = voxel_size
                             simpli.set_voi(
                                 -0.5 * np.array([
-                                    2 * PIXEL_SIZE, 2 * PIXEL_SIZE, THICKNESS
+                                    2 * SETUP.pixel_size, 2 * SETUP.pixel_size,
+                                    CONFIG.simulation.volume[-1]
                                 ]), 0.5 * np.array([
-                                    2 * PIXEL_SIZE, 2 * PIXEL_SIZE, THICKNESS
+                                    2 * SETUP.pixel_size, 2 * SETUP.pixel_size,
+                                    CONFIG.simulation.volume[-1]
                                 ]))
 
                             # print(simpli.dim_origin)
                             simpli.dim_origin[:2] = rnd_dim_origin
                             # print(simpli.dim_origin)
 
-                            logger.info("memory: " +
-                                        str(round(simpli.memory_usage(), 2)) +
-                                        'MB')
                             if simpli.memory_usage() * args.num_proc > 150000:
                                 print(
                                     str(round(simpli.memory_usage(), 2)) + 'MB')
@@ -234,14 +206,14 @@ def run(parameter):
                             # simpli.save_parameter_h5(h5f=dset)
                             for t, tilt in enumerate(simpli._tilts):
                                 theta, phi = tilt[0], tilt[1]
-                                logger.info(f"simulation: {theta}, {phi}")
                                 images = simpli.run_simulation(
                                     label_field, vector_field,
                                     tissue_properties, theta, phi)
 
                                 # absorption
-                                images *= np.exp(-mu * THICKNESS * 1e-3 *
-                                                 simpli.voxel_size)
+                                images *= np.exp(
+                                    -mu * CONFIG.simulation.volume[-1] * 1e-3 *
+                                    simpli.voxel_size)
 
                                 dset['simulation/data/' + str(t)] = images
                                 dset['simulation/data/' +
@@ -250,7 +222,6 @@ def run(parameter):
                                      str(t)].attrs['phi'] = phi
 
                                 for m in range(args.repeat_noise):
-                                    logger.info(f"m_repeat_noise: {m}")
                                     if m == 0:
                                         simpli.noise_model = lambda x: np.round(
                                             x).astype(np.uint16)
@@ -260,11 +231,9 @@ def run(parameter):
                                                 x, np.sqrt(gain * x))).astype(
                                                     np.uint16)
                                     # apply optic to simulation
-                                    logger.info(f"apply_optic")
                                     _, images_ = simpli.apply_optic(images)
                                     dset[f'simulation/optic/{t}/{m}'] = images_
                                     # calculate modalities
-                                    logger.info(f"epa")
                                     epa = simpli.apply_epa(images_)
                                     dset[
                                         f'analysis/epa/{t}/transmittance/{m}'] = epa[
@@ -293,10 +262,6 @@ def check_file(p):
 
 
 if __name__ == "__main__":
-    logger.info("args: " + " ".join(sys.argv[1:]))
-    logger.info(f"git: {subprocess.check_output(['git', 'rev-parse', 'HEAD'])}")
-    logger.info("script:\n" + open(os.path.abspath(__file__), 'r').read())
-
     file_list = glob.glob(os.path.join(args.input, "*.solved.h5"))
 
     # four case study -> ||,+,*,*|
@@ -314,8 +279,6 @@ if __name__ == "__main__":
     parameters = []
     for file, f0_inc in list(itertools.product(filtered_files, [0, 90])):
         parameters.append((file, f0_inc, 0))
-
-    logger.info("parameters: " + str(parameters))
 
     print("total:", len(parameters))
     # parameter = parameters[comm.Get_rank()::comm.Get_size()]

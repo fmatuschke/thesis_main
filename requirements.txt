@@ -13,3 +13,7 @@ imageio
 sklearn
 ipykernel
 scikit-image
+
+# for poligon masks
+opencv-python
+simpleitk

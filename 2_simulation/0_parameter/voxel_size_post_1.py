@@ -1,14 +1,11 @@
 #! /usr/bin/env python3
 
-import numpy as np
-import multiprocessing as mp
-import itertools
 import argparse
-import h5py
+import multiprocessing as mp
 import os
 import sys
-import glob
 
+import numpy as np
 import pandas as pd
 import tqdm
 

@@ -32,6 +32,10 @@ args = parser.parse_args()
 
 
 def run_orientation(file):
+
+    if not os.path.isfile(file):
+        raise ValueError(f'not a file: {file}')
+
     with h5py.File(file, 'r') as h5f:
         omega = h5f['/'].attrs['omega']
         psi = h5f['/'].attrs['psi']
@@ -40,7 +44,12 @@ def run_orientation(file):
         f0_inc = h5f['/'].attrs['f0_inc']
         f1_rot = h5f['/'].attrs['f1_rot']
         pixel_size = h5f['/'].attrs['pixel_size']
-        with h5py.File(str(h5f['fiber_bundles'][...]), 'r') as h5f_:
+
+        fiber_path = str(h5f['fiber_bundles'][...].astype('U'))
+        if not os.path.isfile(fiber_path):
+            raise ValueError(f'not a file: {fiber_path}')
+
+        with h5py.File(fiber_path, 'r') as h5f_:
             fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
             if h5f_['/'].attrs["psi"] != psi or omega == h5f_['/'].attrs[
                     "omega"] != omega:
@@ -61,6 +70,9 @@ def run_orientation(file):
 
 def run(file):
     df = []
+
+    if not os.path.isfile(file):
+        raise ValueError(f'not a file: {file}')
 
     with h5py.File(file, 'r') as h5f:
         omega = h5f['/'].attrs['omega']
