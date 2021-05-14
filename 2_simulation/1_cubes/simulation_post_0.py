@@ -86,19 +86,9 @@ def run(file):
             fit_data = np.empty(
                 (5, rofl_direction.shape[0], rofl_direction.shape[1], 9))
 
-            try:
-                tilt_angle = h5f_sub['simulation'].attrs['tilt_angle']
-            except:
-                warnings.warn("using config value")
-                if microscope == "PM":
-                    SETUP = CONFIG.simulation.setup.pm
-                elif microscope == "LAP":
-                    SETUP = CONFIG.simulation.setup.lap
-                tilt_angle = SETUP.tilt_angle
-
-            # TODO:
-            warnings.warn('LOOK AT THIS')
-            print(tilt_angle)  # For safty
+            tilt_angle = h5f_sub['simulation'].attrs['tilt_angle']
+            if tilt_angle not in [3.9, 5.5]:
+                warnings.warn('unexpected tilt angle: {tilt_angle}')
 
             optic_data = []
             phis = [0, 0, 90, 180, 270]
