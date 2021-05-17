@@ -3,12 +3,14 @@
 # from jupyterthemes import jtplot
 # jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
 
-import numpy as np
 import os
 
+import h5py
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
 import pandas as pd
+import seaborn as sns
+import ipywidgets
 
 # %%
 df = pd.read_pickle(
@@ -72,5 +74,95 @@ for _, p in parameters:
 
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 #     plt.savefig(f'omega_{omega}_f0_inc_{f0_inc}_psi_{psi}_model_{model}.pdf')
+
+# %%
+
+h5f = h5py.File(
+    '/data/PLI-Group/felix/data/thesis/2_simulation/0_parameter/output/vs_135_0.01_6_25_rc1/voxel_size_cube_2pop_psi_1.00_omega_0.00_r_2.00_f0_inc_0.00_f1_rot_0.00_p0_1.30_.h5',
+    'r')
+
+# %%
+
+# dset = h5f['simpli/0.01/PM/Vervet/r/1/analysis/epa/0/transmittance']
+dset = h5f['simpli/0.01/PM/Vervet/r/1/simulation/optic/0/1']
+
+fig = plt.figure()
+
+
+def update(x=0):
+    plt.imshow(dset[:, :, int(x)])
+    fig.canvas.draw_idle()
+
+
+ipywidgets.interact(update,
+                    x=ipywidgets.widgets.IntSlider(min=0,
+                                                   max=8,
+                                                   step=1,
+                                                   value=0))
+
+# %%
+
+VOXEL_SIZES = [0.01, 0.025, 0.05, 0.1, 0.26, 0.65, 1.3]
+df_0 = pd.read_pickle(
+    os.path.join("output/vs_135_0.01_6_25_rc1/voxel_size_post_0.pkl"))
+df_1 = pd.read_pickle(
+    os.path.join("output/vs_135_0.01_6_25_rc1/voxel_size_post_1.pkl"))
+
+# %%
+df = df_0[df_0.n == 0]
+df = df[df.radius == 2.0]
+df = df[df.psi == 1.0]
+df = df[df.f0_inc == 0]
+
+ref = df[df.m == 0]
+ref = ref[ref.voxel_size == VOXEL_SIZES[0]].squeeze()
+print(ref)
+for m in df.m.unique():
+    df_ = df[df.m == m]
+    for v in VOXEL_SIZES[1:2]:
+        df__ = df_[df_.voxel_size == v].squeeze()
+        # print(
+        #     m,
+        #     v,
+        #     #f'{np.mean(np.abs(df__.optic-ref.optic)):.2f}',
+        #     f'{np.mean(np.abs(ref.optic -df__.optic))/ np.mean(ref.optic):.4f}')
+
+        print(ref.optic.dtype)
+
+        # print('a', ref.optic)
+        # print('b', df__.optic)
+        # print('c', np.abs(ref.optic - df__.optic))
+        # print('d', np.abs(df__.optic - ref.optic))
+        # print('e', ref.optic - df__.optic)
+        # print('f', df__.optic - ref.optic)
+
+        break
+    break
+
+    # print(
+    #     m, v,
+    #     f'{np.mean(np.divide(np.mean(np.abs(ref.optic -df__.optic),axis=-1),np.mean(ref.optic,axis=-1))):.4f}'
+    # )
+
+    # print(
+    #     m, v,
+    #     f'{np.mean(np.divide(np.mean(np.abs(df__.optic - ref.optic), axis=-1),np.mean(ref.optic, axis=-1))):.4f}'
+    # )
+# df = df[df.m == 0]
+# print(df__)
+
+# %%
+df = df_1[df_1.n == 0]
+# df = df[df.m == 0]
+# df = df[df.voxel_size == VOXEL_SIZES[3]]
+df = df[df.radius == 0.5]
+df = df[df.psi == 1.0]
+df = df[df.f0_inc == 0]
+
+for m in df.m.unique():
+    df_ = df[df.m == m]
+    for v in VOXEL_SIZES[1:]:
+        print(df_[df_.voxel_size == v].data_diff)
+# df = df[df.m == 0]
 
 # %%

@@ -132,11 +132,15 @@ def run(parameter):
 
         fiber_bundles = models.rotate(fiber_bundles, f0_inc, f1_rot)
 
+        if CONFIG.simulation.volume[0] != CONFIG.simulation.volume[1]:
+            raise ValueError('has to be square')
         nstep = int(np.round(np.sqrt(args.repeat)))
-        step = 60 / nstep  # 60er cube
+        step = CONFIG.simulation.volume[0] / nstep
+
         for n in tqdm.tqdm(list(range(args.repeat))):
             rnd_dim_origin = np.array(
-                (-30 + (n % nstep) * step, -30 + (n // nstep) * step))
+                (-CONFIG.simulation.volume[0] / 2 + (n % nstep) * step,
+                 -CONFIG.simulation.volume[1] / 2 + (n // nstep) * step))
             for voxel_size in VOXEL_SIZES:
 
                 species_list = [
@@ -148,14 +152,14 @@ def run(parameter):
                     model_list = ['r']  # , 'p']
                     for model in model_list:
                         LAYERS = CONFIG.models.layers
-                        layers = [(LAYERS.b.radius, LAYERS.b.dn, LAYERS.b.mu,
+                        layers = [(LAYERS.b.radius, LAYERS.b.dn, mu,
                                    LAYERS.b.model)]
                         if model == 'r':
-                            layers.append((LAYERS.r.radius, LAYERS.r.dn,
-                                           LAYERS.r.mu, LAYERS.r.model))
+                            layers.append((LAYERS.r.radius, LAYERS.r.dn, mu,
+                                           LAYERS.r.model))
                         elif model == 'p':
-                            layers.append((LAYERS.p.radius, LAYERS.p.dn,
-                                           LAYERS.p.mu, LAYERS.p.model))
+                            layers.append((LAYERS.p.radius, LAYERS.p.dn, mu,
+                                           LAYERS.p.model))
                         else:
                             raise ValueError('FOOO')
 
