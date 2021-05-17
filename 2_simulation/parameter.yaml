@@ -28,17 +28,14 @@ models:
     b:
       radius: 0.75
       dn: 0
-      mu: 0
       model: "b"
     r:
       radius: 1
       dn: 0.008
-      mu: 0
       model: "r"
     p:
       radius: 1
       dn: -0.004
-      mu: 0
       model: "p"
 
 cube:

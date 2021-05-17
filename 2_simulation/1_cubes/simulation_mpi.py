@@ -108,18 +108,6 @@ def run(p):
             model_list = ['r']
 
         for model in model_list:
-            LAYERS = CONFIG.models.layers
-            layers = [(LAYERS.b.radius, LAYERS.b.dn, LAYERS.b.mu,
-                       LAYERS.b.model)]
-            if model == 'r':
-                layers.append(
-                    (LAYERS.r.radius, LAYERS.r.dn, LAYERS.r.mu, LAYERS.r.model))
-            elif model == 'p':
-                layers.append(
-                    (LAYERS.p.radius, LAYERS.p.dn, LAYERS.p.mu, LAYERS.p.model))
-            else:
-                raise ValueError('FOOO')
-
             setup_list = [('PM', CONFIG.simulation.setup.pm),
                           ('LAP', CONFIG.simulation.setup.lap)]
             if p.pm_only:
@@ -150,6 +138,16 @@ def run(p):
 
                 simpli.fiber_bundles = fiber_bundles.rotate(rot)
 
+                LAYERS = CONFIG.models.layers
+                layers = [(LAYERS.b.radius, LAYERS.b.dn, 0, LAYERS.b.model)]
+                if model == 'r':
+                    layers.append(
+                        (LAYERS.r.radius, LAYERS.r.dn, 0, LAYERS.r.model))
+                elif model == 'p':
+                    layers.append(
+                        (LAYERS.p.radius, LAYERS.p.dn, 0, LAYERS.p.model))
+                else:
+                    raise ValueError('FOOO')
                 simpli.fiber_bundles.layers = [layers] * len(fiber_bundles)
                 logger.info(
                     f"tissue_pipeline: model: {[layers] * len(fiber_bundles)}")
