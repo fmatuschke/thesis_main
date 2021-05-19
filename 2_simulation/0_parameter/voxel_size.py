@@ -195,7 +195,7 @@ def run(parameter):
                             simpli.dim_origin[:2] = rnd_dim_origin
                             # print(simpli.dim_origin)
 
-                            if simpli.memory_usage() * args.num_proc > 200000:
+                            if simpli.memory_usage() * args.num_proc > 400000:
                                 print(
                                     str(round(simpli.memory_usage(), 2)) + 'MB')
                                 return
@@ -230,9 +230,8 @@ def run(parameter):
                                     tissue_properties, theta, phi)
 
                                 # absorption
-                                images *= np.exp(
-                                    -mu * CONFIG.simulation.volume[-1] * 1e-3 *
-                                    simpli.voxel_size)
+                                # images *= np.exp(
+                                #     -mu * CONFIG.simulation.volume[-1] * 1e-3)
 
                                 dset['simulation/data/' + str(t)] = images
                                 dset['simulation/data/' +

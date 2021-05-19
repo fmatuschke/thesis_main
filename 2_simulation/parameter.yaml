@@ -43,6 +43,7 @@ cube:
   d_rot: 15
 
 species:
+  # mu for 0.75 density r=0.5
   roden:
     mu: 8
   vervet:

@@ -58,6 +58,21 @@ plt.savefig(os.path.join(
     PATH, f'output/transmittance_vervet_cc_{cval[0]:.0f}_{cval[1]:.0f}.png'),
             bbox_inches='tight')
 
+# transmittance BG
+plt.subplots()
+plt.imshow(transmittance[0:4200:skip, 0:4200:skip],
+           cmap=plt.get_cmap('cividis'),
+           origin='lower')
+cval = (np.amin(transmittance[0:4200:skip, 0:4200:skip]),
+        np.amax(transmittance[0:4200:skip, 0:4200:skip]))
+print(cval)
+# plt.plot((leftroi[:, 0] - clip[1]) / skip, (leftroi[:, 1] - clip[0]) / skip,
+#          c='red')
+# plt.plot((rightroi[:, 0] - clip[1]) / skip, (rightroi[:, 1] - clip[0]) / skip,
+#          c='red')
+plt.axis('off')
+plt.tight_layout()
+
 # retardation
 plt.subplots()
 plt.imshow(retardation[clip[0]:24500:skip, clip[1]:27000:skip],
@@ -94,8 +109,19 @@ retardation_left = np.extract(mask_left, retardation)
 retardation_right = np.extract(mask_right, retardation)
 
 # %%
-print(np.mean(transmittance_left), np.std(transmittance_left))
-print(np.mean(transmittance_right), np.std(transmittance_right))
+t_left_mean = np.mean(transmittance_left)
+t_left_std = np.std(transmittance_left)
+t_right_mean = np.mean(transmittance_right)
+t_right_std = np.std(transmittance_right)
+
+r_bg_mean = np.mean(transmittance[0:4200, 0:4200])
+r_bg_std = np.std(transmittance[0:4200, 0:4200])
+
+print(t_left_mean, t_left_std)
+print(t_right_mean, t_right_std)
+print(r_bg_mean, r_bg_std)
+print("fuellgrad 0.75:", -np.log(t_left_mean / r_bg_mean) / (0.06 * 0.75))
+print("fuellgrad 0.75:", -np.log(t_right_mean / r_bg_mean) / (0.06 * 0.75))
 print(np.mean(retardation_left), np.std(retardation_left))
 print(np.mean(retardation_right), np.std(retardation_right))
 

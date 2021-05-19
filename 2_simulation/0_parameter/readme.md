@@ -35,7 +35,8 @@ python3 voxel_size_plots.py -i output/vs_135_0.01_6_25_rc1
 
 # plots
 # _0 without noise, _1 with noise
-voxel_size_plots_data
+./plot.sh voxel_size_plots_data_0.tex output/vs_135_0.01_6_25_rc1
+./plot.sh voxel_size_plots_data_1.tex output/vs_135_0.01_6_25_rc1
 ```
 
 # fiber radii

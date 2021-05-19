@@ -214,9 +214,9 @@ def run(parameter):
                             )
                             dset.attrs['dim_origin'] = rnd_dim_origin
 
-                            simpli.fiber_bundles.layers = [[(0.75, 0, 0, 'b'),
-                                                            (1.0, dn, 0, model)]
-                                                          ] * len(fiber_bundles)
+                            simpli.fiber_bundles.layers = [[
+                                (0.75, 0, mu, 'b'), (1.0, dn, mu, model)
+                            ]] * len(fiber_bundles)
 
                             with warnings.catch_warnings():
                                 warnings.filterwarnings(
@@ -244,8 +244,7 @@ def run(parameter):
                                     tissue_properties, theta, phi)
 
                                 # absorption
-                                images *= np.exp(-mu * THICKNESS * 1e-3 *
-                                                 simpli.voxel_size)
+                                # images *= np.exp(-mu * THICKNESS)
 
                                 dset['simulation/data/' + str(t)] = images
                                 dset['simulation/data/' +

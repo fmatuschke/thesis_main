@@ -175,11 +175,6 @@ def run(p):
                     dset.attrs['tissue_stats'] = np.asarray(
                         (unique_elements, counts_elements))
 
-                images_stack = [None] * 5
-                for t, (theta, phi) in enumerate(simpli.tilts):
-                    images_stack[t] = simpli.run_simulation(
-                        tissue, optical_axis, tissue_properties, theta, phi)
-
                 species_list = [('Human', CONFIG.species.human.mu),
                                 ('Vervet', CONFIG.species.vervet.mu),
                                 ('Roden', CONFIG.species.roden.mu)]
@@ -188,17 +183,18 @@ def run(p):
                     species_list = [('Vervet', CONFIG.species.vervet.mu)]
 
                 for species, mu in species_list:
+                    print("TEST!!!!!!!!!!!!!!")
+                    tissue_properties[1:, 1] = mu
+
                     dset = h5f.create_group(f'{setup_name}/{species}/{model}')
                     dset.create_group('simulation')
                     dset['simulation'].attrs['tilt_angle'] = tilt_angle
 
                     tilting_stack = [None] * 5
                     for t, (theta, phi) in enumerate(simpli.tilts):
-                        # absorption
-                        images = np.multiply(
-                            images_stack[t],
-                            np.exp(-mu * tissue_thickness[:, :, None] * 1e-3 /
-                                   np.cos(theta) * simpli.voxel_size))
+                        images = simpli.run_simulation(tissue, optical_axis,
+                                                       tissue_properties, theta,
+                                                       phi)
 
                         images = simpli.rm_crop_tilt_halo(images)
 
