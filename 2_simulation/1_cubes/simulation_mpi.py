@@ -183,8 +183,8 @@ def run(p):
                     species_list = [('Vervet', CONFIG.species.vervet.mu)]
 
                 for species, mu in species_list:
-                    print("TEST!!!!!!!!!!!!!!")
-                    tissue_properties[1:, 1] = mu
+                    tissue_properties[1:,
+                                      1] = mu  # fiber absorp, background not
 
                     dset = h5f.create_group(f'{setup_name}/{species}/{model}')
                     dset.create_group('simulation')
