@@ -154,9 +154,6 @@ def run(p):
 
                 tissue, optical_axis, tissue_properties = simpli.run_tissue_pipeline(
                 )
-                tissue_thickness = np.sum(
-                    tissue > 0,
-                    -1) / tissue.shape[-1] * CONFIG.simulation.volume[-1]
 
                 # Simulate PLI Measurement
                 logger.info(f"simulation_pipeline: model:{model}")
