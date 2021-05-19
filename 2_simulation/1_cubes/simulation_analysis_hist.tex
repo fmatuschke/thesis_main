@@ -18,7 +18,10 @@
 %                 %  mode=list and make, 
 %                  ]
 % 
-\def\datapath{../../output/sim_120_ime}
+\def\datapath{../../__PATH__}
+\directlua0{
+  pdf.setinfo ("/Path: (__PATH__)")
+}
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}

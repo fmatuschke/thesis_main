@@ -15,12 +15,13 @@ norm=False
 
 cp ../../simulation_analysis_hist.tex .
 rm -rf tikz/*
-sed -i 's/__MICROSCOPE__/'"$microscope"'/g' simulation_analysis_hist.tex
-sed -i 's/__SPECIES__/'"$species"'/g' simulation_analysis_hist.tex
-sed -i 's/__MODEL__/'"$model"'/g' simulation_analysis_hist.tex
-sed -i 's/__RADIUS__/'"$radius"'/g' simulation_analysis_hist.tex
-sed -i 's/__NAME__/'"$name"'/g' simulation_analysis_hist.tex
-sed -i 's/__NORM__/'"$norm"'/g' simulation_analysis_hist.tex
+sed -i 's?__PATH__?'"$1"'?g' simulation_analysis_hist.tex
+sed -i 's?__MICROSCOPE__?'"$microscope"'?g' simulation_analysis_hist.tex
+sed -i 's?__SPECIES__?'"$species"'?g' simulation_analysis_hist.tex
+sed -i 's?__MODEL__?'"$model"'?g' simulation_analysis_hist.tex
+sed -i 's?__RADIUS__?'"$radius"'?g' simulation_analysis_hist.tex
+sed -i 's?__NAME__?'"$name"'?g' simulation_analysis_hist.tex
+sed -i 's?__NORM__?'"$norm"'?g' simulation_analysis_hist.tex
 
 lualatex -interaction=nonstopmode -halt-on-error --shell-escape simulation_analysis_hist.tex
 # make -j4 -f simulation_analysis_hist.makefile
@@ -46,12 +47,13 @@ for radius in 0.5; do
 
                   cp ../../simulation_analysis_hist.tex .
                   rm -rf tikz/*
-                  sed -i 's/__MICROSCOPE__/'"$microscope"'/g' simulation_analysis_hist.tex
-                  sed -i 's/__SPECIES__/'"$species"'/g' simulation_analysis_hist.tex
-                  sed -i 's/__MODEL__/'"$model"'/g' simulation_analysis_hist.tex
-                  sed -i 's/__RADIUS__/'"$radius"'/g' simulation_analysis_hist.tex
-                  sed -i 's/__NAME__/'"$name"'/g' simulation_analysis_hist.tex
-                  sed -i 's/__NORM__/'"$norm"'/g' simulation_analysis_hist.tex
+                  sed -i 's?__PATH__?'"$1"'?g' simulation_analysis_hist.tex
+                  sed -i 's?__MICROSCOPE__?'"$microscope"'?g' simulation_analysis_hist.tex
+                  sed -i 's?__SPECIES__?'"$species"'?g' simulation_analysis_hist.tex
+                  sed -i 's?__MODEL__?'"$model"'?g' simulation_analysis_hist.tex
+                  sed -i 's?__RADIUS__?'"$radius"'?g' simulation_analysis_hist.tex
+                  sed -i 's?__NAME__?'"$name"'?g' simulation_analysis_hist.tex
+                  sed -i 's?__NORM__?'"$norm"'?g' simulation_analysis_hist.tex
 
                   lualatex -interaction=nonstopmode -halt-on-error --shell-escape simulation_analysis_hist.tex
                   # make -j4 -f simulation_analysis_hist.makefile

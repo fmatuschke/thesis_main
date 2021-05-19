@@ -79,11 +79,11 @@
 % 
 \newcommand{\Loop}[1]{
 \foreach \r in {0.5,1.0,2.0,5.0,10.0} {
-\foreach \vs in {0.01,0.025,0.05,0.1,0.26,0.65,1.3} {#1}}}
+\foreach \vs in {0.025,0.05,0.1,0.26,0.65,1.3} {#1}}}
 % 
 \foreach \setup [count=\k] in {PM} { % LAP
-\foreach \species [count=\l] in {Roden,Vervet,Human} { %
-\foreach \mode [count=\m] in {p,r} { %
+\foreach \species [count=\l] in {Vervet} { % {Roden,Vervet,Human}
+\foreach \mode [count=\m] in {r} { % {p, r}
 % 
 \begin{tikzpicture}[]
 \begin{groupplot}[%
@@ -114,7 +114,8 @@
         {$vs=0.1$},
         {$vs=0.26$},
         {$vs=0.65$},
-        {$vs=1.3$}}]
+        {$vs=1.3$}
+        }]
 \def\omega{0.0}
 \def\psi{1.0}
 \def\finc{0}
