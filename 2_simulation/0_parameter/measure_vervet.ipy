@@ -120,8 +120,10 @@ r_bg_std = np.std(transmittance[0:4200, 0:4200])
 print(t_left_mean, t_left_std)
 print(t_right_mean, t_right_std)
 print(r_bg_mean, r_bg_std)
-print("fuellgrad 0.75:", -np.log(t_left_mean / r_bg_mean) / (0.06 * 0.75))
-print("fuellgrad 0.75:", -np.log(t_right_mean / r_bg_mean) / (0.06 * 0.75))
+print("fuellgrad 0.75:", -np.log(t_left_mean / r_bg_mean) / (0.06 * 0.75), 'pm',
+      1 / t_left_mean / (0.06 * 0.75) + 1 / r_bg_mean / (0.06 * 0.75))
+print("fuellgrad 0.75:", -np.log(t_right_mean / r_bg_mean) / (0.06 * 0.75),
+      'pm', 1 / t_right_mean / (0.06 * 0.75) + 1 / r_bg_mean / (0.06 * 0.75))
 print(np.mean(retardation_left), np.std(retardation_left))
 print(np.mean(retardation_right), np.std(retardation_right))
 
