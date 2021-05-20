@@ -7,7 +7,8 @@ import os
 
 # %%
 
-path = 'output/bf'
+path = 'output/bf_rc1'
+ext = os.path.split()[-1]
 df = pd.read_pickle(os.path.join(path, 'bf.pkl'))
 # df = df[df.setup == 'PM']
 df = df.apply(pd.Series.explode).reset_index().apply(
@@ -50,7 +51,8 @@ for parameter in ["transmittance", "retardation"]:
             ax.set(ylim=(0, 1.05))
         f.set_size_inches(15, 10)
         # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
-        plt.savefig(os.path.join(path, f'{parameter}_{setup}.pdf'), dpi=300)
+        plt.savefig(os.path.join(path, f'{ext}_{parameter}_{setup}.pdf'),
+                    dpi=300)
         for species in df.species.unique():
             f = plt.figure()
             ax = sns.boxplot(x="x",
@@ -67,8 +69,8 @@ for parameter in ["transmittance", "retardation"]:
                 ax.set(ylim=(0, 1.05))
             f.set_size_inches(15, 10)
             # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
-            plt.savefig(os.path.join(path,
-                                     f"{parameter}_{setup}_{species}.pdf"),
+            plt.savefig(os.path.join(
+                path, f"{ext}_{parameter}_{setup}_{species}.pdf"),
                         dpi=300)
 
 # %%

@@ -1,27 +1,29 @@
-#! /usr/bin/env python3
-
-import numpy as np
-import multiprocessing as mp
 import argparse
-import pandas as pd
-import warnings
-import h5py
 import glob
+import multiprocessing as mp
 import os
+import subprocess
+import warnings
 
-import fastpli.simulation
 import fastpli.analysis
+import fastpli.io
 import fastpli.model.sandbox
 import fastpli.model.solver
+import fastpli.simulation
 import fastpli.tools
-import fastpli.io
-
+import h5py
+import numpy as np
+import pandas as pd
 import tqdm
+import typing
 
-# VOXEL_SIZE = 0.125
-# PIXEL_SIZE = 1.25
-# THICKNESS = 60
-# LENGTH = 65
+import parameter
+
+FILE_NAME = os.path.abspath(__file__)
+FILE_PATH = os.path.dirname(FILE_NAME)
+FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
+CONFIG = parameter.get_tupleware()
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -50,20 +52,23 @@ subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
 subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
 
-def run(parameter):
-    file = parameter[0]
-    dn = parameter[1]
-    model = parameter[2]
-    name = parameter[3]
-    gain = parameter[4]
-    intensity = parameter[5]
-    res = parameter[6]
-    # tilt_angle = parameter[7]
-    sigma = parameter[8]
-    species = parameter[9]
-    mu = parameter[10]
+class Parameter(typing.NamedTuple):
+    """  """
+    file: str
+    dn: float
+    model: float
+    setup: str
+    gain: float
+    intensity: float
+    pixel_size: float
+    species: str
+    sigma: float
+    mu: float
 
-    with h5py.File(file, 'r') as h5f_:
+
+def run(p):
+
+    with h5py.File(p.file, 'r') as h5f_:
         fiber_bundles = fastpli.io.fiber_bundles.load_h5(h5f_)
         psi = h5f_['/'].attrs["psi"]
         omega = h5f_['/'].attrs["omega"]
@@ -73,19 +78,20 @@ def run(parameter):
 
     simpli = fastpli.simulation.Simpli()
     simpli.omp_num_threads = args.num_threads
-    simpli.pixel_size = res
-    simpli.optical_sigma = sigma  # in voxel size
-    simpli.filter_rotations = np.linspace(0, np.pi, 9, False)
+    simpli.pixel_size = p.pixel_size
+    simpli.optical_sigma = p.sigma  # in voxel size
+    simpli.filter_rotations = np.linspace(0, np.pi,
+                                          CONFIG.simulation.num_filter_rot,
+                                          False)
     simpli.interpolate = "Slerp"
     simpli.untilt_sensor_view = True
-    simpli.wavelength = 525  # in nm
-    simpli.light_intensity = intensity  # a.u.
+    simpli.wavelength = CONFIG.simulation.wavelength  # in nm
+    simpli.light_intensity = p.intensity  # a.u.
     simpli.fiber_bundles = fiber_bundles
     simpli.tilts = np.deg2rad(np.array([(0, 0)]))
 
-    simpli.voxel_size = VOXEL_SIZE
-    simpli.set_voi(-0.5 * np.array([LENGTH, LENGTH, THICKNESS]),
-                   0.5 * np.array([LENGTH, LENGTH, THICKNESS]))
+    simpli.voxel_size = CONFIG.simulation.voxel_size
+    simpli.set_voi(CONFIG.simulation.voi[0], CONFIG.simulation.voi[1])
 
     # print(simpli.dim_origin)
     # simpli.dim_origin[:2] = rnd_dim_origin
@@ -94,10 +100,9 @@ def run(parameter):
     simpli.fiber_bundles.layers = [[(0.75, 0, mu, 'b'),
                                     (1.0, dn, mu, model)]] * len(fiber_bundles)
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="objects overlap")
-        label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline(
-        )
+    # with warnings.catch_warnings():
+    #     warnings.filterwarnings("ignore", message="objects overlap")
+    label_field, vector_field, tissue_properties = simpli.run_tissue_pipeline()
 
     # Simulate PLI Measurement
     for tilt in simpli._tilts:
@@ -109,23 +114,23 @@ def run(parameter):
         # images *= np.exp(-mu * THICKNESS * 1e-3)
 
         simpli.noise_model = lambda x: np.round(
-            np.random.normal(x, np.sqrt(gain * x))).astype(np.float32)
+            np.random.normal(x, np.sqrt(p.gain * x))).astype(np.float32)
 
         _, images = simpli.apply_optic(images)
         t, d, r = simpli.apply_epa(images)
 
         df = pd.DataFrame([[
-            species,
+            p.species,
             simpli.voxel_size,
             radius,
             v0,
-            model,
-            name,
+            p.model,
+            p.setup,
             omega,
             psi,
             simpli.pixel_size,
-            dn,
-            mu,
+            p.dn,
+            p.mu,
             t,
             d,
             r,
@@ -157,17 +162,24 @@ if __name__ == "__main__":
 
     parameters = []
     for file in files:
-        for fn in np.arange(1, 5.001, 0.125):
+        for fn in np.arange(1, 5.001, 0.5):
             for dn, model in [(-0.001 * fn, 'p'), (0.002 * fn, 'r')]:
-                for name, gain, intensity, res, tilt_angle, sigma in [
-                    ('LAP', 3, 35000, 20, 5.5, 0.75),
-                    ('PM', 0.1175, 8000, 1.25, 3.9, 0.75)
-                ]:
-                    for species, mu in [('Roden', 8), ('Vervet', 30),
-                                        ('Human', 65)]:
+                for setup, SETUP in [('LAP', CONFIG.simulation.setup.lap),
+                                     ('PM', CONFIG.simulation.setup.pm)]:
+                    for species, mu in [('Human', CONFIG.species.human.mu),
+                                        ('Vervet', CONFIG.species.vervet.mu),
+                                        ('Roden', CONFIG.species.roden.mu)]:
                         parameters.append(
-                            (file, dn, model, name, gain, intensity, res,
-                             tilt_angle, sigma, species, mu))
+                            Parameter(file=file,
+                                      dn=dn,
+                                      model=model,
+                                      setup=setup,
+                                      gain=SETUP.gain,
+                                      intensity=SETUP.light_intensity,
+                                      pixel_size=SETUP.pixel_size,
+                                      sigma=SETUP.sigma,
+                                      species=species,
+                                      mu=mu))
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [
