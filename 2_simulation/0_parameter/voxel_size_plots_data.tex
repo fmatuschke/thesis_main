@@ -6,6 +6,7 @@
 \usepackage{currfile}
 \usepackage{ifthen}
 \usepackage{tikz}
+\usepackage{mathtools}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
@@ -16,6 +17,7 @@
 % \usetikzlibrary{external}
 % \tikzexternalize
 \tikzset{>=latex}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
@@ -81,6 +83,8 @@
 \foreach \r in {0.5,1.0,2.0,5.0,10.0} {
 \foreach \vs in {0.025,0.05,0.1,0.26,0.65,1.3} {#1}}}
 % 
+% 
+\foreach \noise [count=\n] in {1,0}{
 \foreach \setup [count=\k] in {PM} { % LAP
 \foreach \species [count=\l] in {Vervet} { % {Roden,Vervet,Human}
 \foreach \mode [count=\m] in {r} { % {p, r}
@@ -90,19 +94,19 @@
   group style={
       group size=1 by 4,
       horizontal sep=2cm,
-      vertical sep=0.75cm,
+      vertical sep=1cm,
       ylabels at=edge left,
-      },
-      width = \width,
-      height = 0.24*\height,
-    ymode={log}, 
-    Boxplot,
+  },
+   width = \width,
+   height = 0.22*\height,
+   Boxplot,
+   ymode={log}, 
+   ylabel={$\sum(\abs{I-I_\textit{ref}})$},
 ]
 % 
 \nextgroupplot[%
-    ylabel={data diff rel},
     % ymin=0.003, ymax=0.1,
-    legend to name={legend\currfilebase\k\l\m},
+    legend to name={legend\n\k\l\m},
     legend image post style={mark=square*},
     legend columns=2,
     legend cell align={left},
@@ -110,54 +114,56 @@
     legend transposed=true,
     legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
     legend entries={%
-        {$vs=0.025$},
-        {$vs=0.05$},
-        {$vs=0.1$},
-        {$vs=0.26$},
-        {$vs=0.65$},
-        {$vs=1.3$}
-        }]
+    {$vs=0.025$},
+    {$vs=0.05$},
+    {$vs=0.1$},
+    {$vs=0.26$},
+    {$vs=0.65$},
+    {$vs=1.3$}
+}]
 \def\omega{0.0}
 \def\psi{1.0}
 \def\finc{0}
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
-\node[anchor=south] (title) at ({axis description cs:0.5,1.0}) {\mode/\species};
+\node[anchor=south] (title) at ({axis description cs:0.5,1.05}) {\mode/\species/\setup/\noise};
+\node[anchor=south] (title) at ({axis description cs:0.5,0.95})
+    {$\Omega=\SI{\omega}{\degree},\Psi=\psi,\alpha=\SI{\finc}{\degree}$};
 \xachse
 % 
-
 % 
 \nextgroupplot[%
-    ylabel={data diff rel},
-    ] 
+] 
 \def\omega{0.0}
 \def\psi{1.0}
 \def\finc{90}
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
+\node[anchor=south] (title) at ({axis description cs:0.5,0.95})
+    {$\Omega=\SI{\omega}{\degree},\Psi=\psi,\alpha=\SI{\finc}{\degree}$};
 \xachse
 % 
 \nextgroupplot[%
-    ylabel={data diff rel},
-    ] 
+] 
 \def\omega{90.0}
 \def\psi{0.5}
 \def\finc{0}
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
+\node[anchor=south] (title) at ({axis description cs:0.5,0.95})
+    {$\Omega=\SI{\omega}{\degree},\Psi=\psi,\alpha=\SI{\finc}{\degree}$};
 \xachse
 % 
 \nextgroupplot[%
-    ylabel={data diff rel}
 ]
 \def\omega{90.0}
 \def\psi{0.5}
@@ -165,15 +171,18 @@
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={data_diff}, col sep=comma, row sep=newline,
-        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_1.csv};
+        ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
+\node[anchor=south] (title) at ({axis description cs:0.5,0.95})
+    {$\Omega=\SI{\omega}{\degree},\Psi=\psi,\alpha=\SI{\finc}{\degree}$};
 \xachse
 % 
 \end{groupplot}
 % 
-\node[anchor=north] at ($(group c1r4.south) - (0,0.75cm)$) {\ref{legend\currfilebase\k\l\m}};
+% 
+\node[anchor=north] at ($(group c1r4.south) - (0,0.75cm)$) {\ref{legend\n\k\l\m}};
 % 
 \end{tikzpicture}
-}}}
+}}}}
 % 
 \end{document}
