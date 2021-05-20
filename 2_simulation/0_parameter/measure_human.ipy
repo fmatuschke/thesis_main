@@ -97,7 +97,8 @@ plt.imshow(transmittance[-2000:-100, -2000:-100])
 print(t_mean, t_std)
 print(r_bg_mean, r_bg_std)
 print("fuellgrad 0.75:", -np.log(t_mean / r_bg_mean) / (0.06 * 0.75), 'pm',
-      1 / t_mean / (0.06 * 0.75) + 1 / r_bg_mean / (0.06 * 0.75))
+      (1 / t_mean) / (0.06 * 0.75) * t_std + (1 / r_bg_mean) /
+      (0.06 * 0.75) * r_bg_std)
 print(np.mean(retardation_), np.std(retardation_))
 
 # %%
