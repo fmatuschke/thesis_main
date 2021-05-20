@@ -324,7 +324,8 @@ def main():
     with MPIPoolExecutor() as executor:
         [
             _ for _ in tqdm.tqdm(executor.map(run, parameters),
-                                 total=len(parameters))
+                                 total=len(parameters),
+                                 smoothing=0)
         ]
 
 

@@ -96,10 +96,12 @@
    width = \width,
    height = 0.24*\height,
    Boxplot,
+   ymode={log}, 
 ]
 % 
 \nextgroupplot[%
-    ylabel={data diff rel}, ymode={log}, 
+    ylabel={data diff rel}, 
+    % ymode={log}, 
     % ymin=0.003, ymax=0.1,
     legend to name={legend\currfilebase\k\l\m},
     legend image post style={mark=square*},
