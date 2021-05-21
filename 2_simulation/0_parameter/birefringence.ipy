@@ -8,12 +8,12 @@ import os
 # %%
 
 path = 'output/bf_rc1'
-ext = os.path.split()[-1]
+ext = os.path.split(path)[-1]
 df = pd.read_pickle(os.path.join(path, 'bf.pkl'))
 # df = df[df.setup == 'PM']
 df = df.apply(pd.Series.explode).reset_index().apply(
     pd.Series.explode).reset_index()
-df['x'] = np.round(df.dn, 4)
+# df['x'] = np.round(df.dn, 4)
 # df['x'] = df.apply(lambda x: f"{np.round(x['dn'],4)}", axis=1)
 
 # %%
@@ -37,8 +37,9 @@ df['x'] = np.round(df.dn, 4)
 # %%
 for parameter in ["transmittance", "retardation"]:
     for setup in df.setup.unique():
+        print(setup)
         f = plt.figure()
-        ax = sns.boxplot(x="x",
+        ax = sns.boxplot(x="dn",
                          y=parameter,
                          data=df[(((df.dn % 0.0010 == 0) & (df.dn < 0)) |
                                   ((df.dn % 0.0020 == 0) & (df.dn > 0))) &
@@ -54,8 +55,9 @@ for parameter in ["transmittance", "retardation"]:
         plt.savefig(os.path.join(path, f'{ext}_{parameter}_{setup}.pdf'),
                     dpi=300)
         for species in df.species.unique():
+            print(species)
             f = plt.figure()
-            ax = sns.boxplot(x="x",
+            ax = sns.boxplot(x="dn",
                              y=parameter,
                              data=df[(((df.dn % 0.0010 == 0) & (df.dn < 0)) |
                                       ((df.dn % 0.0020 == 0) &

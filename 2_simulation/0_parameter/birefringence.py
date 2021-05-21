@@ -73,8 +73,8 @@ def run(p):
         psi = h5f_['/'].attrs["psi"]
         omega = h5f_['/'].attrs["omega"]
         # radius = h5f_['/'].attrs["radius"] # FIXME
-        radius = float(file.split("_r_")[1].split("_")[0])
-        v0 = float(file.split("_v0_")[1].split("_")[0])
+        radius = float(p.file.split("_r_")[1].split("_")[0])
+        v0 = float(p.file.split("_v0_")[1].split("_")[0])
 
     simpli = fastpli.simulation.Simpli()
     simpli.omp_num_threads = args.num_threads
@@ -97,8 +97,18 @@ def run(p):
     # simpli.dim_origin[:2] = rnd_dim_origin
     # print(simpli.dim_origin)
 
-    simpli.fiber_bundles.layers = [[(0.75, 0, mu, 'b'),
-                                    (1.0, dn, mu, model)]] * len(fiber_bundles)
+    if p.species == 'Roden':
+        SPECIES = CONFIG.species.roden
+    elif p.species == 'Vervet':
+        SPECIES = CONFIG.species.vervet
+    elif p.species == 'Human':
+        SPECIES = CONFIG.species.human
+    else:
+        raise ValueError('wrong species')
+
+    simpli.fiber_bundles.layers = [[(0.75, 0, SPECIES.mu, 'b'),
+                                    (1.0, p.dn, SPECIES.mu, p.model)]
+                                  ] * len(fiber_bundles)
 
     # with warnings.catch_warnings():
     #     warnings.filterwarnings("ignore", message="objects overlap")
@@ -154,7 +164,7 @@ def run(p):
     return df
 
 
-if __name__ == "__main__":
+def main():
 
     files = glob.glob(
         "/data/PLI-Group/felix/data/thesis/1_model/1_cubes/output/cube_2pop_120/cube_2pop_psi_1.00_omega_0.00_r_*.solved.h5"
@@ -162,10 +172,10 @@ if __name__ == "__main__":
 
     parameters = []
     for file in files:
-        for fn in np.arange(1, 5.001, 0.5):
+        for fn in np.arange(1, 5.001, 1):
             for dn, model in [(-0.001 * fn, 'p'), (0.002 * fn, 'r')]:
-                for setup, SETUP in [('LAP', CONFIG.simulation.setup.lap),
-                                     ('PM', CONFIG.simulation.setup.pm)]:
+                for setup, SETUP in [('PM', CONFIG.simulation.setup.pm),
+                                     ('LAP', CONFIG.simulation.setup.lap)]:
                     for species, mu in [('Human', CONFIG.species.human.mu),
                                         ('Vervet', CONFIG.species.vervet.mu),
                                         ('Roden', CONFIG.species.roden.mu)]:
@@ -191,3 +201,7 @@ if __name__ == "__main__":
     df = pd.concat(df, ignore_index=True)
 
     df.to_pickle(os.path.join(args.output, "bf.pkl"))
+
+
+if __name__ == "__main__":
+    main()
