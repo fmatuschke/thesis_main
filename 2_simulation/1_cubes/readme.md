@@ -5,11 +5,11 @@ generate data
 ```sh
 # activate env
 ./simulation_ime.sh
+
 ```
 
 ## images
 
 ```sh
-# check path inside tex file !
-./pre_stats_box_plot.sh
+python3 generate_tissue.py -i output/cube_2pop_135_rc1 -p 48
 ```
