@@ -1,8 +1,13 @@
+#%% [markdown]
+# previe plot of changes in radii to determan if the radius changes the signal by looking at the resulting orientation distribution changes of acc(GT,GT), acc(GT,SIM), acc(SIM,SIM)
+
 #%%
-from IPython import get_ipython
-get_ipython().run_line_magic('matplotlib', 'inline')
-from jupyterthemes import jtplot
-jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
+# from IPython import get_ipython
+
+# get_ipython().run_line_magic('matplotlib', 'inline')
+# from jupyterthemes import jtplot
+
+# jtplot.style(theme="onedork", context="notebook", ticks=True, grid=True)
 #%%
 import h5py
 import numpy as np
@@ -15,16 +20,23 @@ import fastpli.tools
 
 #%%
 
+THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+FILE_NAME = os.path.abspath(__file__)
+FILE_PATH = os.path.dirname(FILE_NAME)
+FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
+
+DATASET = 'cube_2pop_135_rc1'
+
 df_acc = pd.read_pickle(
-    os.path.join(os.getcwd(), "../..",
-                 "2_simulation/1_cubes/output/sim_120_ime/",
+    os.path.join(FILE_PATH, "output", DATASET,
                  "analysis/cube_2pop_simulation_accs.pkl"))
 print("df_acc:", df_acc.columns)
 
 #%%
 
 for model in ["p", "r"]:
-    fig, axs = plt.subplots(3, figsize=(15, 15))
+    fig, axs = plt.subplots(3, figsize=(10, 16))
     microscope = "PM"
     species = "Vervet"
     # model = "r"
@@ -72,5 +84,9 @@ for model in ["p", "r"]:
                  markers=True,
                  ax=axs[2],
                  legend=False)
-    plt.savefig(f"output/radius_acc_compare_{species}_{microscope}_{model}.pdf")
+    plt.tight_layout()
+    plt.savefig(
+        os.path.join(
+            FILE_PATH, "output",
+            f"{DATASET}_radius_acc_compare_{species}_{microscope}_{model}.pdf"))
 # %%

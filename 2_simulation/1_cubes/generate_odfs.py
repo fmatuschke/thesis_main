@@ -13,7 +13,15 @@ import models
 
 import tqdm
 
-import pretty_errors
+import parameter
+
+THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+FILE_NAME = os.path.abspath(__file__)
+FILE_PATH = os.path.dirname(FILE_NAME)
+FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
+
+CONFIG = parameter.get_tupleware()
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -28,13 +36,6 @@ parser.add_argument("-p",
                     type=int,
                     help="Number of processes.")
 args = parser.parse_args()
-
-# for microscope, species, model in list(
-#                 itertools.product(["PM", "LAP"], ["Roden", "Vervet", "Human"],
-#                                   ["r", "p"])):
-
-# THICKNESS = 60
-# LENGTH = 65
 
 
 def run(file):
@@ -61,7 +62,7 @@ def run(file):
             f1_rot = h5f_sub.attrs["parameter/f1_rot"]
             m_phi, m_theta = models.ori_from_file(
                 h5f_sub.attrs['parameter/fiber_path'], f0_inc, f1_rot,
-                [LENGTH, LENGTH, THICKNESS])
+                CONFIG.simulation.voi)
 
             path, name = os.path.split(file)
             odf.table(

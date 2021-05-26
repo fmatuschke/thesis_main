@@ -1,22 +1,35 @@
 #%%
-import os
 import multiprocessing as mp
-
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import pandas as pd
-import tqdm
-import seaborn as sns
+import os
 
 import fastpli.analysis
-import models
 import helper.circular
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import tqdm
+
+import models
+import parameter
 
 #%%
-sim_path = "output/sim_120_ime_r_0.5"
+
+CONFIG = parameter.get_tupleware()
+
+THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+FILE_NAME = os.path.abspath(__file__)
+FILE_PATH = os.path.dirname(FILE_NAME)
+FILE_BASE = os.path.basename(FILE_NAME)
+FILE_NAME = os.path.splitext(FILE_BASE)[0]
+
+MODEL = 'cube_2pop_135_rc1'
+DATASET = 'cube_2pop_135_rc1_r_0.5'
+
 df = pd.read_pickle(
-    os.path.join(sim_path, "analysis", f"cube_2pop_simulation.pkl"))
+    os.path.join(FILE_PATH, 'output', DATASET,
+                 'analysis/cube_2pop_simulation.pkl'))
 
 df = df[df.microscope == "PM"]
 df = df[df.species == "Vervet"]
@@ -37,12 +50,12 @@ def get_file_from_parameter(psi="0.30",
                             rot="0.00"):
 
     model_str = os.path.join(
-        "../..", "1_model/1_cubes/output/cube_2pop_120",
-        f"cube_2pop_psi_{psi}_omega_{omega}_r_{radius}_v0_120_.solved.h5")
+        THESIS, f"1_model/1_cubes/output/{MODEL}",
+        f"cube_2pop_psi_{psi}_omega_{omega}_r_{radius}_v0_135_.solved.h5")
 
     sim_str = os.path.join(
-        sim_path,
-        f"cube_2pop_psi_{psi}_omega_{omega}_r_{radius}_v0_120_.solved_vs_0.1250_inc_{incl}_rot_{rot}.h5"
+        FILE_PATH, DATASET,
+        f"cube_2pop_psi_{psi}_omega_{omega}_r_{radius}_v0_135_.solved_vs_0.1000_inc_{incl}_rot_{rot}.h5"
     )
 
     return model_str, sim_str
@@ -78,7 +91,7 @@ for (_, row), ax in zip(df.sort_values("f0_inc").iterrows(), axs):
     #
     phi, theta = models.ori_from_file(
         get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
-        [LENGTH, LENGTH, THICKNESS])
+        CONFIG.simulation.voi)
     phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
     ax[1].hist2d(
         phi,
@@ -91,7 +104,10 @@ for (_, row), ax in zip(df.sort_values("f0_inc").iterrows(), axs):
 # plt.tight_layout()
 plt.tight_layout(pad=0, w_pad=0, h_pad=0)
 
-plt.savefig(f"output/{os.path.basename(__file__)[:-3]}_hist.pdf")
+plt.savefig(
+    os.path.join(
+        FILE_PATH,
+        f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist.pdf"))
 # %%
 # fig, axs = plt.subplots(1, 1)
 
@@ -141,6 +157,9 @@ for name in [
         plt.plot(x, y, linewidth=4.2)
 
     plt.tight_layout(pad=0, w_pad=0, h_pad=0)
-    plt.savefig(f"output/{os.path.basename(__file__)[:-3]}_{name}.pdf")
+    plt.savefig(
+        os.path.join(
+            FILE_PATH,
+            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_{name}.pdf"))
 
 # %%
