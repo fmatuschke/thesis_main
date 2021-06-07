@@ -25,9 +25,9 @@ data = np.flip(data, 1)
 # %%
 # plt.imshow(data[800:840, 1070:1125, 0])
 #
-data_8_2 = data[802:810, 1071:1086, :]
-data_8_1 = data[822:830, 1083:1100, :]
-data_7_6 = data[825:834, 1107:1124, :]
+# data_8_2 = data[802:810, 1071:1086, :]
+# data_8_1 = data[822:830, 1083:1100, :]
+# data_7_6 = data[825:834, 1107:1124, :]
 
 data_8_2_lr = data[804:808, 1078:1085, :]
 data_8_1_lr = data[823:829, 1084:1092, :]
@@ -37,25 +37,45 @@ data_8_2_ud = data[802:809, 1073:1078, :]
 data_8_1_ud = data[822:830, 1093:1098, :]
 data_7_6_ud = data[825:834, 1117:1122, :]
 
+data_8_2 = np.vstack((np.reshape(data_8_2_lr, (-1, data_8_2_lr.shape[1])),
+                      np.reshape(data_8_2_ud, (-1, data_8_2_ud.shape[0]))))
+data_8_1 = np.vstack((np.reshape(data_8_1_lr, (-1, data_8_1_lr.shape[1])),
+                      np.reshape(data_8_1_ud, (-1, data_8_1_ud.shape[0]))))
+data_7_6 = np.vstack((np.reshape(data_7_6_lr, (-1, data_7_6_lr.shape[1])),
+                      np.reshape(data_7_6_ud, (-1, data_7_6_ud.shape[0]))))
+
 #
-plt.imshow(data_7_6_ud[:, :, 0])
+plt.imshow(data_8_2_lr[:, :, 0])
 
 # %%
 
 # res = [None] * 6
 res = {}
-for i, d in zip(['82lr', '81lr', '76lr'],
-                [data_8_2_lr, data_8_1_lr, data_7_6_lr]):
-    plt.errorbar(range(d.shape[1]), np.mean(d, (0, -1)), np.std(d, (0, -1)))
-    res['x' + i] = range(d.shape[1])
+for x, (i, d) in enumerate(
+        zip(['82lr', '81lr', '76lr'], [data_8_2_lr, data_8_1_lr, data_7_6_lr])):
+    x = np.arange(d.shape[1])
+    x = x - np.mean(x)
+    plt.errorbar(x, np.mean(d, (0, -1)), np.std(d, (0, -1)))
+    res['x' + i] = x
     res['y' + i] = np.mean(d, (0, -1))
     res['e' + i] = np.std(d, (0, -1))
-for i, d in zip(['82ud', '81ud', '76ud'],
-                [data_8_2_ud, data_8_1_ud, data_7_6_ud]):
-    plt.errorbar(range(d.shape[0]), np.mean(d, (1, -1)), np.std(d, (1, -1)))
-    res['x' + i] = range(d.shape[0])
+for x, (i, d) in enumerate(
+        zip(['82ud', '81ud', '76ud'], [data_8_2_ud, data_8_1_ud, data_7_6_ud])):
+    x = np.arange(d.shape[0])
+    x = x - np.mean(x)
+    plt.errorbar(x, np.mean(d, (1, -1)), np.std(d, (1, -1)))
+    res['x' + i] = x
     res['y' + i] = np.mean(d, (1, -1))
     res['e' + i] = np.std(d, (1, -1))
+for x, (i,
+        d) in enumerate(zip(['82', '81', '76'],
+                            [data_8_2, data_8_1, data_7_6])):
+    x = np.arange(d.shape[1])
+    x = x - np.mean(x)
+    plt.errorbar(x, np.mean(d, 0), np.std(d, 0))
+    res['x' + i] = x
+    res['y' + i] = np.mean(d, 0)
+    res['e' + i] = np.std(d, 0)
 
 # %%
 df = pd.DataFrame.from_dict(res, orient='index').transpose()

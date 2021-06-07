@@ -37,27 +37,28 @@ FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
-with open(os.path.join(THESIS, '2_simulation', 'parameter.yaml'),
-          'r') as stream:
-    PARA = yaml.safe_load(stream)
+# FIXME parameter.py
+# with open(os.path.join(THESIS, '2_simulation', 'parameter.yaml'),
+#           'r') as stream:
+#     PARA = yaml.safe_load(stream)
 
-    class imdict(dict):
+#     class imdict(dict):
 
-        def __hash__(self):
-            return id(self)
+#         def __hash__(self):
+#             return id(self)
 
-        def _immutable(self, *args, **kws):
-            raise TypeError('object is immutable')
+#         def _immutable(self, *args, **kws):
+#             raise TypeError('object is immutable')
 
-        __setitem__ = _immutable
-        __delitem__ = _immutable
-        clear = _immutable
-        update = _immutable
-        setdefault = _immutable
-        pop = _immutable
-        popitem = _immutable
+#         __setitem__ = _immutable
+#         __delitem__ = _immutable
+#         clear = _immutable
+#         update = _immutable
+#         setdefault = _immutable
+#         pop = _immutable
+#         popitem = _immutable
 
-    PARA = imdict(PARA)
+#     PARA = imdict(PARA)
 
 hist_polar_bin = lambda n: np.linspace(
     -np.pi / 2, np.pi / 2, n + 1, endpoint=True)
