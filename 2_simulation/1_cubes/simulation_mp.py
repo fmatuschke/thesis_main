@@ -28,6 +28,32 @@ FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
 CONFIG = parameter.get_tupleware()
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-o",
+                    "--output",
+                    type=str,
+                    required=True,
+                    help="Output path.")
+
+parser.add_argument("-i",
+                    "--input",
+                    nargs='+',
+                    required=True,
+                    help="input string.")
+
+parser.add_argument("-p",
+                    "--num_proc",
+                    type=int,
+                    required=True,
+                    help="Number of processes.")
+
+# parser.add_argument("--start", type=int, required=True, help="mpi start.")
+parser.add_argument('--vervet', default=False, action='store_true')
+parser.add_argument('--flat', default=False, action='store_true')
+parser.add_argument('--single', default=False, action='store_true')
+parser.add_argument('--radial', default=False, action='store_true')
+parser.add_argument('--pm', default=False, action='store_true')
+
 # # DEBUG
 # CONFIG = parameter.get_namespace()
 # CONFIG.simulation.voxel_size = 1.3
@@ -249,34 +275,6 @@ def run(p):
 
 
 def main():
-    # path
-    FILE_NAME = os.path.abspath(__file__)
-    FILE_PATH = os.path.dirname(FILE_NAME)
-    FILE_BASE = os.path.basename(FILE_NAME)
-    FILE_NAME = os.path.splitext(FILE_BASE)[0]
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-o",
-                        "--output",
-                        type=str,
-                        required=True,
-                        help="Output path.")
-
-    parser.add_argument("-i",
-                        "--input",
-                        nargs='+',
-                        required=True,
-                        help="input string.")
-    parser.add_argument("-p",
-                        "--num_proc",
-                        type=int,
-                        required=True,
-                        help="Number of processes.")
-
-    # parser.add_argument("--start", type=int, required=True, help="mpi start.")
-    parser.add_argument('--vervet', default=False, action='store_true')
-    parser.add_argument('--radial', default=False, action='store_true')
-    parser.add_argument('--pm', default=False, action='store_true')
 
     args = parser.parse_args()
     os.makedirs(args.output, exist_ok=True)
@@ -302,22 +300,50 @@ def main():
 
     parameters = []
     file_list = args.input
-    fiber_inc = [(f, i)
-                 for f in file_list
-                 for i in models.inclinations(CONFIG.cube.n_inc)]
-    for file, f0_inc in fiber_inc:
-        omega = helper.file.value(file, "omega")
 
-        for f1_rot in models.omega_rotations(omega, CONFIG.cube.d_rot):
+    if not args.flat and not args.single:
+        fiber_inc = [(f, i)
+                     for f in file_list
+                     for i in models.inclinations(CONFIG.cube.n_inc)]
+        for file, f0_inc in fiber_inc:
+            omega = helper.file.value(file, "omega")
+
+            for f1_rot in models.omega_rotations(omega, CONFIG.cube.d_rot):
+                parameters.append(
+                    Parameter(file=file,
+                              output=args.output,
+                              voxel_size=CONFIG.simulation.voxel_size,
+                              f0_inc=f0_inc,
+                              f1_rot=f1_rot,
+                              vervet_only=args.vervet,
+                              radial_only=args.radial,
+                              pm_only=args.pm))
+    elif args.single:
+        fiber_inc = [(f, i) for f in file_list for i in models.inclinations(19)]
+        for file, f0_inc in fiber_inc:
+            omega = helper.file.value(file, "omega")
             parameters.append(
                 Parameter(file=file,
                           output=args.output,
                           voxel_size=CONFIG.simulation.voxel_size,
                           f0_inc=f0_inc,
-                          f1_rot=f1_rot,
+                          f1_rot=0,
                           vervet_only=args.vervet,
                           radial_only=args.radial,
                           pm_only=args.pm))
+    elif args.flat:
+        for file in file_list:
+            parameters.append(
+                Parameter(file=file,
+                          output=args.output,
+                          voxel_size=CONFIG.simulation.voxel_size,
+                          f0_inc=0,
+                          f1_rot=0,
+                          vervet_only=args.vervet,
+                          radial_only=args.radial,
+                          pm_only=args.pm))
+    else:
+        raise ValueError('Wrong input arguments')
 
     # DEBUG
     # run(parameters[0])
