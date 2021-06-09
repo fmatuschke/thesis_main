@@ -96,6 +96,9 @@ cv2.fillPoly(mask_left, [leftroi], 1)
 mask_right = np.zeros_like(retardation, dtype=np.uint8)
 cv2.fillPoly(mask_right, [rightroi], 1)
 
+print(np.sum(mask_left))
+print(np.sum(mask_right))
+
 # plt.subplots()
 # plt.imshow(mask_left[::100, ::100])
 # plt.subplots()
