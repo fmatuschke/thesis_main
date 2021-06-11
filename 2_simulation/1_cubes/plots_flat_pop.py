@@ -27,7 +27,7 @@ FILE_BASE = os.path.basename(FILE_NAME)
 FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
 MODEL = 'cube_2pop_135_rc1'
-DATASET = 'cube_2pop_135_rc1_single'
+DATASET = 'cube_2pop_135_rc1_flat'
 
 df = pd.read_pickle(
     os.path.join(FILE_PATH, 'output', DATASET,
@@ -37,7 +37,10 @@ df = df[df.microscope == "PM"]
 df = df[df.species == "Vervet"]
 df = df[df.model == "r"]
 df = df[df.radius == 0.5]
-df = df[df.psi == 1.0]
+df = df[df.psi == 0.3]
+# df = df[df.psi == 0.5]
+
+psi = df.psi.unique()[-1]
 
 df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
@@ -73,7 +76,7 @@ def get_file_from_series(df):
 
 
 #%%
-for _, row in tqdm.tqdm(df.sort_values("f0_inc").iterrows(), total=len(df)):
+for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
     phi, theta = fastpli.analysis.orientation.remap_orientation(
         row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -81,7 +84,7 @@ for _, row in tqdm.tqdm(df.sort_values("f0_inc").iterrows(), total=len(df)):
                            ncols=2,
                            subplot_kw=dict(projection="polar"),
                            figsize=(3.5, 2))
-    fig.suptitle(f"incl:{row.f0_inc}")
+    fig.suptitle(f"omega:{row.omega}")
     ax[0].hist2d(
         phi,
         np.rad2deg(theta),
@@ -107,7 +110,7 @@ for _, row in tqdm.tqdm(df.sort_values("f0_inc").iterrows(), total=len(df)):
     plt.savefig(
         os.path.join(
             FILE_PATH,
-            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_{row.f0_inc}.pdf"
+            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_omega_{row.omega}_psi_{psi}.pdf"
         ))
     plt.close()
 # %%
@@ -126,23 +129,37 @@ phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
 df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
                                                                theta)
 
+df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
+
 for f0 in df_.f0_inc.unique():
     theta = df_.loc[df_.f0_inc == f0, "rofl_inc"]
     t_mean = circmean(theta, 180, -180)
     theta[theta < t_mean - 90] = theta[theta < t_mean - 90] + 180
     df_.loc[df_.f0_inc == f0, "rofl_inc"] = theta
 
-df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
+for omega in df_.omega.unique():
+    for psi in df_.psi.unique():
+        for name in ["epa_dir", "rofl_dir"]:
+            if psi < 0.5:
+                df_.loc[(df_['omega'] == omega) & (df_['psi'] == psi),
+                        name] = helper.circular.remap(
+                            df_[(df_['omega'] == omega) &
+                                (df_['psi'] == psi)][name],
+                            float(omega) + 90,
+                            float(omega) - 90)
+            else:
+                df_.loc[(df_['omega'] == omega) & (df_['psi'] == psi),
+                        name] = helper.circular.remap(
+                            df_[(df_['omega'] == omega) &
+                                (df_['psi'] == psi)][name], 90, -90)
 
 for name in tqdm.tqdm(
     ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_dir", "epa_ret"]):
-    if "dir" in name:
-        df_[name] = helper.circular.remap(df_[name], 90, -90)
 
     # Draw a nested boxplot to show bills by day and time
     fig, axs = plt.subplots(1, 1)
     sns.boxplot(
-        x="f0_inc",
+        x="omega",
         y=name,
         # hue="smoker",
         # palette=["m", "g"],
@@ -150,24 +167,24 @@ for name in tqdm.tqdm(
     sns.despine(offset=10, trim=True)
     # plt.tight_layout()
 
-    if "epa_ret" == name:
-        x = np.linspace(0, np.pi, 42)
-        y = (np.cos(x) + 1) / 2
-        # plt.plot(x / np.pi * 3, y, linewidth=4.2)
-        plt.plot(x / np.pi * (len(df) - 1),
-                 y * np.mean(df_[df_.f0_inc == 0].epa_ret),
-                 linewidth=4.2)
+    # if "epa_ret" == name:
+    #     x = np.linspace(0, np.pi, 42)
+    #     y = (np.cos(x) + 1) / 2
+    #     # plt.plot(x / np.pi * 3, y, linewidth=4.2)
+    #     plt.plot(x / np.pi * (len(df) - 1),
+    #              y * np.mean(df_[df_.f0_inc == 0].epa_ret),
+    #              linewidth=4.2)
 
-    if "rofl_inc" == name:
-        x = [0, (len(df) - 1)]
-        y = [0, 90]
-        plt.plot(x, y, linewidth=4.2)
-        # axs.set_ylim(-15, 105)
+    # if "rofl_inc" == name:
+    #     x = [0, (len(df) - 1)]
+    #     y = [0, 90]
+    #     plt.plot(x, y, linewidth=4.2)
 
     plt.tight_layout(pad=0, w_pad=0, h_pad=0)
     plt.savefig(
         os.path.join(
             FILE_PATH,
-            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_{name}.pdf"))
+            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_{name}.pdf"
+        ))
 
 # %%

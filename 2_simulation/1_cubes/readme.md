@@ -19,5 +19,12 @@ python3 generate_tissue.py -i output/cube_2pop_135_rc1 -p 48
 ## ### single population analysis
 
 ```sh
-plots_single_pop.py
+python3 plots_single_pop.py
+```
+
+## ### flat population analysis
+
+```sh
+#  change psi value
+python3 plots_flat_pop.py
 ```
