@@ -112,6 +112,7 @@ def run(p):
         omega = h5f['/'].attrs["omega"]
         radius = h5f['/'].attrs["radius"]
         v0 = h5f['/'].attrs["v0"]
+        rep_n = h5f['/'].attrs["rep_n"]
 
     # logger.info(f"omega: {omega}")
     # logger.info(f"psi: {psi}")
@@ -127,6 +128,7 @@ def run(p):
             h5f.attrs['script'] = script.read()
             h5f.attrs['input_file'] = p.file
             h5f.attrs['rnd_seed'] = rnd_seed
+            h5f.attrs['parameter/rep_n'] = rep_n
 
         model_list = ['r', 'p']
         if p.radial_only:
@@ -205,7 +207,6 @@ def run(p):
                     species_list = [('Vervet', CONFIG.species.vervet.mu)]
 
                 for species, mu in species_list:
-                    dset.attrs['parameter/simpli'] = str(simpli.get_dict())
                     tissue_properties[1:,
                                       1] = mu  # fiber absorp, background not
 
@@ -258,6 +259,7 @@ def run(p):
                         dset.attrs[f'parameter/p/{name}'] = value
 
                     dset.attrs['parameter/simpli'] = str(simpli.get_dict())
+                    dset.attrs['parameter/rep_n'] = rep_n
                     dset.attrs['parameter/v0'] = v0
                     dset.attrs['parameter/radius'] = radius
                     dset.attrs['parameter/psi'] = psi

@@ -15,11 +15,6 @@ import tqdm
 
 # arguments
 parser = argparse.ArgumentParser()
-# parser.add_argument("-i",
-#                     "--input",
-#                     type=str,
-#                     required=True,
-#                     help="input files.")
 
 parser.add_argument("-i",
                     "--input",
@@ -58,6 +53,7 @@ def run(file):
     file = os.path.join(os.path.abspath(os.path.dirname(args.input[0])),
                         "images",
                         os.path.splitext(os.path.basename(file))[0])
+
     solver.save_ppm(file + ".ppm")
     subprocess.run(f"convert {file}.ppm {file}.png && rm {file}.ppm",
                    shell=True,

@@ -1,7 +1,5 @@
-#! /usr/bin/env python3
-
 import argparse
-import ast
+# import ast
 import glob
 import itertools
 import multiprocessing as mp
@@ -11,8 +9,8 @@ import warnings
 # import pretty_errors
 import fastpli.tools
 import h5py
-import helper.file
-import numba
+# import helper.file
+# import numba
 import numpy as np
 import pandas as pd
 import tqdm
@@ -38,7 +36,6 @@ args = parser.parse_args()
 
 def _calc_intensity(phi, alpha, t_rel, theta, phii):
     num_rotations = 9
-    number_tilts = 5
     rotation_angles = np.linspace(0, np.pi, num_rotations + 1)[:-1]
 
     # tilt orientation
@@ -59,10 +56,22 @@ def _calc_intensity(phi, alpha, t_rel, theta, phii):
     rot = fastpli.tools.rotation.a_on_b([0, 0, 1], v)
     v = np.dot(rot, u)
     phi_v = np.arctan2(v[1], v[0])
+
+    if v[2] > 1 + 1e-6 or v[2] < -1 - 1e-6:
+        raise ValueError("FOOOO")
+    v[2] = min(v[2], 1)
+    v[2] = max(v[2], -1)
     alpha_v = np.arcsin(v[2])
 
     I = np.sin(np.pi / 2 * t_rel * np.cos(alpha_v)**2) * np.sin(
         2 * (rotation_angles - phi_v))
+
+    if np.any(np.isnan(I)):
+        print(phi, alpha, t_rel, theta, phii)
+        print(alpha_v, rotation_angles, phi_v)
+        print(v)
+        raise ValueError("FOOO")
+
     return I
 
 
@@ -114,6 +123,12 @@ def run(file):
             # print(fit_data.ravel())
             # print(((optic_data.ravel() / np.mean(optic_data.ravel()) - 1)))
 
+            if 'parameter/rep_n' in h5f_sub.attrs:
+                n_rep = h5f_sub.attrs['parameter/rep_n']
+            else:
+                n_rep = 0
+            # print(n_rep)
+
             df.append(
                 pd.DataFrame([[
                     microscope, species, model,
@@ -127,13 +142,14 @@ def run(file):
                     h5f_sub['analysis/rofl/t_rel'][...].ravel(),
                     h5f_sub['analysis/epa/0/transmittance'][...].ravel(),
                     h5f_sub['analysis/epa/0/direction'][...].ravel(),
-                    h5f_sub['analysis/epa/0/retardation'][...].ravel(), R, R2
+                    h5f_sub['analysis/epa/0/retardation'][...].ravel(), R, R2,
+                    n_rep
                 ]],
                              columns=[
                                  "microscope", "species", "model", "radius",
                                  "omega", "psi", "f0_inc", "f1_rot", "rofl_dir",
                                  "rofl_inc", "rofl_trel", "epa_trans",
-                                 "epa_dir", "epa_ret", "R", "R2"
+                                 "epa_dir", "epa_ret", "R", "R2", "rep_n"
                              ]))
     return df
 

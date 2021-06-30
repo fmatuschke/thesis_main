@@ -1,8 +1,7 @@
 import argparse
-import itertools
+import multiprocessing as mp
 import os
 import subprocess
-import sys
 import time
 import typing
 
@@ -12,8 +11,7 @@ import fastpli.model.solver
 import fastpli.tools
 import h5py
 import numpy as np
-from mpi4py import MPI
-from mpi4py.futures import MPIPoolExecutor
+import tqdm
 
 
 class Parameter(typing.NamedTuple):
@@ -25,6 +23,7 @@ class Parameter(typing.NamedTuple):
     max_steps: int
     num_proc: int
     output: str
+    n: int
 
 
 def run(p):
@@ -39,9 +38,9 @@ def run(p):
     solver = fastpli.model.solver.Solver()
     solver.obj_mean_length = p.radius * 2
     solver.obj_min_radius = p.radius * 2
-    solver.omp_num_threads = p.num_proc
+    solver.omp_num_threads = 1
 
-    file_pref = p.output + f'_psi_{p.psi:.2f}_omega_{p.omega:.2f}_' + f'r_{p.radius:.2f}_v0_{p.volume:.0f}_'
+    file_pref = p.output + f'_n_{p.n}_psi_{p.psi:.2f}_omega_{p.omega:.2f}_' + f'r_{p.radius:.2f}_v0_{p.volume:.0f}_'
 
     # pick random seeds for fiber population distribution
     seeds_0 = np.random.uniform(-p.volume, p.volume,
@@ -85,6 +84,7 @@ def run(p):
     # Save Data
     with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
+        h5f['/'].attrs['rep_n'] = p.n
         h5f['/'].attrs['psi'] = p.psi
         h5f['/'].attrs['omega'] = p.omega
         h5f['/'].attrs['v0'] = p.volume
@@ -103,7 +103,7 @@ def run(p):
     start_time = time.time()
     solver.fiber_bundles = solver.fiber_bundles.cut_sphere(
         0.5 * (p.volume + 10 * p.radius))
-    for i in range(1, p.max_steps + 1):
+    for i in tqdm.trange(1, p.max_steps + 1):
         if solver.step():
             break
 
@@ -113,6 +113,7 @@ def run(p):
                     solver.save_h5(h5f,
                                    script=open(os.path.abspath(__file__),
                                                'r').read())
+                    h5f['/'].attrs['rep_n'] = p.n
                     h5f['/'].attrs['psi'] = p.psi
                     h5f['/'].attrs['omega'] = p.omega
                     h5f['/'].attrs['v0'] = p.volume
@@ -133,6 +134,7 @@ def run(p):
 
     with h5py.File(file_pref + '.solved.h5', 'w-') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
+        h5f['/'].attrs['rep_n'] = p.n
         h5f['/'].attrs['psi'] = p.psi
         h5f['/'].attrs['omega'] = p.omega
         h5f['/'].attrs['v0'] = p.volume
@@ -149,8 +151,6 @@ def run(p):
 
     if os.path.isfile(f'{file_pref}.tmp.h5'):
         os.remove(f'{file_pref}.tmp.h5')
-
-    print(f'rank {MPI.COMM_WORLD.Get_rank()}: finished with {p}')
 
 
 def main():
@@ -176,13 +176,13 @@ def main():
 
     parser.add_argument('-r',
                         '--radius',
-                        default=1,
+                        required=True,
                         type=float,
                         help='mean value of fiber radius')
 
     parser.add_argument('-v',
                         '--volume',
-                        default=1,
+                        required=True,
                         type=int,
                         help='volume size')
 
@@ -194,7 +194,7 @@ def main():
 
     args = parser.parse_args()
     output_name = os.path.join(args.output, FILE_NAME)
-    os.makedirs(args.output, exist_ok=False)
+    os.makedirs(args.output, exist_ok=True)
     subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
     subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
@@ -209,13 +209,14 @@ def main():
                   omega=omega,
                   max_steps=args.max_steps,
                   num_proc=args.num_proc,
-                  output=output_name) for psi, omega in psi_omega_list
+                  output=output_name,
+                  n=i) for i, (psi, omega) in enumerate(psi_omega_list)
     ]
 
     # [run(p) for p in parameters] # for testing
 
-    with MPIPoolExecutor() as executor:
-        executor.map(run, parameters)
+    with mp.Pool(args.num_proc) as pool:
+        [_ for _ in pool.imap_unordered(run, parameters)]
 
 
 if __name__ == '__main__':
