@@ -58,10 +58,8 @@ def calcGroundTruth(parameter):
     psi, omega, f0_inc, f1_rot, radius, rep_n = parameter
 
     # ground truth
-    sub = (df_org.psi == psi) & (df_org.omega == omega) & (df_org.radius
-                                                           == radius)
-    if "rep_n" in df_org:
-        sub = sub & (df_org.rep_n == rep_n)
+    sub = (df_org.psi == psi) & (df_org.omega == omega) & (
+        df_org.radius == radius) & (df_org.rep_n == rep_n)
 
     if len(df_org[sub]) != 1:
         df_ = df_org[sub]
@@ -177,6 +175,8 @@ if __name__ == "__main__":
     # df_org = df_org[df_org.omega == 30]
     # df = df[df.r == 2.0]
     # df_org = df_org[df_org.r == 2.0]
+
+    # FIXME if rep_n not in df, df.rep_n = 0
 
     # GROUND TRUTH sh coeff
     parameters_gt = []

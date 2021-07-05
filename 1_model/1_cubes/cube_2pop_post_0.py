@@ -43,6 +43,7 @@ def run(file):
     # state_ = file.split(f".h5")[0].split(".")[-1]
     r = helper.file.value(file, "r")
     v0 = helper.file.value(file, "v0")
+
     with h5py.File(file, "r") as h5f:
 
         if h5f['/'].attrs['num_steps'] == 0:
@@ -53,6 +54,11 @@ def run(file):
         else:
             state = "not_solved"
             warnings.warn("not solved")
+
+        if file.find("rep") == -1:
+            rep_n = 0
+        else:
+            rep_n = h5f['/'].attrs['rep_n']
 
         # if state != state_:
         #     print(state, state_)
@@ -83,23 +89,13 @@ def run(file):
 
     return pd.DataFrame([[
         omega, psi, v0, r, obj_mean_length, obj_min_radius, overlap,
-        num_col_obj, num_obj, num_steps, step, time, state, file
+        num_col_obj, num_obj, num_steps, step, time, state, file, rep_n % 24
     ]],
                         columns=[
-                            "omega",
-                            "psi",
-                            "v0",
-                            "radius",
-                            "obj_mean_length",
-                            "obj_min_radius",
-                            "overlap",
-                            "num_col_obj",
-                            "num_obj",
-                            "num_steps",
-                            "step",
-                            "time",
-                            "state",
-                            "fiber",
+                            "omega", "psi", "v0", "radius", "obj_mean_length",
+                            "obj_min_radius", "overlap", "num_col_obj",
+                            "num_obj", "num_steps", "step", "time", "state",
+                            "fiber", "rep_n"
                         ])
 
 

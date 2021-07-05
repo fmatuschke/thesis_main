@@ -131,7 +131,9 @@ def run(file):
 
             df.append(
                 pd.DataFrame([[
-                    microscope, species, model,
+                    microscope,
+                    species,
+                    model,
                     float(h5f_sub.attrs['parameter/radius']),
                     float(h5f_sub.attrs['parameter/omega']),
                     float(h5f_sub.attrs['parameter/psi']),
@@ -142,14 +144,18 @@ def run(file):
                     h5f_sub['analysis/rofl/t_rel'][...].ravel(),
                     h5f_sub['analysis/epa/0/transmittance'][...].ravel(),
                     h5f_sub['analysis/epa/0/direction'][...].ravel(),
-                    h5f_sub['analysis/epa/0/retardation'][...].ravel(), R, R2,
-                    n_rep
+                    h5f_sub['analysis/epa/0/retardation'][...].ravel(),
+                    R,
+                    R2,
+                    n_rep,
+                    h5f_sub.attrs['parameter/fiber_path'],
                 ]],
                              columns=[
                                  "microscope", "species", "model", "radius",
                                  "omega", "psi", "f0_inc", "f1_rot", "rofl_dir",
                                  "rofl_inc", "rofl_trel", "epa_trans",
-                                 "epa_dir", "epa_ret", "R", "R2", "rep_n"
+                                 "epa_dir", "epa_ret", "R", "R2", "rep_n",
+                                 "fiber"
                              ]))
     return df
 

@@ -39,18 +39,31 @@ def rotate(fbs, f0_inc, f1_rot):
     return fbs
 
 
+def ori_from_fb(fb, f0_inc=0, f1_rot=0, cut=None):
+    fb = rotate(fb, f0_inc, f1_rot)
+    if cut is not None:
+        fb = fb.cut(cut)
+    return fastpli.analysis.orientation.fiber_bundle(fb)
+
+
 def ori_from_fbs(fbs, f0_inc=0, f1_rot=0, cut=None):
     fbs = rotate(fbs, f0_inc, f1_rot)
     if cut is not None:
-        # if isinstance(cut, (int, float)):
-        #     # cut = [[-cut / 2] * 3, [cut / 2] * 3]
-        #     raise ValueError('please specify')
-        # elif isinstance(cut, (list, tuple)) and len(cut) == 3:
-        #     cut = [[-c / 2 for c in cut], [c / 2 for c in cut]]
-        # else:
-        #     raise ValueError('cut not recognized')
         fbs = fbs.cut(cut)
     return fastpli.analysis.orientation.fiber_bundles(fbs)
+
+
+def fb_ori_from_file(file, f0_inc, f1_rot, cut=None):
+    fbs = fastpli.io.fiber_bundles.load(file)
+
+    phis = []
+    thetas = []
+    for fb in fbs:
+        p, t = ori_from_fb(fb, f0_inc, f1_rot, cut)
+        phis.append(p)
+        thetas.append(t)
+
+    return phis, thetas
 
 
 def ori_from_file(file, f0_inc, f1_rot, cut=None):
@@ -61,13 +74,6 @@ def ori_from_file(file, f0_inc, f1_rot, cut=None):
 def vec_from_fbs(fbs, f0_inc=0, f1_rot=0, cut=None):
     fbs = rotate(fbs, f0_inc, f1_rot)
     if cut is not None:
-        # if isinstance(cut, (int, float)):
-        #     # cut = [[-cut / 2] * 3, [cut / 2] * 3]
-        #     raise ValueError('please specify')
-        # elif isinstance(cut, (list, tuple)) and len(cut) == 3:
-        #     cut = [[-c / 2 for c in cut], [c / 2 for c in cut]]
-        # else:
-        #     raise ValueError('cut not recognized')
         fbs = fbs.cut(cut)
 
     vecs = []

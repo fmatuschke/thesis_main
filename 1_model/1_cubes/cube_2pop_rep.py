@@ -198,9 +198,11 @@ def main():
     subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
     subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
+    N = 24
+
     psi_omega_list = []
-    psi_omega_list.extend([(1.0, 0.0)] * 24)
-    psi_omega_list.extend([(0.5, 90.0)] * 24)
+    psi_omega_list.extend([(1.0, 0.0)] * N)
+    psi_omega_list.extend([(0.5, 90.0)] * N)
 
     parameters = [
         Parameter(radius=args.radius,
@@ -210,7 +212,7 @@ def main():
                   max_steps=args.max_steps,
                   num_proc=args.num_proc,
                   output=output_name,
-                  n=i) for i, (psi, omega) in enumerate(psi_omega_list)
+                  n=i % N) for i, (psi, omega) in enumerate(psi_omega_list)
     ]
 
     # [run(p) for p in parameters] # for testing

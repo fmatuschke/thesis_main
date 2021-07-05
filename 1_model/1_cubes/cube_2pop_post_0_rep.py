@@ -84,7 +84,7 @@ def run(file):
 
     return pd.DataFrame([[
         omega, psi, v0, r, obj_mean_length, obj_min_radius, overlap,
-        num_col_obj, num_obj, num_steps, step, time, state, file, rep_n
+        num_col_obj, num_obj, num_steps, step, time, state, file, rep_n % 24
     ]],
                         columns=[
                             "omega",
