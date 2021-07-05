@@ -175,10 +175,13 @@ for name in tqdm.tqdm(
     #              y * np.mean(df_[df_.f0_inc == 0].epa_ret),
     #              linewidth=4.2)
 
-    # if "rofl_inc" == name:
-    #     x = [0, (len(df) - 1)]
-    #     y = [0, 90]
-    #     plt.plot(x, y, linewidth=4.2)
+    if name in ["rofl_dir", "epa_dir"]:
+        x = [0, (len(df) - 1)]
+        y = [0, 0]
+        plt.plot(x, y, linewidth=4.2)
+        x = [0, (len(df) - 1)]
+        y = [0, 90]
+        plt.plot(x, y, linewidth=4.2)
 
     plt.tight_layout(pad=0, w_pad=0, h_pad=0)
     plt.savefig(

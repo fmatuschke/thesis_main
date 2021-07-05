@@ -4,6 +4,7 @@ import argparse
 import multiprocessing as mp
 import pandas as pd
 import tqdm
+import scipy.stats
 
 import fastpli.tools
 import helper.spherical_interpolation
@@ -34,6 +35,9 @@ df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
 df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
 
+df["dir_mean"] = df["epa_dir"].apply(
+    lambda x: scipy.stats.circmean(x, np.pi, -np.pi))
+
 
 def run(p):
     radius = p[1].radius
@@ -46,7 +50,7 @@ def run(p):
         df_acc.species == species) & (df_acc.model == model)
 
     for name in [
-            "acc",
+            # "acc",
             # "R",
             # "R2",
     ]:
@@ -64,7 +68,11 @@ def run(p):
     sub = (df.radius == radius) & (df.microscope == microscope) & (
         df.species == species) & (df.model == model)
 
-    for name in ["trel_mean", "ret_mean", "trans_mean"]:
+    for name in [
+            # "R", "R2",
+            "dir_mean",
+            # "trel_mean", "ret_mean", "trans_mean"
+    ]:
 
         crange = None
         # crange = [0, 1]
