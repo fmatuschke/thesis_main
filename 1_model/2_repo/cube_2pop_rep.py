@@ -40,7 +40,7 @@ def run(p):
     solver.obj_min_radius = p.radius * 2
     solver.omp_num_threads = 1
 
-    file_pref = p.output + f'_rep_{p.n}_psi_{p.psi:.2f}_omega_{p.omega:.2f}_r_{p.radius:.2f}_v0_{p.volume:.0f}_'
+    file_pref = p.output + f'_repn_{p.n}_psi_{p.psi:.2f}_omega_{p.omega:.2f}_r_{p.radius:.2f}_v0_{p.volume:.0f}_'
 
     # pick random seeds for fiber population distribution
     seeds_0 = np.random.uniform(-p.volume, p.volume,

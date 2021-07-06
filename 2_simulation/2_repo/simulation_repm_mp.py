@@ -48,7 +48,7 @@ parser.add_argument("-p",
                     help="Number of processes.")
 
 parser.add_argument("-m",
-                    "--num_sim",
+                    "--rep_m",
                     type=int,
                     required=True,
                     help="Number of processes.")
@@ -72,7 +72,7 @@ class Parameter(typing.NamedTuple):
     voxel_size: float
     f0_inc: float
     f1_rot: float
-    m_sim: int
+    rep_m: int
     vervet_only: bool
     radial_only: bool
     pm_only: bool
@@ -105,13 +105,13 @@ def run(p):
     file_name += f'_vs_{p.voxel_size:.4f}'
     file_name += f'_inc_{p.f0_inc:.2f}'
     file_name += f'_rot_{p.f1_rot:.2f}'
-    file_name += f'_msim_{p.m_sim}'
+    file_name += f'_msim_{p.rep_m}'
     file_name = os.path.join(p.output, file_name)
     # logger.info(f"input file: {p.file}")
     # logger.info(f"output file: {file_name}")
 
     if os.path.isfile(file_name + '.h5'):
-        logger.info(f"file exists: {file_name}.h5")
+        # logger.info(f"file exists: {file_name}.h5")
         raise ValueError("file exists")
 
     with h5py.File(p.file, 'r') as h5f:
@@ -120,7 +120,11 @@ def run(p):
         omega = h5f['/'].attrs["omega"]
         radius = h5f['/'].attrs["radius"]
         v0 = h5f['/'].attrs["v0"]
-        rep_n = h5f['/'].attrs["rep_n"]
+
+        if 'rep_n' in h5f['/'].attrs:
+            rep_n = h5f['/'].attrs['rep_n']
+        else:
+            rep_n = 0
 
     # logger.info(f"omega: {omega}")
     # logger.info(f"psi: {psi}")
@@ -268,7 +272,7 @@ def run(p):
 
                     dset.attrs['parameter/simpli'] = str(simpli.get_dict())
                     dset.attrs['parameter/rep_n'] = rep_n
-                    dset.attrs['parameter/m_sim'] = p.m_sim
+                    dset.attrs['parameter/rep_m'] = p.rep_m
                     dset.attrs['parameter/v0'] = v0
                     dset.attrs['parameter/radius'] = radius
                     dset.attrs['parameter/psi'] = psi
@@ -313,50 +317,30 @@ def main():
     parameters = []
     file_list = args.input
 
-    if not args.flat and not args.single:
-        fiber_inc = [(f, i)
-                     for f in file_list
-                     for i in models.inclinations(CONFIG.cube.n_inc)]
+    if args.single:
+        fiber_inc = [(f, i) for f in file_list for i in models.inclinations(2)]
         for file, f0_inc in fiber_inc:
-            omega = helper.file.value(file, "omega")
-
-            for f1_rot in models.omega_rotations(omega, CONFIG.cube.d_rot):
-                for m in range(args.num_sim):
-                    parameters.append(
-                        Parameter(file=file,
-                                  output=args.output,
-                                  voxel_size=CONFIG.simulation.voxel_size,
-                                  f0_inc=f0_inc,
-                                  f1_rot=f1_rot,
-                                  m_sim=m,
-                                  vervet_only=args.vervet,
-                                  radial_only=args.radial,
-                                  pm_only=args.pm))
-    elif args.single:
-        fiber_inc = [(f, i) for f in file_list for i in models.inclinations(4)]
-        for file, f0_inc in fiber_inc:
-            omega = helper.file.value(file, "omega")
-            for m in range(args.num_sim):
+            for m in range(args.rep_m):
                 parameters.append(
                     Parameter(file=file,
                               output=args.output,
                               voxel_size=CONFIG.simulation.voxel_size,
                               f0_inc=f0_inc,
                               f1_rot=0,
-                              m_sim=m,
+                              rep_m=m,
                               vervet_only=args.vervet,
                               radial_only=args.radial,
                               pm_only=args.pm))
     elif args.flat:
         for file in file_list:
-            for m in range(args.num_sim):
+            for m in range(args.rep_m):
                 parameters.append(
                     Parameter(file=file,
                               output=args.output,
                               voxel_size=CONFIG.simulation.voxel_size,
                               f0_inc=0,
                               f1_rot=0,
-                              m_sim=m,
+                              rep_m=m,
                               vervet_only=args.vervet,
                               radial_only=args.radial,
                               pm_only=args.pm))
