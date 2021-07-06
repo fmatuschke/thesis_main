@@ -157,7 +157,7 @@ def run(p):
                 # Setup Simpli
                 simpli = fastpli.simulation.Simpli()
                 warnings.filterwarnings("ignore", message="objects overlap")
-                simpli.omp_num_threads = 1
+                simpli.omp_num_threads = 2
                 simpli.voxel_size = CONFIG.simulation.voxel_size
                 simpli.pixel_size = SETUP.pixel_size
                 simpli.filter_rotations = np.linspace(
@@ -226,7 +226,7 @@ def run(p):
                     dset.create_group('simulation')
                     dset['simulation'].attrs['tilt_angle'] = tilt_angle
 
-                    tilting_stack = [None] * 5
+                    tilting_stack = [[None] * 5] * p.rep_m
                     for t, (theta, phi) in enumerate(simpli.tilts):
                         images = simpli.run_simulation(tissue, optical_axis,
                                                        tissue_properties, theta,
@@ -234,36 +234,38 @@ def run(p):
 
                         images = simpli.rm_crop_tilt_halo(images)
 
-                        # apply optic to simulation
-                        resample, images = simpli.apply_optic(images)
-                        dset[f'simulation/optic/{t}'] = images
-                        dset[f'simulation/resample/{t}'] = resample
-                        dset['simulation/optic'].attrs['theta'] = theta
-                        dset['simulation/optic'].attrs['phi'] = phi
+                        for m in range(p.rep_m):
+                            # apply optic to simulation
+                            resample, images_ = simpli.apply_optic(images)
+                            dset[f'{m}/simulation/optic/{t}'] = images_
+                            dset[f'{m}/simulation/resample/{t}'] = resample
+                            dset[f'{m}/simulation/optic'].attrs['theta'] = theta
+                            dset[f'{m}/simulation/optic'].attrs['phi'] = phi
 
-                        # calculate modalities
-                        epa = simpli.apply_epa(images)
-                        dset[f'analysis/epa/{t}/transmittance'] = epa[0]
-                        dset[f'analysis/epa/{t}/direction'] = epa[1]
-                        dset[f'analysis/epa/{t}/retardation'] = epa[2]
+                            # calculate modalities
+                            epa = simpli.apply_epa(images_)
+                            dset[f'{m}/analysis/epa/{t}/transmittance'] = epa[0]
+                            dset[f'{m}/analysis/epa/{t}/direction'] = epa[1]
+                            dset[f'{m}/analysis/epa/{t}/retardation'] = epa[2]
 
-                        tilting_stack[t] = images
+                            tilting_stack[m][t] = images_
 
                     mask = None  # keep analysing all pixels
 
-                    # print('Run ROFL analysis:')
-                    rofl_direction, rofl_incl, rofl_t_rel, param = simpli.apply_rofl(
-                        tilting_stack, mask=mask)
+                    for m in range(p.rep_m):
+                        # print('Run ROFL analysis:')
+                        rofl_direction, rofl_incl, rofl_t_rel, param = simpli.apply_rofl(
+                            tilting_stack[m], mask=mask)
 
-                    dset['analysis/rofl/direction'] = rofl_direction
-                    dset['analysis/rofl/inclination'] = rofl_incl
-                    dset['analysis/rofl/t_rel'] = rofl_t_rel
+                        dset[f'{m}/analysis/rofl/direction'] = rofl_direction
+                        dset[f'{m}/analysis/rofl/inclination'] = rofl_incl
+                        dset[f'{m}/analysis/rofl/t_rel'] = rofl_t_rel
 
-                    dset['analysis/rofl/direction_conf'] = param[0]
-                    dset['analysis/rofl/inclination_conf'] = param[1]
-                    dset['analysis/rofl/t_rel_conf'] = param[2]
-                    dset['analysis/rofl/func'] = param[3]
-                    dset['analysis/rofl/n_iter'] = param[4]
+                        dset[f'{m}/analysis/rofl/direction_conf'] = param[0]
+                        dset[f'{m}/analysis/rofl/inclination_conf'] = param[1]
+                        dset[f'{m}/analysis/rofl/t_rel_conf'] = param[2]
+                        dset[f'{m}/analysis/rofl/func'] = param[3]
+                        dset[f'{m}/analysis/rofl/n_iter'] = param[4]
 
                     dset.attrs['parameter/CONFIG'] = yaml.dump(CONFIG)
 
@@ -320,30 +322,28 @@ def main():
     if args.single:
         fiber_inc = [(f, i) for f in file_list for i in models.inclinations(2)]
         for file, f0_inc in fiber_inc:
-            for m in range(args.rep_m):
-                parameters.append(
-                    Parameter(file=file,
-                              output=args.output,
-                              voxel_size=CONFIG.simulation.voxel_size,
-                              f0_inc=f0_inc,
-                              f1_rot=0,
-                              rep_m=m,
-                              vervet_only=args.vervet,
-                              radial_only=args.radial,
-                              pm_only=args.pm))
+            parameters.append(
+                Parameter(file=file,
+                          output=args.output,
+                          voxel_size=CONFIG.simulation.voxel_size,
+                          f0_inc=f0_inc,
+                          f1_rot=0,
+                          rep_m=args.rep_m,
+                          vervet_only=args.vervet,
+                          radial_only=args.radial,
+                          pm_only=args.pm))
     elif args.flat:
         for file in file_list:
-            for m in range(args.rep_m):
-                parameters.append(
-                    Parameter(file=file,
-                              output=args.output,
-                              voxel_size=CONFIG.simulation.voxel_size,
-                              f0_inc=0,
-                              f1_rot=0,
-                              rep_m=m,
-                              vervet_only=args.vervet,
-                              radial_only=args.radial,
-                              pm_only=args.pm))
+            parameters.append(
+                Parameter(file=file,
+                          output=args.output,
+                          voxel_size=CONFIG.simulation.voxel_size,
+                          f0_inc=0,
+                          f1_rot=0,
+                          rep_m=args.rep_m,
+                          vervet_only=args.vervet,
+                          radial_only=args.radial,
+                          pm_only=args.pm))
     else:
         raise ValueError('Wrong input arguments')
 

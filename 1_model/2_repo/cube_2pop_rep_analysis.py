@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 import argparse
 import glob
 import multiprocessing as mp
@@ -30,7 +28,7 @@ parser.add_argument("-p",
                     help="Number of processes.")
 args = parser.parse_args()
 
-os.makedirs(os.path.join(args.input, "hist"), exist_ok=True)
+os.makedirs(os.path.join(args.input, "analysis"), exist_ok=True)
 
 THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
 FILE_NAME = os.path.abspath(__file__)
@@ -94,8 +92,7 @@ def calc_omega_stat(p, t):
         d = np.abs(np.dot(v0[:, i], v1))  # because orientation
         data[i] = np.rad2deg(np.arccos(d))
 
-    return v1, np.np.mean(data), np.std(data), np.quantile(
-        data, [0.25, 0.5, 0.75])
+    return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
 
 
 def run(df):
@@ -164,7 +161,7 @@ def run(df):
 def main():
 
     if False or not os.path.isfile(
-            os.path.join(args.input, "hist", "cube_2pop.pkl")):
+            os.path.join(args.input, "analysis", "cube_2pop.pkl")):
         print("calculating data")
         df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
         df = df[df.state != "init"]
@@ -180,10 +177,11 @@ def main():
         # exit(1)
 
         df = pd.concat(df, ignore_index=True)
-        df.to_pickle(os.path.join(args.input, "hist", "cube_2pop.pkl"))
+        df.to_pickle(os.path.join(args.input, "analysis", "cube_2pop.pkl"))
     else:
         print("loading data")
-        df = pd.read_pickle(os.path.join(args.input, "hist", "cube_2pop.pkl"))
+        df = pd.read_pickle(
+            os.path.join(args.input, "analysis", "cube_2pop.pkl"))
 
     # print(df.columns)
     # print(df.dtypes)
@@ -214,13 +212,17 @@ def main():
         'omega_init_75_1',
     ]]
     # print(df_)
-    df_.to_csv(os.path.join(args.input, "analysis", 'omegas.csv'))
+    df_.to_csv(os.path.join(args.input, "analysis", 'omegas.csv'), index=False)
 
     df___ = []
     for o in df.omega.unique():
         for p in df.psi.unique():
             for r in df.radius.unique():
                 df_ = df[(df.omega == o) & (df.psi == p) & (df.radius == r)]
+
+                if len(df_) == 0:
+                    continue
+
                 print(o, p, r)
                 print(
                     # df_.omega_init_0,
@@ -259,57 +261,82 @@ def main():
                 df__['omega'] = o
                 df__['psi'] = p
                 df__['radius'] = r
-
-                df__['omega_init_mean_0_mean'] = np.mean(df_.omega_init_mean_0)
-                df__['omega_init_std_0_mean'] = np.mean(df_.omega_init_std_0)
-                df__['omega_init_25_0_mean'] = np.mean(df_.omega_init_25_0)
-                df__['omega_init_50_0_mean'] = np.mean(df_.omega_init_50_0)
-                df__['omega_init_75_0_mean'] = np.mean(df_.omega_init_75_0)
-                df__['omega_init_mean_0_std'] = np.std(df_.omega_init_mean_0)
-                df__['omega_init_std_0_std'] = np.std(df_.omega_init_std_0)
-                df__['omega_init_25_0_std'] = np.std(df_.omega_init_25_0)
-                df__['omega_init_50_0_std'] = np.std(df_.omega_init_50_0)
-                df__['omega_init_75_0_std'] = np.std(df_.omega_init_75_0)
-
-                df__['omega_mean_0_mean'] = np.mean(df_.omega_mean_0)
-                df__['omega_std_0_mean'] = np.mean(df_.omega_std_0)
-                df__['omega_25_0_mean'] = np.mean(df_.omega_25_0)
-                df__['omega_50_0_mean'] = np.mean(df_.omega_50_0)
-                df__['omega_75_0_mean'] = np.mean(df_.omega_75_0)
-                df__['omega_mean_0_std'] = np.std(df_.omega_mean_0)
-                df__['omega_std_0_std'] = np.std(df_.omega_std_0)
-                df__['omega_25_0_std'] = np.std(df_.omega_25_0)
-                df__['omega_50_0_std'] = np.std(df_.omega_50_0)
-                df__['omega_75_0_std'] = np.std(df_.omega_75_0)
-
-                df__['omega_init_mean_1_mean'] = np.mean(df_.omega_init_mean_1)
-                df__['omega_init_std_1_mean'] = np.mean(df_.omega_init_std_1)
-                df__['omega_init_25_1_mean'] = np.mean(df_.omega_init_25_1)
-                df__['omega_init_50_1_mean'] = np.mean(df_.omega_init_50_1)
-                df__['omega_init_75_1_mean'] = np.mean(df_.omega_init_75_1)
-                df__['omega_init_mean_1_std'] = np.std(df_.omega_init_mean_1)
-                df__['omega_init_std_1_std'] = np.std(df_.omega_init_std_1)
-                df__['omega_init_25_1_std'] = np.std(df_.omega_init_25_1)
-                df__['omega_init_50_1_std'] = np.std(df_.omega_init_50_1)
-                df__['omega_init_75_1_std'] = np.std(df_.omega_init_75_1)
-
-                df__['omega_mean_1_mean'] = np.mean(df_.omega_mean_1)
-                df__['omega_std_1_mean'] = np.mean(df_.omega_std_1)
-                df__['omega_25_1_mean'] = np.mean(df_.omega_25_1)
-                df__['omega_50_1_mean'] = np.mean(df_.omega_50_1)
-                df__['omega_75_1_mean'] = np.mean(df_.omega_75_1)
-                df__['omega_mean_1_std'] = np.std(df_.omega_mean_1)
-                df__['omega_std_1_std'] = np.std(df_.omega_std_1)
-                df__['omega_25_1_std'] = np.std(df_.omega_25_1)
-                df__['omega_50_1_std'] = np.std(df_.omega_50_1)
-                df__['omega_75_1_std'] = np.std(df_.omega_75_1)
-
+                df__['state'] = 'init'
+                df__['pop'] = 0
+                df__['mean_mean'] = np.mean(df_.omega_init_mean_0)
+                df__['std_mean'] = np.mean(df_.omega_init_std_0)
+                df__['25_mean'] = np.mean(df_.omega_init_25_0)
+                df__['50_mean'] = np.mean(df_.omega_init_50_0)
+                df__['75_mean'] = np.mean(df_.omega_init_75_0)
+                df__['mean_std'] = np.std(df_.omega_init_mean_0)
+                df__['std_std'] = np.std(df_.omega_init_std_0)
+                df__['25_std'] = np.std(df_.omega_init_25_0)
+                df__['50_std'] = np.std(df_.omega_init_50_0)
+                df__['75_std'] = np.std(df_.omega_init_75_0)
                 df___.append(df__)
+
+                df__ = {}
+                df__['omega'] = o
+                df__['psi'] = p
+                df__['radius'] = r
+                df__['state'] = 'solved'
+                df__['pop'] = 0
+                df__['mean_mean'] = np.mean(df_.omega_mean_0)
+                df__['std_mean'] = np.mean(df_.omega_std_0)
+                df__['25_mean'] = np.mean(df_.omega_25_0)
+                df__['50_mean'] = np.mean(df_.omega_50_0)
+                df__['75_mean'] = np.mean(df_.omega_75_0)
+                df__['mean_std'] = np.std(df_.omega_mean_0)
+                df__['std_std'] = np.std(df_.omega_std_0)
+                df__['25_std'] = np.std(df_.omega_25_0)
+                df__['50_std'] = np.std(df_.omega_50_0)
+                df__['75_std'] = np.std(df_.omega_75_0)
+                df___.append(df__)
+
+                if p != 1:
+                    df__ = {}
+                    df__['omega'] = o
+                    df__['psi'] = p
+                    df__['radius'] = r
+                    df__['state'] = 'init'
+                    df__['pop'] = 1
+                    df__['mean_mean'] = np.mean(df_.omega_init_mean_1)
+                    df__['std_mean'] = np.mean(df_.omega_init_std_1)
+                    df__['25_mean'] = np.mean(df_.omega_init_25_1)
+                    df__['50_mean'] = np.mean(df_.omega_init_50_1)
+                    df__['75_mean'] = np.mean(df_.omega_init_75_1)
+                    df__['mean_std'] = np.std(df_.omega_init_mean_1)
+                    df__['std_std'] = np.std(df_.omega_init_std_1)
+                    df__['25_std'] = np.std(df_.omega_init_25_1)
+                    df__['50_std'] = np.std(df_.omega_init_50_1)
+                    df__['75_std'] = np.std(df_.omega_init_75_1)
+                    df___.append(df__)
+
+                    df__ = {}
+                    df__['omega'] = o
+                    df__['psi'] = p
+                    df__['radius'] = r
+                    df__['state'] = 'solved'
+                    df__['pop'] = 1
+                    df__['mean_mean'] = np.mean(df_.omega_mean_1)
+                    df__['std_mean'] = np.mean(df_.omega_std_1)
+                    df__['25_mean'] = np.mean(df_.omega_25_1)
+                    df__['50_mean'] = np.mean(df_.omega_50_1)
+                    df__['75_mean'] = np.mean(df_.omega_75_1)
+                    df__['mean_std'] = np.std(df_.omega_mean_1)
+                    df__['std_std'] = np.std(df_.omega_std_1)
+                    df__['25_std'] = np.std(df_.omega_25_1)
+                    df__['50_std'] = np.std(df_.omega_50_1)
+                    df__['75_std'] = np.std(df_.omega_75_1)
+                    df___.append(df__)
 
     df___ = pd.DataFrame(df___)
 
+    df___.sort_values(['omega', 'psi', 'radius', 'pop', 'state'], inplace=True)
+
     df___.to_pickle(os.path.join(args.input, "analysis", 'omegas_ms.pkl'))
-    df___.to_csv(os.path.join(args.input, "analysis", 'omegas_ms.csv'))
+    df___.to_csv(os.path.join(args.input, "analysis", 'omegas_ms.csv'),
+                 index=False)
 
 
 if __name__ == "__main__":

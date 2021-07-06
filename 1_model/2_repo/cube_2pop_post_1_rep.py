@@ -46,7 +46,7 @@ def run(file):
     v0 = helper.file.value(file, "v0")
     omega = helper.file.value(file, "omega")
     psi = helper.file.value(file, "psi")
-    rep_n = int(helper.file.value(file, "n"))
+    rep_n = int(helper.file.value(file, "repn"))
 
     return pd.DataFrame([[omega, psi, v0, r, rep_n % args.num_repo]],
                         columns=[
