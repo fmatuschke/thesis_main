@@ -55,15 +55,6 @@ def run(file):
             state = "not_solved"
             warnings.warn("not solved")
 
-        if file.find("rep") == -1:
-            rep_n = 0
-        else:
-            rep_n = h5f['/'].attrs['rep_n']
-
-        # if state != state_:
-        #     print(state, state_)
-        #     raise ValueError("state != state_")
-
         # TODO: only take h5 values
         omega = h5f['/'].attrs['omega']
         psi = h5f['/'].attrs['psi']

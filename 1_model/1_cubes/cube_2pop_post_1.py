@@ -41,18 +41,12 @@ def run(file):
     omega = helper.file.value(file, "omega")
     psi = helper.file.value(file, "psi")
 
-    if file.find("rep") == -1:
-        rep_n = 0
-    else:
-        rep_n = int(helper.file.value(file, "n"))
-
-    return pd.DataFrame([[omega, psi, v0, r, rep_n % 24]],
+    return pd.DataFrame([[omega, psi, v0, r]],
                         columns=[
                             "omega",
                             "psi",
                             "v0",
                             "radius",
-                            "rep_n",
                         ])
 
 

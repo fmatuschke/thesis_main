@@ -268,7 +268,7 @@ def run(p):
 
                     dset.attrs['parameter/simpli'] = str(simpli.get_dict())
                     dset.attrs['parameter/rep_n'] = rep_n
-                    dset.attrs['parameter/m_sim'] = m_sim
+                    dset.attrs['parameter/m_sim'] = p.m_sim
                     dset.attrs['parameter/v0'] = v0
                     dset.attrs['parameter/radius'] = radius
                     dset.attrs['parameter/psi'] = psi
@@ -333,7 +333,7 @@ def main():
                                   radial_only=args.radial,
                                   pm_only=args.pm))
     elif args.single:
-        fiber_inc = [(f, i) for f in file_list for i in models.inclinations(5)]
+        fiber_inc = [(f, i) for f in file_list for i in models.inclinations(4)]
         for file, f0_inc in fiber_inc:
             omega = helper.file.value(file, "omega")
             for m in range(args.num_sim):

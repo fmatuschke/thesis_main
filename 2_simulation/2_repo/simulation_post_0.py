@@ -123,6 +123,12 @@ def run(file):
             # print(fit_data.ravel())
             # print(((optic_data.ravel() / np.mean(optic_data.ravel()) - 1)))
 
+            if 'parameter/rep_n' in h5f_sub.attrs:
+                n_rep = h5f_sub.attrs['parameter/rep_n']
+            else:
+                n_rep = 0
+            # print(n_rep)
+
             df.append(
                 pd.DataFrame([[
                     microscope,
@@ -141,13 +147,15 @@ def run(file):
                     h5f_sub['analysis/epa/0/retardation'][...].ravel(),
                     R,
                     R2,
+                    n_rep,
                     h5f_sub.attrs['parameter/fiber_path'],
                 ]],
                              columns=[
                                  "microscope", "species", "model", "radius",
                                  "omega", "psi", "f0_inc", "f1_rot", "rofl_dir",
                                  "rofl_inc", "rofl_trel", "epa_trans",
-                                 "epa_dir", "epa_ret", "R", "R2", "fiber"
+                                 "epa_dir", "epa_ret", "R", "R2", "rep_n",
+                                 "fiber"
                              ]))
     return df
 

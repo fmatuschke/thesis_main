@@ -31,18 +31,24 @@ parser.add_argument("-p",
                     default=1,
                     type=int,
                     help="Number of processes.")
+parser.add_argument("-N",
+                    "--num_repo",
+                    default=1,
+                    type=int,
+                    help="Number of processes.")
+
 args = parser.parse_args()
 
 
 def run(file):
-    # fbs = fastpli.io.fiber_bundles.load(file)
+    fbs = fastpli.io.fiber_bundles.load(file)
     r = helper.file.value(file, "r")
     v0 = helper.file.value(file, "v0")
     omega = helper.file.value(file, "omega")
     psi = helper.file.value(file, "psi")
     rep_n = int(helper.file.value(file, "n"))
 
-    return pd.DataFrame([[omega, psi, v0, r, rep_n]],
+    return pd.DataFrame([[omega, psi, v0, r, rep_n % args.num_repo]],
                         columns=[
                             "omega",
                             "psi",

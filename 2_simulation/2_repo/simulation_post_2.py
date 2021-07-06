@@ -55,11 +55,11 @@ def save2dHist(file, H, x, y, norm=False):
 
 def calcShGT(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot, radius = parameter
+    psi, omega, f0_inc, f1_rot, radius, rep_n = parameter
 
     # ground truth
-    sub = (df_org.psi == psi) & (df_org.omega == omega) & (df_org.radius
-                                                           == radius)
+    sub = (df_org.psi == psi) & (df_org.omega == omega) & (
+        df_org.radius == radius) & (df_org.rep_n == rep_n)
 
     if len(df_org[sub]) != 1:
         df_ = df_org[sub]
@@ -80,16 +80,17 @@ def calcShGT(parameter):
     sh1 = helper.spherical_harmonics.real_spherical_harmonics(phi, theta, 6)
 
     gt_dict[
-        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'] = sh1
+        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rep_{rep_n}'] = sh1
 
 
 def calcShSim(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot, microscope, species, model, radius = parameter
+    psi, omega, f0_inc, f1_rot, microscope, species, model, radius, rep_n = parameter
     sub = (df_sim.psi == psi) & (df_sim.omega == omega) & (
         df_sim.f0_inc == f0_inc) & (df_sim.f1_rot == f1_rot) & (
             df_sim.microscope == microscope) & (df_sim.species == species) & (
-                df_sim.model == model) & (df_sim.radius == radius)
+                df_sim.model == model) & (df_sim.radius
+                                          == radius) & (df_sim.rep_n == rep_n)
 
     if len(df_sim[sub]) != 1:
         print("FOOO:2")
@@ -102,11 +103,12 @@ def calcShSim(parameter):
 
     sim_dict[
         f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-        + f'microscope_{microscope}_species_{species}_model_{model}_'] = sh0
+        +
+        f'microscope_{microscope}_species_{species}_model_{model}_rep_{rep_n}'] = sh0
 
 
 def calcACC(parameter):
-    psi, omega, f0_inc, f1_rot, microscope, species, model, radius1 = parameter
+    psi, omega, f0_inc, f1_rot, microscope, species, model, radius1, rep_n = parameter
 
     df = []
     # for radius1/ in sorted(df_sim.radius.unique()):
@@ -117,31 +119,35 @@ def calcACC(parameter):
     radius0 = 0.5
 
     sh0 = gt_dict[
-        f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_']
+        f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rep_{rep_n}']
     sh1 = gt_dict[
-        f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_']
+        f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rep_{rep_n}']
     accGtGt = helper.schilling.angular_correlation_coefficient(sh0, sh1)
 
     sh0 = gt_dict[
-        f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_']
+        f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rep_{rep_n}']
     sh1 = sim_dict[
         f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-        + f'microscope_{microscope}_species_{species}_model_{model}_']
+        +
+        f'microscope_{microscope}_species_{species}_model_{model}_rep_{rep_n}']
     accGtSim = helper.schilling.angular_correlation_coefficient(sh0, sh1)
 
     sh0 = sim_dict[
         f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-        + f'microscope_{microscope}_species_{species}_model_{model}_']
+        +
+        f'microscope_{microscope}_species_{species}_model_{model}_rep_{rep_n}']
     sh1 = gt_dict[
-        f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_']
+        f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rep_{rep_n}']
     accSimGt = helper.schilling.angular_correlation_coefficient(sh0, sh1)
 
     sh0 = sim_dict[
         f'r_{radius0:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-        + f'microscope_{microscope}_species_{species}_model_{model}_']
+        +
+        f'microscope_{microscope}_species_{species}_model_{model}_rep_{rep_n}']
     sh1 = sim_dict[
         f'r_{radius1:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'
-        + f'microscope_{microscope}_species_{species}_model_{model}_']
+        +
+        f'microscope_{microscope}_species_{species}_model_{model}_rep_{rep_n}']
     accSimSim = helper.schilling.angular_correlation_coefficient(sh0, sh1)
 
     df.append(
@@ -154,6 +160,7 @@ def calcACC(parameter):
                 'f1_rot': f1_rot,
                 'omega': omega,
                 'psi': psi,
+                'rep_n': rep_n,
                 'radius0': radius0,
                 'radius1': radius1,
                 'accGtGt': accGtGt,
@@ -199,8 +206,10 @@ if __name__ == "__main__":
             "omega",
             "f0_inc",
             "f1_rot",
+            "rep_n",
     ]].drop_duplicates().iterrows():
-        parameters.append((p.psi, p.omega, p.f0_inc, p.f1_rot, p.radius))
+        parameters.append(
+            (p.psi, p.omega, p.f0_inc, p.f1_rot, p.radius, int(p.rep_n)))
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
@@ -220,9 +229,10 @@ if __name__ == "__main__":
             "omega",
             "f0_inc",
             "f1_rot",
+            "rep_n",
     ]].drop_duplicates().iterrows():
         parameters.append((p.psi, p.omega, p.f0_inc, p.f1_rot, p.microscope,
-                           p.species, p.model, p.radius))
+                           p.species, p.model, p.radius, int(p.rep_n)))
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
@@ -241,9 +251,10 @@ if __name__ == "__main__":
             "omega",
             "f0_inc",
             "f1_rot",
+            "rep_n",
     ]].drop_duplicates().iterrows():
         parameters.append((p.psi, p.omega, p.f0_inc, p.f1_rot, p.microscope,
-                           p.species, p.model, p.radius))
+                           p.species, p.model, p.radius, int(p.rep_n)))
 
     df = []
     with mp.Pool(processes=args.num_proc) as pool:

@@ -40,7 +40,7 @@ def run(p):
     solver.obj_min_radius = p.radius * 2
     solver.omp_num_threads = 1
 
-    file_pref = p.output + f'_n_{p.n}_psi_{p.psi:.2f}_omega_{p.omega:.2f}_' + f'r_{p.radius:.2f}_v0_{p.volume:.0f}_'
+    file_pref = p.output + f'_rep_{p.n}_psi_{p.psi:.2f}_omega_{p.omega:.2f}_r_{p.radius:.2f}_v0_{p.volume:.0f}_'
 
     # pick random seeds for fiber population distribution
     seeds_0 = np.random.uniform(-p.volume, p.volume,
@@ -191,6 +191,11 @@ def main():
                         type=int,
                         required=True,
                         help="Number of threads.")
+    parser.add_argument("-N",
+                        "--num_repo",
+                        default=1,
+                        type=int,
+                        help="Number of processes.")
 
     args = parser.parse_args()
     output_name = os.path.join(args.output, FILE_NAME)
@@ -198,11 +203,9 @@ def main():
     subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
     subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
-    N = 24
-
     psi_omega_list = []
-    psi_omega_list.extend([(1.0, 0.0)] * N)
-    psi_omega_list.extend([(0.5, 90.0)] * N)
+    psi_omega_list.extend([(1.0, 0.0)] * args.num_repo)
+    psi_omega_list.extend([(0.5, 90.0)] * args.num_repo)
 
     parameters = [
         Parameter(radius=args.radius,
@@ -212,10 +215,9 @@ def main():
                   max_steps=args.max_steps,
                   num_proc=args.num_proc,
                   output=output_name,
-                  n=i % N) for i, (psi, omega) in enumerate(psi_omega_list)
+                  n=i % args.num_repo)
+        for i, (psi, omega) in enumerate(psi_omega_list)
     ]
-
-    # [run(p) for p in parameters] # for testing
 
     with mp.Pool(args.num_proc) as pool:
         [_ for _ in pool.imap_unordered(run, parameters)]

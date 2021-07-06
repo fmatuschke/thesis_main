@@ -55,11 +55,11 @@ def save2dHist(file, H, x, y, norm=False):
 
 def calcGroundTruth(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot, radius = parameter
+    psi, omega, f0_inc, f1_rot, radius, rep_n = parameter
 
     # ground truth
-    sub = (df_org.psi == psi) & (df_org.omega == omega) & (df_org.radius
-                                                           == radius)
+    sub = (df_org.psi == psi) & (df_org.omega == omega) & (
+        df_org.radius == radius) & (df_org.rep_n == rep_n)
 
     if len(df_org[sub]) != 1:
         df_ = df_org[sub]
@@ -93,15 +93,16 @@ def calcGroundTruth(parameter):
     #     ), h, x, y)
 
     gt_dict[
-        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_'] = sh1
+        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rep_{rep_n}'] = sh1
 
 
 def run(parameter):
     # rofl
-    psi, omega, f0_inc, f1_rot, microscope, species, model, radius = parameter
+    psi, omega, f0_inc, f1_rot, microscope, species, model, radius, rep_n = parameter
     sub = (df.psi == psi) & (df.omega == omega) & (df.f0_inc == f0_inc) & (
-        df.f1_rot == f1_rot) & (df.microscope == microscope) & (
-            df.species == species) & (df.model == model) & (df.radius == radius)
+        df.f1_rot
+        == f1_rot) & (df.microscope == microscope) & (df.species == species) & (
+            df.model == model) & (df.radius == radius) & (df.rep_n == rep_n)
 
     if len(df[sub]) != 1:
         print("FOOO:2")
@@ -126,7 +127,7 @@ def run(parameter):
 
     # ground truth
     sh1 = gt_dict[
-        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_']
+        f'r_{radius:.2f}_f0_inc_{f0_inc:.2f}_f1_rot_{f1_rot:.2f}_omega_{omega:.2f}_psi_{psi:.2f}_rep_{rep_n}']
 
     # ACC
     acc = helper.schilling.angular_correlation_coefficient(sh0, sh1)
@@ -139,6 +140,7 @@ def run(parameter):
             'radius': radius,
             'f0_inc': f0_inc,
             'f1_rot': f1_rot,
+            'rep_n': rep_n,
             'omega': omega,
             'psi': psi,
             'acc': acc,
@@ -175,6 +177,8 @@ if __name__ == "__main__":
     # df = df[df.r == 2.0]
     # df_org = df_org[df_org.r == 2.0]
 
+    # FIXME if rep_n not in df, df.rep_n = 0
+
     # GROUND TRUTH sh coeff
     parameters_gt = []
 
@@ -184,8 +188,10 @@ if __name__ == "__main__":
             "omega",
             "f0_inc",
             "f1_rot",
+            "rep_n",
     ]].drop_duplicates().iterrows():
-        parameters_gt.append((p.psi, p.omega, p.f0_inc, p.f1_rot, p.radius))
+        parameters_gt.append(
+            (p.psi, p.omega, p.f0_inc, p.f1_rot, p.radius, int(p.rep_n)))
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
@@ -206,9 +212,10 @@ if __name__ == "__main__":
             "omega",
             "f0_inc",
             "f1_rot",
+            "rep_n",
     ]].drop_duplicates().iterrows():
         parameters.append((p.psi, p.omega, p.f0_inc, p.f1_rot, p.microscope,
-                           p.species, p.model, p.radius))
+                           p.species, p.model, p.radius, int(p.rep_n)))
 
     with mp.Pool(processes=args.num_proc) as pool:
         df = [
