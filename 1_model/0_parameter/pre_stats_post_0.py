@@ -181,7 +181,7 @@ run.lock = mp.Lock()
 with mp.Pool(processes=args.num_proc) as pool:
     df = [
         d for d in tqdm(
-            pool.imap_unordered(run, files), total=len(files), smoothing=0.1)
+            pool.imap_unordered(run, files), total=len(files), smoothing=0.0)
     ]
     df = pd.concat(df, ignore_index=True)
 

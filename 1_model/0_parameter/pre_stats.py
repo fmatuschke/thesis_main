@@ -232,7 +232,7 @@ if __name__ == '__main__':
     # Fiber Model
     N_OMP_THREADS = 1
     N_MAX_STEPS = 100000
-    N_REPEAT = range(5)
+    N_REPEAT = range(24)
     SIZE = 60  # <- for pre stats ok, no simulation required
     FIBER_RADII = [0.5, 1.0, 2.0, 5.0, 10]
     OBJ_MEAN_LENGTH_F = [1.0, 2.0, 4.0, 8.0]
@@ -247,6 +247,7 @@ if __name__ == '__main__':
             parameters = list(
                 itertools.product([radii], OBJ_MEAN_LENGTH_F, OBJ_MIN_RADIUS_F,
                                   PARAMETER, N_REPEAT))
+
             for _ in tqdm.tqdm(pool.imap_unordered(run, parameters),
                                total=len(parameters),
                                position=0,

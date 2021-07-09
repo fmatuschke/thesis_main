@@ -13,6 +13,7 @@
 \usepgfplotslibrary{colorbrewer}
 \usepgfplotslibrary{statistics}
 \usepgfplotslibrary{groupplots}
+\tikzset{>=latex}
 % 
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
@@ -24,6 +25,9 @@
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
+\def\vrf{\langle{r_f}\rangle}
+\def\vfl{\nu_{l}}
+\def\vfr{\nu_{r}}
 % 
 \begin{document}
 % 
@@ -102,6 +106,7 @@ cycle multiindex* list={
         x={times_mean}, y={steps_mean}, x error = {times_std} , y error={steps_std}, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
+   \draw[->] (rel axis cs:0.9,0.05) -- (rel axis cs:0.975,0.05) node[midway, anchor=south]{$t/s$};
 % 
 \nextgroupplot[ylabel={$\# col obj$}, ymin=0, ymax=2000000, xmin=0.2, xmax=100000]
    \Loop{
@@ -109,6 +114,7 @@ cycle multiindex* list={
         x={times_mean}, y={num_col_objs_mean}, x error = {times_std} , y error={num_col_objs_std}, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
+   \draw[->] (rel axis cs:0.9,0.05) -- (rel axis cs:0.975,0.05) node[midway, anchor=south]{$t/s$};
 %
 \nextgroupplot[ylabel={$overlap frac$}, ymin=0.0005, ymax=0.3, xmin=0.2, xmax=100000]
     \Loop{
@@ -116,6 +122,7 @@ cycle multiindex* list={
         x={times_mean}, y={overlaps_frac_mean}, x error = {times_std} , y error={overlaps_frac_std}, col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
     }
+    \draw[->] (rel axis cs:0.9,0.05) -- (rel axis cs:0.975,0.05) node[midway, anchor=south]{$t/s$};
    % \coordinate (L) at (axis description cs:1,0);
 % 
 % 
@@ -143,8 +150,8 @@ cycle multiindex* list={
          \pgfmathparse{int(round(\fl))} \let\intfl=\pgfmathresult
          \pgfmathparse{int(round(\fr))} \let\intfr=\pgfmathresult
          \ifthenelse{\intfr = 4}{%
-            \addlegendentryexpanded{$f_r=\intfr,f_l=\intfl,r=\r$}}{%
-            \addlegendentryexpanded{$f_r=\intfr$}}
+            \addlegendentryexpanded{$\vfr=\intfr,\vfl=\intfl,\vrf=\r$}}{%
+            \addlegendentryexpanded{$\vfr=\intfr$}}
 % 
          % \pgfmathtruncatemacro\counter{\counter+1}
          % \ifthenelse{\counter = 3}{\addlegendimage{empty legend}\addlegendentry{}}{}
