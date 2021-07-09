@@ -40,7 +40,7 @@ parser.add_argument('-p',
 
 args = parser.parse_args()
 output_name = os.path.join(args.output, FILE_NAME)
-os.makedirs(args.output, exist_ok=False)
+os.makedirs(args.output, exist_ok=True)
 subprocess.run([f'touch {args.output}/$(git rev-parse HEAD)'], shell=True)
 subprocess.run([f'touch {args.output}/$(hostname)'], shell=True)
 
@@ -54,6 +54,10 @@ def run(parameters):
     file_pref = output_name + f'_psi_{psi:.2f}_omega_{omega:.2f}_r_' \
                                f'{radius:.2f}_v0_{SIZE:.0f}_fl_{mean_length_f:.2f}_' \
                                f'fr_{min_radius_f:.2f}_n_{n}_'
+
+    if os.path.isfile(file_pref + '.solved.h5'):
+        return
+
     # logger.info(f'file_pref: {file_pref}')
 
     # setup solver
@@ -111,7 +115,7 @@ def run(parameters):
 
     # Save Data
     # logger.debug(f'save init')
-    with h5py.File(file_pref + '.init.h5', 'w-') as h5f:
+    with h5py.File(file_pref + '.init.h5', 'w') as h5f:
         solver.save_h5(h5f, script=open(os.path.abspath(__file__), 'r').read())
         h5f['/'].attrs['psi'] = psi
         h5f['/'].attrs['omega'] = omega
