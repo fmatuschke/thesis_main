@@ -22,130 +22,116 @@
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-\makeatletter
-\definecolor{cc21}{HTML}{A6CEE3}
-\definecolor{cc22}{HTML}{1F78B4}
-\pgfplotscreateplotcyclelist{cc2}{cc21, cc22}
-\makeatother
+% \makeatletter
+% \definecolor{cc21}{HTML}{A6CEE3}
+% \definecolor{cc22}{HTML}{1F78B4}
+% \pgfplotscreateplotcyclelist{cc2}{cc21, cc22}
+% \makeatother
 % 
 \begin{document}
 % 
-\pgfmathsetmacro{\ng}{2}
-\pgfmathsetmacro{\dx}{0.3}
-\pgfmathsetmacro{\db}{0.5}
+\pgfmathsetmacro{\ng}{6}
+\pgfmathsetmacro{\dx}{0.75}
+% 
 \pgfplotsset{
     Boxplot/.style={
-        xmin=0.5,
-        xmax=8.5,
+        cycle list/Paired-6,
+        xmin=0.42,
+        xmax=8.58,
         axis x line=none,
-        xlabel=threads,
         axis y line = left,
         enlarge y limits,
         ymajorgrids,
         clip=false,
-        y label style={at={(axis description cs:-0.075,.5)},rotate=0,anchor=south},
+        % y label style={at={(axis description cs:-0.125,.5)},rotate=0,anchor=south},
         boxplot={
             draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
-            box extend=\db/\ng,
+            box extend=\dx/(\ng+1)*1.5,
             mark size=0.42pt,
+            draw/median/.code={%
+               \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
+               \pgfextra
+               \pgftransformshift{
+                  \pgfplotsboxplotpointabbox
+                     {\pgfplotsboxplotvalue{median}}
+                     {0.5}
+               }
+               \pgfuseplotmark{*}
+               \endpgfextra
+               ;
+            },
         },
         boxplot/draw direction=y,
-        cycle list name=cc2,
     },
+    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
 }
 %
-\newcommand{\xachse}{
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:0.7,20.0} |- {axis description cs:0.0,0.0}) -- 
-  ({axis cs:1.3,20.0} |- {axis description cs:0.0,0.0})
-  node [black,midway,below,yshift=-1ex] {$1$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:1.7,20.0} |- {axis description cs:0.0,0.0}) -- 
-  ({axis cs:2.3,20.0} |- {axis description cs:0.0,0.0})
-  node [black,midway,below,yshift=-1ex] {$2$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:2.7,20.0} |- {axis description cs:0.0,0.0}) -- 
-  ({axis cs:3.3,20.0} |- {axis description cs:0.0,0.0})
-  node [black,midway,below,yshift=-1ex] {$3$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:3.7,20.0} |- {axis description cs:0.0,0.0}) -- 
-  ({axis cs:4.3,20.0} |- {axis description cs:0.0,0.0})
-  node [black,midway,below,yshift=-1ex] {$4$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:4.7,20.0} |- {axis description cs:0.0,0.0}) -- 
-  ({axis cs:5.3,20.0} |- {axis description cs:0.0,0.0})
-  node [black,midway,below,yshift=-1ex] {$5$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:5.7,20.0} |- {axis description cs:0.0,0.0}) -- 
-  ({axis cs:6.3,20.0} |- {axis description cs:0.0,0.0})
-  node [black,midway,below,yshift=-1ex] {$6$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:6.7,20.0} |- {axis description cs:0.0,0.0}) -- 
-  ({axis cs:7.3,20.0} |- {axis description cs:0.0,0.0})
-  node [black,midway,below,yshift=-1ex] {$7$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:7.7,20.0} |- {axis description cs:0.0,0.0}) -- 
-  ({axis cs:8.3,20.0} |- {axis description cs:0.0,0.0})
-  node [black,midway,below,yshift=-1ex] (last) {$8$};
-\node [anchor=base west] at (last.base east) {$n_{threads}$};
-}
-% 
 \begin{tikzpicture}[]
-\begin{groupplot}[%
-   group style={
-         group size=1 by 3,
-         horizontal sep=0cm,
-         vertical sep=2.0cm,
-         ylabels at=edge left,
-   },
-      width = 0.75*\width,
-      height = 0.2*\height,
+\begin{axis}[%
+      width = \width,
+      height = 0.5*\height,
       ylabel={$\mathit{speedup}$},
       Boxplot,
-   ]
-% 
-\nextgroupplot[title=after 0 steps,
-   legend to name={legend},
-   legend image post style={mark=square*},
-   legend columns=2,
-   legend cell align={left},
-   legend image post style={scale=1},
-   legend transposed=false,
-   legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
-   legend entries={%
-      {$\mathbin{\|}$},
-      {$\times$}}]
+      legend to name={legend},
+      legend image post style={mark=square*},
+      legend columns=2,
+      legend cell align={left},
+      legend image post style={scale=1},
+      legend transposed=true,
+      legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
+      legend entries={%
+         {$\Delta_{\mathit{steps}} = 0, \mathbin{\|}$},
+         {$\Delta_{\mathit{steps}} = 0, \times$},
+         {$\Delta_{\mathit{steps}} = 100, \mathbin{\|}$},
+         {$\Delta_{\mathit{steps}} = 100, \times$},
+         {$\Delta_{\mathit{steps}} = 1000, \mathbin{\|}$},
+         {$\Delta_{\mathit{steps}} = 1000, \times$}}]
    \foreach \p in {1,2,3,4,5,6,7,8} {
-      \foreach \f in {1,0} {
-         \addplot+[fill, draw=black] table[%
-            y={\f/\p/0}, col sep=comma, row sep=newline,
-            ]{\datapath};
-  }}
-  \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:2.5,2.5}) node[sloped, pos=0.95, below] {ideal}; 
-  \xachse  
+      \foreach \a in {0,100,1000} {
+         \foreach \f in {1,0} {
+            \addplot+[fill, draw=black] table[%
+               y={\f/\p/\a}, col sep=comma, row sep=newline,
+               ]{\datapath};
+  }}}
+  \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:6,6}) node[sloped, pos=0.95, above] {ideal}; 
+%   
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$1$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$2$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$3$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$4$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$5$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$6$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] {$7$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+  ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+  ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.0})
+  node [black,midway,below,yshift=-1ex] (last) {$8$};
+\node [anchor=base west] at (last.base east) {$n_{threads}$};
 % 
-\nextgroupplot[title=after 100 steps,]
-   \foreach \p in {1,2,3,4,5,6,7,8} {
-      \foreach \f in {1,0} {
-         \addplot+[fill, draw=black] table[%
-            y={\f/\p/100}, col sep=comma, row sep=newline,
-            ]{\datapath};
-   }}
-   \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:4,4}) node[sloped, pos=0.95, below] {ideal}; 
-   \xachse
-
-\nextgroupplot[title=after 1000 steps,]
-   \foreach \p in {1,2,3,4,5,6,7,8} {
-      \foreach \f in {1,0} {
-         \addplot+[fill, draw=black] table[%
-            y={\f/\p/1000}, col sep=comma, row sep=newline,
-            ]{\datapath};
-   }}
-   \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:6,6}) node[sloped, pos=0.95, below] {ideal}; 
-   \xachse  
-\end{groupplot}
+\end{axis}
 % 
-\node[anchor=north] at ($(group c1r3.south) - (0,0.75cm)$) {\ref{legend}};
+\node[anchor=north] at (current bounding box.south) {\ref{legend}};
 % 
 \end{tikzpicture}
 
