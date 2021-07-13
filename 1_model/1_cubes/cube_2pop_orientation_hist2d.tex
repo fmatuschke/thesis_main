@@ -23,7 +23,7 @@
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
-\def\radiusvalue{1.0}
+\def\radiusvalue{0.5}
 % 
 \def\deltax{7}
 \def\deltay{6}
@@ -56,19 +56,22 @@
     y axis line style= { draw opacity=0 },
     ymin=0, ymax=90,
     axis on top=true,
+   %  point meta min = 0,
+   %  point meta max = 0.06,
     colorbar,
-    % colorbar style={
-    %     % title=Color key,
-    %     % ylabel=Z-value,
-    %     % ytick={-1,-0.75,...,1},
-    %     yticklabel style={
-    %         text width=2.5em,
-    %         align=right,
-    %         /pgf/number format/.cd,
-    %             fixed,
-    %             fixed zerofill
-    %     }
-    % }
+    colorbar style={
+        % title=Color key,
+        % ylabel=Z-value,
+      %   ymin = 0, ymax = 0.02,
+      %   ytick={0,0.02,...,0.06},
+      %   yticklabel style={
+      %       text width=2.5em,
+      %       align=right,
+      %       /pgf/number format/.cd,
+      %           fixed,
+      %           fixed zerofill
+      %   }
+    }
     % /pgf/number format/sci subscript
 ]
 \addplot [%
@@ -80,7 +83,7 @@ point meta=\thisrowno{2},
 \end{polaraxis}
 \end{scope}
 \begin{scope}[]
-\ifthenelse{\i=1}{\node[anchor=south] at (bb.north) {$\Psi = \psivalue$};}{}
+\ifthenelse{\i=1}{\node[anchor=south, xshift=-1.5em] at (bb.north) {$\Psi = \psivalue$};}{}
 \ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (bb.west) {$\Omega = \SI{\omegavalue}{\degree}$};}{}
 \end{scope}
 \end{scope}

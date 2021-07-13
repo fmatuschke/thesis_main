@@ -80,7 +80,7 @@ def run(file):
         simpli = fastpli.simulation.Simpli()
         warnings.filterwarnings("ignore", message="objects overlap")
         # simpli.omp_num_threads = 0
-        simpli.voxel_size = 0.1
+        simpli.voxel_size = 0.2
         simpli.set_voi([-30] * 3, [30] * 3)
         simpli.fiber_bundles = fbs
         simpli.fiber_bundles.layers = [[(1.0, 0, 0, 'p')]] * len(fbs)
