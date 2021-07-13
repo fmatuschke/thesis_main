@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 #%%
-df = pd.read_pickle('test.pkl')
+file = 'r_0.5.pkl'
+df = pd.read_pickle(f'output/{file}')
 df.file = df.file.apply(lambda x: x[56:75])
 
 # %%
@@ -12,22 +13,45 @@ df_ = pd.DataFrame()
 df_ = pd.DataFrame(df.groupby(['n', 'file', 'p', 'a']).sum()).reset_index()
 
 for index, row in df_.iterrows():
-    a = float(df_[(df_.file == row.file) & (df_.n == row.n) & (df_.p == 1)].dt)
-    b = float(df_[(df_.file == row.file) & (df_.n == row.n) &
-                  (df_.p == row.p)].dt)
+    a = float(df_[(df_.file == row.file) & (df_.n == row.n) & (df_.p == 1) &
+                  (df_.a == row.a)].dt)
+    b = float(df_[(df_.file == row.file) & (df_.n == row.n) & (df_.p == row.p) &
+                  (df_.a == row.a)].dt)
     df_.loc[index, 'speedup'] = a / b
+
+#%%
+
+df = pd.DataFrame()
+for a in df_.a.unique():
+    for p in df_.p.unique():
+        for f, fi in enumerate(df_.file.unique()):
+            data = df_.speedup[(df_.a == a) & (df_.p == p) &
+                               (df_.file == fi)].to_numpy()
+            df[f'{f}/{p}/{int(a)}'] = data
+
+df.to_csv(f'output/{file}_speedup.csv', index=False)
+
+# df_in = df_in.drop(['n', 'dt'], axis=1)
+# df_out = pd.pivot(df_in, index='file', columns=['p', 'a'],
+#                   values='speedup').reset_index()
+
+# # df_out = pd.DataFrame(columns=['cross', ])
 
 # %%
 
+#%%
 for a in df_.a.unique():
+    print(a)
+    plt.figure()
     ax = sns.boxplot(x="p",
                      y="speedup",
                      hue="file",
                      data=df_[df_.a == a],
                      palette="Set2")
-    plt.plot([0, 2], [1, 3])
+    plt.plot([0, 7], [1, 8])
     ax.axis('equal')
     # ax.set(ylim=(2,0))
+    plt.savefig(f'output/speedup_{file[:-4]}_{a}.pdf')
     plt.show()
 
 # %%

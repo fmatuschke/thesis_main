@@ -16,16 +16,14 @@ if [ ! -f "$1" ]; then
    exit
 fi
 
-if [ ! -d "$2" ]; then
-   echo "not a directory: $2"
-   exit
-fi
+# if [ ! -d "$2" ]; then
+#    echo "not a directory: $2"
+#    exit
+# fi
 
-singe=false
 if [ "$#" -eq 3 ]; then
    if [[ "$3" == "--single" ]]; then
-      echo "SINGLE"
-      singe=true
+      echo
    else
       echo "wrong 3rd argument: $3"
       exit
@@ -43,9 +41,10 @@ cd output/tmp
 cp ../../${NAME}.tex ${NAMEOUT}.tex
 sed -i 's?__PATH__?'"$2"'?g' ${NAMEOUT}.tex
 lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
-if [ ! singe ]; then
-   lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
-   lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
+if [ "$#" -eq 3 ]; then
+   if [[ "$3" == "--single" ]]; then
+      lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
+   fi
 fi
 mv ${NAMEOUT}.pdf ../tikz/${NAMEOUT}.pdf
 xdg-open ../tikz/${NAMEOUT}.pdf &>/dev/null 2>&1
