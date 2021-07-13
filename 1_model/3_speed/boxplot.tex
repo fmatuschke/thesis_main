@@ -35,8 +35,6 @@
 \pgfmathsetmacro{\db}{0.5}
 \pgfplotsset{
     Boxplot/.style={
-        height=0.33*\height,
-        width=139/147*\width, % because of lable
         xmin=0.5,
         xmax=8.5,
         axis x line=none,
@@ -56,33 +54,7 @@
     },
 }
 %
-\foreach \a [count=\ai] in {0,100,1000} {
-\begin{tikzpicture}[]
-% 
-\begin{axis}[%
-   width = \width,
-   height = 0.19*\height,
-   Boxplot,
-   ]
-
-   \foreach \p in {1,2,3,4,5,6,7,8} {
-      \foreach \f in {0,1} {
-
-      \addplot+[fill, draw=black] table[%
-          y={\f/\p/\a}, col sep=comma, row sep=newline,
-          ]{\datapath};
-  }}
-
-\ifnum \ai=1
-  \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:2.5,2.5}) node[sloped, pos=0.95, below] {ideal}; 
-\fi 
-\ifnum \ai=2
-  \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:4,4}) node[sloped, pos=0.95, below] {ideal}; 
-\fi 
-\ifnum \ai=3
-  \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:6,6}) node[sloped, pos=0.95, below] {ideal}; 
-\fi       
-% \node[anchor=north west] at (axis description cs:0,1) {\ref{legends\currfilebase}};
+\newcommand{\xachse}{
 \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
   ({axis cs:0.7,20.0} |- {axis description cs:0.0,0.0}) -- 
   ({axis cs:1.3,20.0} |- {axis description cs:0.0,0.0})
@@ -116,10 +88,66 @@
   ({axis cs:8.3,20.0} |- {axis description cs:0.0,0.0})
   node [black,midway,below,yshift=-1ex] (last) {$8$};
 \node [anchor=base west] at (last.base east) {$n_{threads}$};
+}
+% 
+\begin{tikzpicture}[]
+\begin{groupplot}[%
+   group style={
+         group size=1 by 3,
+         horizontal sep=0cm,
+         vertical sep=2.0cm,
+         ylabels at=edge left,
+   },
+      width = 0.75*\width,
+      height = 0.2*\height,
+      ylabel={$\mathit{speedup}$},
+      Boxplot,
+   ]
+% 
+\nextgroupplot[title=after 0 steps,
+   legend to name={legend},
+   legend image post style={mark=square*},
+   legend columns=2,
+   legend cell align={left},
+   legend image post style={scale=1},
+   legend transposed=false,
+   legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
+   legend entries={%
+      {$\mathbin{\|}$},
+      {$\times$}}]
+   \foreach \p in {1,2,3,4,5,6,7,8} {
+      \foreach \f in {1,0} {
+         \addplot+[fill, draw=black] table[%
+            y={\f/\p/0}, col sep=comma, row sep=newline,
+            ]{\datapath};
+  }}
+  \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:2.5,2.5}) node[sloped, pos=0.95, below] {ideal}; 
+  \xachse  
+% 
+\nextgroupplot[title=after 100 steps,]
+   \foreach \p in {1,2,3,4,5,6,7,8} {
+      \foreach \f in {1,0} {
+         \addplot+[fill, draw=black] table[%
+            y={\f/\p/100}, col sep=comma, row sep=newline,
+            ]{\datapath};
+   }}
+   \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:4,4}) node[sloped, pos=0.95, below] {ideal}; 
+   \xachse
 
-\end{axis}
+\nextgroupplot[title=after 1000 steps,]
+   \foreach \p in {1,2,3,4,5,6,7,8} {
+      \foreach \f in {1,0} {
+         \addplot+[fill, draw=black] table[%
+            y={\f/\p/1000}, col sep=comma, row sep=newline,
+            ]{\datapath};
+   }}
+   \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:6,6}) node[sloped, pos=0.95, below] {ideal}; 
+   \xachse  
+\end{groupplot}
+% 
+\node[anchor=north] at ($(group c1r3.south) - (0,0.75cm)$) {\ref{legend}};
 % 
 \end{tikzpicture}
-}
+
 % 
 \end{document}

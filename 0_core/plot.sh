@@ -16,20 +16,6 @@ if [ ! -f "$1" ]; then
    exit
 fi
 
-# if [ ! -d "$2" ]; then
-#    echo "not a directory: $2"
-#    exit
-# fi
-
-if [ "$#" -eq 3 ]; then
-   if [[ "$3" == "--single" ]]; then
-      echo
-   else
-      echo "wrong 3rd argument: $3"
-      exit
-   fi
-fi
-
 NAME=$(echo "$1" | cut -f 1 -d '.')
 APPEND="$(echo $2 | sed 's?/?_?g')"
 NAMEOUT="${NAME}_${APPEND}"
@@ -41,10 +27,6 @@ cd output/tmp
 cp ../../${NAME}.tex ${NAMEOUT}.tex
 sed -i 's?__PATH__?'"$2"'?g' ${NAMEOUT}.tex
 lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
-if [ "$#" -eq 3 ]; then
-   if [[ "$3" == "--single" ]]; then
-      lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
-   fi
-fi
+lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
 mv ${NAMEOUT}.pdf ../tikz/${NAMEOUT}.pdf
 xdg-open ../tikz/${NAMEOUT}.pdf &>/dev/null 2>&1
