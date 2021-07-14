@@ -71,7 +71,7 @@
 \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$4$};
 \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$8$};
 \node[anchor=base west, xshift = 2em] at (last.base east) {$\vfl$};
-\node[anchor=east] at ({axis description cs:0,1.05}) {$V/V_0$};
+\node[anchor=east] at ({axis description cs:0,1.05}) {$V_f/V_0$};
 }
 % 
 \newcommand{\Loop}[1]{
@@ -87,7 +87,7 @@
       vertical sep=0.75cm,
       ylabels at=edge left,
   },
-   width = \width,
+   width = 0.9*\width,
    height = 0.19*\height,
    Boxplot,
 ]
@@ -148,7 +148,12 @@
 }
 \xachse
 %
+\coordinate (PA) at (rel axis cs:0,0);
+\coordinate (PB) at (rel axis cs:1,0);
 \end{groupplot}
+% center axis
+\coordinate (PC) at (current bounding box.west);
+\path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
 % 
 \node[anchor=north] at ($(group c1r5.south) - (0,0.75cm)$) {\ref{legend}};
 % 

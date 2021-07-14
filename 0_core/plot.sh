@@ -27,6 +27,10 @@ cd output/tmp
 cp ../../${NAME}.tex ${NAMEOUT}.tex
 sed -i 's?__PATH__?'"$2"'?g' ${NAMEOUT}.tex
 lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
-lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
+
+if [ "$#" != 3 ]; then
+   lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
+fi
+
 mv ${NAMEOUT}.pdf ../tikz/${NAMEOUT}.pdf
 xdg-open ../tikz/${NAMEOUT}.pdf &>/dev/null 2>&1
