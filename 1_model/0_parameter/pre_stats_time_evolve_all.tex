@@ -42,36 +42,41 @@
    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
    }
 %
-\pgfplotsset{colormap/Blues-4}
-\pgfplotsset{colormap/Greens-4}
-\pgfplotsset{colormap/RdPu-4}
-\pgfplotsset{colormap/Purples-4}
-\pgfplotsset{colormap/Reds-4}
-\pgfplotsset{colormap/Greys-4}
+\pgfplotsset{colormap/Dark2-8}
+\pgfplotsset{colormap/Set1-8}
 % 
 \pgfplotsset{
 cycle multiindex* list={
-   index of colormap={1 of Blues-4},index of colormap={2 of Blues-4},
-   index of colormap={3 of Blues-4},
-   index of colormap={1 of Greens-4},index of colormap={2 of Greens-4},
-   index of colormap={3 of Greens-4},
-   index of colormap={1 of RdPu-4},index of colormap={2 of RdPu-4},
-   index of colormap={3 of RdPu-4},
-   index of colormap={1 of Purples-4},index of colormap={2 of Purples-4},
-   index of colormap={3 of Purples-4},
-   index of colormap={1 of Reds-4},index of colormap={2 of Reds-4},
-   index of colormap={3 of Reds-4},
-   index of colormap={1 of Greys-4},index of colormap={2 of Greys-4},
-   index of colormap={3 of Greys-4},
+   index of colormap={0 of Dark2-8},
+   index of colormap={1 of Dark2-8},
+   index of colormap={2 of Dark2-8},
+   index of colormap={3 of Dark2-8},
+   index of colormap={4 of Dark2-8},
+   index of colormap={5 of Dark2-8},
+   index of colormap={6 of Dark2-8},
+   index of colormap={7 of Dark2-8},
+   index of colormap={0 of Set1-8},
+   index of colormap={1 of Set1-8},
+   index of colormap={2 of Set1-8},
+   index of colormap={3 of Set1-8},
+   index of colormap={4 of Set1-8},
+   index of colormap={5 of Set1-8},
+   index of colormap={6 of Set1-8},
+   index of colormap={7 of Set1-8},
    \nextlist
 }}
+% \pgfplotsset{
+%    cycle list name=color list,
+% }
 % 
 \newcommand{\Loop}[1]{
-   \foreach \r in {0.5,1.0,2.0}{
-   \foreach \fl in {2.0, 8.0}{
-   \foreach \fr in {2.0,4.0,8.0}{#1}}}} % 1.0 und 2.0 nicht unterscheidbar
+   \foreach \fl in {1.0,2.0,4.0,8.0}{
+   \foreach \fr in {1.0,2.0,4.0,8.0}{#1}}} % 1.0 und 2.0 nicht unterscheidbar
 % 
+% \foreach \psi [count=\ipsi] in {0.5}{
+% \foreach \r [count=\ir] in {0.5}{
 \foreach \psi [count=\ipsi] in {0.5,1.0}{
+\foreach \r [count=\ir] in {0.5,1.0,2.0,5.0,10.0}{
 \begin{tikzpicture}
 \begin{groupplot}[%
   group style={
@@ -84,12 +89,12 @@ cycle multiindex* list={
    height = 0.2*\height,
    xmode=log,
    ymode=log,
-   % xmajorgrids,
-   extra x ticks={1, 60, 3600, 43200},
-   extra x tick labels={$\SI{1}{\second}$, $\SI{1}{\minute}$,
-                        $\SI{1}{\hour}$, $\SI{12}{\hour}$},
-   extra x tick style={x tick label style={font=\scriptsize, below, yshift=-0.5ex},
-                       ticklabel pos=top},
+   % % xmajorgrids,
+   % extra x ticks={1, 60, 3600, 43200},
+   % extra x tick labels={$\SI{1}{\second}$, $\SI{1}{\minute}$,
+   %                      $\SI{1}{\hour}$, $\SI{12}{\hour}$},
+   % extra x tick style={x tick label style={font=\scriptsize, below, yshift=-0.5ex},
+   %                     ticklabel pos=top},
 ]
 % 
 % \nextgroupplot[ylabel={overlap}]
@@ -99,7 +104,7 @@ cycle multiindex* list={
 %         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
 %    }
 % % 
-\nextgroupplot[ylabel={$\# steps$}, ymin=30, ymax=200000, xmin=0.2, xmax=100000]
+\nextgroupplot[ylabel={$\# steps$}, title={$\vrf = \SI{\r}{\micro\meter}, \Psi=\psi$}]
    \Loop{
     \addplot+[] table[
         x={times_mean}, y={steps_mean}, x error = {times_std} , y error={steps_std}, col sep=comma,]
@@ -107,7 +112,7 @@ cycle multiindex* list={
    }
    \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
 % 
-\nextgroupplot[ylabel={$\# col obj$}, ymin=0, ymax=2000000, xmin=0.2, xmax=100000]
+\nextgroupplot[ylabel={$\# col obj$}]
    \Loop{
     \addplot+[] table[
         x={times_mean}, y={num_col_objs_mean}, x error = {times_std} , y error={num_col_objs_std}, col sep=comma,]
@@ -115,7 +120,7 @@ cycle multiindex* list={
    }
    \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
 %
-\nextgroupplot[ylabel={$overlap frac$}, ymin=0.0005, ymax=0.3, xmin=0.2, xmax=100000]
+\nextgroupplot[ylabel={$overlap frac$}]
     \Loop{
     \addplot+[] table[
         x={times_mean}, y={overlaps_frac_mean}, x error = {times_std} , y error={overlaps_frac_std}, col sep=comma,]
@@ -123,7 +128,7 @@ cycle multiindex* list={
     }
     \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
    % \coordinate (L) at (axis description cs:1,0);
-\nextgroupplot[ylabel={$\# obj$}, ymin=250, ymax=1000000, xmin=0.2, xmax=100000]
+\nextgroupplot[ylabel={$\# obj$}]
    \Loop{
     \addplot+[] table[
         x={times_mean}, y={num_objs_mean}, x error = {times_std} , y error={num_objs_std}, col sep=comma,]
@@ -144,9 +149,9 @@ cycle multiindex* list={
 % LEGEND
 \begin{pgfinterruptboundingbox}
 \begin{axis}[%
-   legend to name={legend\ipsi},
+   legend to name={legend\ipsi\ir},
    legend cell align=left,
-   legend columns=6,
+   legend columns=4,
    legend transposed=true,
    scale only axis, 
    width=1mm,
@@ -162,8 +167,8 @@ cycle multiindex* list={
          \addplot coordinates {(0,0)};
          \pgfmathparse{int(round(\fl))} \let\intfl=\pgfmathresult
          \pgfmathparse{int(round(\fr))} \let\intfr=\pgfmathresult
-         \ifthenelse{\intfr = 4}{%
-            \addlegendentryexpanded{$\vfr=\intfr,\vfl=\intfl,\vrf=\r$}}{%
+         \ifthenelse{\intfr = 1}{%
+            \addlegendentryexpanded{$\vfr=\intfr,\vfl=\intfl$}}{%
             \addlegendentryexpanded{$\vfr=\intfr$}}
 % 
          % \pgfmathtruncatemacro\counter{\counter+1}
@@ -177,7 +182,7 @@ cycle multiindex* list={
 % \path node[anchor=south] at ($(current bounding box.north) + (0,1)$) {\ref{legend}};
 % \path let \p1=($(current bounding box.north east)-(current bounding box.south west)$) in node[anchor=center] at ($(current bounding box.south west) + (\x1/5*4,\y1*1/4)$) {\ref{legend}};
 % \path node[anchor=north] at ($(current bounding box.south) - (0,0.5cm)$) {\ref{legend}};
-\path node[anchor=north] at ($(group c1r4.south) - (0,0.75cm)$) {\ref{legend\ipsi}};
+\path node[anchor=north] at ($(group c1r4.south) - (0,0.75cm)$) {\ref{legend\ipsi\ir}};
 \end{tikzpicture}
-}
+}}
 \end{document}

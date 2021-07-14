@@ -1,0 +1,57 @@
+#%%
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import glob
+import h5py
+
+#%%
+df = pd.DataFrame(
+    columns=['num_obj', 'time', 'obj_mean_length', 'obj_min_radius', 'v0'])
+for file in glob.glob('output/volumes/*solved.h5'):
+    h5f = h5py.File(file, 'r')
+
+    df = df.append(
+        {
+            'num_obj': h5f['/'].attrs['num_obj'],
+            'time': h5f['/'].attrs['time'],
+            'obj_mean_length': h5f['/'].attrs['obj_mean_length'],
+            'obj_min_radius': h5f['/'].attrs['obj_min_radius'],
+            'v0': h5f['/'].attrs['v0'],
+        },
+        ignore_index=True)
+
+# %%
+ax = sns.boxplot(x="v0", y="time", data=df)
+ax.set_yscale('log', basey=10)
+
+print(df.groupby('v0').mean())
+
+x = np.array([40, 60, 80, 100])
+y = np.array([12.45, 85, 341, 969])
+r = np.polyfit(x, np.log10(y), 1)
+
+x = np.array([20, 40, 60, 80, 100])
+y = 10**(r[0] * x + r[1])
+plt.plot(np.arange(x.size), y)
+plt.title(f'y = 10**({r[0]:.3f}*x+{r[1]:.3f})')
+plt.savefig('output/time_volume_size_time.pdf')
+
+# %%
+ax = sns.boxplot(x="v0", y="num_obj", data=df)
+ax.set_yscale('log', basey=10)
+
+print(df.groupby('v0').mean())
+
+x = np.array([40, 60, 80, 100])
+y = np.array([10027, 33633, 78740, 155902])
+r = np.polyfit(x, np.log10(y), 1)
+
+x = np.array([20, 40, 60, 80, 100])
+y = 10**(r[0] * x + r[1])
+plt.plot(np.arange(x.size), y)
+plt.title(f'y = 10**({r[0]:.3f}*x+{r[1]:.3f})')
+plt.savefig('output/time_volume_size_num_obj.pdf')
+
+# %%
