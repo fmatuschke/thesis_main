@@ -1,0 +1,120 @@
+\documentclass[tikz]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{statistics}
+\tikzset{>=latex}
+% 
+\def\width{13.87303cm}
+\def\height{22.37076cm}
+\def\datapath{../../__PATH__/boxplot}
+\directlua0{
+  pdf.setinfo ("/Path: (__PATH__)")
+}
+% 
+\def\vrf{\langle{r_f}\rangle}
+\def\vfl{\nu_{l}}
+\def\vfr{\nu_{r}}
+% 
+\begin{document}
+\pgfmathsetmacro{\ng}{8}
+\pgfmathsetmacro{\dx}{0.75}
+% 
+\pgfplotsset{
+    Boxplot/.style={
+        cycle list/Paired-8,
+        xmin=0.42,
+        xmax=4.58,
+        ymin=0.5,
+        ymax=0.8,
+        axis x line=none,
+        axis y line = left,
+        enlarge y limits,
+        ymajorgrids,
+        clip=false,
+        % y label style={at={(axis description cs:-0.125,.5)},rotate=0,anchor=south},
+        boxplot={
+            draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
+            box extend=\dx/(\ng+1),
+            mark size=0.42pt,
+            draw/median/.code={%
+               \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
+               \pgfextra
+               \pgftransformshift{
+                  \pgfplotsboxplotpointabbox
+                     {\pgfplotsboxplotvalue{median}}
+                     {0.5}
+               }
+               \pgfuseplotmark{*}
+               \endpgfextra
+               ;
+            },
+        },
+        boxplot/draw direction=y,
+    },
+    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
+}
+% 
+\newcommand{\Loop}[1]{
+\foreach \fl in {1.0,2.0,4.0,8.0} {
+\foreach \fr in {1.0,2.0,4.0,8.0} {
+\foreach \psi/\omega in {1.0/0.0,0.5/90.0} {#1}}}}
+% 
+\begin{tikzpicture}[]
+% 
+\begin{axis}[
+   width = 0.9*\width,
+   height = 0.42*\width,
+   Boxplot,
+   % ylabel={$\textnormal{$\vrf$}= 0.5$},
+   legend to name={legend},
+   legend image post style={mark=square*},
+   legend columns=2,
+   legend cell align={left},
+   legend image post style={scale=1},
+   legend transposed=true,
+   legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
+   legend entries={%
+      {$\vfr=1.0,\hspace{1.5pt} \mathbin{\|}$},
+      {$\vfr=1.0,\times$},
+      {$\vfr=2.0,\hspace{1.5pt} \mathbin{\|}$},
+      {$\vfr=2.0,\times$},
+      {$\vfr=4.0,\hspace{1.5pt} \mathbin{\|}$},
+      {$\vfr=4.0,\times$},
+      {$\vfr=8.0,\hspace{1.5pt} \mathbin{\|}$},
+      {$\vfr=8.0,\times$}}]
+\Loop{
+    \addplot+[fill, draw=black] table[%
+        y={p_\psi_o_\omega_fr_\fr_fl_\fl_volume}, col sep=comma, row sep=newline,
+        ]{\datapath/cube_stats_r_0.5.csv};
+}
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$1$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$2$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$4$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$8$};
+\node[anchor=base west, xshift = 2em] at (last.base east) {$\vfl$};
+\node[anchor=east] at ({axis description cs:0,1.05}) {$V_f/V_0$};
+\coordinate (PA) at (rel axis cs:0,0);
+\coordinate (PB) at (rel axis cs:1,0);
+\coordinate (P) at (rel axis cs:0.5,0);
+\end{axis}
+%
+% center axis
+\coordinate (PC) at (current bounding box.west);
+\path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+% 
+\node[anchor=north] at ($(P) - (0,0.75cm)$) {\ref{legend}};
+% 
+\end{tikzpicture}
+% 
+\end{document}
