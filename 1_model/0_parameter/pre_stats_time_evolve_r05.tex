@@ -92,13 +92,13 @@ cycle multiindex* list={
 \begin{tikzpicture}
 \begin{groupplot}[%
   group style={
-      group size=1 by 4,
+      group size=1 by 5,
       horizontal sep=2cm,
       vertical sep=0.75cm,
       ylabels at=edge left,
   },
    width = 0.9*\width,
-   height = 0.225*\height,
+   height = 0.185*\height,
    xmode=log,
    ymode=log,
    xmin=10, xmax=200000,
@@ -144,7 +144,21 @@ cycle multiindex* list={
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
    \axisnode
-   
+\nextgroupplot[ylabel={$\Delta t / \si{\second}$}, xmin=30, xmax=100000, ymin = 1, ymax = 300,
+               extra y ticks={1, 10, 60},
+               extra y tick labels={$\SI{1}{\second}$, $\SI{10}{\second}$, $\SI{1}{\minute}$},
+               extra y tick style={y tick label style={font=\scriptsize},
+                       ticklabel pos=right},
+               extra x ticks={},
+               extra x tick labels={},
+   ]
+   \Loop{
+    \addplot+[] table[
+        x={steps_mean}, y={dt_mean}, x error = {steps_std} , y error={dt_std}, col sep=comma,]
+        {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
+   }
+   \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$steps$};
+   % \axisnode
 % 
 % 
 % 
@@ -192,7 +206,7 @@ cycle multiindex* list={
 % \path node[anchor=south] at ($(current bounding box.north) + (0,1)$) {\ref{legend}};
 % \path let \p1=($(current bounding box.north east)-(current bounding box.south west)$) in node[anchor=center] at ($(current bounding box.south west) + (\x1/5*4,\y1*1/4)$) {\ref{legend}};
 % \path node[anchor=north] at ($(current bounding box.south) - (0,0.5cm)$) {\ref{legend}};
-\path node[anchor=north] at ($(group c1r4.south) - (0,0.75cm)$) {\ref{legend\ipsi}};
+\path node[anchor=north] at ($(group c1r5.south) - (0,0.75cm)$) {\ref{legend\ipsi}};
 \end{tikzpicture}
 }
 \end{document}

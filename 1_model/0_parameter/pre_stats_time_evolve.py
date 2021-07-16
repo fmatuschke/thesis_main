@@ -122,6 +122,7 @@ def run_mean_std(parameter):
                         f'num_objs_{n}': num_objs,
                         f'num_col_objs_{n}': num_col_objs,
                         f'overlaps_frac_{n}': overlaps_frac,
+                        f'dt_{n}': np.append(np.diff(times), np.nan)
                     })
 
                     names.append(f"steps_{n}")
@@ -130,6 +131,7 @@ def run_mean_std(parameter):
                     names.append(f"num_objs_{n}")
                     names.append(f"num_col_objs_{n}")
                     names.append(f"overlaps_frac_{n}")
+                    names.append(f"dt_{n}")
 
                     df_ = pd.concat([df_, df__], ignore_index=True, axis=1)
                 df_.columns = names
@@ -143,7 +145,11 @@ def run_mean_std(parameter):
                                           base=2,
                                           endpoint=True,
                                           dtype=int)
-                    numbers = sorted(list(set(list(numbers) + list(range(10)))))
+                    numbers = sorted(
+                        list(
+                            set(list(numbers) +
+                                list(range(min(10, len(df_)))))))
+                    # print(numbers)
                 else:
                     numbers = list(range(len(df_)))
                 # print(numbers, len(df_))
@@ -158,7 +164,7 @@ def run_mean_std(parameter):
                 df__ = pd.DataFrame()
                 for name in [
                         "steps", "times", "overlaps", "num_objs",
-                        "num_col_objs", "overlaps_frac"
+                        "num_col_objs", "overlaps_frac", "dt"
                 ]:
                     df_tmp = pd.DataFrame()
                     for n in df.n.unique():

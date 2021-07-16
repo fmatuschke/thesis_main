@@ -46,8 +46,8 @@ def run(file):
     solver.fiber_bundles = fbs
     # solver.reset_view()
     # solver.set_view_angles(30, 30, 0)
-    solver.set_view_distance(60)
-    solver.set_view_center(0, -5, 0)
+    solver.set_view_distance(args.volume * 1.1)
+    solver.set_view_center(0, -5 / 60 * args.volume, 0)
     solver.draw_scene()
 
     file = os.path.join(os.path.abspath(os.path.dirname(args.input[0])),
@@ -66,6 +66,6 @@ if __name__ == "__main__":
 
     with mp.Pool(processes=args.num_proc) as pool:
         [
-            f for f in tqdm.tqdm(pool.imap_unordered(run, files),
-                                 total=len(files))
+            f for f in tqdm.tqdm(
+                pool.imap_unordered(run, files), total=len(files), smoothing=0)
         ]

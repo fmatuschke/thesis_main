@@ -217,62 +217,100 @@ def main():
     df___ = []
     for o in df.omega.unique():
         for p in df.psi.unique():
-            for r in df.radius.unique():
-                df_ = df[(df.omega == o) & (df.psi == p) & (df.radius == r)]
+            # for r in df.radius.unique():
+            r = 0.5
+            df_ = df[(df.omega == o) & (df.psi == p) & (df.radius == r)]
 
-                if len(df_) == 0:
-                    continue
+            if len(df_) == 0:
+                continue
 
-                print(o, p, r)
-                print(
-                    # df_.omega_init_0,
-                    f'{np.mean(df_.omega_init_mean_0):.1f} +- {np.std(df_.omega_init_mean_0):.1f},',
-                    f'{np.mean(df_.omega_init_std_0):.1f} +- {np.std(df_.omega_init_std_0):.1f},',
-                    f'{np.mean(df_.omega_init_25_0):.1f} +- {np.std(df_.omega_init_25_0):.1f},',
-                    f'{np.mean(df_.omega_init_50_0):.1f} +- {np.std(df_.omega_init_50_0):.1f},',
-                    f'{np.mean(df_.omega_init_75_0):.1f} +- {np.std(df_.omega_init_75_0):.1f},'
-                )
-                print(
-                    # df_.omega_0,
-                    f'{np.mean(df_.omega_mean_0):.1f} +- {np.std(df_.omega_mean_0):.1f},',
-                    f'{np.mean(df_.omega_std_0):.1f} +- {np.std(df_.omega_std_0):.1f},',
-                    f'{np.mean(df_.omega_25_0):.1f} +- {np.std(df_.omega_25_0):.1f},',
-                    f'{np.mean(df_.omega_50_0):.1f} +- {np.std(df_.omega_50_0):.1f},',
-                    f'{np.mean(df_.omega_75_0):.1f} +- {np.std(df_.omega_75_0):.1f},'
-                )
-                print(
-                    # df_.omega_init_1,
-                    f'{np.mean(df_.omega_init_mean_1):.1f} +- {np.std(df_.omega_init_mean_1):.1f},',
-                    f'{np.mean(df_.omega_init_std_1):.1f} +- {np.std(df_.omega_init_std_1):.1f},',
-                    f'{np.mean(df_.omega_init_25_1):.1f} +- {np.std(df_.omega_init_25_1):.1f},',
-                    f'{np.mean(df_.omega_init_50_1):.1f} +- {np.std(df_.omega_init_50_1):.1f},',
-                    f'{np.mean(df_.omega_init_75_1):.1f} +- {np.std(df_.omega_init_75_1):.1f},'
-                )
-                print(
-                    # df_.omega_1,
-                    f'{np.mean(df_.omega_mean_1):.1f} +- {np.std(df_.omega_mean_1):.1f},',
-                    f'{np.mean(df_.omega_std_1):.1f} +- {np.std(df_.omega_std_1):.1f},',
-                    f'{np.mean(df_.omega_25_1):.1f} +- {np.std(df_.omega_25_1):.1f},',
-                    f'{np.mean(df_.omega_50_1):.1f} +- {np.std(df_.omega_50_1):.1f},',
-                    f'{np.mean(df_.omega_75_1):.1f} +- {np.std(df_.omega_75_1):.1f},'
-                )
+            print(o, p, r)
+            print(
+                # df_.omega_init_0,
+                f'{np.mean(df_.omega_init_mean_0):.1f} +- {np.std(df_.omega_init_mean_0):.1f},',
+                f'{np.mean(df_.omega_init_std_0):.1f} +- {np.std(df_.omega_init_std_0):.1f},',
+                f'{np.mean(df_.omega_init_25_0):.1f} +- {np.std(df_.omega_init_25_0):.1f},',
+                f'{np.mean(df_.omega_init_50_0):.1f} +- {np.std(df_.omega_init_50_0):.1f},',
+                f'{np.mean(df_.omega_init_75_0):.1f} +- {np.std(df_.omega_init_75_0):.1f},'
+            )
+            print(
+                # df_.omega_0,
+                f'{np.mean(df_.omega_mean_0):.1f} +- {np.std(df_.omega_mean_0):.1f},',
+                f'{np.mean(df_.omega_std_0):.1f} +- {np.std(df_.omega_std_0):.1f},',
+                f'{np.mean(df_.omega_25_0):.1f} +- {np.std(df_.omega_25_0):.1f},',
+                f'{np.mean(df_.omega_50_0):.1f} +- {np.std(df_.omega_50_0):.1f},',
+                f'{np.mean(df_.omega_75_0):.1f} +- {np.std(df_.omega_75_0):.1f},'
+            )
+            print(
+                # df_.omega_init_1,
+                f'{np.mean(df_.omega_init_mean_1):.1f} +- {np.std(df_.omega_init_mean_1):.1f},',
+                f'{np.mean(df_.omega_init_std_1):.1f} +- {np.std(df_.omega_init_std_1):.1f},',
+                f'{np.mean(df_.omega_init_25_1):.1f} +- {np.std(df_.omega_init_25_1):.1f},',
+                f'{np.mean(df_.omega_init_50_1):.1f} +- {np.std(df_.omega_init_50_1):.1f},',
+                f'{np.mean(df_.omega_init_75_1):.1f} +- {np.std(df_.omega_init_75_1):.1f},'
+            )
+            print(
+                # df_.omega_1,
+                f'{np.mean(df_.omega_mean_1):.1f} +- {np.std(df_.omega_mean_1):.1f},',
+                f'{np.mean(df_.omega_std_1):.1f} +- {np.std(df_.omega_std_1):.1f},',
+                f'{np.mean(df_.omega_25_1):.1f} +- {np.std(df_.omega_25_1):.1f},',
+                f'{np.mean(df_.omega_50_1):.1f} +- {np.std(df_.omega_50_1):.1f},',
+                f'{np.mean(df_.omega_75_1):.1f} +- {np.std(df_.omega_75_1):.1f},'
+            )
 
+            df__ = {}
+            df__['omega'] = o
+            df__['psi'] = p
+            df__['radius'] = r
+            df__['state'] = 'init'
+            df__['pop'] = 0
+            df__['mean_mean'] = np.mean(df_.omega_init_mean_0)
+            df__['std_mean'] = np.mean(df_.omega_init_std_0)
+            df__['25_mean'] = np.mean(df_.omega_init_25_0)
+            df__['50_mean'] = np.mean(df_.omega_init_50_0)
+            df__['75_mean'] = np.mean(df_.omega_init_75_0)
+            df__['mean_std'] = np.std(df_.omega_init_mean_0)
+            df__['std_std'] = np.std(df_.omega_init_std_0)
+            df__['25_std'] = np.std(df_.omega_init_25_0)
+            df__['50_std'] = np.std(df_.omega_init_50_0)
+            df__['75_std'] = np.std(df_.omega_init_75_0)
+            df___.append(df__)
+
+            df__ = {}
+            df__['omega'] = o
+            df__['psi'] = p
+            df__['radius'] = r
+            df__['state'] = 'solved'
+            df__['pop'] = 0
+            df__['mean_mean'] = np.mean(df_.omega_mean_0)
+            df__['std_mean'] = np.mean(df_.omega_std_0)
+            df__['25_mean'] = np.mean(df_.omega_25_0)
+            df__['50_mean'] = np.mean(df_.omega_50_0)
+            df__['75_mean'] = np.mean(df_.omega_75_0)
+            df__['mean_std'] = np.std(df_.omega_mean_0)
+            df__['std_std'] = np.std(df_.omega_std_0)
+            df__['25_std'] = np.std(df_.omega_25_0)
+            df__['50_std'] = np.std(df_.omega_50_0)
+            df__['75_std'] = np.std(df_.omega_75_0)
+            df___.append(df__)
+
+            if p != 1:
                 df__ = {}
                 df__['omega'] = o
                 df__['psi'] = p
                 df__['radius'] = r
                 df__['state'] = 'init'
-                df__['pop'] = 0
-                df__['mean_mean'] = np.mean(df_.omega_init_mean_0)
-                df__['std_mean'] = np.mean(df_.omega_init_std_0)
-                df__['25_mean'] = np.mean(df_.omega_init_25_0)
-                df__['50_mean'] = np.mean(df_.omega_init_50_0)
-                df__['75_mean'] = np.mean(df_.omega_init_75_0)
-                df__['mean_std'] = np.std(df_.omega_init_mean_0)
-                df__['std_std'] = np.std(df_.omega_init_std_0)
-                df__['25_std'] = np.std(df_.omega_init_25_0)
-                df__['50_std'] = np.std(df_.omega_init_50_0)
-                df__['75_std'] = np.std(df_.omega_init_75_0)
+                df__['pop'] = 1
+                df__['mean_mean'] = np.mean(df_.omega_init_mean_1)
+                df__['std_mean'] = np.mean(df_.omega_init_std_1)
+                df__['25_mean'] = np.mean(df_.omega_init_25_1)
+                df__['50_mean'] = np.mean(df_.omega_init_50_1)
+                df__['75_mean'] = np.mean(df_.omega_init_75_1)
+                df__['mean_std'] = np.std(df_.omega_init_mean_1)
+                df__['std_std'] = np.std(df_.omega_init_std_1)
+                df__['25_std'] = np.std(df_.omega_init_25_1)
+                df__['50_std'] = np.std(df_.omega_init_50_1)
+                df__['75_std'] = np.std(df_.omega_init_75_1)
                 df___.append(df__)
 
                 df__ = {}
@@ -280,55 +318,18 @@ def main():
                 df__['psi'] = p
                 df__['radius'] = r
                 df__['state'] = 'solved'
-                df__['pop'] = 0
-                df__['mean_mean'] = np.mean(df_.omega_mean_0)
-                df__['std_mean'] = np.mean(df_.omega_std_0)
-                df__['25_mean'] = np.mean(df_.omega_25_0)
-                df__['50_mean'] = np.mean(df_.omega_50_0)
-                df__['75_mean'] = np.mean(df_.omega_75_0)
-                df__['mean_std'] = np.std(df_.omega_mean_0)
-                df__['std_std'] = np.std(df_.omega_std_0)
-                df__['25_std'] = np.std(df_.omega_25_0)
-                df__['50_std'] = np.std(df_.omega_50_0)
-                df__['75_std'] = np.std(df_.omega_75_0)
+                df__['pop'] = 1
+                df__['mean_mean'] = np.mean(df_.omega_mean_1)
+                df__['std_mean'] = np.mean(df_.omega_std_1)
+                df__['25_mean'] = np.mean(df_.omega_25_1)
+                df__['50_mean'] = np.mean(df_.omega_50_1)
+                df__['75_mean'] = np.mean(df_.omega_75_1)
+                df__['mean_std'] = np.std(df_.omega_mean_1)
+                df__['std_std'] = np.std(df_.omega_std_1)
+                df__['25_std'] = np.std(df_.omega_25_1)
+                df__['50_std'] = np.std(df_.omega_50_1)
+                df__['75_std'] = np.std(df_.omega_75_1)
                 df___.append(df__)
-
-                if p != 1:
-                    df__ = {}
-                    df__['omega'] = o
-                    df__['psi'] = p
-                    df__['radius'] = r
-                    df__['state'] = 'init'
-                    df__['pop'] = 1
-                    df__['mean_mean'] = np.mean(df_.omega_init_mean_1)
-                    df__['std_mean'] = np.mean(df_.omega_init_std_1)
-                    df__['25_mean'] = np.mean(df_.omega_init_25_1)
-                    df__['50_mean'] = np.mean(df_.omega_init_50_1)
-                    df__['75_mean'] = np.mean(df_.omega_init_75_1)
-                    df__['mean_std'] = np.std(df_.omega_init_mean_1)
-                    df__['std_std'] = np.std(df_.omega_init_std_1)
-                    df__['25_std'] = np.std(df_.omega_init_25_1)
-                    df__['50_std'] = np.std(df_.omega_init_50_1)
-                    df__['75_std'] = np.std(df_.omega_init_75_1)
-                    df___.append(df__)
-
-                    df__ = {}
-                    df__['omega'] = o
-                    df__['psi'] = p
-                    df__['radius'] = r
-                    df__['state'] = 'solved'
-                    df__['pop'] = 1
-                    df__['mean_mean'] = np.mean(df_.omega_mean_1)
-                    df__['std_mean'] = np.mean(df_.omega_std_1)
-                    df__['25_mean'] = np.mean(df_.omega_25_1)
-                    df__['50_mean'] = np.mean(df_.omega_50_1)
-                    df__['75_mean'] = np.mean(df_.omega_75_1)
-                    df__['mean_std'] = np.std(df_.omega_mean_1)
-                    df__['std_std'] = np.std(df_.omega_std_1)
-                    df__['25_std'] = np.std(df_.omega_25_1)
-                    df__['50_std'] = np.std(df_.omega_50_1)
-                    df__['75_std'] = np.std(df_.omega_75_1)
-                    df___.append(df__)
 
     df___ = pd.DataFrame(df___)
 
