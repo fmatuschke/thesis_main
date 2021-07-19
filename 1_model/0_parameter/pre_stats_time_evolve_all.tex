@@ -36,7 +36,8 @@
    mark size=0.3pt, %mean value marker
    error bars/.cd,
    error bar style={line width=0.4pt}, % thickness line top to bottom
-   error mark options={rotate=90,mark size=0.8pt, line width=0.4pt}, % top and bottom (line) marker
+   error mark options={rotate=90,mark size=0.8pt,line width=0.4pt}, % top and bottom (line) marker
+   x dir=both, x explicit,
    y dir=both, y explicit,
    },
    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
@@ -81,118 +82,162 @@ cycle multiindex* list={
 % 
 \newcommand{\Loop}[1]{
    \foreach \fl in {1.0,2.0,4.0,8.0}{
-   \foreach \fr in {1.0,2.0,4.0,8.0}{#1}}} % 1.0 und 2.0 nicht unterscheidbar
+      \foreach \fr in {1.0,2.0,4.0,8.0}{#1}}} % 1.0 und 2.0 nicht unterscheidbar
+      % 
+\newcommand{\axisnode}{
+   \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
+}
 % 
-% \foreach \psi [count=\ipsi] in {0.5}{
+% 
 % \foreach \r [count=\ir] in {0.5}{
-\foreach \psi [count=\ipsi] in {0.5,1.0}{
+% \foreach \psi [count=\ipsi] in {1.0}{
 \foreach \r [count=\ir] in {0.5,1.0,2.0,5.0,10.0}{
-\begin{tikzpicture}
-\begin{groupplot}[%
-  group style={
-      group size=1 by 4,
-      horizontal sep=2cm,
-      vertical sep=0.75cm,
-      ylabels at=edge left,
-  },
-   width = 0.9*\width,
-   height = 0.2*\height,
-   xmode=log,
-   ymode=log,
-   % % xmajorgrids,
-   % extra x ticks={1, 60, 3600, 43200},
-   % extra x tick labels={$\SI{1}{\second}$, $\SI{1}{\minute}$,
-   %                      $\SI{1}{\hour}$, $\SI{12}{\hour}$},
-   % extra x tick style={x tick label style={font=\scriptsize, below, yshift=-0.5ex},
-   %                     ticklabel pos=top},
-]
-% 
-% \nextgroupplot[ylabel={overlap}]
-   % \Loop{
-%     \addplot+[] table[
-%         x={times_mean}, y={overlaps_mean}, x error = {times_std} , y error={overlaps_std}, col sep=comma,]
-%         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
-%    }
-% % 
-\nextgroupplot[ylabel={$\# steps$}, title={$\vrf = \SI{\r}{\micro\meter}, \Psi=\psi$}]
-   \Loop{
-    \addplot+[] table[
-        x={times_mean}, y={steps_mean}, x error = {times_std} , y error={steps_std}, col sep=comma,]
-        {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
-   }
-   \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
-% 
-\nextgroupplot[ylabel={$\# col obj$}]
-   \Loop{
-    \addplot+[] table[
-        x={times_mean}, y={num_col_objs_mean}, x error = {times_std} , y error={num_col_objs_std}, col sep=comma,]
-        {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
-   }
-   \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
-%
-\nextgroupplot[ylabel={$overlap frac$}]
-    \Loop{
-    \addplot+[] table[
-        x={times_mean}, y={overlaps_frac_mean}, x error = {times_std} , y error={overlaps_frac_std}, col sep=comma,]
-        {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
-    }
-    \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
-   % \coordinate (L) at (axis description cs:1,0);
-\nextgroupplot[ylabel={$\# obj$}]
-   \Loop{
-    \addplot+[] table[
-        x={times_mean}, y={num_objs_mean}, x error = {times_std} , y error={num_objs_std}, col sep=comma,]
-        {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
-   }
-   \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
-% 
-% 
-% 
-\coordinate (PA) at (rel axis cs:0,0);
-\coordinate (PB) at (rel axis cs:1,0);
-\end{groupplot}
-% center axis
-\coordinate (PC) at (current bounding box.west);
-\path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
-
-% 
-% LEGEND
-\begin{pgfinterruptboundingbox}
-\begin{axis}[%
-   legend to name={legend\ipsi\ir},
-   legend cell align=left,
-   legend columns=4,
-   legend transposed=true,
-   scale only axis, 
-   width=1mm,
-   hide axis,
-   legend image post style={sharp plot},
-   legend style={draw=white!15!black,legend cell align=left, %font=\vphantom{hg},
-                 /tikz/every even column/.append style={column sep=2ex},
-                 nodes={scale=0.75, transform shape}},
-   ]
-   % 
-   % \pgfmathtruncatemacro\counter{0}
-   \Loop{
-         \addplot coordinates {(0,0)};
-         \pgfmathparse{int(round(\fl))} \let\intfl=\pgfmathresult
-         \pgfmathparse{int(round(\fr))} \let\intfr=\pgfmathresult
-         \ifthenelse{\intfr = 1}{%
-            \addlegendentryexpanded{$\vfr=\intfr,\vfl=\intfl$}}{%
-            \addlegendentryexpanded{$\vfr=\intfr$}}
-% 
-         % \pgfmathtruncatemacro\counter{\counter+1}
-         % \ifthenelse{\counter = 3}{\addlegendimage{empty legend}\addlegendentry{}}{}
-         % \ifthenelse{\counter = 6}{\addlegendimage{empty legend}\addlegendentry{}}{}
-         % \ifthenelse{\counter = 12}{\addlegendimage{empty legend}\addlegendentry{}}{}
-         % \ifthenelse{\counter = 15}{\addlegendimage{empty legend}\addlegendentry{}}{}
-   }
-\end{axis}
-\end{pgfinterruptboundingbox}
-% \path node[anchor=south] at ($(current bounding box.north) + (0,1)$) {\ref{legend}};
-% \path let \p1=($(current bounding box.north east)-(current bounding box.south west)$) in node[anchor=center] at ($(current bounding box.south west) + (\x1/5*4,\y1*1/4)$) {\ref{legend}};
-% \path node[anchor=north] at ($(current bounding box.south) - (0,0.5cm)$) {\ref{legend}};
-\path node[anchor=north] at ($(group c1r4.south) - (0,0.75cm)$) {\ref{legend\ipsi\ir}};
-\end{tikzpicture}
-}}
+\foreach \psi [count=\ipsi] in {1.0,0.5}{
+   \begin{tikzpicture}
+      \begin{groupplot}[%
+        group style={
+            group size=1 by 5,
+            horizontal sep=2cm,
+            vertical sep=0.75cm,
+            ylabels at=edge left,
+        },
+         width = 0.9*\width,
+         height = 0.185*\height,
+         xmode=log,
+         ymode=log,
+         % xmin=10, xmax=200000,
+         % xmajorgrids,
+         % extra x ticks={60, 3600, 86400},
+         % extra x tick labels={$\SI{1}{\minute}$,$\SI{1}{\hour}$,$\SI{24}{\hour}$},
+         % extra x tick style={x tick label style={font=\scriptsize, below, yshift=-0.5ex},
+         %                     ticklabel pos=top},
+      ]
+      % 
+      % \nextgroupplot[ylabel={overlap}]
+         % \Loop{
+      %     \addplot+[] table[
+      %         x={times_mean}, y={overlaps_mean}, x error = {times_std} , y error={overlaps_std}, col sep=comma,]
+      %         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
+      %    }
+      % % 
+      \nextgroupplot[ylabel={$\# steps$}, title={$\vrf = \SI{\r}{\micro\meter}, \Psi=\psi$}]
+         \Loop{
+          \addplot+[] table[
+            x={times_50}, y={steps_50},
+            x error minus= {times_25},
+            x error plus= {times_75},
+            y error minus= {steps_25},
+            y error plus= {steps_75},
+            col sep=comma,]
+              {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
+         }
+         \axisnode
+      \nextgroupplot[ylabel={$\# col obj$}]
+         \Loop{
+          \addplot+[] table[
+            x={times_50}, y={num_col_objs_50},
+            x error minus= {times_25},
+            x error plus= {times_75},
+            y error minus= {num_col_objs_25},
+            y error plus= {num_col_objs_75},
+            col sep=comma,]
+              {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
+         }
+         \axisnode
+      \nextgroupplot[ylabel={$overlap frac$}]
+          \Loop{
+          \addplot+[] table[
+            x={times_50}, y={overlaps_frac_50},
+            x error minus= {times_25},
+            x error plus= {times_75},
+            y error minus= {overlaps_frac_25},
+            y error plus= {overlaps_frac_75},
+            col sep=comma,]
+              {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
+          }
+          \axisnode
+      \nextgroupplot[ylabel={$\# obj$}]
+         \Loop{
+          \addplot+[] table[
+            x={times_50}, y={num_objs_50},
+            x error minus= {times_25},
+            x error plus= {times_75},
+            y error minus= {num_objs_25},
+            y error plus= {num_objs_75},
+            col sep=comma,]
+              {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
+         }
+         \axisnode
+      \nextgroupplot[ylabel={$\Delta t / \si{\second}$},
+                     % xmin=30, xmax=100000,
+                     extra y ticks={1, 10, 60},
+                     extra y tick labels={$\SI{1}{\second}$, $\SI{10}{\second}$, $\SI{1}{\minute}$},
+                     extra y tick style={y tick label style={font=\scriptsize},
+                             ticklabel pos=right},
+                     extra x ticks={},
+                     extra x tick labels={},
+         ]
+         \Loop{
+          \addplot+[] table[
+               x={steps_50}, y={dt_50},
+               x error minus= {steps_25},
+               x error plus= {steps_75},
+               y error minus= {dt_25},
+               y error plus= {dt_75},
+               col sep=comma,]
+              {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
+         }
+         \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$steps$};
+         % \axisnode
+      % 
+      % 
+      % 
+      \coordinate (PA) at (rel axis cs:0,0);
+      \coordinate (PB) at (rel axis cs:1,0);
+      \end{groupplot}
+      % center axis
+      \coordinate (PC) at (current bounding box.west);
+      \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+      
+      % 
+      % LEGEND
+      \begin{pgfinterruptboundingbox}
+      \begin{axis}[%
+         legend to name={legend\ipsi\ir},
+         legend cell align=left,
+         legend columns=4,
+         legend transposed=true,
+         scale only axis, 
+         width=1mm,
+         hide axis,
+         legend image post style={sharp plot},
+         legend style={draw=white!15!black,legend cell align=left, %font=\vphantom{hg},
+                       /tikz/every even column/.append style={column sep=2ex},
+                       nodes={scale=0.75, transform shape}},
+         ]
+         % 
+         % \pgfmathtruncatemacro\counter{0}
+         \Loop{
+               \addplot coordinates {(0,0)};
+               \pgfmathparse{int(round(\fl))} \let\intfl=\pgfmathresult
+               \pgfmathparse{int(round(\fr))} \let\intfr=\pgfmathresult
+               \ifthenelse{\intfr = 1}{%
+                  \addlegendentryexpanded{$\vfr=\intfr,\vfl=\intfl$}}{%,\vrf=\r
+                  \addlegendentryexpanded{$\vfr=\intfr$}}
+      % 
+               % \pgfmathtruncatemacro\counter{\counter+1}
+               % \ifthenelse{\counter = 3}{\addlegendimage{empty legend}\addlegendentry{}}{}
+               % \ifthenelse{\counter = 6}{\addlegendimage{empty legend}\addlegendentry{}}{}
+               % \ifthenelse{\counter = 12}{\addlegendimage{empty legend}\addlegendentry{}}{}
+               % \ifthenelse{\counter = 15}{\addlegendimage{empty legend}\addlegendentry{}}{}
+         }
+   \end{axis}
+   \end{pgfinterruptboundingbox}
+   % \path node[anchor=south] at ($(current bounding box.north) + (0,1)$) {\ref{legend}};
+   % \path let \p1=($(current bounding box.north east)-(current bounding box.south west)$) in node[anchor=center] at ($(current bounding box.south west) + (\x1/5*4,\y1*1/4)$) {\ref{legend}};
+   % \path node[anchor=north] at ($(current bounding box.south) - (0,0.5cm)$) {\ref{legend}};
+   \path node[anchor=north] at ($(group c1r5.south) - (0,0.75cm)$) {\ref{legend\ipsi\ir}};
+   \end{tikzpicture}
+   }}
 \end{document}
+      

@@ -138,17 +138,18 @@ def run_mean_std(parameter):
 
                 # numbers = list(set([int(2**(i / 10.0)) for i in range(100)]))
 
-                if len(df_) > 100:
+                if len(df_) > 42:
                     numbers = np.logspace(0,
-                                          np.log2(len(df_) - 1),
-                                          100,
+                                          np.log2(len(df_) - 0.5),
+                                          42,
                                           base=2,
                                           endpoint=True,
                                           dtype=int)
-                    numbers = sorted(
-                        list(
-                            set(list(numbers) +
-                                list(range(min(10, len(df_)))))))
+                    numbers = sorted(list(set(list(numbers))))
+                    # numbers = sorted(
+                    #     list(
+                    #         set(list(numbers) +
+                    #             list(range(min(10, len(df_)))))))
                     # print(numbers)
                 else:
                     numbers = list(range(len(df_)))
@@ -172,6 +173,16 @@ def run_mean_std(parameter):
 
                     df__[f"{name}_mean"] = df_tmp.T.mean(axis=0)[numbers]
                     df__[f"{name}_std"] = df_tmp.T.std(axis=0)[numbers]
+                    median = df_tmp.T.quantile(0.50, axis=0)[numbers].to_numpy()
+                    df__[f"{name}_05"] = median - df_tmp.T.quantile(
+                        0.05, axis=0)[numbers]
+                    df__[f"{name}_25"] = median - df_tmp.T.quantile(
+                        0.25, axis=0)[numbers]
+                    df__[f"{name}_50"] = median
+                    df__[f"{name}_75"] = df_tmp.T.quantile(
+                        0.75, axis=0)[numbers] - median
+                    df__[f"{name}_95"] = df_tmp.T.quantile(
+                        0.95, axis=0)[numbers] - median
 
                 df__.to_csv(
                     os.path.join(

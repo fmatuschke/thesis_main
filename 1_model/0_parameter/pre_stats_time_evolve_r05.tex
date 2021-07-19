@@ -36,7 +36,8 @@
    mark size=0.3pt, %mean value marker
    error bars/.cd,
    error bar style={line width=0.4pt}, % thickness line top to bottom
-   error mark options={rotate=90,mark size=0.8pt, line width=0.4pt}, % top and bottom (line) marker
+   error mark options={rotate=90,mark size=0.8pt,line width=0.4pt}, % top and bottom (line) marker
+   x dir=both, x explicit,
    y dir=both, y explicit,
    },
    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
@@ -80,15 +81,16 @@ cycle multiindex* list={
 }}
 % 
 \newcommand{\Loop}[1]{
-   \foreach \r in {0.5}{ % 0.5,1.0,2.0
    \foreach \fl in {1.0,2.0,4.0,8.0}{
-   \foreach \fr in {1.0,2.0,4.0,8.0}{#1}}}} % 1.0 und 2.0 nicht unterscheidbar
-% 
+      \foreach \fr in {1.0,2.0,4.0,8.0}{#1}}} % 1.0 und 2.0 nicht unterscheidbar
+      % 
 \newcommand{\axisnode}{
    \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$t/s$};
 }
-% 
-\foreach \psi [count=\ipsi] in {0.5,1.0}{
+   % 
+   % \foreach \psi [count=\ipsi] in {1.0}{
+\foreach \r in {0.5}{ % 0.5,1.0,2.0
+\foreach \psi [count=\ipsi] in {1.0,0.5}{
 \begin{tikzpicture}
 \begin{groupplot}[%
   group style={
@@ -119,28 +121,48 @@ cycle multiindex* list={
 \nextgroupplot[ylabel={$\# steps$}, ymin=30, ymax=100000]
    \Loop{
     \addplot+[] table[
-        x={times_mean}, y={steps_mean}, x error = {times_std} , y error={steps_std}, col sep=comma,]
+      x={times_50}, y={steps_50},
+      x error minus= {times_25},
+      x error plus= {times_75},
+      y error minus= {steps_25},
+      y error plus= {steps_75},
+      col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
    \axisnode
 \nextgroupplot[ylabel={$\# col obj$}, ymin=0, ymax=10000000]
    \Loop{
     \addplot+[] table[
-        x={times_mean}, y={num_col_objs_mean}, x error = {times_std} , y error={num_col_objs_std}, col sep=comma,]
+      x={times_50}, y={num_col_objs_50},
+      x error minus= {times_25},
+      x error plus= {times_75},
+      y error minus= {num_col_objs_25},
+      y error plus= {num_col_objs_75},
+      col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
    \axisnode
 \nextgroupplot[ylabel={$overlap frac$}, ymin=0.0001, ymax=0.5]
     \Loop{
     \addplot+[] table[
-        x={times_mean}, y={overlaps_frac_mean}, x error = {times_std} , y error={overlaps_frac_std}, col sep=comma,]
+      x={times_50}, y={overlaps_frac_50},
+      x error minus= {times_25},
+      x error plus= {times_75},
+      y error minus= {overlaps_frac_25},
+      y error plus= {overlaps_frac_75},
+      col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
     }
     \axisnode
 \nextgroupplot[ylabel={$\# obj$}, ymin=40000, ymax=1000000]
    \Loop{
     \addplot+[] table[
-        x={times_mean}, y={num_objs_mean}, x error = {times_std} , y error={num_objs_std}, col sep=comma,]
+      x={times_50}, y={num_objs_50},
+      x error minus= {times_25},
+      x error plus= {times_75},
+      y error minus= {num_objs_25},
+      y error plus= {num_objs_75},
+      col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
    \axisnode
@@ -154,7 +176,12 @@ cycle multiindex* list={
    ]
    \Loop{
     \addplot+[] table[
-        x={steps_mean}, y={dt_mean}, x error = {steps_std} , y error={dt_std}, col sep=comma,]
+         x={steps_50}, y={dt_50},
+         x error minus= {steps_25},
+         x error plus= {steps_75},
+         y error minus= {dt_25},
+         y error plus= {dt_75},
+         col sep=comma,]
         {\datapath/cube_stat_time_evolve_r_\r_psi_\psi_fr_\fr_fl_\fl_.csv};
    }
    \draw[->] (rel axis cs:0.9,0.075) -- (rel axis cs:0.975,0.075) node[midway, anchor=south]{$steps$};
@@ -208,5 +235,5 @@ cycle multiindex* list={
 % \path node[anchor=north] at ($(current bounding box.south) - (0,0.5cm)$) {\ref{legend}};
 \path node[anchor=north] at ($(group c1r5.south) - (0,0.75cm)$) {\ref{legend\ipsi}};
 \end{tikzpicture}
-}
+}}
 \end{document}

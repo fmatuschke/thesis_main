@@ -85,25 +85,37 @@
    legend transposed=true,
    legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
    legend entries={%
-      {$\vfr=1.0,\hspace{1.5pt} \mathbin{\|}$},
+      {$\vfr=1.0,\hspace{1.2pt} ||$},
       {$\vfr=1.0,\times$},
-      {$\vfr=2.0,\hspace{1.5pt} \mathbin{\|}$},
+      {$\vfr=2.0,\hspace{1.2pt} ||$},
       {$\vfr=2.0,\times$},
-      {$\vfr=4.0,\hspace{1.5pt} \mathbin{\|}$},
+      {$\vfr=4.0,\hspace{1.2pt} ||$},
       {$\vfr=4.0,\times$},
-      {$\vfr=8.0,\hspace{1.5pt} \mathbin{\|}$},
+      {$\vfr=8.0,\hspace{1.2pt} ||$},
       {$\vfr=8.0,\times$}}]
 \Loop{
     \addplot+[fill, draw=black] table[%
         y={p_\psi_o_\omega_fr_\fr_fl_\fl_volume}, col sep=comma, row sep=newline,
         ]{\datapath/cube_stats_r_0.5.csv};
 }
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$1$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$2$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$4$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$8$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] 
+    ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.05}) node [black,midway,below,yshift=-1ex] {$1$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] 
+    ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.05}) node [black,midway,below,yshift=-1ex] {$2$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] 
+    ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.05}) node [black,midway,below,yshift=-1ex] {$4$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}] 
+    ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.05}) node [black,midway,below,yshift=-1ex] (last) {$8$};
 \node[anchor=base west, xshift = 2em] at (last.base east) {$\vfl$};
 \node[anchor=east] at ({axis description cs:0,1.05}) {$V_f/V_0$};
+% \draw[dotted, thin] (axis cs:1.5,0.5) -- (axis cs:1.5,0.8);
+% \draw[dotted, thin] (axis cs:2.5,0.5) -- (axis cs:2.5,0.8);
+% \draw[dotted, thin] (axis cs:3.5,0.5) -- (axis cs:3.5,0.8);
+% \draw[dotted, thin] (axis cs:4.5,0.5) -- (axis cs:4.5,0.8);
 \coordinate (PA) at (rel axis cs:0,0);
 \coordinate (PB) at (rel axis cs:1,0);
 \coordinate (P) at (rel axis cs:0.5,0);
