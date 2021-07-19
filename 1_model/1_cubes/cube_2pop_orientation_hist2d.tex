@@ -28,6 +28,10 @@
 \def\deltax{7}
 \def\deltay{6}
 % 
+\pgfmathdeclarefunction{lg10}{1}{%
+    \pgfmathparse{ln(#1)/ln(10)}%
+}
+% 
 \begin{document}
 \pgfplotsset{colormap/Set1}
 % 
@@ -60,6 +64,7 @@
    %  point meta max = 0.06,
     colorbar,
     colorbar style={
+        % yticklabel=\pgfmathparse{10^\tick}\pgfmathprintnumber\pgfmathresult
         % title=Color key,
         % ylabel=Z-value,
       %   ymin = 0, ymax = 0.02,
@@ -76,8 +81,9 @@
 ]
 \addplot [%
 matrix plot*,
-point meta=\thisrowno{2},
-] table {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat}; %, contour filled={number=9}
+point meta=\thisrowno{2}
+% point meta=lg10(\thisrowno{2}+1)
+] table[] {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat}; %, contour filled={number=9}
 % \addplot3 [surf] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat}; %, contour filled={number=9}
 % \addplot3 [contour gnuplot={number=14},thick,] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat};
 \end{polaraxis}

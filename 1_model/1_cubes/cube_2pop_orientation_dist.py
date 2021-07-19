@@ -16,6 +16,7 @@ import yaml
 # import esag
 import acg
 import models
+import parameter
 
 # arguments
 parser = argparse.ArgumentParser()
@@ -39,27 +40,7 @@ FILE_PATH = os.path.dirname(FILE_NAME)
 FILE_BASE = os.path.basename(FILE_NAME)
 FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
-# with open(os.path.join(THESIS, '2_simulation', 'parameter.yaml'),
-#           'r') as stream:
-#     PARA = yaml.safe_load(stream)
-
-#     class imdict(dict):
-
-#         def __hash__(self):
-#             return id(self)
-
-#         def _immutable(self, *args, **kws):
-#             raise TypeError('object is immutable')
-
-#         __setitem__ = _immutable
-#         __delitem__ = _immutable
-#         clear = _immutable
-#         update = _immutable
-#         setdefault = _immutable
-#         pop = _immutable
-#         popitem = _immutable
-
-#     PARA = imdict(PARA)
+CONFIG = parameter.get_tupleware()
 
 
 def run(df):
@@ -68,7 +49,7 @@ def run(df):
     # print(file)
 
     # calculate acg from file
-    vecs = models.vec_from_file(file, 0, 0, PARA['simulation']['voi'])
+    vecs = models.vec_from_file(file, 0, 0, CONFIG.simulation.voi)
     vec = vecs[0]
     if vec.shape[0] >= 3:
         vec = np.divide(vec, np.linalg.norm(vec, axis=1)[:, None])
@@ -95,7 +76,7 @@ def run(df):
     # calculate acg from init
     file = file.replace("solved", "init")
     file = file.replace("tmp", "init")
-    vec = models.vec_from_file(file, 0, 0, PARA['simulation']['voi'])
+    vec = models.vec_from_file(file, 0, 0, CONFIG.simulation.voi)
 
     vec = vecs[0]
     if vec.shape[0] >= 3:

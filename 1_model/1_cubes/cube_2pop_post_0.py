@@ -80,13 +80,13 @@ def run(file):
 
     return pd.DataFrame([[
         omega, psi, v0, r, obj_mean_length, obj_min_radius, overlap,
-        num_col_obj, num_obj, num_steps, step, time, state, file, rep_n % 24
+        num_col_obj, num_obj, num_steps, step, time, state, file
     ]],
                         columns=[
                             "omega", "psi", "v0", "radius", "obj_mean_length",
                             "obj_min_radius", "overlap", "num_col_obj",
                             "num_obj", "num_steps", "step", "time", "state",
-                            "fiber", "rep_n"
+                            "fiber"
                         ])
 
 
