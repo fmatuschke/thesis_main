@@ -37,38 +37,6 @@ FILE_BASE = os.path.basename(FILE_NAME)
 FILE_NAME = os.path.splitext(FILE_BASE)[0]
 CONFIG = parameter.get_tupleware()
 
-hist_polar_bin = lambda n: np.linspace(
-    -np.pi / 2, np.pi / 2, n + 1, endpoint=True)
-
-
-def polar_hist(phi, theta):
-    phi = np.array(phi)
-    theta = np.array(theta)
-
-    incl = np.pi / 2 - theta
-
-    # remap to phi->[-np.pi/2, np.pi/2], incl->[-np.pi/2, np.pi/2]
-    phi[phi > np.pi * 3 / 2] -= 2 * np.pi
-    incl[phi > np.pi / 2] = -incl[phi > np.pi / 2]
-    phi[phi > np.pi / 2] -= np.pi
-
-    if np.any(incl < -np.pi / 2) or np.any(incl > np.pi / 2):
-        raise ValueError("FOOO incl")
-    if np.any(phi < -np.pi / 2) or np.any(phi > np.pi / 2):
-        raise ValueError("FOOO phi")
-
-    # direction
-    h, x = np.histogram(phi, hist_polar_bin(180), density=True)
-    phi_x = x[:-1] + (x[1] - x[0]) / 2
-    phi_h = h / np.amax(h)
-
-    # inclination
-    h, x = np.histogram(incl, hist_polar_bin(180), density=True)
-    incl_x = x[:-1] + (x[1] - x[0]) / 2
-    incl_h = h / np.amax(h)
-
-    return phi_x, phi_h, incl_x, incl_h
-
 
 def calc_omega_stat(p, t):
 
@@ -105,54 +73,38 @@ def run(df):
     if len(domegas) == 1:
         domegas.append([np.array([0, 0, 0]), 0, 0, [0, 0, 0]])
 
-    phi, theta = models.ori_from_file(file, 0, 0, CONFIG.simulation.voi)
-    phi_x, phi_h, incl_x, incl_h = polar_hist(phi, theta)
-
-    # 2d hist
-    h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
-                                                        theta,
-                                                        n_phi=36 * 2,
-                                                        n_theta=18,
-                                                        weight_area=True)
-
-    return pd.DataFrame(
-        [[
-            df.omega,
-            df.psi,
-            df.radius,
-            phi_x,
-            phi_h,
-            incl_x,
-            incl_h,
-            h,
-            x,
-            y,
-            domegas[0][0],
-            domegas[0][1],
-            domegas[0][2],
-            domegas[0][3][0],
-            domegas[0][3][1],
-            domegas[0][3][2],
-            domegas[1][0],
-            domegas[1][1],
-            domegas[1][2],
-            domegas[1][3][0],
-            domegas[1][3][1],
-            domegas[1][3][2],
-        ]],
-        columns=[
-            "omega", "psi", "radius", "phi_x", "phi_h", "incl_x", "incl_h",
-            "hist_2d_h", "hist_2d_x", "hist_2d_y", "omega_0", "omega_mean_0",
-            "omega_std_0", "omega_25_0", "omega_50_0", "omega_75_0", "omega_1",
-            "omega_mean_1", "omega_std_1", "omega_25_1", "omega_50_1",
-            "omega_75_1"
-        ])
+    return pd.DataFrame([[
+        df.omega,
+        df.psi,
+        df.radius,
+        phis,
+        thetas,
+        domegas[0][0],
+        domegas[0][1],
+        domegas[0][2],
+        domegas[0][3][0],
+        domegas[0][3][1],
+        domegas[0][3][2],
+        domegas[1][0],
+        domegas[1][1],
+        domegas[1][2],
+        domegas[1][3][0],
+        domegas[1][3][1],
+        domegas[1][3][2],
+    ]],
+                        columns=[
+                            "omega", "psi", "radius", "phis", "thetas",
+                            "omega_0", "omega_mean_0", "omega_std_0",
+                            "omega_25_0", "omega_50_0", "omega_75_0", "omega_1",
+                            "omega_mean_1", "omega_std_1", "omega_25_1",
+                            "omega_50_1", "omega_75_1"
+                        ])
 
 
 def main():
 
     if False or not os.path.isfile(
-            os.path.join(args.input, "analysis", "cube_2pop.pkl")):
+            os.path.join(args.input, "analysis", "cube_2pop_domega.pkl")):
         print("calculating data")
         df = pd.read_pickle(os.path.join(args.input, "cube_2pop.pkl"))
         df = df[df.state != "init"]
@@ -168,18 +120,19 @@ def main():
         # exit(1)
 
         df = pd.concat(df, ignore_index=True)
-        df.to_pickle(os.path.join(args.input, "analysis", "cube_2pop.pkl"))
+        df.to_pickle(
+            os.path.join(args.input, "analysis", "cube_2pop_domega.pkl"))
     else:
         print("loading data")
         df = pd.read_pickle(
-            os.path.join(args.input, "analysis", "cube_2pop.pkl"))
+            os.path.join(args.input, "analysis", "cube_2pop_domega.pkl"))
 
     # print(df.columns)
     # print(df.dtypes)
     df_ = df[[
-        'omega', 'psi', 'radius', 'omega_mean_0', 'omega_std_0', 'omega_25_0',
-        'omega_50_0', 'omega_75_0', 'omega_mean_1', 'omega_std_1', 'omega_25_1',
-        'omega_50_1', 'omega_75_1'
+        'omega', 'psi', 'phis', 'thetas', 'radius', 'omega_mean_0',
+        'omega_std_0', 'omega_25_0', 'omega_50_0', 'omega_75_0', 'omega_mean_1',
+        'omega_std_1', 'omega_25_1', 'omega_50_1', 'omega_75_1'
     ]]
     # print(df_)
     df_.to_csv(os.path.join(args.input, "analysis", 'omegas.csv'), index=False)
@@ -205,12 +158,52 @@ def main():
                 #       f'{np.mean(df_.omega_50_0):.1f}, '
                 #       f'{np.mean(df_.omega_75_0):.1f}, ')
 
+                thetas = df_.iloc[0]['thetas']
+                phis = df_.iloc[0]['phis']
+
+                for i, (tt, pp) in enumerate(zip(thetas, phis)):
+                    tt[:] = 90 - np.rad2deg(tt)
+                    pp[:] = np.rad2deg(pp)
+
+                    # center on fiber main population orientation
+                    if i == 0:
+                        tt[np.logical_and(pp > 90, pp < 3 * 90)] *= -1
+                        pp[np.logical_and(pp > 90, pp < 3 * 90)] -= 180
+                        pp[pp >= 3 * 90] -= 360
+                    if i == 1:
+                        tt[np.logical_and(pp > o + 90, pp < o + 3 * 90)] *= -1
+                        pp[np.logical_and(pp > o + 90, pp < o + 3 * 90)] -= 180
+                        pp[pp >= o + 3 * 90] -= 360
+
+                for i, tt in enumerate(thetas):
+                    if tt.size == 0:
+                        thetas[i] = np.array([np.nan])
+                        phis[i] = np.array([np.nan])
+
+                if len(thetas) == 1:
+                    thetas.append(np.array([np.nan]))
+                    phis.append(np.array([np.nan]))
+
+                # np.set_printoptions(suppress=True)
+                # print(phis[0])
+
                 df__ = {}
                 df__['omega'] = o
                 df__['psi'] = p
                 df__['radius'] = r
                 df__['state'] = 'solved'
                 df__['pop'] = 0
+
+                df__['incl_mean'] = np.mean(thetas[0])
+                df__['incl_std'] = np.std(thetas[0])
+                df__['incl_25'] = np.quantile(thetas[0], 0.25)
+                df__['incl_50'] = np.quantile(thetas[0], 0.5)
+                df__['incl_75'] = np.quantile(thetas[0], 0.75)
+                df__['phi_mean'] = np.mean(phis[0])
+                df__['phi_std'] = np.std(phis[0])
+                df__['phi_25'] = np.quantile(phis[0], 0.25)
+                df__['phi_50'] = np.quantile(phis[0], 0.5)
+                df__['phi_75'] = np.quantile(phis[0], 0.75)
                 df__['mean'] = df_.iloc[0]['omega_mean_0']
                 df__['std'] = df_.iloc[0]['omega_std_0']
                 df__['25'] = df_.iloc[0]['omega_25_0']
@@ -225,6 +218,16 @@ def main():
                     df__['radius'] = r
                     df__['state'] = 'solved'
                     df__['pop'] = 1
+                    df__['incl_mean'] = np.mean(thetas[1])
+                    df__['incl_std'] = np.std(thetas[1])
+                    df__['incl_25'] = np.quantile(thetas[1], 0.25)
+                    df__['incl_50'] = np.quantile(thetas[1], 0.5)
+                    df__['incl_75'] = np.quantile(thetas[1], 0.75)
+                    df__['phi_mean'] = np.mean(phis[1])
+                    df__['phi_std'] = np.std(phis[1])
+                    df__['phi_25'] = np.quantile(phis[1], 0.25)
+                    df__['phi_50'] = np.quantile(phis[1], 0.5)
+                    df__['phi_75'] = np.quantile(phis[1], 0.75)
                     df__['mean'] = df_.iloc[0]['omega_mean_1']
                     df__['std'] = df_.iloc[0]['omega_std_1']
                     df__['25'] = df_.iloc[0]['omega_25_1']
