@@ -34,9 +34,8 @@ df = pd.read_pickle(
 df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
 df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
-
 df["dir_mean"] = df["epa_dir"].apply(
-    lambda x: scipy.stats.circmean(x, np.pi, -np.pi))
+    lambda x: scipy.stats.circmean(x, np.pi * 3 / 4, -1 / 4 * np.pi))
 
 
 def run(p):
@@ -71,7 +70,9 @@ def run(p):
     for name in [
             # "R", "R2",
             "dir_mean",
-            # "trel_mean", "ret_mean", "trans_mean"
+            "trel_mean",
+            "ret_mean",
+            "trans_mean"
     ]:
 
         crange = None
