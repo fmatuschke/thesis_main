@@ -1,0 +1,100 @@
+#%%
+import pandas as pd
+import os
+import seaborn as sns
+import numpy as np
+import itertools
+import matplotlib.pyplot as plt
+import tqdm
+
+# %%
+
+df = pd.read_pickle(
+    os.path.join("output/cube_2pop_135_rc1", "analysis",
+                 'cube_2pop_domega.pkl'))
+df = df[df["radius"] == 0.5]
+
+df["phi_0"] = df.apply(lambda x: x["phis"][0], axis=1)
+df["phi_1"] = df.apply(lambda x: x["phis"][1]
+                       if len(x["phis"]) == 2 else np.empty((0)),
+                       axis=1)
+
+df["theta_0"] = df.apply(lambda x: x["thetas"][0], axis=1)
+df["theta_1"] = df.apply(lambda x: x["thetas"][1]
+                         if len(x["thetas"]) == 2 else np.empty((0)),
+                         axis=1)
+
+df = df.drop(["phis", "thetas"], axis=1)
+
+for i, o in itertools.product(["0", "1"], ["25", "50", "75", "std", "mean"]):
+    df = df.drop([f"omega_{o}_{i}"], axis=1)
+
+# %%
+df = df[(df.omega == 30) | (df.omega == 60) | (df.omega == 90)]
+df = df[(df.psi == 0.3) | (df.psi == 0.6) | (df.psi == 0.9)]
+
+# %%
+cols = ['phi', 'theta']  # omega
+df__ = []
+for i, row in df.iterrows():
+    for p in range(2):
+        df_ = pd.DataFrame()
+        for c in cols:
+            df_[f'{c}'] = row[f'{c}_{p}']
+            df_['p'] = p
+            df_['omega'] = row['omega']
+            df_['psi'] = row['psi']
+        df__.append(df_)
+df__ = pd.concat(df__, ignore_index=True)
+
+cols = ['omega']
+df___ = []
+for i, row in df.iterrows():
+    for p in range(2):
+        df_ = pd.DataFrame()
+        for c in cols:
+            df_[f'd{c}'] = row[f'{c}_{p}']
+            df_['p'] = p
+            df_['omega'] = row['omega']
+            df_['psi'] = row['psi']
+        df___.append(df_)
+df___ = pd.concat(df___, ignore_index=True)
+
+# %%
+for o in tqdm.tqdm(df__.omega.unique()):
+    for p in tqdm.tqdm(df__[df__.omega == o].psi.unique(), leave=False):
+        for i in range(2):
+            mask = ((df__.omega == o) & (df__.psi == p) &
+                    (df__.p == i)).to_numpy()
+            thetas = df__.loc[mask].theta.to_numpy()
+            phis = df__.loc[mask].phi.to_numpy()
+
+            thetas = 90 - np.rad2deg(thetas)
+            phis = np.rad2deg(phis)
+
+            # center on fiber main population orientation
+            thetas[np.logical_and(phis > i * o + 90,
+                                  phis < i * o + 3 * 90)] *= -1
+            phis[np.logical_and(phis > i * o + 90,
+                                phis < i * o + 3 * 90)] -= 180
+            phis[phis >= i * o + 3 * 90] -= 360
+
+            df__.loc[mask, 'theta'] = thetas
+            df__.loc[mask, 'phi'] = phis
+
+# %%
+# sns.boxplot(data=df___[df___.p == 0], hue='psi', x='omega', y='domega')
+
+# %%
+
+for p in range(2):
+    plt.figure()
+    sns.boxplot(data=df__[df__.p == p], hue='psi', x='omega', y='theta')
+    plt.savefig(f'domega_theta_p_{p}.pdf')
+
+# %%
+for p in range(2):
+    plt.figure()
+    sns.boxplot(data=df__[df__.p == p], hue='psi', x='omega', y='phi')
+    plt.savefig(f'domega_phi_p_{p}.pdf')
+# %%

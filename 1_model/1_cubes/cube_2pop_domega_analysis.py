@@ -236,6 +236,7 @@ def main():
                     df___.append(df__)
 
     df___ = pd.DataFrame(df___)
+    df___ = df___[(df___.radius == 0.5)]
 
     df___.sort_values(['omega', 'psi', 'radius', 'pop', 'state'], inplace=True)
 
