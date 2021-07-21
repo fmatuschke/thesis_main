@@ -48,7 +48,7 @@ for i, row in df.iterrows():
 df__ = pd.concat(df__, ignore_index=True)
 
 cols = ['omega']
-df___ = []
+df_omega = []
 for i, row in df.iterrows():
     for p in range(2):
         df_ = pd.DataFrame()
@@ -57,8 +57,8 @@ for i, row in df.iterrows():
             df_['p'] = p
             df_['omega'] = row['omega']
             df_['psi'] = row['psi']
-        df___.append(df_)
-df___ = pd.concat(df___, ignore_index=True)
+        df_omega.append(df_)
+df_omega = pd.concat(df_omega, ignore_index=True)
 
 # %%
 for o in tqdm.tqdm(df__.omega.unique()):
@@ -83,18 +83,26 @@ for o in tqdm.tqdm(df__.omega.unique()):
             df__.loc[mask, 'phi'] = phis
 
 # %%
-# sns.boxplot(data=df___[df___.p == 0], hue='psi', x='omega', y='domega')
+# reduce number of outliers
+df___ = df__[::10]
 
 # %%
 
 for p in range(2):
     plt.figure()
-    sns.boxplot(data=df__[df__.p == p], hue='psi', x='omega', y='theta')
-    plt.savefig(f'domega_theta_p_{p}.pdf')
+    sns.boxplot(data=df___[df___.p == p], hue='psi', x='omega', y='theta')
+    plt.savefig(f'output/domega_theta_p_{p}.pdf')
 
 # %%
 for p in range(2):
     plt.figure()
-    sns.boxplot(data=df__[df__.p == p], hue='psi', x='omega', y='phi')
-    plt.savefig(f'domega_phi_p_{p}.pdf')
+    sns.boxplot(data=df___[df___.p == p], hue='psi', x='omega', y='phi')
+    plt.savefig(f'output/domega_phi_p_{p}.pdf')
+# %%
+df___ = df_omega[::10]
+for p in range(2):
+    plt.figure()
+    sns.boxplot(data=df___[df___.p == p], hue='psi', x='omega', y='domega')
+    plt.savefig(f'output/domega_domega_p_{p}.pdf')
+
 # %%

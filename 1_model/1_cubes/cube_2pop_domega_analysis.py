@@ -61,7 +61,8 @@ def calc_omega_stat(p, t):
         d = np.abs(np.dot(v0[:, i], v1))  # because orientation
         data[i] = np.rad2deg(np.arccos(d))
 
-    return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
+    return data, np.mean(data), np.std(data), np.quantile(
+        data, [0.25, 0.5, 0.75])
 
 
 def run(df):
