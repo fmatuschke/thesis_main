@@ -99,7 +99,8 @@ def main():
                   repeat=args.repeat,
                   nthreads=t,
                   after=a) for file in args.input
-        for t in [1, 2, 3, 4, 5, 6, 7, 8] for a in args.after
+        for t in [1, 2, 3, 4, 5, 6, 7, 8, 16, 24, 32, 40, 48]
+        for a in args.after
     ]
 
     df = []
