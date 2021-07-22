@@ -18,39 +18,35 @@
 %                 %  mode=list and make, 
 %                  ]
 % 
-\def\datapath{../../__PATH__}
-\directlua0{
-  pdf.setinfo ("/Path: (__PATH__)")
-}
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
 % 
-\def\setup{__MICROSCOPE__}
-\def\species{__SPECIES__}
-\def\model{__MODEL__}
-\def\radius{__RADIUS__}
-\def\name{__NAME__}
-\def\norm{__NORM__}
-% 
 \input{cividis.tex}
+% 
+% \def\setup{__MICROSCOPE__}
+% \def\species{__SPECIES__}
+% \def\model{__MODEL__}
+% \def\radius{__RADIUS__}
+% \def\name{__NAME__}
+% \def\norm{__NORM__}
 % 
 \begin{document}
 % 
 % 
-\def\delta{4.25}
+\def\delta{@delta_img} %4.25
 \pgfplotsset{every tick label/.append style={font=\footnotesize}}
 % 
 \begin{tikzpicture}
 % 
 \begin{scope}[local bounding box=bb]
 % 
-\foreach [count=\i from 0] \fnull in {0.0,30.0,60.0,90.0} {
-\foreach [count=\j from 0] \psi in {0.3, 0.6, 0.9} { % 0.0, unecesarry, because other psi at omega==0 (should) have the same value
+\foreach [count=\i from 0] \fnull in {@fnull_list} {
+\foreach [count=\j from 0] \psi in {@psi_list} {
 % 
 \begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
 \begin{polaraxis}[
-    width=3.25cm, height = 3.25cm,
+    width=@size, height = @size,
     scale only axis=true,
     xtick={0,45,...,315},
     ytick={60,30},
@@ -61,8 +57,8 @@
     yticklabel style={white, overlay},
     % colormap/viridis,
     colormap name=cividis,
-    point meta min = 0,
-    point meta max = 1,
+    point meta min = @cmin,
+    point meta max = @cmax,
     tickwidth=0,
     xtick distance = 45,
     separate axis lines,
@@ -70,14 +66,14 @@
     ymin=0, ymax=90,
     axis on top=true,
 ]
-\addplot [surf,point meta=\thisrowno{2},] table {%
-  \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_hist.dat}; %, contour filled={number=9}
+% \addplot [surf,point meta=\thisrowno{2},] table {%
+%   @file_name_psi_\psi_f0_\fnull_hist.dat}; %, contour filled={number=9}
 \addplot [only marks, scatter, scatter src=explicit] file[] {%
-  \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_data.dat}; %, contour filled={number=9}
+  @file_name_psi_\psi_f0_\fnull_data.dat}; %, contour filled={number=9}
 \addplot [ only marks, mark=o, thin, dash pattern=on 1pt off 1pt] file[] {%
-  \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_data.dat}; %, contour filled={number=9}
+  @file_name_psi_\psi_f0_\fnull_data.dat}; %, contour filled={number=9}
 \addplot [only marks, mark=o, thick] file[] {%
-  \datapath/hist/sim_r_\radius_setup_\setup_s_\species_m_\model_psi_\psi_f0_\fnull_\name_\norm_init.dat}; %, contour filled={number=9}
+  @file_name_psi_\psi_f0_\fnull_init.dat}; %, contour filled={number=9}
 \end{polaraxis}
 % 
 \end{scope}

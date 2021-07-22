@@ -82,8 +82,13 @@ def generate(df,
     if delta is None:
         delta = 4.25  # for 4
 
-    sed("@file_name", file_name, f"polar_hist_to_tikz.tex",
-        f"output/tmp/{file_name}.tex")
+    if "dir" not in value and "inc" not in value:
+        sed("@file_name", file_name, f"polar_hist_to_tikz.tex",
+            f"output/tmp/{file_name}.tex")
+    else:
+
+        sed("@file_name", file_name, f"polar_hist_to_tikz_ori.tex",
+            f"output/tmp/{file_name}.tex")
     sed("@delta_img", str(delta), f"output/tmp/{file_name}.tex")
     sed("@fnull_list", f0_list_str, f"output/tmp/{file_name}.tex")
     sed("@psi_list", psi_list_str, f"output/tmp/{file_name}.tex")
@@ -124,15 +129,54 @@ def generate(df,
             # measurement symmetry
             phi_ = np.concatenate((phi_, -phi_), axis=0)
             theta_ = np.concatenate((theta_, theta_), axis=0)
-            data_ = np.concatenate((data_, data_), axis=0)
-            # orientation symmetry
+            # # orientation symmetry
             phi_ = np.concatenate((phi_, phi_), axis=0)
             theta_ = np.concatenate((theta_, np.pi + theta_), axis=0)
-            data_ = np.concatenate((data_, data_), axis=0)
+
+            if "dir" in value:
+                # measurement symmetry
+                if np.any(data_ > np.pi):
+                    raise ValueError("FOOOO")
+                data_ = np.concatenate((data_, (np.pi - data_) % np.pi), axis=0)
+                # # orientation symmetry
+                data_ = np.concatenate((data_, data_), axis=0)
+            elif "inc" in value:
+                # measurement symmetry
+                if np.any(data_ > 0.5 * np.pi):
+                    raise ValueError("FOOOO")
+                data_ = np.concatenate((data_, -data_), axis=0)
+                # # orientation symmetry
+                data_ = np.concatenate((data_, data_), axis=0)
+            else:
+                # measurement symmetry
+                data_ = np.concatenate((data_, data_), axis=0)
+                # orientation symmetry
+                data_ = np.concatenate((data_, data_), axis=0)
 
             # rm multiple
             phi_, theta_ = helper.spherical_interpolation.remap_spherical(
                 phi_, theta_)
+
+            phi_theta = []
+            data__ = []
+            for p, t, d in zip(phi_, theta_, data_):
+                if (p, t) in phi_theta:
+                    i = phi_theta.index((p, t))
+                    if d > data__[i]:
+                        data__[i] = d
+
+                else:
+                    phi_theta.append((p, t))
+                    if "dir" in value:
+                        d = (d + np.pi) % np.pi
+                    data__.append(d)
+
+            phi_theta = np.array(phi_theta)
+            data__ = np.array(data__)
+            # print(data__.shape, phi_.shape)
+            phi_ = phi_theta[:, 0]
+            theta_ = phi_theta[:, 1]
+            data_ = data__
 
             x_ = np.multiply(np.cos(phi_), np.sin(theta_))
             y_ = np.multiply(np.sin(phi_), np.sin(theta_))
@@ -158,8 +202,25 @@ def generate(df,
             data_ = data__[:, 2]
 
             # interplate mesh on sphere
-            x_i, y_i, z_i, data_i = helper.spherical_interpolation.on_mesh(
-                phi_, theta_, data_, d_phi, d_theta)
+            if "dir" not in value and "inc" not in value:
+                x_i, y_i, z_i, data_i = helper.spherical_interpolation.on_mesh(
+                    phi_, theta_, data_, d_phi, d_theta)
+            else:
+                x_i = np.empty((0))
+                y_i = np.empty((0))
+                z_i = np.empty((0))
+                data_i = np.empty((0))
+
+            # elif "dir" in value:
+            #     x, y = np.cos(data_), np.sin(data_)
+            #     # print(data_[:10], x[:10], y[:10])
+            #     x_i, y_i, z_i, xdata_i = helper.spherical_interpolation.on_mesh(
+            #         phi_, theta_, x, d_phi, d_theta)
+            #     x_i, y_i, z_i, ydata_i = helper.spherical_interpolation.on_mesh(
+            #         phi_, theta_, y, d_phi, d_theta)
+            #     data_i = np.arctan2(ydata_i, xdata_i)
+            #     data_i += np.pi
+            #     data_i %= np.pi
 
             with open(
                     f"output/tmp/{file_name}_psi_{psi:.2f}_f0_{f0_inc:.2f}_hist.dat",
@@ -192,6 +253,9 @@ def generate(df,
 
     with open(f"output/tmp/{file_name}.out",
               "wb") as out, open(f"output/tmp/{file_name}.err", "wb") as err:
+        shutil.copyfile("cividis.tex", "output/tmp/cividis.tex")
+        # print(
+        #     f"lualatex -interaction=nonstopmode -halt-on-error {file_name}.tex")
         subprocess.run(
             [
                 "lualatex", "-interaction=nonstopmode", "-halt-on-error",

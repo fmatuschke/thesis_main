@@ -22,6 +22,8 @@
 \def\width{13.87303cm}
 \def\height{22.37076cm}
 % 
+\input{cividis.tex}
+% 
 % \def\setup{__MICROSCOPE__}
 % \def\species{__SPECIES__}
 % \def\model{__MODEL__}
@@ -53,7 +55,8 @@
     yticklabels={30,60},
     ylabel style={overlay},
     yticklabel style={white, overlay},
-    colormap/viridis,
+    % colormap/viridis,
+    colormap name=cividis,
     point meta min = @cmin,
     point meta max = @cmax,
     tickwidth=0,
