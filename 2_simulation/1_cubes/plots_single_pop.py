@@ -73,7 +73,8 @@ def get_file_from_series(df):
 
 
 #%%
-for _, row in tqdm.tqdm(df.sort_values("f0_inc").iterrows(), total=len(df)):
+for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::2],
+                        total=len(df) // 2):
     phi, theta = fastpli.analysis.orientation.remap_orientation(
         row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -82,24 +83,44 @@ for _, row in tqdm.tqdm(df.sort_values("f0_inc").iterrows(), total=len(df)):
                            subplot_kw=dict(projection="polar"),
                            figsize=(3.5, 2))
     fig.suptitle(f"incl:{row.f0_inc}")
-    ax[0].hist2d(
-        phi,
-        np.rad2deg(theta),
-        bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-              np.linspace(0, 90, 9 + 1)],
-        norm=mpl.colors.LogNorm())
+    fastpli.analysis.orientation.histogram(phi,
+                                           theta,
+                                           ax=ax[0],
+                                           n_phi=36,
+                                           n_theta=9,
+                                           weight_area=True,
+                                           fun=lambda x: np.log(x + 1),
+                                           cmap='cividis')
+    # ax[0].hist2d(
+    #     phi,
+    #     np.rad2deg(theta),
+    #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
+    #           np.linspace(0, 90, 9 + 1)],
+    #     cmap=plt.get_cmap("cividis"),
+    #     # norm=mpl.colors.LogNorm(),
+    # )
     #
     #
     phi, theta = models.ori_from_file(
         get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
         CONFIG.simulation.voi)
     phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
-    ax[1].hist2d(
-        phi,
-        np.rad2deg(theta),
-        bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-              np.linspace(0, 90, 9 + 1)],
-        norm=mpl.colors.LogNorm())
+    fastpli.analysis.orientation.histogram(phi,
+                                           theta,
+                                           ax=ax[1],
+                                           n_phi=36,
+                                           n_theta=9,
+                                           weight_area=True,
+                                           fun=lambda x: np.log(x + 1),
+                                           cmap='cividis')
+    # ax[1].hist2d(
+    #     phi,
+    #     np.rad2deg(theta),
+    #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
+    #           np.linspace(0, 90, 9 + 1)],
+    #     cmap=plt.get_cmap("cividis"),
+    #     # norm=mpl.colors.LogNorm(),
+    # )
 
     # plt.tight_layout()
     plt.tight_layout(pad=0, w_pad=0, h_pad=0)
@@ -122,7 +143,9 @@ df_ = df.apply(pd.Series.explode).reset_index()
 
 phi, theta = df_["rofl_dir"].to_numpy(
     float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
-phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
+# phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
+theta[phi > 3 / 4 * np.pi] = np.pi - theta[phi > 3 / 4 * np.pi]
+phi[phi > 3 / 4 * np.pi] -= np.pi
 df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
                                                                theta)
 

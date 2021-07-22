@@ -3,10 +3,20 @@ import numpy as np
 import skimage.io
 import os
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import cv2
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+
+
+#%%
+def save_img(name, data, vmin, vmax):
+    cmap = cm.cividis
+    norm = plt.Normalize(vmin=vmin, vmax=vmax)
+    image = cmap(norm(data))
+    plt.imsave(name, image, origin='lower')
+
 
 #%%
 retardation = skimage.io.imread(os.path.join(
@@ -40,32 +50,46 @@ rightroi = np.vstack((rightroi, rightroi[0, :]))
 clip = [21000, 20000]
 skip = 5
 
+# transmittance BG
+plt.subplots()
+vmax = np.mean(transmittance[0:4200:skip, 0:4200:skip].ravel())
+vmax += np.std(transmittance[0:4200:skip, 0:4200:skip].ravel()) * 5
+plt.imshow(transmittance[0:4200:skip, 0:4200:skip],
+           cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=vmax,
+           origin='lower')
+cval = (np.amin(transmittance[0:4200:skip, 0:4200:skip]),
+        np.amax(transmittance[0:4200:skip, 0:4200:skip]))
+print(vmax)
+
 # transmittance
 plt.subplots()
 plt.imshow(transmittance[clip[0]:24500:skip, clip[1]:27000:skip],
            cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=vmax,
            origin='lower')
-cval = (np.amin(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]),
-        np.amax(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]))
-print(cval)
+# cval = (np.amin(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]),
+#         np.amax(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]))
+# print(cval)
 plt.plot((leftroi[:, 0] - clip[1]) / skip, (leftroi[:, 1] - clip[0]) / skip,
          c='red')
 plt.plot((rightroi[:, 0] - clip[1]) / skip, (rightroi[:, 1] - clip[0]) / skip,
          c='red')
 plt.axis('off')
 plt.tight_layout()
-plt.savefig(os.path.join(
-    PATH, f'output/transmittance_vervet_cc_{cval[0]:.0f}_{cval[1]:.0f}.png'),
-            bbox_inches='tight')
+print(transmittance.shape)
+print(clip[::-1], (27000, 24500))
+print(leftroi[:, 0], leftroi[:, 1])
+print(rightroi[:, 0], rightroi[:, 1])
+save_img(os.path.join(PATH, f'output/transmittance_vervet_cc_0_{vmax:.0f}.png'),
+         transmittance[clip[0]:24500:skip, clip[1]:27000:skip], 0, vmax)
 
-# transmittance BG
-plt.subplots()
-plt.imshow(transmittance[0:4200:skip, 0:4200:skip],
-           cmap=plt.get_cmap('cividis'),
-           origin='lower')
-cval = (np.amin(transmittance[0:4200:skip, 0:4200:skip]),
-        np.amax(transmittance[0:4200:skip, 0:4200:skip]))
-print(cval)
+# plt.savefig(os.path.join(PATH,
+#                          f'output/transmittance_vervet_cc_0_{vmax:.0f}.png'),
+#             bbox_inches='tight')
+
 # plt.plot((leftroi[:, 0] - clip[1]) / skip, (leftroi[:, 1] - clip[0]) / skip,
 #          c='red')
 # plt.plot((rightroi[:, 0] - clip[1]) / skip, (rightroi[:, 1] - clip[0]) / skip,
@@ -77,19 +101,34 @@ plt.tight_layout()
 plt.subplots()
 plt.imshow(retardation[clip[0]:24500:skip, clip[1]:27000:skip],
            cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=1,
            origin='lower')
-cval = (np.amin(retardation[clip[0]:24500:skip, clip[1]:27000:skip]),
-        np.amax(retardation[clip[0]:24500:skip, clip[1]:27000:skip]))
-print(cval)
+# cval = (np.amin(retardation[clip[0]:24500:skip, clip[1]:27000:skip]),
+#         np.amax(retardation[clip[0]:24500:skip, clip[1]:27000:skip]))
+# print(cval)
 plt.plot((leftroi[:, 0] - clip[1]) / skip, (leftroi[:, 1] - clip[0]) / skip,
          c='red')
 plt.plot((rightroi[:, 0] - clip[1]) / skip, (rightroi[:, 1] - clip[0]) / skip,
          c='red')
 plt.axis('off')
 plt.tight_layout()
-plt.savefig(os.path.join(
-    PATH, f'output/retardation_vervet_cc_{cval[0]:.3f}_{cval[1]:.3f}.png'),
-            bbox_inches='tight')
+# print(leftroi[:, 0] , leftroi[:, 1] )
+# print(rightroi[:, 0], rightroi[:, 1])
+save_img(os.path.join(PATH, f'output/retardation_vervet_cc_0_1.png'),
+         retardation[clip[0]:24500:skip, clip[1]:27000:skip], 0, 1)
+
+# plt.savefig(os.path.join(PATH, f'output/retardation_vervet_cc_0_1.png'),
+#             bbox_inches='tight')
+
+# %%
+# thumbnail
+data = transmittance[::50, ::50]
+save_img(f'output/transmittance_vervet_thumbnail_0_{vmax:.1f}.png', data, 0,
+         vmax)
+data = retardation[::50, ::50]
+save_img('output/retardation_vervet_thumbnail_0_1.png', data, 0, 1)
+
 # %%
 mask_left = np.zeros_like(retardation, dtype=np.uint8)
 cv2.fillPoly(mask_left, [leftroi], 1)

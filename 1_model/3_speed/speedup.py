@@ -52,7 +52,7 @@ class Parameter(typing.NamedTuple):
     file: str
     steps: int
     repeat: int
-    nthreads: int
+    nthreads: list
     after: int
 
 
@@ -60,7 +60,7 @@ def run(p):
     fiber_bundle_org = fastpli.io.fiber_bundles.load(p.file)
     solver = fastpli.model.solver.Solver()
     solver.fiber_bundles = fiber_bundle_org
-    solver.omp_num_threads = 4
+    solver.omp_num_threads = 8
     for _ in tqdm.trange(p.after, desc='a', leave=False):
         solver.step()
     fiber_bundle = solver.fiber_bundles
@@ -68,25 +68,25 @@ def run(p):
     df = pd.DataFrame(columns=['n', 'm', 'dt', 'p'])
 
     for n in tqdm.trange(p.repeat, desc='n', leave=False):
-        solver = fastpli.model.solver.Solver()
-        solver.omp_num_threads = p.nthreads
-        solver.fiber_bundles = fiber_bundle
-
-        for i in tqdm.trange(p.steps, desc='i', leave=False):
-            dt = time.time()
-            solver.step()
-            dt = time.time() - dt
-            # t[n, i] = dt
-            df = df.append(
-                {
-                    'file': p.file,
-                    'n': n,
-                    'm': i,
-                    'a': p.after,
-                    'dt': dt,
-                    'p': p.nthreads
-                },
-                ignore_index=True)
+        for t in tqdm.trange(p.nthreads, desc='p', leave=False):
+            solver = fastpli.model.solver.Solver()
+            solver.omp_num_threads = t
+            solver.fiber_bundles = fiber_bundle
+            for i in tqdm.trange(p.steps, desc='i', leave=False):
+                dt = time.time()
+                solver.step()
+                dt = time.time() - dt
+                # t[n, i] = dt
+                df = df.append(
+                    {
+                        'file': p.file,
+                        'n': n,
+                        'm': i,
+                        'a': p.after,
+                        'dt': dt,
+                        'p': t
+                    },
+                    ignore_index=True)
 
     return df
 
@@ -97,10 +97,8 @@ def main():
         Parameter(file=file,
                   steps=args.steps,
                   repeat=args.repeat,
-                  nthreads=t,
-                  after=a) for file in args.input
-        for t in [1, 2, 3, 4, 5, 6, 7, 8, 16, 24, 32, 40, 48]
-        for a in args.after
+                  nthreads=[1, 2, 3, 4, 5, 6, 7, 8, 16, 24, 32, 40, 48],
+                  after=a) for file in args.input for a in args.after
     ]
 
     df = []
