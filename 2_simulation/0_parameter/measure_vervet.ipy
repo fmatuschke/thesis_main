@@ -174,27 +174,58 @@ print(np.mean(retardation_right), np.std(retardation_right))
 # %%
 plt.subplots()
 plt.hist(transmittance_left,
-         int(np.sqrt(transmittance_left.size)),
+         255,
          label='left',
          fc=(239 / 255, 138 / 255, 98 / 255, 0.75))
 plt.hist(transmittance_right,
-         int(np.sqrt(transmittance_right.size)),
+         255,
          label='right',
          fc=(43 / 255, 140 / 255, 190 / 255, 0.75))
 plt.legend()
 plt.savefig(os.path.join(PATH, f'output/transmittance_vervet_cc_hist.png'),
             bbox_inches='tight')
 
+#
+y, x = np.histogram(transmittance_left, 255)
+y = np.append(y, 0)
+np.savetxt("output/vervet_transmittance_left.dat",
+           np.vstack((x, y)).T,
+           header='x y',
+           comments='',
+           fmt='%.6e')
+y, x = np.histogram(transmittance_right, 255)
+y = np.append(y, 0)
+np.savetxt("output/vervet_transmittance_right.dat",
+           np.vstack((x, y)).T,
+           header='x y',
+           comments='',
+           fmt='%.6e')
+
 plt.subplots()
 plt.hist(retardation_left,
-         int(np.sqrt(retardation_left.size)),
+         255,
          label='left',
          fc=(239 / 255, 138 / 255, 98 / 255, 0.75))
 plt.hist(retardation_right,
-         int(np.sqrt(retardation_right.size)),
+         255,
          label='right',
          fc=(43 / 255, 140 / 255, 190 / 255, 0.75))
 plt.legend()
 plt.savefig(os.path.join(PATH, f'output/retardation_vervet_cc_hist.png'),
             bbox_inches='tight')
+
+y, x = np.histogram(retardation_left, 255)
+y = np.append(y, 0)
+np.savetxt("output/vervet_retardation_left.dat",
+           np.vstack((x, y)).T,
+           header='x y',
+           comments='',
+           fmt='%.6e')
+y, x = np.histogram(retardation_right, 255)
+y = np.append(y, 0)
+np.savetxt("output/vervet_retardation_right.dat",
+           np.vstack((x, y)).T,
+           header='x y',
+           comments='',
+           fmt='%.6e')
 # %%

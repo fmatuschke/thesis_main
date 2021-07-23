@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-
+# %%
 import os
 
 import h5py
@@ -7,9 +6,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tqdm
 from sklearn import linear_model
+from scipy import stats
+from matplotlib.colors import LogNorm
+from matplotlib import cm
+import skimage.transform
+import matplotlib
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+# %%
 
 # with h5py.File("../../data/LAP/test500.h5", "a") as h5f:
 #     del h5f['mean']
@@ -23,8 +28,6 @@ THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
 # var = var[var < 50000]
 # var = var[mean > 400]
 # mean = mean[mean > 400]
-'''
-'''
 
 # PM
 h5f = h5py.File(os.path.join(THESIS, 'data/PM/repo/Test500.h5'), 'r')
@@ -50,10 +53,8 @@ mean = mean[var < 300]
 var = var[var < 300]
 var = var[mean > 25]
 mean = mean[mean > 25]
-'''
-'''
 
-from scipy import stats
+# %%
 
 res = stats.linregress(mean, var)
 print(f'slope: {res.slope}')
@@ -68,7 +69,6 @@ print(f'intercept_stderr: {res.intercept_stderr}')
 
 # print(reg.coef_)
 # print(reg.intercept_)
-"""  """
 
 # H, X, Y = np.histogram2d(mean, var, (100, 50))
 
@@ -85,16 +85,15 @@ print(f'intercept_stderr: {res.intercept_stderr}')
 # z = np.polyfit(mean, var, 1)
 # print(z)
 # p = np.poly1d(z)
-x = np.linspace(np.min(mean), np.max(mean), 50)
-
+# %%
 # plt.scatter(x, m)
-from matplotlib.colors import LogNorm
-from matplotlib import cm
 
 plt.hist2d(mean.ravel(),
            var.ravel(), (100, 50),
            norm=LogNorm(),
            cmap=plt.get_cmap('cividis'))
+x = np.linspace(np.min(mean), np.max(mean), 2)
+print(x, x * res.slope + res.intercept)
 plt.plot(x, x * res.slope + res.intercept, '-')
 plt.title(
     f"x * ({res.slope:.6f} +- {res.stderr:.6f}) + ({res.intercept:.3f} +- {res.intercept_stderr:.3f}), R:{res.rvalue:.4f}"
@@ -104,6 +103,18 @@ plt.tight_layout()
 plt.savefig(os.path.join(PATH, 'output', 'PM_noise.png'))
 # plt.show()
 
+darray, xarray, yarray = np.histogram2d(mean.ravel(), var.ravel(), (100, 50))
+xarray = xarray[:-1] + (xarray[1] - xarray[0]) / 2
+yarray = yarray[:-1] + (yarray[1] - yarray[0]) / 2
+xarray, yarray = np.meshgrid(xarray, yarray)
+
+with open(f"output/PM_noise.dat", "w") as f:
+    for x, y, d in zip(xarray, yarray, darray.T):
+        for xx, yy, dd in zip(x, y, d):
+            f.write(f'{xx:.2f} {yy:.2f} {np.log(dd+1):.6f}\n')
+        f.write('\n')
+    f.write('\n')
+# %%
 ###########################
 """ save single image """
 ###########################
@@ -116,9 +127,6 @@ plt.imshow(data, cmap=plt.get_cmap('gray'))
 plt.colorbar()
 plt.tight_layout()
 plt.savefig(os.path.join(PATH, 'output', 'PM_000.png'))
-
-import skimage.transform
-import matplotlib
 
 data_ = skimage.transform.resize(data, (512, 512), anti_aliasing=False)
 print(f'vmin: 0, vmax: {data_.max()}')
