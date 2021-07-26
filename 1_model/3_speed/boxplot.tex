@@ -15,8 +15,10 @@
 \usepgfplotslibrary{statistics}
 \tikzset{>=latex}
 % 
-\def\width{13.87303cm}
-\def\height{22.37076cm}
+\newlength{\width}
+\newlength{\height}
+\setlength{\width}{13.87303cm}
+\setlength{\height}{22.37076cm}
 \def\datapath{../../__PATH__}
 \directlua0{
   pdf.setinfo ("/Path: (__PATH__)")
@@ -30,14 +32,14 @@
 % 
 \begin{document}
 % 
-\pgfmathsetmacro{\ng}{6}
+\pgfmathsetmacro{\ng}{8}
 \pgfmathsetmacro{\dx}{0.75}
 % 
 \pgfplotsset{
     Boxplot/.style={
-        cycle list/Paired-6,
-        xmin=0.42,
-        xmax=8.58,
+        width = 0.78\width,
+        height = 0.5\width,
+        cycle list/Paired-8,
         axis x line=none,
         axis y line = left,
         enlarge y limits,
@@ -66,12 +68,106 @@
     ylabel absolute, every axis y label/.append style={yshift=0.0ex},
 }
 %
+% 
+\begin{tikzpicture}[]
+  \begin{axis}[%
+        ylabel={$\mathit{speedup}$},
+        xmin=0.42,
+        xmax=8.58,
+        ymin=1,
+        ymax=6,
+        Boxplot,
+        scale only axis,
+        legend to name={legend},
+        legend image post style={mark=square*},
+        legend columns=2,
+        legend cell align={left},
+        legend image post style={scale=1},
+        legend transposed=true,
+        legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
+        legend entries={%
+           {$\Delta_{\mathit{steps}} = 0, \hspace{1.2pt} ||$},
+           {$\Delta_{\mathit{steps}} = 0, \times$},
+           {$\Delta_{\mathit{steps}} = 100, \hspace{1.2pt} ||$},
+           {$\Delta_{\mathit{steps}} = 100, \times$},
+           {$\Delta_{\mathit{steps}} = 1000, \hspace{1.pt} ||$},
+           {$\Delta_{\mathit{steps}} = 1000, \times$},
+           {$\Delta_{\mathit{steps}} = 10000, \hspace{1.pt} ||$},
+           {$\Delta_{\mathit{steps}} = 10000, \times$}}]
+     \foreach \p in {1,2,3,4,5,6,7,8} {
+        \foreach \a in {0,100,1000,10000} {
+           \foreach \f in {1,0} {
+              \addplot+[fill, draw=black] table[%
+                 y={\f/\p/\a}, col sep=comma, row sep=newline,
+                 ]{\datapath};
+    }}}
+    \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:6,6}) node[sloped, pos=0.95, above] {ideal}; 
+  %   
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$1$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$2$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$3$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$4$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$5$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$6$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$7$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] (last) {$8$};
+  % 
+  \draw[dotted, thin] (axis cs:1.5,1) -- (axis cs:1.5,6.25);
+  \draw[dotted, thin] (axis cs:2.5,1) -- (axis cs:2.5,6.25);
+  \draw[dotted, thin] (axis cs:3.5,1) -- (axis cs:3.5,6.25);
+  \draw[dotted, thin] (axis cs:4.5,1) -- (axis cs:4.5,6.25);
+  \draw[dotted, thin] (axis cs:5.5,1) -- (axis cs:5.5,6.25);
+  \draw[dotted, thin] (axis cs:6.5,1) -- (axis cs:6.5,6.25);
+  \draw[dotted, thin] (axis cs:7.5,1) -- (axis cs:7.5,6.25);
+  \node [anchor=base west] at (last.base east) {$n_{threads}$};
+  % 
+  \coordinate (PA) at (rel axis cs:0,0);
+  \coordinate (PB) at (rel axis cs:1,0);
+  \coordinate (P) at (rel axis cs:0.5,0);
+  \end{axis}
+  %
+  % center axis
+  \coordinate (PC) at (current bounding box.west);
+  \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+  % 
+  \node[anchor=north] at (current bounding box.south) {\ref{legend}};
+  %  
+\end{tikzpicture}
+% 
+% 
 \begin{tikzpicture}[]
 \begin{axis}[%
-      width = 0.95*\width,
-      height = 0.42*\height,
       ylabel={$\mathit{speedup}$},
       Boxplot,
+      xmin=0.42,
+      xmax=12.58,
+      ymin=1,
+      ymax=15,
+      scale only axis,
       legend to name={legend},
       legend image post style={mark=square*},
       legend columns=2,
@@ -85,9 +181,11 @@
          {$\Delta_{\mathit{steps}} = 100, \hspace{1.2pt} ||$},
          {$\Delta_{\mathit{steps}} = 100, \times$},
          {$\Delta_{\mathit{steps}} = 1000, \hspace{1.pt} ||$},
-         {$\Delta_{\mathit{steps}} = 1000, \times$}}]
-   \foreach \p in {1,2,3,4,5,6,7,8} {
-      \foreach \a in {0,100,1000} {
+         {$\Delta_{\mathit{steps}} = 1000, \times$},
+         {$\Delta_{\mathit{steps}} = 10000, \hspace{1.pt} ||$},
+         {$\Delta_{\mathit{steps}} = 10000, \times$}}]
+   \foreach \p in {1,2,3,4,5,6,7,8,16,24,32,48} {
+      \foreach \a in {0,100,1000,10000} {
          \foreach \f in {1,0} {
             \addplot+[fill, draw=black] table[%
                y={\f/\p/\a}, col sep=comma, row sep=newline,
@@ -95,60 +193,78 @@
   }}}
   \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:6,6}) node[sloped, pos=0.95, above] {ideal}; 
 %   
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-  ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.05})
-  node [black,midway,below,yshift=-1ex] {$1$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-  ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.05})
-  node [black,midway,below,yshift=-1ex] {$2$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-  ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.05})
-  node [black,midway,below,yshift=-1ex] {$3$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-  ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.05})
-  node [black,midway,below,yshift=-1ex] {$4$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-  ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.05})
-  node [black,midway,below,yshift=-1ex] {$5$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-  ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.05})
-  node [black,midway,below,yshift=-1ex] {$6$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-  ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.05})
-  node [black,midway,below,yshift=-1ex] {$7$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-  ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-  ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.05})
-  node [black,midway,below,yshift=-1ex] (last) {$8$};
-% \draw[dashed, thin] (axis cs:1,1) -- (axis cs:1,6);
-% \draw[dotted, thin] (axis cs:0.5,1) -- (axis cs:0.5,6);
-\draw[dotted, thin] (axis cs:1.5,1) -- (axis cs:1.5,6);
-\draw[dotted, thin] (axis cs:2.5,1) -- (axis cs:2.5,6);
-\draw[dotted, thin] (axis cs:3.5,1) -- (axis cs:3.5,6);
-\draw[dotted, thin] (axis cs:4.5,1) -- (axis cs:4.5,6);
-\draw[dotted, thin] (axis cs:5.5,1) -- (axis cs:5.5,6);
-\draw[dotted, thin] (axis cs:6.5,1) -- (axis cs:6.5,6);
-\draw[dotted, thin] (axis cs:7.5,1) -- (axis cs:7.5,6);
-% \draw[dotted, thin] (axis cs:8.5,1) -- (axis cs:8.5,6);
-\node [anchor=base west] at (last.base east) {$n_{threads}$};
-% 
-\coordinate (PA) at (rel axis cs:0,0);
-\coordinate (PB) at (rel axis cs:1,0);
-\coordinate (P) at (rel axis cs:0.5,0);
-\end{axis}
-%
-% center axis
-\coordinate (PC) at (current bounding box.west);
-\path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
-% 
-\node[anchor=north] at (current bounding box.south) {\ref{legend}};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$1$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$2$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$3$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$4$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$5$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$6$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] {$7$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] (last) {$8$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:8.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:9.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] (last) {$16$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:9.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:10.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] (last) {$24$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:10.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:11.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] (last) {$32$};
+  \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+    ({axis cs:11.6,20.0} |- {axis description cs:0.0,0.05}) -- 
+    ({axis cs:12.4,20.0} |- {axis description cs:0.0,0.05})
+    node [black,midway,below,yshift=-1ex] (last) {$48$};
+  % 
+  \draw[dotted, thin] (axis cs:1.5,1) -- (axis cs:1.5,16);
+  \draw[dotted, thin] (axis cs:2.5,1) -- (axis cs:2.5,16);
+  \draw[dotted, thin] (axis cs:3.5,1) -- (axis cs:3.5,16);
+  \draw[dotted, thin] (axis cs:4.5,1) -- (axis cs:4.5,16);
+  \draw[dotted, thin] (axis cs:5.5,1) -- (axis cs:5.5,16);
+  \draw[dotted, thin] (axis cs:6.5,1) -- (axis cs:6.5,16);
+  \draw[dotted, thin] (axis cs:7.5,1) -- (axis cs:7.5,16);
+  \draw[dotted, thin] (axis cs:8.5,1) -- (axis cs:8.5,16);
+  \draw[dotted, thin] (axis cs:9.5,1) -- (axis cs:9.5,16);
+  \draw[dotted, thin] (axis cs:10.5,1) -- (axis cs:10.5,16);
+  \draw[dotted, thin] (axis cs:11.5,1) -- (axis cs:11.5,16);
+  \node [anchor=base west] at (last.base east) {$n_{threads}$};
+  % 
+  \coordinate (PA) at (rel axis cs:0,0);
+  \coordinate (PB) at (rel axis cs:1,0);
+  \coordinate (P) at (rel axis cs:0.5,0);
+  \end{axis}
+  %
+  % center axis
+  \coordinate (PC) at (current bounding box.west);
+  \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+  % 
+  \node[anchor=north] at (current bounding box.south) {\ref{legend}};
 % 
 \end{tikzpicture}
 

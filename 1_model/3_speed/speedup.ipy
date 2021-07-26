@@ -37,8 +37,6 @@ df.to_csv(f'output/{file}_speedup.csv', index=False)
 
 # # df_out = pd.DataFrame(columns=['cross', ])
 
-# %%
-
 #%%
 for a in df_.a.unique():
     print(a)
@@ -49,9 +47,12 @@ for a in df_.a.unique():
                      data=df_[df_.a == a],
                      palette="Set2")
     plt.plot([0, 7], [1, 8])
+
+    # for i, p in enumerate([16, 24, 32, 48], 8):
+    #     plt.plot([i - 0.5, i + 0.5], [p, p])
     ax.axis('equal')
-    # ax.set(ylim=(2,0))
-    plt.savefig(f'output/speedup_{file[:-4]}_{a}.pdf')
+    ax.set_xlim(-0.5, 12.5)
+    plt.savefig(f'output/speedup_{file[:-4]}_{a:.0f}.pdf')
     plt.show()
 
 # %%
