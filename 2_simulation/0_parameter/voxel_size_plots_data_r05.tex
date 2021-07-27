@@ -1,17 +1,12 @@
 \documentclass[tikz]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
-\usepackage{amsmath, amssymb, amsthm, mathtools}
-\usepackage{fontspec}
-\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
-\usepackage{lualatex-math}
-\setmathfont{Latin Modern Math}
 \usepackage{pgfplots}
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
 \usepackage{tikz}
-% \usepackage{mathtools}
+\usepackage{mathtools}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
@@ -46,7 +41,7 @@
                     index of colormap={4 of Dark2-8},
                     index of colormap={5 of Dark2-8}},
         xmin=0.42,
-        xmax=5.58,
+        xmax=4.58,
         axis x line=none,
         axis y line = left,
         enlarge y limits,
@@ -75,47 +70,44 @@
     ylabel absolute, every axis y label/.append style={yshift=0.0ex},
 }
 %
-\newcommand{\xachse}{
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$0.5$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$1$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$2$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$5$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:4.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:5.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$10$};
-\node [anchor=base west, xshift = 2em] at (last.base east) {$<r_f>$};
-}
+% \newcommand{\xachse}{
+% % \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$0.5$};
+% % \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$1$};
+% % \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$2$};
+% % \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$5$};
+% \node [anchor=base west, xshift = 2em] at (last.base east) {$radius$};
+% }
 % 
+\def\r{0.5}
 \newcommand{\Loop}[1]{
-\foreach \r in {0.5,1.0,2.0,5.0,10.0} {
-\foreach \vs in {0.025,0.05,0.1,0.26,0.65,1.3} {#1}}}
+\foreach \vs in {0.025,0.05,0.1,0.26,0.65,1.3} {#1}}
 % 
 % 
-\foreach \noise [count=\n] in {1}{ %0
+\foreach \noise [count=\n] in {1}{ % 0
 \foreach \setup [count=\k] in {PM} { % LAP
 \foreach \species [count=\l] in {Vervet} { % {Roden,Vervet,Human}
 \foreach \mode [count=\m] in {r} { % {p, r}
 % 
 \begin{tikzpicture}[]
-\begin{groupplot}[%
+\begin{axis}[%
   group style={
       group size=1 by 4,
       horizontal sep=2cm,
       vertical sep=1cm,
       ylabels at=edge left,
   },
-   width = \width,
+   width = 0.875*\width,
    height = 0.22*\height,
    Boxplot,
+%    scale only axis,
    ymode={log}, 
    ylabel={$\sum(\abs{I-I_\textit{ref}})$},
-]
-% 
-\nextgroupplot[%
     % ymin=0.003, ymax=0.1,
     legend to name={legend\n\k\l\m},
     legend image post style={mark=square*},
     legend columns=2,
     legend cell align={left},
-    legend image post style={scale=1},
+    legend image post style={scale=4},
     legend transposed=true,
     legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
     legend entries={%
@@ -125,7 +117,7 @@
     {$\mathit{v_{s}}=\SI{0.26}{\micro\meter}$},
     {$\mathit{v_{s}}=\SI{0.65}{\micro\meter}$},
     {$\mathit{v_{s}}=\SI{1.3}{\micro\meter}$}
-}]
+      }]
 \def\omega{0.0}
 \def\psi{1.0}
 \def\finc{0}
@@ -134,14 +126,6 @@
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
-\node[anchor=south] (title) at ({axis description cs:0.5,1.1}) {\species};
-\node[anchor=south] (title) at ({axis description cs:0.5,0.95})
-    {$||,\alpha_{\mathit{inc}}=\SI{\finc}{\degree}$};
-\xachse
-% 
-% 
-\nextgroupplot[%
-] 
 \def\omega{0.0}
 \def\psi{1.0}
 \def\finc{90}
@@ -150,12 +134,6 @@
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
-\node[anchor=south] (title) at ({axis description cs:0.5,0.95})
-    {$||,\alpha_{\mathit{inc}}=\SI{\finc}{\degree}$};
-\xachse
-% 
-\nextgroupplot[%
-] 
 \def\omega{90.0}
 \def\psi{0.5}
 \def\finc{0}
@@ -164,12 +142,6 @@
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
-\node[anchor=south] (title) at ({axis description cs:0.5,0.95})
-    {$\times,\alpha_{\mathit{inc}}=\SI{\finc}{\degree}$};
-\xachse
-% 
-\nextgroupplot[%
-]
 \def\omega{90.0}
 \def\psi{0.5}
 \def\finc{90}
@@ -178,25 +150,35 @@
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
-\node[anchor=south] (title) at ({axis description cs:0.5,0.95})
-    {$\times,\alpha_{\mathit{inc}}=\SI{\finc}{\degree}$};
-\xachse
+% 
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+   ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0})
+   node [black,midway,below,yshift=-1ex, align=left] {\footnotesize $||, \alpha_{\mathit{inc}}=\SI{0}{\degree}$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+   ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0})
+   node [black,midway,below,yshift=-1ex, align=left] {\footnotesize $||, \alpha_{\mathit{inc}}=\SI{90}{\degree}$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+   ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0})
+   node [black,midway,below,yshift=-1ex, align=left] {\footnotesize $\times, \alpha_{\mathit{inc}}=\SI{0}{\degree}$};
+\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+   ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0})
+   node [black,midway,below,yshift=-1ex, align=left] {\footnotesize $\times, \alpha_{\mathit{inc}}=\SI{90}{\degree}$};
+% 
+% 
 % center axis
 \coordinate (PA) at (rel axis cs:0,0);
 \coordinate (PB) at (rel axis cs:1,0);
 % \coordinate (P) at (rel axis cs:0.5,0);
 % 
-\end{groupplot}
-%
+\node[anchor=north] at (axis description cs:0.5,-0.25) {\ref{legend\n\k\l\m}};
+% 
+\end{axis}
 % 
 \coordinate (PC) at (current bounding box.west);
 % \path[draw, green, thick] (current bounding box.west) -- (current bounding box.east);
 % \path[draw, blue, thick, dashed] (PA) -- (PB);
 % \path[draw, red, thick] ($(PA) - (2,1)$) -- ($(PB) + (20,-1)$);
 \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,-1)$) -- ($(PB) + (\x1,1)$);
-% 
-\node[anchor=north] at ($(group c1r4.south) - (0,0.75cm)$) {\ref{legend\n\k\l\m}};
-% 
 \end{tikzpicture}
 }}}}
 % 

@@ -13,6 +13,10 @@ df = pd.read_pickle(os.path.join(path, 'bf.pkl'))
 # df = df[df.setup == 'PM']
 df = df.apply(pd.Series.explode).reset_index().apply(
     pd.Series.explode).reset_index()
+
+df = df[df.setup == 'PM']
+df = df[df.dn > 0]
+
 # df['x'] = np.round(df.dn, 4)
 # df['x'] = df.apply(lambda x: f"{np.round(x['dn'],4)}", axis=1)
 
