@@ -120,9 +120,10 @@ def run(row):
                         (ref.epa_ret + 1e-6),
                     "data_diff":
                         np.mean(np.abs(
-                            (df__.optic - ref.optic))) / ref.epa_trans,
+                            (df__.optic - ref.optic))) / (ref.epa_trans / 2),
                     "data_diff_sqr":
-                        np.mean((df__.optic - ref.optic)**2) / ref.epa_trans**2,
+                        np.mean((df__.optic - ref.optic)**2) /
+                        (ref.epa_trans / 2)**2,
                 })
     return df_res
 
