@@ -16,38 +16,22 @@ df = df.apply(pd.Series.explode).reset_index().apply(
 
 df = df[df.setup == 'PM']
 df = df[df.dn > 0]
-
-# df['x'] = np.round(df.dn, 4)
-# df['x'] = df.apply(lambda x: f"{np.round(x['dn'],4)}", axis=1)
-
-# %%
-# df_ = df[df.dn % 0.001 == 0]
-# for setup in df_.setup.unique():
-#     for dn in sorted(df_.dn.unique()):
-#         for radius in sorted(df_.radius.unique()):
-
-#             sub = (df_.radius == radius) & (df_.dn == dn) & (df_.setup == setup)
-
-#             #             print(np.mean(df_[(df_.species == "Roden") & sub].transmittance),
-#             #                   np.mean(df_[(df_.species == "Vervet") & sub].transmittance),
-#             #                   np.mean(df_[(df_.species == "Human") & sub].transmittance))
-#             res = scipy.stats.kruskal(
-#                 df_[(df_.species == "Roden") & sub].retardation,
-#                 df_[(df_.species == "Vervet") & sub].retardation,
-#                 df_[(df_.species == "Human") & sub].retardation)
-#             print(setup, radius, dn, res[0], res[1])
-#         print()
+df_t = df[df.dn == 0.002]
 
 # %%
 for parameter in ["transmittance", "retardation"]:
     for setup in df.setup.unique():
         print(setup)
         f = plt.figure()
+        if parameter == 'transmittance':
+            df_ = df_t
+        else:
+            df_ = df
         ax = sns.boxplot(x="dn",
                          y=parameter,
-                         data=df[(((df.dn % 0.0010 == 0) & (df.dn < 0)) |
-                                  ((df.dn % 0.0020 == 0) & (df.dn > 0))) &
-                                 (df.setup == setup)],
+                         data=df_[(((df_.dn % 0.0010 == 0) & (df_.dn < 0)) |
+                                   ((df_.dn % 0.0020 == 0) & (df_.dn > 0))) &
+                                  (df_.setup == setup)],
                          hue="radius",
                          palette=sns.color_palette())
         # ax.ticklabel_format(scilimits=(5,5))
@@ -58,17 +42,17 @@ for parameter in ["transmittance", "retardation"]:
         # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
         plt.savefig(os.path.join(path, f'{ext}_{parameter}_{setup}.pdf'),
                     dpi=300)
-        for species in df.species.unique():
+        for species in df_.species.unique():
             print(species)
             f = plt.figure()
-            ax = sns.boxplot(x="dn",
-                             y=parameter,
-                             data=df[(((df.dn % 0.0010 == 0) & (df.dn < 0)) |
-                                      ((df.dn % 0.0020 == 0) &
-                                       (df.dn > 0))) & (df.species == species) &
-                                     (df.setup == setup)],
-                             hue="radius",
-                             palette=sns.color_palette())
+            ax = sns.boxplot(
+                x="dn",
+                y=parameter,
+                data=df_[(((df_.dn % 0.0010 == 0) & (df_.dn < 0)) |
+                          ((df_.dn % 0.0020 == 0) & (df_.dn > 0))) &
+                         (df_.species == species) & (df_.setup == setup)],
+                hue="radius",
+                palette=sns.color_palette())
             # ax.ticklabel_format(scilimits=(5,5))
             ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
             if parameter == "retardation":
