@@ -1,4 +1,5 @@
 #%%
+import collections
 import itertools
 import multiprocessing as mp
 import os
@@ -73,8 +74,44 @@ def get_file_from_series(df):
 
 
 #%%
-for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::2],
-                        total=len(df) // 2):
+def calc_omega(p, t):
+    v0 = np.array([np.cos(p) * np.sin(t), np.sin(p) * np.sin(t), np.cos(t)])
+    v1 = v0[:, 0].copy()
+
+    for v in v0.T[1:, :]:
+        s = np.dot(v1, v)
+
+        if s > 0:
+            v1 += v
+        else:
+            v1 -= v
+    v1 /= np.linalg.norm(v1)
+
+    # print(v1)
+
+    data = np.empty(v0.shape[1])
+
+    for i in range(v0.shape[1]):
+        d = np.abs(np.dot(v0[:, i], v1))  # because orientation
+        data[i] = np.arccos(d)
+
+    return data
+    # return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
+
+
+asd = []
+for i, row in df.iterrows():
+    # row = df.iloc[i]
+    phi, theta = fastpli.analysis.orientation.remap_orientation(
+        row.rofl_dir, np.pi / 2 - row.rofl_inc)
+
+    asd.append(np.rad2deg(calc_omega(phi, theta)))
+df['domega'] = asd
+
+#%%
+
+for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::],
+                        total=len(df) // 1):
     phi, theta = fastpli.analysis.orientation.remap_orientation(
         row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -91,6 +128,7 @@ for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::2],
                                            weight_area=True,
                                            fun=lambda x: np.log(x + 1),
                                            cmap='cividis')
+
     # ax[0].hist2d(
     #     phi,
     #     np.rad2deg(theta),
@@ -113,6 +151,20 @@ for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::2],
                                            weight_area=True,
                                            fun=lambda x: np.log(x + 1),
                                            cmap='cividis')
+
+    # df_omega = df_omega.append(
+    #     {
+    #         'f0_inc': row.f0_inc,
+    #         'radius': row.radius,
+    #         'omega': row.omega,
+    #         'psi': row.psi,
+    #         'species': row.species,
+    #         'microscope': row.microscope,
+    #         'f1_rot': row.f1_rot,
+    #         'domega': np.rad2deg(calc_omega(phi, theta))
+    #     },
+    #     ignore_index=True)
+
     # ax[1].hist2d(
     #     phi,
     #     np.rad2deg(theta),
@@ -136,9 +188,6 @@ for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::2],
 
 sns.set_theme(style="ticks", palette="pastel")
 
-# Load the example tips dataset
-tips = sns.load_dataset("tips")
-
 df_ = df.apply(pd.Series.explode).reset_index()
 
 phi, theta = df_["rofl_dir"].to_numpy(
@@ -158,7 +207,7 @@ for f0 in df_.f0_inc.unique():
 df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
 
 for name in tqdm.tqdm(
-    ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_dir", "epa_ret"]):
+    ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret", "domega"]):
     if "dir" in name:
         df_[name] = helper.circular.remap(df_[name], 90, -90)
 
@@ -175,11 +224,15 @@ for name in tqdm.tqdm(
 
     if "epa_ret" == name:
         x = np.linspace(0, np.pi, 42)
+        y_max = np.mean(df_[df_.f0_inc == 0].epa_ret)
+        y_min = np.mean(df_[df_.f0_inc == 90].epa_ret)
         y = (np.cos(x) + 1) / 2
         # plt.plot(x / np.pi * 3, y, linewidth=4.2)
-        plt.plot(x / np.pi * (len(df) - 1),
-                 y * np.mean(df_[df_.f0_inc == 0].epa_ret),
-                 linewidth=4.2)
+        plt.plot(x / np.pi * (len(df) - 1), y * y_max, linewidth=4.2)
+        # plt.plot(x / np.pi * (len(df) - 1), y * 0.85, linewidth=4.2)
+        # plt.plot(x / np.pi * (len(df) - 1),
+        #          y * (y_max - y_min) + y_min,
+        #          linewidth=4.2)
 
     if "rofl_inc" == name:
         x = [0, (len(df) - 1)]
@@ -192,5 +245,4 @@ for name in tqdm.tqdm(
         os.path.join(
             FILE_PATH,
             f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_{name}.pdf"))
-
 # %%

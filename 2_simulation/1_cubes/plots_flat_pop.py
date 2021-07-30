@@ -135,6 +135,43 @@ for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
             f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_omega_{row.omega}_psi_{psi}.pdf"
         ))
     plt.close()
+
+
+#%%
+def calc_omega(p, t):
+    v0 = np.array([np.cos(p) * np.sin(t), np.sin(p) * np.sin(t), np.cos(t)])
+    v1 = v0[:, 0].copy()
+
+    for v in v0.T[1:, :]:
+        s = np.dot(v1, v)
+
+        if s > 0:
+            v1 += v
+        else:
+            v1 -= v
+    v1 /= np.linalg.norm(v1)
+
+    # print(v1)
+
+    data = np.empty(v0.shape[1])
+
+    for i in range(v0.shape[1]):
+        d = np.abs(np.dot(v0[:, i], v1))  # because orientation
+        data[i] = np.arccos(d)
+
+    return data
+    # return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
+
+
+asd = []
+for i, row in df.iterrows():
+    # row = df.iloc[i]
+    phi, theta = fastpli.analysis.orientation.remap_orientation(
+        row.rofl_dir, np.pi / 2 - row.rofl_inc)
+
+    asd.append(np.rad2deg(calc_omega(phi, theta)))
+df['domega'] = asd
+
 # %%
 # fig, axs = plt.subplots(1, 1)
 
@@ -178,7 +215,7 @@ for omega in df_.omega.unique():
                                 (df_['psi'] == psi)][name], 90, -90)
 
 for name in tqdm.tqdm(
-    ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_dir", "epa_ret"]):
+    ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret", "domega"]):
 
     # Draw a nested boxplot to show bills by day and time
     fig, axs = plt.subplots(1, 1)
