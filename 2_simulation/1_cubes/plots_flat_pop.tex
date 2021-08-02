@@ -41,23 +41,7 @@
    every tick label/.append style={font=\small,},
    title style={font=\normalsize,},
    Boxplot/.style={
-      boxplot={
-         draw position={\plotnumofactualtype},
-         % box extend=\dx/(\ng+1),
-         % mark size=0.42pt,
-         draw/median/.code={%
-            \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
-            \pgfextra
-            \pgftransformshift{
-               \pgfplotsboxplotpointabbox
-                  {\pgfplotsboxplotvalue{median}}
-                  {0.5}
-            }
-            \pgfuseplotmark{*}
-            \endpgfextra
-            ;
-         },
-      },
+      boxplot={draw position={\plotnumofactualtype},},
       boxplot/draw direction=y,
    },
 }
@@ -80,8 +64,9 @@
    % scale only axis,
    xmin=-0.5, xmax=9.5,
    xtick={0,3,6,9},
-   xticklabels={$\SI{0}{\degree}$, $\SI{30}{\degree}$, $\SI{60}{\degree}$, $\SI{90}{\degree}$},
-   xlabel={$\Omega$},
+   % xticklabels={$\SI{0}{\degree}$, $\SI{30}{\degree}$, $\SI{60}{\degree}$, $\SI{90}{\degree}$},
+   xticklabels={$0$, $30$, $60$, $90$},
+   xlabel={$\Omega / \si{\degree}$},
    every axis x label/.style={
       at={(ticklabel* cs:1.0,0.0)},
       anchor=north west,
@@ -97,30 +82,30 @@
    cycle list/Paired-10,
 ]
 % 
-\nextgroupplot[title={transmittance}]
+\nextgroupplot[title={\vphantom{/}transmittance}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_trans_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
 }
 % 
-\nextgroupplot[title={retardation}]
+\nextgroupplot[title={\vphantom{/}retardation}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_ret_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
 }
 % 
-\nextgroupplot[title={direction / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_dir_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
-   % \addplot+[mark=none, BLUE, dashed] coordinates {(0,0) (9,0)};
+   \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,0)};
    \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
 }
 % 
-\nextgroupplot[title={inclination / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_inc_\omega}, col sep=comma, row sep=newline,
@@ -128,14 +113,14 @@
    % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,0)};
 }
 % 
-\nextgroupplot[title={trel}]
+\nextgroupplot[title={\vphantom{/}trel}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_trel_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
 }
 % 
-\nextgroupplot[title={domega / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={domega_\omega}, col sep=comma, row sep=newline,
@@ -168,23 +153,7 @@
    every tick label/.append style={font=\small,},
    title style={font=\normalsize,},
    Boxplot/.style={
-      boxplot={
-         draw position={\plotnumofactualtype+4.5},
-         % box extend=\dx/(\ng+1),
-         % mark size=0.42pt,
-         draw/median/.code={%
-            \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
-            \pgfextra
-            \pgftransformshift{
-               \pgfplotsboxplotpointabbox
-                  {\pgfplotsboxplotvalue{median}}
-                  {0.5}
-            }
-            \pgfuseplotmark{*}
-            \endpgfextra
-            ;
-         },
-      },
+      boxplot={draw position={\plotnumofactualtype+4.5},},
       boxplot/draw direction=y,
    },
 }
@@ -207,8 +176,9 @@
    % scale only axis,
    xmin=-0.5, xmax=9.5,
    xtick={4.5},
-   xticklabels={$\SI{0}{\degree}$},
-   xlabel={$\Omega$},
+   % xticklabels={$\SI{0}{\degree}$},
+   xticklabels={$0$},
+   xlabel={$\Omega / \si{\degree}$},
    every axis x label/.style={
       at={(ticklabel* cs:1.0,0.0)},
       anchor=north west,
@@ -224,21 +194,21 @@
    cycle list/Paired-10,
 ]
 % 
-\nextgroupplot[title={transmittance}]
+\nextgroupplot[title={\vphantom{/}transmittance}]
 \foreach \omega in {0.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_trans_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
 }
 % 
-\nextgroupplot[title={retardation}]
+\nextgroupplot[title={\vphantom{/}retardation}]
 \foreach \omega in {0.0} {       
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_ret_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
 }
 % 
-\nextgroupplot[title={direction / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
 \foreach \omega in {0.0} {       
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_dir_\omega}, col sep=comma, row sep=newline,
@@ -247,7 +217,7 @@
    % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
 }
 % 
-\nextgroupplot[title={inclination / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
 \foreach \omega in {0.0} {        
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_inc_\omega}, col sep=comma, row sep=newline,
@@ -255,14 +225,14 @@
    % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,0)};
 }
 % 
-\nextgroupplot[title={trel}]
+\nextgroupplot[title={\vphantom{/}trel}]
 \foreach \omega in {0.0} {       
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_trel_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
 }
 % 
-\nextgroupplot[title={domega / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
 \foreach \omega in {0.0} {     
    \addplot+[Boxplot, fill, draw=black] table[%
       y={domega_\omega}, col sep=comma, row sep=newline,

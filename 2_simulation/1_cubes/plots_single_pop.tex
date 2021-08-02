@@ -1,0 +1,149 @@
+\documentclass[tikz]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{statistics}
+\tikzset{>=latex}
+% 
+\newlength{\width}
+\newlength{\height}
+\setlength{\width}{13.87303cm} %5.462 inch
+\setlength{\height}{22.37076cm} %8,807 inch
+\def\datapath{../../__PATH__/analysis}
+\directlua0{
+  pdf.setinfo ("/Path: (__PATH__)")
+}
+% 
+\def\vrf{\langle{r_f}\rangle}
+\def\vfl{\nu_{l}}
+\def\vfr{\nu_{r}}
+% 
+\definecolor{dark21}{HTML}{1b9e77}
+\definecolor{dark22}{HTML}{d95f02}
+\definecolor{dark23}{HTML}{7570b3}
+\colorlet{RED}{dark22}
+\colorlet{GREEN}{dark21}
+\colorlet{BLUE}{dark23} 
+% 
+\input{cividis.tex}
+% 
+\begin{document}
+% 
+\pgfplotsset{
+   every tick label/.append style={font=\small,},
+   title style={font=\normalsize,},
+   Boxplot/.style={
+      boxplot={draw position={\plotnumofactualtype},},
+      boxplot/draw direction=y,
+   },
+}
+% 
+% \pgfplotsset{colormap/Reds-CM}
+% 
+\begin{tikzpicture}[]
+% 
+\begin{groupplot}[%
+   group style={
+      group size=2 by 3,
+      horizontal sep=1cm,
+      vertical sep=1cm,
+      ylabels at=edge left,
+   },
+   width = 0.495\width,
+   height = 0.275\height,
+   % scale only axis,
+   xmin=-0.5, xmax=18.5,
+   xtick={0,6,12,18},
+   % xticklabels={$\SI{0}{\degree}$, $\SI{30}{\degree}$, $\SI{60}{\degree}$, $\SI{90}{\degree}$},
+   xticklabels={$0$, $30$, $60$, $90$},
+   xlabel={$\Omega / \si{\degree}$},
+   every axis x label/.style={
+      at={(ticklabel* cs:1.0,0.0)},
+      anchor=north west,
+   },
+   every axis title/.append style={
+      yshift=-8pt,
+   },
+   % axis x line=none,
+   % axis y line=left,
+   enlarge y limits,
+   ymajorgrids,
+   clip=false,
+   colormap name=viridis, %Spectral
+   cycle list={
+      [colors of colormap={0,50,...,1000}]},
+   % Spectral
+   % cycle list/Paired-10,
+]
+% 
+\nextgroupplot[title={\vphantom{/}transmittance}]
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={epa_trans_\inc}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
+}
+% 
+\nextgroupplot[title={\vphantom{/}retardation}]
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={epa_ret_\inc}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
+   \addplot+[dashed, black, domain=0:18, samples=42, smooth] {(cos(x*10) + 1) / 2 * 0.795};
+}
+% 
+\nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={rofl_dir_\inc}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
+   % \addplot+[mark=none, BLUE, dashed] coordinates {(0,0) (9,0)};
+   % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
+}
+% 
+\nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={rofl_inc_\inc}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
+   \addplot+[mark=none, black, dashed] coordinates {(0,0) (18,90)};
+}
+% 
+\nextgroupplot[title={\vphantom{/}trel}]
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={rofl_trel_\inc}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
+}
+% 
+\nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={domega_\inc}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
+}
+% 
+\end{groupplot}
+% 
+% \node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {\large $\Psi = \psi$};
+% 
+% center axis
+\coordinate (PA) at (group c1r2.west);
+\coordinate (PB) at (group c2r2.east);
+\coordinate (PC) at (current bounding box.west);
+\path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+% 
+\end{tikzpicture}
+
+% 
+% 
+\end{document}

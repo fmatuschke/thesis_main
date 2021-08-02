@@ -110,79 +110,80 @@ df['domega'] = asd
 
 #%%
 
-for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::],
-                        total=len(df) // 1):
-    phi, theta = fastpli.analysis.orientation.remap_orientation(
-        row.rofl_dir, np.pi / 2 - row.rofl_inc)
+if False:
+    for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::],
+                            total=len(df) // 1):
+        phi, theta = fastpli.analysis.orientation.remap_orientation(
+            row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
-    fig, ax = plt.subplots(nrows=1,
-                           ncols=2,
-                           subplot_kw=dict(projection="polar"),
-                           figsize=(3.5, 2))
-    fig.suptitle(f"incl:{row.f0_inc}")
-    fastpli.analysis.orientation.histogram(phi,
-                                           theta,
-                                           ax=ax[0],
-                                           n_phi=36,
-                                           n_theta=9,
-                                           weight_area=True,
-                                           fun=lambda x: np.log(x + 1),
-                                           cmap='cividis')
+        fig, ax = plt.subplots(nrows=1,
+                               ncols=2,
+                               subplot_kw=dict(projection="polar"),
+                               figsize=(3.5, 2))
+        fig.suptitle(f"incl:{row.f0_inc}")
+        fastpli.analysis.orientation.histogram(phi,
+                                               theta,
+                                               ax=ax[0],
+                                               n_phi=36,
+                                               n_theta=9,
+                                               weight_area=True,
+                                               fun=lambda x: np.log(x + 1),
+                                               cmap='cividis')
 
-    # ax[0].hist2d(
-    #     phi,
-    #     np.rad2deg(theta),
-    #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-    #           np.linspace(0, 90, 9 + 1)],
-    #     cmap=plt.get_cmap("cividis"),
-    #     # norm=mpl.colors.LogNorm(),
-    # )
-    #
-    #
-    phi, theta = models.ori_from_file(
-        get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
-        CONFIG.simulation.voi)
-    phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
-    fastpli.analysis.orientation.histogram(phi,
-                                           theta,
-                                           ax=ax[1],
-                                           n_phi=36,
-                                           n_theta=9,
-                                           weight_area=True,
-                                           fun=lambda x: np.log(x + 1),
-                                           cmap='cividis')
+        # ax[0].hist2d(
+        #     phi,
+        #     np.rad2deg(theta),
+        #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
+        #           np.linspace(0, 90, 9 + 1)],
+        #     cmap=plt.get_cmap("cividis"),
+        #     # norm=mpl.colors.LogNorm(),
+        # )
+        #
+        #
+        phi, theta = models.ori_from_file(
+            get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
+            CONFIG.simulation.voi)
+        phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
+        fastpli.analysis.orientation.histogram(phi,
+                                               theta,
+                                               ax=ax[1],
+                                               n_phi=36,
+                                               n_theta=9,
+                                               weight_area=True,
+                                               fun=lambda x: np.log(x + 1),
+                                               cmap='cividis')
 
-    # df_omega = df_omega.append(
-    #     {
-    #         'f0_inc': row.f0_inc,
-    #         'radius': row.radius,
-    #         'omega': row.omega,
-    #         'psi': row.psi,
-    #         'species': row.species,
-    #         'microscope': row.microscope,
-    #         'f1_rot': row.f1_rot,
-    #         'domega': np.rad2deg(calc_omega(phi, theta))
-    #     },
-    #     ignore_index=True)
+        # df_omega = df_omega.append(
+        #     {
+        #         'f0_inc': row.f0_inc,
+        #         'radius': row.radius,
+        #         'omega': row.omega,
+        #         'psi': row.psi,
+        #         'species': row.species,
+        #         'microscope': row.microscope,
+        #         'f1_rot': row.f1_rot,
+        #         'domega': np.rad2deg(calc_omega(phi, theta))
+        #     },
+        #     ignore_index=True)
 
-    # ax[1].hist2d(
-    #     phi,
-    #     np.rad2deg(theta),
-    #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-    #           np.linspace(0, 90, 9 + 1)],
-    #     cmap=plt.get_cmap("cividis"),
-    #     # norm=mpl.colors.LogNorm(),
-    # )
+        # ax[1].hist2d(
+        #     phi,
+        #     np.rad2deg(theta),
+        #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
+        #           np.linspace(0, 90, 9 + 1)],
+        #     cmap=plt.get_cmap("cividis"),
+        #     # norm=mpl.colors.LogNorm(),
+        # )
 
-    # plt.tight_layout()
-    plt.tight_layout(pad=0, w_pad=0, h_pad=0)
+        # plt.tight_layout()
+        plt.tight_layout(pad=0, w_pad=0, h_pad=0)
 
-    plt.savefig(
-        os.path.join(
-            FILE_PATH,
-            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_{row.f0_inc}.pdf"
-        ))
-    plt.close()
+        plt.savefig(
+            os.path.join(
+                FILE_PATH,
+                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_{row.f0_inc}.pdf"
+            ))
+        plt.close()
 # %%
 # fig, axs = plt.subplots(1, 1)
 
@@ -206,43 +207,65 @@ for f0 in df_.f0_inc.unique():
 
 df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
 
-for name in tqdm.tqdm(
-    ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret", "domega"]):
-    if "dir" in name:
-        df_[name] = helper.circular.remap(df_[name], 90, -90)
+#%%
 
-    # Draw a nested boxplot to show bills by day and time
-    fig, axs = plt.subplots(1, 1)
-    sns.boxplot(
-        x="f0_inc",
-        y=name,
-        # hue="smoker",
-        # palette=["m", "g"],
-        data=df_)
-    sns.despine(offset=10, trim=True)
-    # plt.tight_layout()
+# for o in df_.omega.unique():
+#     df__ = df_[df_.omega == o]
 
-    if "epa_ret" == name:
-        x = np.linspace(0, np.pi, 42)
-        y_max = np.mean(df_[df_.f0_inc == 0].epa_ret)
-        y_min = np.mean(df_[df_.f0_inc == 90].epa_ret)
-        y = (np.cos(x) + 1) / 2
-        # plt.plot(x / np.pi * 3, y, linewidth=4.2)
-        plt.plot(x / np.pi * (len(df) - 1), y * y_max, linewidth=4.2)
-        # plt.plot(x / np.pi * (len(df) - 1), y * 0.85, linewidth=4.2)
-        # plt.plot(x / np.pi * (len(df) - 1),
-        #          y * (y_max - y_min) + y_min,
-        #          linewidth=4.2)
+dff = pd.DataFrame()
 
-    if "rofl_inc" == name:
-        x = [0, (len(df) - 1)]
-        y = [0, 90]
-        plt.plot(x, y, linewidth=4.2)
-        # axs.set_ylim(-15, 105)
+for inc in df_.f0_inc.unique():
+    for n in [
+            "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
+            "domega"
+    ]:
+        dff[f'{n}_{inc}'] = df_[df_.f0_inc == inc][n].to_numpy()
 
-    plt.tight_layout(pad=0, w_pad=0, h_pad=0)
-    plt.savefig(
-        os.path.join(
-            FILE_PATH,
-            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_{name}.pdf"))
+dff.to_csv(os.path.join(FILE_PATH, 'output', DATASET, 'analysis',
+                        f"{DATASET}_{os.path.basename(__file__)[:-3]}.csv"),
+           index=False)
+
+#%%
+if False:
+    for name in tqdm.tqdm(
+        ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
+         "domega"]):
+        if "dir" in name:
+            df_[name] = helper.circular.remap(df_[name], 90, -90)
+
+        # Draw a nested boxplot to show bills by day and time
+        fig, axs = plt.subplots(1, 1)
+        sns.boxplot(
+            x="f0_inc",
+            y=name,
+            # hue="smoker",
+            # palette=["m", "g"],
+            data=df_)
+        sns.despine(offset=10, trim=True)
+        # plt.tight_layout()
+
+        if "epa_ret" == name:
+            x = np.linspace(0, np.pi, 42)
+            y_max = np.mean(df_[df_.f0_inc == 0].epa_ret)
+            y_min = np.mean(df_[df_.f0_inc == 90].epa_ret)
+            y = (np.cos(x) + 1) / 2
+            # plt.plot(x / np.pi * 3, y, linewidth=4.2)
+            plt.plot(x / np.pi * (len(df) - 1), y * y_max, linewidth=4.2)
+            # plt.plot(x / np.pi * (len(df) - 1), y * 0.85, linewidth=4.2)
+            # plt.plot(x / np.pi * (len(df) - 1),
+            #          y * (y_max - y_min) + y_min,
+            #          linewidth=4.2)
+
+        if "rofl_inc" == name:
+            x = [0, (len(df) - 1)]
+            y = [0, 90]
+            plt.plot(x, y, linewidth=4.2)
+            # axs.set_ylim(-15, 105)
+
+        plt.tight_layout(pad=0, w_pad=0, h_pad=0)
+        plt.savefig(
+            os.path.join(
+                FILE_PATH,
+                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_{name}.pdf"
+            ))
 # %%
