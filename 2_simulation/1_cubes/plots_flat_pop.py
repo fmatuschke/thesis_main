@@ -38,7 +38,7 @@ df = df[df.species == "Vervet"]
 df = df[df.model == "r"]
 df = df[df.radius == 0.5]
 # df = df[df.psi == 0.3]
-df = df[df.psi == 0.5]
+# df = df[df.psi == 0.5]
 
 psi = df.psi.unique()[-1]
 
@@ -76,65 +76,66 @@ def get_file_from_series(df):
 
 
 #%%
-for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
-    phi, theta = fastpli.analysis.orientation.remap_orientation(
-        row.rofl_dir, np.pi / 2 - row.rofl_inc)
+if False:
+    for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
+        phi, theta = fastpli.analysis.orientation.remap_orientation(
+            row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
-    fig, ax = plt.subplots(nrows=1,
-                           ncols=2,
-                           subplot_kw=dict(projection="polar"),
-                           figsize=(3.5, 2))
-    fig.suptitle(f"omega:{row.omega}")
-    # TODO: wichtung
-    fastpli.analysis.orientation.histogram(phi,
-                                           theta,
-                                           ax=ax[0],
-                                           n_phi=36,
-                                           n_theta=9,
-                                           weight_area=True,
-                                           fun=lambda x: np.log(x + 1),
-                                           cmap='cividis')
-    # ax[0].hist2d(
-    #     phi,
-    #     np.rad2deg(theta),
-    #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-    #           np.linspace(0, 90, 9 + 1)],
-    #     cmap=plt.get_cmap("cividis"),
-    #     # norm=mpl.colors.LogNorm(),
-    # )
-    #
-    #
-    phi, theta = models.ori_from_file(
-        get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
-        CONFIG.simulation.voi)
-    phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
+        fig, ax = plt.subplots(nrows=1,
+                               ncols=2,
+                               subplot_kw=dict(projection="polar"),
+                               figsize=(3.5, 2))
+        fig.suptitle(f"omega:{row.omega}")
+        # TODO: wichtung
+        fastpli.analysis.orientation.histogram(phi,
+                                               theta,
+                                               ax=ax[0],
+                                               n_phi=36,
+                                               n_theta=9,
+                                               weight_area=True,
+                                               fun=lambda x: np.log(x + 1),
+                                               cmap='cividis')
+        # ax[0].hist2d(
+        #     phi,
+        #     np.rad2deg(theta),
+        #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
+        #           np.linspace(0, 90, 9 + 1)],
+        #     cmap=plt.get_cmap("cividis"),
+        #     # norm=mpl.colors.LogNorm(),
+        # )
+        #
+        #
+        phi, theta = models.ori_from_file(
+            get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
+            CONFIG.simulation.voi)
+        phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
 
-    fastpli.analysis.orientation.histogram(phi,
-                                           theta,
-                                           ax=ax[1],
-                                           n_phi=36,
-                                           n_theta=9,
-                                           weight_area=True,
-                                           fun=lambda x: np.log(x + 1),
-                                           cmap='cividis')
-    # ax[1].hist2d(
-    #     phi,
-    #     np.rad2deg(theta),
-    #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-    #           np.linspace(0, 90, 9 + 1)],
-    #     cmap=plt.get_cmap("cividis"),
-    #     # norm=mpl.colors.LogNorm(),
-    # )
+        fastpli.analysis.orientation.histogram(phi,
+                                               theta,
+                                               ax=ax[1],
+                                               n_phi=36,
+                                               n_theta=9,
+                                               weight_area=True,
+                                               fun=lambda x: np.log(x + 1),
+                                               cmap='cividis')
+        # ax[1].hist2d(
+        #     phi,
+        #     np.rad2deg(theta),
+        #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
+        #           np.linspace(0, 90, 9 + 1)],
+        #     cmap=plt.get_cmap("cividis"),
+        #     # norm=mpl.colors.LogNorm(),
+        # )
 
-    # plt.tight_layout()
-    plt.tight_layout(pad=0, w_pad=0, h_pad=0)
+        # plt.tight_layout()
+        plt.tight_layout(pad=0, w_pad=0, h_pad=0)
 
-    plt.savefig(
-        os.path.join(
-            FILE_PATH,
-            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_omega_{row.omega}_psi_{psi}.pdf"
-        ))
-    plt.close()
+        plt.savefig(
+            os.path.join(
+                FILE_PATH,
+                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_omega_{row.omega}_psi_{psi}.pdf"
+            ))
+        plt.close()
 
 
 #%%
@@ -214,41 +215,71 @@ for omega in df_.omega.unique():
                             df_[(df_['omega'] == omega) &
                                 (df_['psi'] == psi)][name], 90, -90)
 
-for name in tqdm.tqdm(
-    ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret", "domega"]):
+#%%
 
-    # Draw a nested boxplot to show bills by day and time
-    fig, axs = plt.subplots(1, 1)
-    sns.boxplot(
-        x="omega",
-        y=name,
-        # hue="smoker",
-        # palette=["m", "g"],
-        data=df_)
-    sns.despine(offset=10, trim=True)
-    # plt.tight_layout()
+# df_save = df_[[
+#     "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret", "domega",
+#     "psi", "omega"
+# ]]
 
-    # if "epa_ret" == name:
-    #     x = np.linspace(0, np.pi, 42)
-    #     y = (np.cos(x) + 1) / 2
-    #     # plt.plot(x / np.pi * 3, y, linewidth=4.2)
-    #     plt.plot(x / np.pi * (len(df) - 1),
-    #              y * np.mean(df_[df_.f0_inc == 0].epa_ret),
-    #              linewidth=4.2)
+for psi in df_.psi.unique():
+    df__ = df_[df_.psi == psi]
 
-    if name in ["rofl_dir", "epa_dir"]:
-        x = [0, (len(df) - 1)]
-        y = [0, 0]
-        plt.plot(x, y, linewidth=4.2)
-        x = [0, (len(df) - 1)]
-        y = [0, 90]
-        plt.plot(x, y, linewidth=4.2)
+    dff = pd.DataFrame()
 
-    plt.tight_layout(pad=0, w_pad=0, h_pad=0)
-    plt.savefig(
-        os.path.join(
-            FILE_PATH,
-            f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_{name}.pdf"
-        ))
+    for o in df__.omega.unique():
+        for n in [
+                "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
+                "domega"
+        ]:
+            # print(psi, n, o)
+            # print(df__[df__.omega == o][n])
+            dff[f'{n}_{o}'] = df__[df__.omega == o][n].to_numpy()
+
+    dff.to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}.csv"),
+               index=False)
+
+#%%
+
+if False:
+    for name in tqdm.tqdm(
+        ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
+         "domega"]):
+
+        # Draw a nested boxplot to show bills by day and time
+        fig, axs = plt.subplots(1, 1)
+        sns.boxplot(
+            x="omega",
+            y=name,
+            # hue="smoker",
+            # palette=["m", "g"],
+            data=df_)
+        sns.despine(offset=10, trim=True)
+        # plt.tight_layout()
+
+        # if "epa_ret" == name:
+        #     x = np.linspace(0, np.pi, 42)
+        #     y = (np.cos(x) + 1) / 2
+        #     # plt.plot(x / np.pi * 3, y, linewidth=4.2)
+        #     plt.plot(x / np.pi * (len(df) - 1),
+        #              y * np.mean(df_[df_.f0_inc == 0].epa_ret),
+        #              linewidth=4.2)
+
+        if name in ["rofl_dir", "epa_dir"]:
+            x = [0, (len(df) - 1)]
+            y = [0, 0]
+            plt.plot(x, y, linewidth=4.2)
+            x = [0, (len(df) - 1)]
+            y = [0, 90]
+            plt.plot(x, y, linewidth=4.2)
+
+        plt.tight_layout(pad=0, w_pad=0, h_pad=0)
+        plt.savefig(
+            os.path.join(
+                FILE_PATH,
+                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_{name}.pdf"
+            ))
 
 # %%
