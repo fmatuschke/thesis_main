@@ -28,7 +28,7 @@ FILE_BASE = os.path.basename(FILE_NAME)
 FILE_NAME = os.path.splitext(FILE_BASE)[0]
 
 MODEL = 'cube_2pop_135_rc1'
-DATASET = 'cube_2pop_135_rc1_single'
+DATASET = 'cube_2pop_135_rc1_inclined'
 
 df = pd.read_pickle(
     os.path.join(FILE_PATH, 'output', DATASET,
@@ -38,7 +38,9 @@ df = df[df.microscope == "PM"]
 df = df[df.species == "Vervet"]
 df = df[df.model == "r"]
 df = df[df.radius == 0.5]
-df = df[df.psi == 1.0]
+# df = df[df.psi == 0.3]
+# df = df[df.psi == 0.5]
+# psi = df.psi.unique()[-1]
 
 df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
@@ -111,8 +113,7 @@ df['domega'] = asd
 #%%
 
 if False:
-    for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::],
-                            total=len(df) // 1):
+    for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_orientation(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -120,7 +121,8 @@ if False:
                                ncols=2,
                                subplot_kw=dict(projection="polar"),
                                figsize=(3.5, 2))
-        fig.suptitle(f"incl:{row.f0_inc}")
+        fig.suptitle(f"omega:{row.omega}")
+        # TODO: wichtung
         fastpli.analysis.orientation.histogram(phi,
                                                theta,
                                                ax=ax[0],
@@ -129,21 +131,12 @@ if False:
                                                weight_area=True,
                                                fun=lambda x: np.log(x + 1),
                                                cmap='cividis')
-
-        # ax[0].hist2d(
-        #     phi,
-        #     np.rad2deg(theta),
-        #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-        #           np.linspace(0, 90, 9 + 1)],
-        #     cmap=plt.get_cmap("cividis"),
-        #     # norm=mpl.colors.LogNorm(),
-        # )
-        #
         #
         phi, theta = models.ori_from_file(
             get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
             CONFIG.simulation.voi)
         phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
+
         fastpli.analysis.orientation.histogram(phi,
                                                theta,
                                                ax=ax[1],
@@ -153,37 +146,16 @@ if False:
                                                fun=lambda x: np.log(x + 1),
                                                cmap='cividis')
 
-        # df_omega = df_omega.append(
-        #     {
-        #         'f0_inc': row.f0_inc,
-        #         'radius': row.radius,
-        #         'omega': row.omega,
-        #         'psi': row.psi,
-        #         'species': row.species,
-        #         'microscope': row.microscope,
-        #         'f1_rot': row.f1_rot,
-        #         'domega': np.rad2deg(calc_omega(phi, theta))
-        #     },
-        #     ignore_index=True)
-
-        # ax[1].hist2d(
-        #     phi,
-        #     np.rad2deg(theta),
-        #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-        #           np.linspace(0, 90, 9 + 1)],
-        #     cmap=plt.get_cmap("cividis"),
-        #     # norm=mpl.colors.LogNorm(),
-        # )
-
         # plt.tight_layout()
         plt.tight_layout(pad=0, w_pad=0, h_pad=0)
 
         plt.savefig(
             os.path.join(
                 FILE_PATH,
-                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_{row.f0_inc}.pdf"
+                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_omega_{row.omega}_psi_{psi}.pdf"
             ))
         plt.close()
+
 # %%
 # fig, axs = plt.subplots(1, 1)
 
@@ -194,36 +166,52 @@ df_ = df.apply(pd.Series.explode).reset_index()
 phi, theta = df_["rofl_dir"].to_numpy(
     float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
 # phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
-theta[phi > 2 / 4 * np.pi] = np.pi - theta[phi > 2 / 4 * np.pi]
-phi[phi > 2 / 4 * np.pi] -= np.pi
+theta[phi > 3 / 4 * np.pi] = np.pi - theta[phi > 3 / 4 * np.pi]
+phi[phi > 3 / 4 * np.pi] -= np.pi
 df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
                                                                theta)
-
-for f0 in df_.f0_inc.unique():
-    theta = df_.loc[df_.f0_inc == f0, "rofl_inc"]
-    # t_mean = circmean(theta, 90, -90)
-    theta[theta < f0 - 90] = theta[theta < f0 - 90] + 180
-    df_.loc[df_.f0_inc == f0, "rofl_inc"] = theta
-
 df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
+
+for omega in df_.omega.unique():
+    theta = df_.loc[df_.omega == omega, "rofl_inc"]
+    t_mean = circmean(theta, 180, -180)
+    theta[theta < t_mean - 90] = theta[theta < t_mean - 90] + 180
+    df_.loc[df_.omega == omega, "rofl_inc"] = theta
+
+for omega in df_.omega.unique():
+    for psi in df_.psi.unique():
+        for name in ["epa_dir", "rofl_dir"]:
+            df_.loc[(df_['omega'] == omega) & (df_['psi'] == psi),
+                    name] = helper.circular.remap(
+                        df_[(df_['omega'] == omega) &
+                            (df_['psi'] == psi)][name], 90, -90)
 
 #%%
 
-# for o in df_.omega.unique():
-#     df__ = df_[df_.omega == o]
+for psi in df_.psi.unique():
+    df__ = df_[df_.psi == psi]
 
-dff = pd.DataFrame()
+    dff = pd.DataFrame()
 
-for inc in df_.f0_inc.unique():
-    for n in [
-            "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
-            "domega"
-    ]:
-        dff[f'{n}_{inc}'] = df_[df_.f0_inc == inc][n].to_numpy()
+    for o in df__.omega.unique():
+        for n in [
+                "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
+                "domega"
+        ]:
+            # print(psi, n, o)
+            # print(df__[df__.omega == o][n])
+            dff[f'{n}_{o}'] = df__[df__.omega == o][n].to_numpy()
 
-dff.to_csv(os.path.join(FILE_PATH, 'output', DATASET, 'analysis',
-                        f"{DATASET}_{os.path.basename(__file__)[:-3]}.csv"),
-           index=False)
+    dff.to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}.csv"),
+               index=False)
+
+# %%
+
+# %%
+
+# %%
 
 #%%
 if False:

@@ -46,6 +46,7 @@
    },
 }
 % 
+% \foreach \psi in {0.7} {
 \foreach \psi in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
 % 
 \directlua{tex.print('\string\\message{\psi}')}
@@ -86,46 +87,45 @@
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_trans_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}retardation}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_ret_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_dir_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
-\pgfplotsset{update limits=false}
-\addplot+[mark=none, black, dashed] coordinates {(0,0) (9,0)};
-\addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
-\pgfplotsset{update limits=true}
 % 
 \nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_inc_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
+\pgfplotsset{update limits=false}
+\addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
+\pgfplotsset{update limits=true}
 % 
 \nextgroupplot[title={\vphantom{/}trel}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_trel_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={domega_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \end{groupplot}
@@ -199,21 +199,21 @@
 \foreach \omega in {0.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_trans_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}retardation}]
 \foreach \omega in {0.0} {       
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_ret_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
 \foreach \omega in {0.0} {       
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_dir_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
    % \addplot+[mark=none, BLUE, dashed] coordinates {(0,0) (9,0)};
    % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
 }
@@ -222,7 +222,7 @@
 \foreach \omega in {0.0} {        
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_inc_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
    % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,0)};
 }
 % 
@@ -230,14 +230,14 @@
 \foreach \omega in {0.0} {       
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_trel_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
 \foreach \omega in {0.0} {     
    \addplot+[Boxplot, fill, draw=black] table[%
       y={domega_\omega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 %
 \end{groupplot}

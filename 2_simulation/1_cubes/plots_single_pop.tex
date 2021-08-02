@@ -78,7 +78,7 @@
    % axis y line=left,
    enlarge y limits,
    ymajorgrids,
-   clip=false,
+   clip=true,
    colormap name=viridis, %Spectral
    cycle list={
       [colors of colormap={0,50,...,1000}]},
@@ -98,16 +98,16 @@
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_ret_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
-   \addplot+[dashed, black, domain=0:18, samples=42, smooth] {(cos(x*10) + 1) / 2 * 0.795};
 }
+\pgfplotsset{update limits=false}
+\addplot+[dashed, black, domain=0:18, samples=42, smooth] {(cos(x*10) + 1) / 2 * 0.795};
+\pgfplotsset{update limits=true}
 % 
 \nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_dir_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
-   % \addplot+[mark=none, BLUE, dashed] coordinates {(0,0) (9,0)};
-   % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
 }
 % 
 \nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
