@@ -50,6 +50,7 @@ parser.add_argument("-p",
 # parser.add_argument("--start", type=int, required=True, help="mpi start.")
 parser.add_argument('--vervet', default=False, action='store_true')
 parser.add_argument('--flat', default=False, action='store_true')
+parser.add_argument('--inclined', default=False, action='store_true')
 parser.add_argument('--single', default=False, action='store_true')
 parser.add_argument('--radial', default=False, action='store_true')
 parser.add_argument('--pm', default=False, action='store_true')
@@ -302,7 +303,7 @@ def main():
     parameters = []
     file_list = args.input
 
-    if not args.flat and not args.single:
+    if not args.flat and not args.inclined and not args.single:
         fiber_inc = [(f, i)
                      for f in file_list
                      for i in models.inclinations(CONFIG.cube.n_inc)]
@@ -340,6 +341,17 @@ def main():
                           voxel_size=CONFIG.simulation.voxel_size,
                           f0_inc=0,
                           f1_rot=0,
+                          vervet_only=args.vervet,
+                          radial_only=args.radial,
+                          pm_only=args.pm))
+    elif args.inclined:
+        for file in file_list:
+            parameters.append(
+                Parameter(file=file,
+                          output=args.output,
+                          voxel_size=CONFIG.simulation.voxel_size,
+                          f0_inc=0,
+                          f1_rot=90,
                           vervet_only=args.vervet,
                           radial_only=args.radial,
                           pm_only=args.pm))

@@ -173,6 +173,7 @@ if __name__ == "__main__":
     org_path = os.path.basename(args.input)
     org_path = org_path.replace('_single', '')
     org_path = org_path.replace('_flat', '')
+    org_path = org_path.replace('_inclined', '')
     org_path = org_path.replace('_r_0.5', '')
     print("USING:", org_path)
 

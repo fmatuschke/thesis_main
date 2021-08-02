@@ -34,6 +34,21 @@ python3 simulation_post_0.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1
 python3 simulation_post_1.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_flat -p 48
 python3 simulation_post_2.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_flat -p 48
 #
+# two inclined
+/data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
+   simulation_mp.py \
+   -i ${MODEL_PATH}/*r_0.50_*.solved.h5 \
+   -o /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_inclined \
+   --pm \
+   --vervet \
+   --radial \
+   --inclined \
+   -p 48
+#
+python3 simulation_post_0.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_inclined -p 48
+python3 simulation_post_1.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_inclined -p 48
+python3 simulation_post_2.py -i /data/PLI-Group/felix/data/thesis/2_simulation/1_cubes/output/${NAME}_inclined -p 48
+#
 # Vorauswahl
 /data/PLI-Group/felix/data/thesis/env-$(hostname)/bin/python3 \
    simulation_mp.py \
