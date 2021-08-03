@@ -30,16 +30,11 @@
 \pgfmathsetmacro{\ng}{6}
 \pgfmathsetmacro{\dx}{0.75}
 % 
-\pgfplotsset{colormap/Dark2-8}
+\pgfplotsset{colormap/Paired-6}
+% \pgfplotsset{colormap/Dark2-8}
 \pgfplotsset{
     Boxplot/.style={
-        cycle list={%
-                    index of colormap={0 of Dark2-8},
-                    index of colormap={1 of Dark2-8},
-                    index of colormap={2 of Dark2-8},
-                    index of colormap={3 of Dark2-8},
-                    index of colormap={4 of Dark2-8},
-                    index of colormap={5 of Dark2-8}},
+        cycle list/Paired-6,
         xmin=0.42,
         xmax=4.58,
         axis x line=none,
@@ -47,11 +42,11 @@
         enlarge y limits,
         ymajorgrids,
         clip=false,
-        % y label style={at={(axis description cs:-0.125,.5)},rotate=0,anchor=south},
         boxplot={
             draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
             box extend=\dx/(\ng+1),
-            mark size=0.42pt,
+            mark size=0.1pt,
+            mark options={fill=black},
             draw/median/.code={%
                \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
                \pgfextra
@@ -69,14 +64,6 @@
     },
     ylabel absolute, every axis y label/.append style={yshift=0.0ex},
 }
-%
-% \newcommand{\xachse}{
-% % \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$0.5$};
-% % \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$1$};
-% % \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] {$2$};
-% % \draw[decorate,decoration={brace,amplitude=1ex,mirror}] ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0}) node [black,midway,below,yshift=-1ex] (last) {$5$};
-% \node [anchor=base west, xshift = 2em] at (last.base east) {$radius$};
-% }
 % 
 \def\r{0.5}
 \newcommand{\Loop}[1]{
@@ -90,34 +77,12 @@
 % 
 \begin{tikzpicture}[]
 \begin{axis}[%
-  group style={
-      group size=1 by 4,
-      horizontal sep=2cm,
-      vertical sep=1cm,
-      ylabels at=edge left,
-  },
-   width = 0.875*\width,
-   height = 0.22*\height,
-   Boxplot,
-%    scale only axis,
-   ymode={log}, 
-   ylabel={$1/N \sum((\abs{I-I_\textit{ref})/I_\textit{ref}})$},
-    % ymin=0.003, ymax=0.1,
-    legend to name={legend\n\k\l\m},
-    legend image post style={mark=square*},
-    legend columns=2,
-    legend cell align={left},
-    legend image post style={scale=4},
-    legend transposed=true,
-    legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
-    legend entries={%
-    {$\mathit{v_{s}}=\SI{0.025}{\micro\meter}$},
-    {$\mathit{v_{s}}=\SI{0.05}{\micro\meter}$},
-    {$\mathit{v_{s}}=\SI{0.1}{\micro\meter}$},
-    {$\mathit{v_{s}}=\SI{0.26}{\micro\meter}$},
-    {$\mathit{v_{s}}=\SI{0.65}{\micro\meter}$},
-    {$\mathit{v_{s}}=\SI{1.3}{\micro\meter}$}
-      }]
+    width = 0.962*\width,
+    height = 0.22*\height,
+    ymode={log}, 
+    title={$\mathrm{mean}(\abs{I-I_\textit{ref}}/I_\textit{ref})$},
+    Boxplot,
+    ]
 \def\omega{0.0}
 \def\psi{1.0}
 \def\finc{0}
@@ -164,21 +129,47 @@
    ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) -- ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0})
    node [black,midway,below,yshift=-1ex, align=left] {\footnotesize $\times, \alpha_{\mathit{inc}}=\SI{90}{\degree}$};
 % 
-% 
 % center axis
-\coordinate (PA) at (rel axis cs:0,0);
-\coordinate (PB) at (rel axis cs:1,0);
-% \coordinate (P) at (rel axis cs:0.5,0);
-% 
-\node[anchor=north] at (axis description cs:0.5,-0.25) {\ref{legend\n\k\l\m}};
+\coordinate (PC) at (rel axis cs:0.5,0);
 % 
 \end{axis}
 % 
-\coordinate (PC) at (current bounding box.west);
-% \path[draw, green, thick] (current bounding box.west) -- (current bounding box.east);
-% \path[draw, blue, thick, dashed] (PA) -- (PB);
-% \path[draw, red, thick] ($(PA) - (2,1)$) -- ($(PB) + (20,-1)$);
-\path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,-1)$) -- ($(PB) + (\x1,1)$);
+% LEGENDE
+\begin{axis}[%
+    hide axis,
+    scale only axis,
+    height=0pt,
+    width=0pt,
+    cycle list/Paired-6,
+    legend to name={legend\n\k\l\m},
+    legend style={draw=white!15!black,legend cell align=left},
+    legend transposed=true,
+    legend columns=2,
+    legend style={/tikz/every even column/.append style={column sep=1ex}},
+    legend entries={%
+        {$\mathit{v_{s}}=\SI{0.025}{\micro\meter}$},
+        {$\mathit{v_{s}}=\SI{0.05}{\micro\meter}$},
+        {$\mathit{v_{s}}=\SI{0.1}{\micro\meter}$},
+        {$\mathit{v_{s}}=\SI{0.26}{\micro\meter}$},
+        {$\mathit{v_{s}}=\SI{0.65}{\micro\meter}$},
+        {$\mathit{v_{s}}=\SI{1.3}{\micro\meter}$},
+    },
+    legend image post style={mark=square*, only marks},
+    ]
+    \addplot+[] coordinates {(0,0)};
+    \addplot+[] coordinates {(0,0)};
+    \addplot+[] coordinates {(0,0)};
+    \addplot+[] coordinates {(0,0)};
+    \addplot+[] coordinates {(0,0)};
+    \addplot+[] coordinates {(0,0)};
+\end{axis}
+%
+\node[anchor=north] at (PC |- current bounding box.south) {\ref{legend\n\k\l\m}};
+% 
+% CENTER AXIS
+\coordinate (P) at (current bounding box.west);
+\path[] let \p1 = ($(PC)-(P)$) in (P) -- ($(P) + (2*\x1,0)$);
+% 
 \end{tikzpicture}
 }}}}
 % 

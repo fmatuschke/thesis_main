@@ -19,48 +19,57 @@ df = df[df.dn > 0]
 df_t = df[df.dn == 0.002]
 
 # %%
-for parameter in ["transmittance", "retardation"]:
-    for setup in df.setup.unique():
-        print(setup)
-        f = plt.figure()
-        if parameter == 'transmittance':
-            df_ = df_t
-        else:
-            df_ = df
-        ax = sns.boxplot(x="dn",
-                         y=parameter,
-                         data=df_[(((df_.dn % 0.0010 == 0) & (df_.dn < 0)) |
-                                   ((df_.dn % 0.0020 == 0) & (df_.dn > 0))) &
-                                  (df_.setup == setup)],
-                         hue="radius",
-                         palette=sns.color_palette())
-        # ax.ticklabel_format(scilimits=(5,5))
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
-        if parameter == "retardation":
-            ax.set(ylim=(0, 1.05))
-        f.set_size_inches(15, 10)
-        # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
-        plt.savefig(os.path.join(path, f'{ext}_{parameter}_{setup}.pdf'),
-                    dpi=300)
-        for species in df_.species.unique():
-            print(species)
-            f = plt.figure()
-            ax = sns.boxplot(
-                x="dn",
-                y=parameter,
-                data=df_[(((df_.dn % 0.0010 == 0) & (df_.dn < 0)) |
-                          ((df_.dn % 0.0020 == 0) & (df_.dn > 0))) &
-                         (df_.species == species) & (df_.setup == setup)],
-                hue="radius",
-                palette=sns.color_palette())
-            # ax.ticklabel_format(scilimits=(5,5))
-            ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
-            if parameter == "retardation":
-                ax.set(ylim=(0, 1.05))
-            f.set_size_inches(15, 10)
-            # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
-            plt.savefig(os.path.join(
-                path, f"{ext}_{parameter}_{setup}_{species}.pdf"),
-                        dpi=300)
+for species in df.species.unique():
+    for parameter in ["transmittance", "retardation"]:
+        for setup in df.setup.unique():
+            # f = plt.figure()
+            # if parameter == 'transmittance':
+            #     df_ = df_t
+            # else:
+            # df_ = df
+            # ax = sns.boxplot(x="dn",
+            #                  y=parameter,
+            #                  data=df_[(((df_.dn % 0.0010 == 0) & (df_.dn < 0)) |
+            #                            ((df_.dn % 0.0020 == 0) & (df_.dn > 0))) &
+            #                           (df_.setup == setup)],
+            #                  hue="radius",
+            #                  palette=sns.color_palette())
+            # # ax.ticklabel_format(scilimits=(5,5))
+            # ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+            # if parameter == "retardation":
+            #     ax.set(ylim=(0, 1.05))
+            # f.set_size_inches(15, 10)
+            # # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
+            # plt.savefig(os.path.join(path, f'{ext}_{parameter}_{setup}.pdf'),
+            #             dpi=300)
+            # for species in df_.species.unique():
+            #     print(species)
+            #     f = plt.figure()
+            #     ax = sns.boxplot(
+            #         x="dn",
+            #         y=parameter,
+            #         data=df_[(((df_.dn % 0.0010 == 0) & (df_.dn < 0)) |
+            #                   ((df_.dn % 0.0020 == 0) & (df_.dn > 0))) &
+            #                  (df_.species == species) & (df_.setup == setup)],
+            #         hue="radius",
+            #         palette=sns.color_palette())
+            #     # ax.ticklabel_format(scilimits=(5,5))
+            #     ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
+            #     if parameter == "retardation":
+            #         ax.set(ylim=(0, 1.05))
+            #     f.set_size_inches(15, 10)
+            #     # plt.ticklabel_format(style='sci', axis='x', scilimits=(5,5), useMathText=True)
+            #     plt.savefig(os.path.join(
+            #         path, f"{ext}_{parameter}_{setup}_{species}.pdf"),
+            #                 dpi=300)
+
+            dfs = pd.DataFrame()
+            for r in df.radius.unique():
+                for dn in df.dn.unique():
+                    dfs[f'{r}_{dn}'] = df[(df.radius == r) &
+                                          (df.species == species) &
+                                          (df.setup == setup) &
+                                          (df.dn == dn)][parameter].to_numpy()
+            dfs.to_csv(f'{path}/{parameter}_{setup}_{species}.csv', index=False)
 
 # %%

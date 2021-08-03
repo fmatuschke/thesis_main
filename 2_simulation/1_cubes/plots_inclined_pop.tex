@@ -41,8 +41,13 @@
    every tick label/.append style={font=\small,},
    title style={font=\normalsize,},
    Boxplot/.style={
-      boxplot={draw position={\plotnumofactualtype},},
-      boxplot/draw direction=y,
+      mark=*,
+      mark size=0.1pt,
+      mark options={fill=black},
+      boxplot={%
+         draw position={\plotnumofactualtype},
+         draw direction=y,
+      },
    },
 }
 % 
@@ -62,6 +67,7 @@
    },
    width = 0.495\width,
    height = 0.275\height,
+   % height = 0.2\height,
    % scale only axis,
    xmin=-0.5, xmax=9.5,
    xtick={0,3,6,9},
@@ -111,7 +117,10 @@
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 \pgfplotsset{update limits=false}
-\addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
+\addplot+[mark=none, white,
+   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, semithick]  coordinates {(0,0) (9,90)};
+\addplot+[mark=none, black,
+   dash pattern= on 3pt off 3pt]  coordinates {(0,0) (9,90)};
 \pgfplotsset{update limits=true}
 % 
 \nextgroupplot[title={\vphantom{/}trel}]

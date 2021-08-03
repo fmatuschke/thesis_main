@@ -43,8 +43,13 @@
    every tick label/.append style={font=\small,},
    title style={font=\normalsize,},
    Boxplot/.style={
-      boxplot={draw position={\plotnumofactualtype},},
-      boxplot/draw direction=y,
+      mark=*,
+      mark size=0.1pt,
+      mark options={fill=black},
+      boxplot={%
+         draw position={\plotnumofactualtype},
+         draw direction=y,
+      },
    },
 }
 % 
@@ -60,6 +65,7 @@
       ylabels at=edge left,
    },
    width = 0.495\width,
+   % height = 0.2\height,
    height = 0.275\height,
    % scale only axis,
    xmin=-0.5, xmax=18.5,
@@ -87,46 +93,56 @@
 ]
 % 
 \nextgroupplot[title={\vphantom{/}transmittance}]
-\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_trans_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}retardation}]
-\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_ret_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 \pgfplotsset{update limits=false}
-\addplot+[dashed, black, domain=0:18, samples=42, smooth] {(cos(x*10) + 1) / 2 * 0.795};
+\addplot+[mark=none, white,
+   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, thick,
+   domain=0:18, samples=42, smooth] {(cos(x*10) + 1) / 2 * 0.795};
+\addplot+[mark=none, black,
+   dash pattern= on 3pt off 3pt,
+   domain=0:18, samples=42, smooth] {(cos(x*10) + 1) / 2 * 0.795};
 \pgfplotsset{update limits=true}
 % 
 \nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
-\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_dir_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
-\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_inc_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
-   \addplot+[mark=none, black, dashed] coordinates {(0,0) (18,90)};
 }
+\pgfplotsset{update limits=false}
+\addplot+[mark=none, white,
+   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, thick] coordinates {(0,0) (18,90)};
+\addplot+[mark=none, black,
+   dash pattern= on 3pt off 3pt] coordinates {(0,0) (18,90)};
+\pgfplotsset{update limits=true}
 % 
 \nextgroupplot[title={\vphantom{/}trel}]
-\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot, fill, draw=black] table[%
       y={rofl_trel_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
-\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {      
+\foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot, fill, draw=black] table[%
       y={domega_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
