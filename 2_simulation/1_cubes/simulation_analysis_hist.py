@@ -77,7 +77,7 @@ def run(p):
             name,
             f"simulation_analysis_hist_{radius}_setup_{microscope}_s_{species}_m_{model}_{name}",
             crange=[0, 1],
-            psi_list=[0.10, 0.30, 0.50, 0.60],
+            psi_list=[0.10, 0.30, 0.50, 0.70, 0.90],
             f0_list=[0, 30, 60, 90])
         # psi_list=[0.30, 0.50, 0.60, 0.90],
         # f0_list=[0, 30, 60, 90])
@@ -114,7 +114,7 @@ def run(p):
             name,
             f"simulation_analysis_hist_{radius}_setup_{microscope}_s_{species}_m_{model}_{name}",
             crange=crange,
-            psi_list=[0.10, 0.30, 0.50, 0.60],
+            psi_list=[0.10, 0.30, 0.50, 0.70, 0.90],
             f0_list=[0, 30, 60, 90])
         print(name, crange)
 

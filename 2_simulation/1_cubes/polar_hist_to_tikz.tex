@@ -41,12 +41,12 @@
 % 
 \begin{scope}[local bounding box=bb]
 % 
-\foreach [count=\i from 0] \fnull in {@fnull_list} {
-\foreach [count=\j from 0] \psi in {@psi_list} {
+\foreach [count=\j from 0] \fnull in {@fnull_list} {
+\foreach [count=\i from 0] \psi in {@psi_list} {
 % 
 \begin{scope}[shift={(\j*\delta,-\i*\delta)}, local bounding box=\i\j]
 \begin{polaraxis}[
-    width=@size, height = @size,
+    width=@size, height=@size,
     scale only axis=true,
     xtick={0,45,...,315},
     ytick={60,30},
@@ -72,14 +72,14 @@
   @file_name_psi_\psi_f0_\fnull_data.dat}; %, contour filled={number=9}
 \addplot [ only marks, mark=o, thin, dash pattern=on 1pt off 1pt] file[] {%
   @file_name_psi_\psi_f0_\fnull_data.dat}; %, contour filled={number=9}
-\addplot [only marks, mark=o, thick] file[] {%
+\addplot [only marks, mark=o, ultra thick] file[] {%
   @file_name_psi_\psi_f0_\fnull_init.dat}; %, contour filled={number=9}
 \end{polaraxis}
 % 
 \end{scope}
 \begin{pgfinterruptboundingbox}
-\ifthenelse{\i=0}{\node[anchor=south] at ($(\i\j.north)+(0,0.42)$) {$\Psi = \psi$};}{}
-\ifthenelse{\j=0}{\node[anchor=south, rotate=90] at ($(\i\j.west)-(0.55,0)$) {$inc = \fnull$};}{}
+\ifthenelse{\i=0}{\node[anchor=south] at ($(\i\j.north)+(0,0.42)$) {\small$inc = \fnull$};}{}
+\ifthenelse{\j=0}{\node[anchor=south, rotate=90] at ($(\i\j.west)-(0.55,0)$) {\small$\Psi = \psi$};}{}
 % \draw (\i\j.north west) rectangle (\i\j.south east);
 \end{pgfinterruptboundingbox}
 % 
