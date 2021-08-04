@@ -77,10 +77,10 @@ def generate(df,
         crange = (np.min(df[value]), np.max(df[value]))
 
     if size is None:
-        size = 0.925 * 13.8 / len(f0_list) * 0.675  # convertion to cm?
+        size = 0.95 * 13.8 / len(f0_list) * 0.675  # convertion to cm?
 
     if delta is None:
-        delta = 3.175  # for 4 columns
+        delta = 3.1  # for 4 columns
 
     if "dir" not in value and "inc" not in value:
         sed("@file_name", file_name, f"polar_hist_to_tikz.tex",

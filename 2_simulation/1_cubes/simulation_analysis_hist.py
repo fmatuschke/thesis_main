@@ -119,6 +119,8 @@ def run(p):
 
         if name == "rtrel_mean":
             crange = [0, 1]
+        elif "ret" in name:
+            crange = [0, 0.8]
         # elif "dir" in name:
         #     crange = [0, np.pi]
         # elif "incl" in name:
