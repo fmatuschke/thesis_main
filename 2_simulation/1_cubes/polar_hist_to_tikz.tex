@@ -66,7 +66,7 @@
     ymin=0, ymax=90,
     axis on top=true,
 ]
-\addplot [surf,point meta=\thisrowno{2},] table {%
+\addplot [matrix plot*,point meta=\thisrowno{2},] table {%
   @file_name_psi_\psi_f0_\fnull_hist.dat}; %, contour filled={number=9}
 \addplot [only marks, scatter, scatter src=explicit] file[] {%
   @file_name_psi_\psi_f0_\fnull_data.dat}; %, contour filled={number=9}
@@ -78,7 +78,7 @@
 % 
 \end{scope}
 \begin{pgfinterruptboundingbox}
-\ifthenelse{\i=0}{\node[anchor=south] at ($(\i\j.north)+(0,0.42)$) {\small$inc = \fnull$};}{}
+\ifthenelse{\i=0}{\node[anchor=south] at ($(\i\j.north)+(0,0.42)$) {\small$\alpha_{\mathit{inc}} = \fnull$};}{}
 \ifthenelse{\j=0}{\node[anchor=south, rotate=90] at ($(\i\j.west)-(0.55,0)$) {\small$\Psi = \psi$};}{}
 % \draw (\i\j.north west) rectangle (\i\j.south east);
 \end{pgfinterruptboundingbox}
@@ -94,6 +94,25 @@
 % \draw[very thick, blue, dashed] (bb.north west) rectangle ++ (\width, -\height);
 % \end{pgfinterruptboundingbox}
 % 
+\end{tikzpicture}
+% 
+\begin{tikzpicture}
+\begin{axis}[
+    hide axis,
+    scale only axis,
+    height=0pt, width=0pt,
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    colormap name=cividis,
+    colorbar horizontal,
+    point meta min = @cmin,
+    point meta max = @cmax,
+    colorbar style={
+        width=10cm,
+        xticklabel style={tick label style={font=\footnotesize}},
+        % xtick={0,20,40,60,80,100,120,140,160,180},
+        % xticklabels={$\SI{0}{\degree}$,$\SI{20}{\degree}$,$\SI{40}{\degree}$,$\SI{60}{\degree}$,$\SI{80}{\degree}$,$\SI{100}{\degree}$,$\SI{120}{\degree}$,$\SI{140}{\degree}$,$\SI{160}{\degree}$,$\SI{180}{\degree}$},
+    }]
+\end{axis}
 \end{tikzpicture}
 % 
 \end{document}

@@ -37,23 +37,38 @@ print(df.columns)
 print()
 
 df["rtrel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
+# df["rtrel_mean"][df["rtrel_mean"] > 0.55] = 0
+#
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
 df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
 df["dir_mean"] = df["epa_dir"].apply(
     lambda x: scipy.stats.circmean(x, 0, np.pi))
 
-# for i, row in df.iterrows():
-#     if np.min(row["rofl_dir"]) < 0 or np.max(
-#             row["rofl_dir"]) >= np.pi or np.min(
-#                 row["rofl_inc"]) < -0.5 * np.pi or np.max(
-#                     row["rofl_inc"]) >= 0.5 * np.pi:
-#         print(np.min(row["rofl_dir"]), np.max(row["rofl_dir"]),
-#               np.min(row["rofl_inc"]), np.max(row["rofl_inc"]))
-
 df["rdir_mean"] = df["rofl_dir"].apply(
     lambda x: scipy.stats.circmean(x, 0, np.pi))
 df["rincl_mean"] = df["rofl_inc"].apply(
     lambda x: scipy.stats.circmean(x, -0.5 * np.pi, 0.5 * np.pi))
+
+for i, row in df.iterrows():
+    if np.rad2deg(np.min(row.rofl_dir)) < 0:
+        print("A")
+    if np.rad2deg(np.max(row.rofl_dir)) >= 180:
+        print(row.rofl_dir[row.rofl_dir >= np.pi])
+        print("B")
+    if np.rad2deg(np.min(row.rofl_inc)) < -90:
+        print("C")
+    if np.rad2deg(np.max(row.rofl_inc)) >= 90:
+        print("D")
+
+# with np.printoptions(
+#         precision=2,
+#         suppress=True,
+#         edgeitems=42,
+# ):
+#     for i, row in df[(df.psi == 0.1) & (df.f0_inc == 0) &
+#                      (df.f1_rot == 90)].iterrows():
+#         print(row.omega, row.f1_rot, np.rad2deg(row.rdir_mean),
+#               np.rad2deg(row.rincl_mean), np.rad2deg(row.rofl_inc))
 
 
 def run(p):
@@ -89,10 +104,10 @@ def run(p):
 
     for name in [
             # "R", "R2",
-            "dir_mean",
+            # "dir_mean",
             "rtrel_mean",
-            "rdir_mean",
-            "rincl_mean",
+            # "rdir_mean",
+            # "rincl_mean",
             "ret_mean",
             "trans_mean"
     ]:
@@ -103,11 +118,12 @@ def run(p):
         #     crange = None
 
         if name == "rtrel_mean":
-            crange = [0, 0.55]
-        elif "dir" in name:
-            crange = [0, np.pi]
-        elif "incl" in name:
-            crange = [-np.pi / 2, np.pi / 2]
+            crange = [0, 1]
+        # elif "dir" in name:
+        #     crange = [0, np.pi]
+        # elif "incl" in name:
+        #     # crange = [-np.pi / 2, np.pi / 2]
+        #     crange = [0, np.pi / 2]
 
         crange = polar_hist_to_tikz.generate(
             df[sub],

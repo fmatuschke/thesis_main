@@ -86,9 +86,10 @@ def generate(df,
         sed("@file_name", file_name, f"polar_hist_to_tikz.tex",
             f"output/tmp/{file_name}.tex")
     else:
-
+        raise ValueError("FOOO")
         sed("@file_name", file_name, f"polar_hist_to_tikz_ori.tex",
             f"output/tmp/{file_name}.tex")
+
     sed("@delta_img", str(delta), f"output/tmp/{file_name}.tex")
     sed("@fnull_list", f0_list_str, f"output/tmp/{file_name}.tex")
     sed("@psi_list", psi_list_str, f"output/tmp/{file_name}.tex")
@@ -135,14 +136,14 @@ def generate(df,
 
             if "dir" in value:
                 # measurement symmetry
-                if np.any(data_ > np.pi):
+                if np.any(data_ > np.pi) or np.any(data_ < 0):
                     raise ValueError("FOOOO")
                 data_ = np.concatenate((data_, (np.pi - data_) % np.pi), axis=0)
                 # # orientation symmetry
                 data_ = np.concatenate((data_, data_), axis=0)
             elif "inc" in value:
                 # measurement symmetry
-                if np.any(data_ > 0.5 * np.pi):
+                if np.any(data_ > 0.5 * np.pi) or np.any(data_ < -0.5 * np.pi):
                     raise ValueError("FOOOO")
                 data_ = np.concatenate((data_, -data_), axis=0)
                 # # orientation symmetry
@@ -167,8 +168,8 @@ def generate(df,
 
                 else:
                     phi_theta.append((p, t))
-                    if "dir" in value:
-                        d = (d + np.pi) % np.pi
+                    # if "dir" in value:
+                    #     d = (d + np.pi) % np.pi
                     data__.append(d)
 
             phi_theta = np.array(phi_theta)
@@ -206,33 +207,31 @@ def generate(df,
                 x_i, y_i, z_i, data_i = helper.spherical_interpolation.on_mesh(
                     phi_, theta_, data_, d_phi, d_theta)
             else:
-                x_i = np.empty((0))
-                y_i = np.empty((0))
-                z_i = np.empty((0))
-                data_i = np.empty((0))
+                raise ValueError("cant do that")
+                # x_i = np.empty((0))
+                # y_i = np.empty((0))
+                # z_i = np.empty((0))
+                # data_i = np.empty((0))
 
-            # elif "dir" in value:
-            #     x, y = np.cos(data_), np.sin(data_)
-            #     # print(data_[:10], x[:10], y[:10])
-            #     x_i, y_i, z_i, xdata_i = helper.spherical_interpolation.on_mesh(
-            #         phi_, theta_, x, d_phi, d_theta)
-            #     x_i, y_i, z_i, ydata_i = helper.spherical_interpolation.on_mesh(
-            #         phi_, theta_, y, d_phi, d_theta)
-            #     data_i = np.arctan2(ydata_i, xdata_i)
-            #     data_i += np.pi
-            #     data_i %= np.pi
+                # still not working with interpolation ...
+                # xdata, ydata = np.cos(data_), np.sin(data_)
+                # x_i, y_i, z_i, xdata_i = helper.spherical_interpolation.on_mesh(
+                #     phi_, theta_, xdata, d_phi, d_theta)
+                # x_i, y_i, z_i, ydata_i = helper.spherical_interpolation.on_mesh(
+                #     phi_, theta_, ydata, d_phi, d_theta)
+                # data_i = np.arctan2(ydata_i, xdata_i)
+                # data_i += np.pi
+                # data_i %= np.pi
 
             with open(
                     f"output/tmp/{file_name}_psi_{psi:.2f}_f0_{f0_inc:.2f}_hist.dat",
                     "w") as f:
-                for h_array, x_array, y_array, z_array in zip(
-                        data_i, x_i, y_i, z_i):
-                    for h, x, y, z in zip(h_array, x_array, y_array, z_array):
-                        p = np.rad2deg(np.arctan2(y, x))
-                        t = np.rad2deg(np.arccos(z))
-
-                        if t <= 90:
-                            f.write(f'{p:.2f} {t:.2f} {h:.6f}\n')
+                u = np.linspace(0, 360, d_phi)
+                for h_array, p in zip(data_i, u):
+                    v = np.linspace(180, 0, d_theta)
+                    for h, t in zip(h_array, v):
+                        # if t <= 90:
+                        f.write(f'{p:.2f} {t:.2f} {h:.6f}\n')
                     f.write('\n')
 
             with open(
