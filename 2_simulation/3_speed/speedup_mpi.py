@@ -30,7 +30,7 @@ SETUP = CONFIG.simulation.setup.pm
 # Setup Simpli for Tissue Generation
 simpli = fastpli.simulation.Simpli(MPI.COMM_WORLD)
 simpli.omp_num_threads = 1
-simpli.voxel_size = CONFIG.simulation.voxel_size / 2
+simpli.voxel_size = CONFIG.simulation.voxel_size
 simpli.pixel_size = SETUP.pixel_size
 simpli.filter_rotations = np.linspace(0, np.pi,
                                       CONFIG.simulation.num_filter_rot, False)
@@ -96,7 +96,10 @@ for t, (theta, phi) in enumerate(simpli.tilts):
 if MPI.COMM_WORLD.Get_rank() == 0:
     if MPI.COMM_WORLD.Get_size() == 1:
         with open(f'simulation_v_{simpli.voxel_size}.dat', 'w') as f:
-            f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}, {tt}\n')
+            f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}')
+            for t in tt:
+                f.write(f', {t}')
+            f.write('\n')
     else:
         with open(f'simulation_v_{simpli.voxel_size}.dat', 'a') as f:
             f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}')
