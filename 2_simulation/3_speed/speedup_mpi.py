@@ -8,15 +8,28 @@ Ecexution:
 mpirun -n 2 python3 -m mpi4py examples/simpli_mpi.py
 """
 
+import argparse
 import os
 import time
 
 import fastpli.io
 import fastpli.simulation
 import numpy as np
+import tqdm
 from mpi4py import MPI
 
 import parameter
+
+if MPI.COMM_WORLD.Get_rank() == 0:
+    print('MPI size:', MPI.COMM_WORLD.Get_size())
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-n",
+                    "--n_repeat",
+                    required=True,
+                    type=int,
+                    help="Number of processes.")
+args = parser.parse_args()
 
 THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
 FILE_NAME = os.path.abspath(__file__)
@@ -61,50 +74,46 @@ if MPI.COMM_WORLD.Get_size() == 1:
 
 # Generate Tissue
 # print('Run Generation:')
-MPI.COMM_WORLD.Barrier()
-t0 = time.time()
-tissue, optical_axis, tissue_properties = simpli.generate_tissue()
-MPI.COMM_WORLD.Barrier()
-t1 = time.time()
+
+t_generator = []
+for n in tqdm.trange(args.n_repeat):
+    MPI.COMM_WORLD.Barrier()
+    t0 = time.time()
+    tissue, optical_axis, tissue_properties = simpli.generate_tissue()
+    MPI.COMM_WORLD.Barrier()
+    t1 = time.time()
+    t_generator.append(t1 - t0)
 
 if MPI.COMM_WORLD.Get_rank() == 0:
-    if MPI.COMM_WORLD.Get_size() == 1:
-        with open(f'generate_tissue_v_{simpli.voxel_size}.dat', 'w') as f:
-            f.write(
-                f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}, {t1 - t0}\n'
-            )
-    else:
-        with open(f'generate_tissue_v_{simpli.voxel_size}.dat', 'a') as f:
-            f.write(
-                f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}, {t1 - t0}\n'
-            )
-
-    print(f'Time {MPI.COMM_WORLD.Get_size()}: {t1 - t0}')
+    mode = 'w' if MPI.COMM_WORLD.Get_size() == 1 else 'a'
+    with open(f'generate_tissue_v_{simpli.voxel_size}.dat', mode) as f:
+        f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}')
+        for t in t_generator:
+            f.write(f', {t}')
+        f.write('\n')
 
 simpli.light_intensity = SETUP.light_intensity  # a.u.
 tissue_properties[1:, 1] = CONFIG.species.vervet.mu
-tt = []
-for t, (theta, phi) in enumerate(simpli.tilts):
-    MPI.COMM_WORLD.Barrier()
-    t0 = time.time()
-    images = simpli.run_simulation(tissue, optical_axis, tissue_properties,
-                                   theta, phi)
-    MPI.COMM_WORLD.Barrier()
-    t1 = time.time()
-    tt.append(t1 - t0)
+
+t_generator = []
+for n in tqdm.trange(args.n_repeat):
+    tt = []
+    for t, (theta, phi) in enumerate(simpli.tilts):
+        MPI.COMM_WORLD.Barrier()
+        t0 = time.time()
+        images = simpli.run_simulation(tissue, optical_axis, tissue_properties,
+                                       theta, phi)
+        MPI.COMM_WORLD.Barrier()
+        t1 = time.time()
+        tt.append(t1 - t0)
+    t_generator.append(tt)
 
 if MPI.COMM_WORLD.Get_rank() == 0:
-    if MPI.COMM_WORLD.Get_size() == 1:
-        with open(f'simulation_v_{simpli.voxel_size}.dat', 'w') as f:
-            f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}')
+    mode = 'w' if MPI.COMM_WORLD.Get_size() == 1 else 'a'
+    with open(f'simulation_v_{simpli.voxel_size}.dat', mode) as f:
+        f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}')
+        for tt in t_generator:
             for t in tt:
                 f.write(f', {t}')
-            f.write('\n')
-    else:
-        with open(f'simulation_v_{simpli.voxel_size}.dat', 'a') as f:
-            f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}')
-            for t in tt:
-                f.write(f', {t}')
-            f.write('\n')
-
-    print(f'Time {MPI.COMM_WORLD.Get_size()}: {tt}')
+            f.write('\n,')
+        f.write('\n')
