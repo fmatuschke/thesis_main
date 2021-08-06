@@ -1,11 +1,5 @@
 """
-MPI executable example.
-
-NOTE: if h5py is used, it has to be compiled in parallel mode. See
-https://docs.h5py.org/en/stable/mpi.html for more information
-
-Ecexution:
-mpirun -n 2 python3 -m mpi4py examples/simpli_mpi.py
+for n in {1,2,3,4,5,6,7,8,16,24,32,40,48}; do; mpiexec -n $n python3 -m mpi4py speedup_mpi.py -n 10; done
 """
 
 import argparse
@@ -15,6 +9,7 @@ import time
 import fastpli.io
 import fastpli.simulation
 import numpy as np
+import pandas as pd
 import tqdm
 from mpi4py import MPI
 
@@ -76,7 +71,7 @@ if MPI.COMM_WORLD.Get_size() == 1:
 # print('Run Generation:')
 
 t_generator = []
-for n in tqdm.trange(args.n_repeat):
+for n in tqdm.trange(args.n_repeat, disable=MPI.COMM_WORLD.Get_rank() > 0):
     MPI.COMM_WORLD.Barrier()
     t0 = time.time()
     tissue, optical_axis, tissue_properties = simpli.generate_tissue()
@@ -85,18 +80,27 @@ for n in tqdm.trange(args.n_repeat):
     t_generator.append(t1 - t0)
 
 if MPI.COMM_WORLD.Get_rank() == 0:
-    mode = 'w' if MPI.COMM_WORLD.Get_size() == 1 else 'a'
-    with open(f'generate_tissue_v_{simpli.voxel_size}.dat', mode) as f:
-        f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}')
-        for t in t_generator:
-            f.write(f', {t}')
-        f.write('\n')
+    fname = f"output/generation_mpi_v_{simpli.voxel_size}.pkl"
+    if MPI.COMM_WORLD.Get_size() == 1:
+        if os.path.exists(fname):
+            os.remove(fname)
+        df = pd.DataFrame()
+    else:
+        df = pd.read_pickle(fname)
+    df[f'p{MPI.COMM_WORLD.Get_size()}'] = t_generator
+    df.to_pickle(fname)
 
+    df_ = df.copy()
+    for c in df_:
+        df_[c] = np.divide(np.mean(df_['p1']), df_[c])
+    df_.to_csv(fname[:-4] + '.csv', index=False)
+
+# #########################
 simpli.light_intensity = SETUP.light_intensity  # a.u.
 tissue_properties[1:, 1] = CONFIG.species.vervet.mu
 
-t_generator = []
-for n in tqdm.trange(args.n_repeat):
+t_generator = np.empty((args.n_repeat, len(simpli.tilts)))
+for n in tqdm.trange(args.n_repeat, disable=MPI.COMM_WORLD.Get_rank() > 0):
     tt = []
     for t, (theta, phi) in enumerate(simpli.tilts):
         MPI.COMM_WORLD.Barrier()
@@ -105,15 +109,43 @@ for n in tqdm.trange(args.n_repeat):
                                        theta, phi)
         MPI.COMM_WORLD.Barrier()
         t1 = time.time()
-        tt.append(t1 - t0)
-    t_generator.append(tt)
+        t_generator[n, t] = t1 - t0
 
 if MPI.COMM_WORLD.Get_rank() == 0:
-    mode = 'w' if MPI.COMM_WORLD.Get_size() == 1 else 'a'
-    with open(f'simulation_v_{simpli.voxel_size}.dat', mode) as f:
-        f.write(f'{simpli.voxel_size}, {MPI.COMM_WORLD.Get_size()}')
-        for tt in t_generator:
-            for t in tt:
-                f.write(f', {t}')
-            f.write('\n,')
-        f.write('\n')
+    fname = f"output/simulation_mpi_v_{simpli.voxel_size}.pkl"
+    if MPI.COMM_WORLD.Get_size() == 1:
+        if os.path.exists(fname):
+            os.remove(fname)
+        df = pd.DataFrame()
+    else:
+        df = pd.read_pickle(fname)
+    for n, tt in enumerate(t_generator.T):
+        df[f'p{MPI.COMM_WORLD.Get_size()}_t{n}'] = tt
+    df.to_pickle(fname)
+
+    df_ = df.copy()
+    for c in df_:
+        n = int(c.split('_t')[-1])
+        df_[c] = df_[f'p1_t{n}'].mean() / df_[c]
+    df_.to_csv(fname[:-4] + '.csv', index=False)
+
+#%%
+import pandas as pd
+import numpy
+
+fname = f"output/generation_mpi_v_1.0.pkl"
+df = pd.read_pickle(fname)
+df_ = df.copy()
+for c in df_:
+    df_[c] = df[f'p1'].mean() / df[c]
+df_.to_csv(fname[:-4] + '.csv', index=False)
+
+fname = f"output/simulation_mpi_v_1.0.pkl"
+df = pd.read_pickle(fname)
+df_ = df.copy()
+for c in df_:
+    n = int(c.split('_t')[-1])
+    df_[c] = df[f'p1_t{n}'].mean() / df[c]
+df_.to_csv(fname[:-4] + '.csv', index=False)
+
+# %%

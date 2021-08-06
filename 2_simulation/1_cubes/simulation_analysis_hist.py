@@ -36,7 +36,43 @@ print()
 print(df.columns)
 print()
 
+if True:
+
+    def calc_omega(p, t):
+        v0 = np.array([np.cos(p) * np.sin(t), np.sin(p) * np.sin(t), np.cos(t)])
+        v1 = v0[:, 0].copy()
+
+        for v in v0.T[1:, :]:
+            s = np.dot(v1, v)
+
+            if s > 0:
+                v1 += v
+            else:
+                v1 -= v
+        v1 /= np.linalg.norm(v1)
+
+        # print(v1)
+
+        data = np.empty(v0.shape[1])
+
+        for i in range(v0.shape[1]):
+            d = np.abs(np.dot(v0[:, i], v1))  # because orientation
+            data[i] = np.arccos(d)
+
+        return data
+        # return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
+
+    domega = []
+    for i, row in df.iterrows():
+        # row = df.iloc[i]
+        phi, theta = fastpli.analysis.orientation.remap_orientation(
+            row.rofl_dir, np.pi / 2 - row.rofl_inc)
+
+        domega.append(np.mean(np.rad2deg(calc_omega(phi, theta))))
+    df['domega_mean'] = domega
+
 df["rtrel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
+# df["domega_mean"] = df["domega"].apply(lambda x: np.mean(x))
 # df["rtrel_mean"][df["rtrel_mean"] > 0.55] = 0
 #
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
@@ -82,7 +118,7 @@ def run(p):
         df_acc.species == species) & (df_acc.model == model)
 
     for name in [
-            "acc",
+            # "acc",
             # "R",
             # "R2",
     ]:
@@ -103,13 +139,15 @@ def run(p):
         df.species == species) & (df.model == model)
 
     for name in [
-            # "R", "R2",
-            # "dir_mean",
-            "rtrel_mean",
-            # "rdir_mean",
-            # "rincl_mean",
-            "ret_mean",
-            "trans_mean"
+            "R",
+            # "R2",
+            # # "dir_mean",
+            # "rtrel_mean",
+            # # "rdir_mean",
+            # # "rincl_mean",
+            # "ret_mean",
+            # "trans_mean"
+            # "domega_mean"
     ]:
 
         crange = None
