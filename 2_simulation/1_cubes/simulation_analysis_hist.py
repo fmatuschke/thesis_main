@@ -118,8 +118,8 @@ def run(p):
         df_acc.species == species) & (df_acc.model == model)
 
     for name in [
-            # "acc",
-            # "R",
+            "acc",
+            # "R", # sind kopien
             # "R2",
     ]:
 
@@ -140,14 +140,14 @@ def run(p):
 
     for name in [
             "R",
-            # "R2",
-            # # "dir_mean",
-            # "rtrel_mean",
-            # # "rdir_mean",
-            # # "rincl_mean",
-            # "ret_mean",
-            # "trans_mean"
-            # "domega_mean"
+            "R2",
+            # "dir_mean",
+            "rtrel_mean",
+            # "rdir_mean",
+            # "rincl_mean",
+            "ret_mean",
+            "trans_mean",
+            "domega_mean"
     ]:
 
         crange = None

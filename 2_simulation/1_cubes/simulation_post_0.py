@@ -53,8 +53,8 @@ def _calc_intensity(phi, alpha, t_rel, theta, phii):
     ])
 
     # tilted fiber orientation
-    rot = fastpli.tools.rotation.a_on_b([0, 0, 1], v)
-    v = np.dot(rot, u)
+    rot = fastpli.tools.rotation.a_on_b([0, 0, 1], u)
+    v = np.dot(rot, v)
     phi_v = np.arctan2(v[1], v[0])
 
     if v[2] > 1 + 1e-6 or v[2] < -1 - 1e-6:
