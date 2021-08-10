@@ -49,7 +49,7 @@ SETUP = CONFIG.simulation.setup.pm
 # Setup Simpli for Tissue Generation
 simpli = fastpli.simulation.Simpli()
 simpli.omp_num_threads = args.num_proc
-simpli.voxel_size = CONFIG.simulation.voxel_size
+simpli.voxel_size = CONFIG.simulation.voxel_size * 10
 simpli.pixel_size = SETUP.pixel_size
 simpli.filter_rotations = np.linspace(0, np.pi,
                                       CONFIG.simulation.num_filter_rot, False)
@@ -100,7 +100,7 @@ df.to_pickle(fname)
 
 df_ = df.copy()
 for c in df_:
-    df_[c] = np.divide(np.mean(df_[f'p{1}']), df_[c])
+    df_[c] = df[f'p{1}'].mean() / df[c]
 df_.to_csv(fname[:-4] + '.csv', index=False)
 
 # ###################

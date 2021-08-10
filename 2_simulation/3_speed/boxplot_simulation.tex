@@ -72,24 +72,14 @@
 \begin{tikzpicture}[]
   \begin{axis}[%
         ylabel={$\mathit{speedup}$},
+        y label style={at={(0.025,0.5)}},
         xmin=0.42,
         xmax=8.58,
-        % ymin=1,
-        % ymax=6,
         Boxplot,
         scale only axis,
         xtick={1,2,3,4,5,6,7,8},
         xticklabels={1,2,3,4,5,6,7,8},
-        legend to name={legend},
-        legend image post style={mark=square*},
-        legend columns=2,
-        legend cell align={left},
-        legend image post style={scale=1},
-        legend transposed=true,
-        legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
-        legend entries={%
-           {None},{E},{N},{W},{S}},
-         ]
+      ]
      \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8} {
       \foreach \t [count=\it from 0] in {0,1,2,3,4} {
         \addplot+[fill, draw=black] table[%
@@ -133,6 +123,8 @@
       ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.05})
       node [black,midway,below,yshift=-1ex] (last) {$8$};
    % 
+   \coordinate (A) at (rel axis cs:1,0);
+   \coordinate (B) at (axis cs:0,1);
    \coordinate (PA) at (rel axis cs:0,0);
    \coordinate (PB) at (rel axis cs:1,0);
    \coordinate (P) at (rel axis cs:0.5,0);
@@ -142,8 +134,31 @@
    \coordinate (PC) at (current bounding box.west);
    \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
    % 
-   \node[anchor=north] at (current bounding box.south) {\ref{legend}};
    %  
+   % LEGENDE
+   \begin{axis}[%
+      hide axis,
+      scale only axis,
+      height=0pt,
+      width=0pt,
+      cycle list/Paired-5,
+      legend to name={legend1},
+      legend style={draw=white!15!black,legend cell align=left},
+      legend transposed=true,
+      legend columns=2,
+      legend style={/tikz/every even column/.append style={column sep=1ex}},
+      legend entries={{C},{E},{N},{W},{S}},
+      legend image post style={mark=square*, only marks},
+      ]
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+   \end{axis}
+   %
+   \node[anchor=south east] at (A |- B) {\ref{legend1}};
+% 
 \end{tikzpicture}
 %
 % 
@@ -151,24 +166,14 @@
 \begin{tikzpicture}[]
   \begin{axis}[%
         ylabel={$\mathit{speedup}$},
+        y label style={at={(0.025,0.5)}},
         xmin=0.42,
         xmax=13.58,
-        % ymin=1,
-        % ymax=6,
         Boxplot,
         scale only axis,
         xtick={1,2,3,4,5,6,7,8,9,10,11,12,13},
         xticklabels={1,2,3,4,5,6,7,8,16,24,32,40,48},
-        legend to name={legend},
-        legend image post style={mark=square*},
-        legend columns=2,
-        legend cell align={left},
-        legend image post style={scale=1},
-        legend transposed=true,
-        legend style={text = black, /tikz/every even column/.append style={column sep=1ex}},
-        legend entries={%
-           {None},{E},{N},{W},{S}},
-         ]
+      ]
   ]
      \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8,16,24,32,40,48} {
       \foreach \t [count=\it from 0] in {0,1,2,3,4} {
@@ -234,6 +239,9 @@
       ({axis cs:13.4,20.0} |- {axis description cs:0.0,0.05})
       node [black,midway,below,yshift=-1ex] (last) {$48$};
    % 
+   \coordinate (A) at (rel axis cs:1,0);
+   \coordinate (B) at (axis cs:0,1);
+   % 
    \coordinate (PA) at (rel axis cs:0,0);
    \coordinate (PB) at (rel axis cs:1,0);
    \coordinate (P) at (rel axis cs:0.5,0);
@@ -242,8 +250,30 @@
    % center axis
    \coordinate (PC) at (current bounding box.west);
    \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
-   
-   \node[anchor=north] at (current bounding box.south) {\ref{legend}};
+   % 
+   % LEGENDE
+   \begin{axis}[%
+      hide axis,
+      scale only axis,
+      height=0pt,
+      width=0pt,
+      cycle list/Paired-5,
+      legend to name={legend2},
+      legend style={draw=white!15!black,legend cell align=left},
+      legend transposed=true,
+      legend columns=2,
+      legend style={/tikz/every even column/.append style={column sep=1ex}},
+      legend entries={{C},{E},{N},{W},{S}},
+      legend image post style={mark=square*, only marks},
+      ]
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+   \end{axis}
+   %
+   \node[anchor=south east] at (A |- B) {\ref{legend2}};
    %  
 \end{tikzpicture}
 % 

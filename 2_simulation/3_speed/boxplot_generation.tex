@@ -40,29 +40,11 @@
         width = 0.78\width,
         height = 0.5\width,
         cycle list/Paired-8,
-        % axis x line=none,
+        axis x line=bottom,
         axis y line = left,
         enlarge y limits,
         ymajorgrids,
         clip=false,
-        % y label style={at={(axis description cs:-0.125,.5)},rotate=0,anchor=south},
-        % boxplot={
-        %     draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
-        %     box extend=\dx/(\ng+1)*1.5,
-        %     mark size=0.42pt,
-        %     draw/median/.code={%
-        %        \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
-        %        \pgfextra
-        %        \pgftransformshift{
-        %           \pgfplotsboxplotpointabbox
-        %              {\pgfplotsboxplotvalue{median}}
-        %              {0.5}
-        %        }
-        %        \pgfuseplotmark{*}
-        %        \endpgfextra
-        %        ;
-        %     },
-        % },
         boxplot,
         boxplot/draw direction=y,
     },
@@ -73,10 +55,9 @@
 \begin{tikzpicture}[]
   \begin{axis}[%
         ylabel={$\mathit{speedup}$},
-        % xmin=0.42,
-        % xmax=8.58,
-        % ymin=1,
-        % ymax=6,
+        y label style={at={(0.025,0.5)}},
+        xmin=0.42,
+        xmax=8.58,
         Boxplot,
         scale only axis,
         xtick={1,2,3,4,5,6,7,8},
@@ -108,12 +89,11 @@
 \begin{tikzpicture}[]
   \begin{axis}[%
         ylabel={$\mathit{speedup}$},
-        % xmin=0.42,
-        % xmax=8.58,
-        % ymin=1,
-        % ymax=6,
+        y label style={at={(0.025,0.5)}},
         Boxplot,
         scale only axis,
+        xmin=0.42,
+        xmax=12.58,
         xtick={1,2,3,4,5,6,7,8,9,10,11,12},
         xticklabels={1,2,3,4,5,6,7,8,16,24,32,48},
   ]

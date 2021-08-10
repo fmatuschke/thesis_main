@@ -38,7 +38,7 @@ SETUP = CONFIG.simulation.setup.pm
 # Setup Simpli for Tissue Generation
 simpli = fastpli.simulation.Simpli(MPI.COMM_WORLD)
 simpli.omp_num_threads = 1
-simpli.voxel_size = CONFIG.simulation.voxel_size
+simpli.voxel_size = CONFIG.simulation.voxel_size * 10
 simpli.pixel_size = SETUP.pixel_size
 simpli.filter_rotations = np.linspace(0, np.pi,
                                       CONFIG.simulation.num_filter_rot, False)
@@ -92,7 +92,7 @@ if MPI.COMM_WORLD.Get_rank() == 0:
 
     df_ = df.copy()
     for c in df_:
-        df_[c] = np.divide(np.mean(df_['p1']), df_[c])
+        df_[c] = df['p1'].mean() / df[c]
     df_.to_csv(fname[:-4] + '.csv', index=False)
 
 # #########################
@@ -126,26 +126,26 @@ if MPI.COMM_WORLD.Get_rank() == 0:
     df_ = df.copy()
     for c in df_:
         n = int(c.split('_t')[-1])
-        df_[c] = df_[f'p1_t{n}'].mean() / df_[c]
+        df_[c] = df[f'p1_t{n}'].mean() / df[c]
     df_.to_csv(fname[:-4] + '.csv', index=False)
 
 #%%
-import pandas as pd
-import numpy
+# import pandas as pd
+# import numpy
 
-fname = f"output/generation_mpi_v_1.0.pkl"
-df = pd.read_pickle(fname)
-df_ = df.copy()
-for c in df_:
-    df_[c] = df[f'p1'].mean() / df[c]
-df_.to_csv(fname[:-4] + '.csv', index=False)
+# fname = f"output/generation_mpi_v_1.0.pkl"
+# df = pd.read_pickle(fname)
+# df_ = df.copy()
+# for c in df_:
+#     df_[c] = df[f'p1'].mean() / df[c]
+# df_.to_csv(fname[:-4] + '.csv', index=False)
 
-fname = f"output/simulation_mpi_v_1.0.pkl"
-df = pd.read_pickle(fname)
-df_ = df.copy()
-for c in df_:
-    n = int(c.split('_t')[-1])
-    df_[c] = df[f'p1_t{n}'].mean() / df[c]
-df_.to_csv(fname[:-4] + '.csv', index=False)
+# fname = f"output/simulation_mpi_v_1.0.pkl"
+# df = pd.read_pickle(fname)
+# df_ = df.copy()
+# for c in df_:
+#     n = int(c.split('_t')[-1])
+#     df_[c] = df[f'p1_t{n}'].mean() / df[c]
+# df_.to_csv(fname[:-4] + '.csv', index=False)
 
 # %%
