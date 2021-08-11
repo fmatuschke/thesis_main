@@ -68,7 +68,7 @@ def run(p):
     df = pd.DataFrame(columns=['n', 'm', 'dt', 'p'])
 
     for n in tqdm.trange(p.repeat, desc='n', leave=False):
-        for t in tqdm.trange(p.nthreads, desc='p', leave=False):
+        for t in tqdm.tqdm(p.nthreads, desc='p', leave=False):
             solver = fastpli.model.solver.Solver()
             solver.omp_num_threads = t
             solver.fiber_bundles = fiber_bundle
