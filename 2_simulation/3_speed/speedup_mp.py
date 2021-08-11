@@ -49,7 +49,7 @@ SETUP = CONFIG.simulation.setup.pm
 # Setup Simpli for Tissue Generation
 simpli = fastpli.simulation.Simpli()
 simpli.omp_num_threads = args.num_proc
-simpli.voxel_size = CONFIG.simulation.voxel_size * 10
+simpli.voxel_size = CONFIG.simulation.voxel_size
 simpli.pixel_size = SETUP.pixel_size
 simpli.filter_rotations = np.linspace(0, np.pi,
                                       CONFIG.simulation.num_filter_rot, False)

@@ -37,8 +37,8 @@
 % 
 \pgfplotsset{
     Boxplot/.style={
-        width = 0.78\width,
-        height = 0.5\width,
+        width = 0.5\width,
+        height = 0.35\width,
         cycle list/Paired-8,
         axis x line=bottom,
         axis y line = left,
@@ -48,14 +48,17 @@
         boxplot,
         boxplot/draw direction=y,
     },
-    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
+    ylabel absolute,
+    every axis x label/.append style={xshift=0.0ex, font=\footnotesize},
+    every axis y label/.append style={yshift=0.0em, at={(0.075,0.5)}, font=\footnotesize},
+    every x tick label/.append style = {font=\footnotesize},
+    every y tick label/.append style = {font=\footnotesize},
 }
 %
 % 
 \begin{tikzpicture}[]
   \begin{axis}[%
         ylabel={$\mathit{speedup}$},
-        y label style={at={(0.025,0.5)}},
         xmin=0.42,
         xmax=8.58,
         Boxplot,
@@ -79,7 +82,7 @@
   %
   % center axis
   \coordinate (PC) at (current bounding box.west);
-  \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+  % \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
   
   % \node[anchor=north] at (current bounding box.south) {\ref{legend}};
   %  
@@ -89,7 +92,6 @@
 \begin{tikzpicture}[]
   \begin{axis}[%
         ylabel={$\mathit{speedup}$},
-        y label style={at={(0.025,0.5)}},
         Boxplot,
         scale only axis,
         xmin=0.42,
@@ -104,7 +106,7 @@
     }
     \begin{scope}[overlay]
     \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8}) node[sloped, pos=0.5, above] {ideal};
-    % \draw[black, dashed] ({axis cs:8,8}) -- ({axis cs:13,48}); 
+    \draw[black, dashed] ({axis cs:8,8}) -- ({axis cs:13,48}); 
     \end{scope}
   % 
   \coordinate (PA) at (rel axis cs:0,0);
@@ -114,7 +116,7 @@
   %
   % center axis
   \coordinate (PC) at (current bounding box.west);
-  \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+  % \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
   
   % \node[anchor=north] at (current bounding box.south) {\ref{legend}};
   %  

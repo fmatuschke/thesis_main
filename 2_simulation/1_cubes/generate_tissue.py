@@ -37,7 +37,7 @@ def run(p):
     file_name = os.path.join(file_path, "tissue", file_name)
 
     with h5py.File(p.file, 'r') as h5f:
-        dset = h5f['PM/Vervet/p']
+        dset = h5f['PM/Vervet/r']
         fiber_bundles = fastpli.io.fiber_bundles.load(
             dset.attrs['parameter/fiber_path'])
         psi = dset.attrs["parameter/psi"]
@@ -69,8 +69,8 @@ def run(p):
 
         LAYERS = CONFIG.models.layers
         layers = [(LAYERS.b.radius, LAYERS.b.dn, 0, LAYERS.b.model),
-                  (LAYERS.p.radius, LAYERS.p.dn, 0, LAYERS.p.model)
-                 ]  # p is faster
+                  (LAYERS.r.radius, LAYERS.r.dn, 0, LAYERS.r.model)
+                 ]  # p is faster for vectors
         simpli.fiber_bundles.layers = [layers] * len(fiber_bundles)
 
         tissue, _, _ = simpli.generate_tissue(only_tissue=True)
@@ -95,7 +95,12 @@ def run(p):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", required=True, help="input string.")
+    parser.add_argument("-i",
+                        "--input",
+                        nargs='+',
+                        type=str,
+                        required=True,
+                        help="input string.")
     parser.add_argument("-p",
                         "--num_proc",
                         type=int,
@@ -103,11 +108,19 @@ def main():
                         help="Number of processes.")
     args = parser.parse_args()
 
-    os.makedirs(os.path.join(args.input, "tissue"), exist_ok=True)
-
     parameters = []
-    for file in glob.glob(os.path.join(args.input, '*.h5')):
-        parameters.append(Parameter(file=file))
+    print(type(args.input))
+    if isinstance(args.input, list):
+        for file in args.input:
+            parameters.append(Parameter(file=file))
+    else:
+        for file in glob.glob(os.path.join(args.input, '*.h5')):
+            parameters.append(Parameter(file=file))
+
+    # print(os.path.dirname(file))
+    os.makedirs(os.path.join(os.path.dirname(file), "tissue"), exist_ok=True)
+    # print(parameters)
+    # exit(1)
 
     # Memory Check
     simpli = fastpli.simulation.Simpli()
@@ -115,7 +128,9 @@ def main():
     simpli.pixel_size = CONFIG.simulation.setup.pm.pixel_size  # in mu meter
     simpli.set_voi(CONFIG.simulation.voi[0], CONFIG.simulation.voi[1])
     print(f"Single Memory: {simpli.memory_usage(item='tissue'):.0f} MB")
-    print(f"Total Memory: {simpli.memory_usage(item='tissue')* args.num_proc:.0f} MB")
+    print(
+        f"Total Memory: {simpli.memory_usage(item='tissue')* args.num_proc:.0f} MB"
+    )
 
     with mp.Pool(args.num_proc) as pool:
         [

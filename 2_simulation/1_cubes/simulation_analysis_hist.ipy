@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-%matplotlib inline
+import h5py
 
 import fastpli.tools
 
@@ -18,25 +18,144 @@ df_sim["ret_mean"] = df_sim["epa_ret"].apply(lambda x: np.mean(x))
 df_sim["trans_mean"] = df_sim["epa_trans"].apply(lambda x: np.mean(x))
 
 # %%
-df = df_sim[df_sim.psi == 0.1]
-df = df[df.f0_inc == 0]
-df = df[df.f1_rot == 0]
+psi = 0.1
+f0_inc = 0
+omega = 30
 
+df = df_sim[df_sim.psi == psi]
+df = df[df.f0_inc == f0_inc]
+df = df[df.omega == omega]
+df = df.drop([
+    'microscope', 'species', 'model', 'radius', 'omega', 'psi', 'f0_inc', 'R2'
+],
+             axis=1)
 
-df['rofl_dir'] = df['rofl_dir'].apply(lambda x: np.rad2deg(x))
-df['rofl_inc'] = df['rofl_inc'].apply(lambda x: np.rad2deg(x))
-df['epa_dir'] = df['epa_dir'].apply(lambda x: np.rad2deg(x))
+df = df.sort_values('f1_rot')
+
+# df = df[df.f1_rot == 0]
+
+# df['rofl_dir'] = df['rofl_dir'].apply(lambda x: np.rad2deg(x))
+# df['rofl_inc'] = df['rofl_inc'].apply(lambda x: np.rad2deg(x))
+# df['epa_dir'] = df['epa_dir'].apply(lambda x: np.rad2deg(x))
 df = df.copy()
 
 
 # %%
-def to_spherical(om,f0,f1):    
+def _calc_intensity(phi, alpha, t_rel, theta, phii):
+    num_rotations = 9
+    rotation_angles = np.linspace(0, np.pi, num_rotations + 1)[:-1]
+
+    # tilt orientation
+    u = np.array([
+        np.cos(phii) * np.sin(theta),
+        np.sin(phii) * np.sin(theta),
+        np.cos(theta)
+    ])
+
+    # fiber orientation
+    v = np.array([
+        np.cos(phi) * np.cos(alpha),
+        np.sin(phi) * np.cos(alpha),
+        np.sin(alpha)
+    ])
+
+    # print(u, v)
+
+    # tilted fiber orientation
+    rot = fastpli.tools.rotation.a_on_b([0, 0, 1], u)
+    v = np.dot(rot, u)
+    phi_v = np.arctan2(v[1], v[0])
+
+    if v[2] > 1 + 1e-6 or v[2] < -1 - 1e-6:
+        raise ValueError("FOOOO")
+    v[2] = min(v[2], 1)
+    v[2] = max(v[2], -1)
+    alpha_v = np.arcsin(v[2])
+
+    I = np.sin(np.pi / 2 * t_rel * np.cos(alpha_v)**2) * np.sin(
+        2 * (rotation_angles - phi_v))
+
+    if np.any(np.isnan(I)):
+        print(phi, alpha, t_rel, theta, phii)
+        print(alpha_v, rotation_angles, phi_v)
+        print(v)
+        raise ValueError("FOOO")
+
+    return I
+
+
+#%%
+data = []
+for t, (phi, theta) in enumerate(zip(phis, thetas)):
+    plt.figure()
+    for s in ['', '-']:
+
+        file = f'output/cube_2pop_135_rc1_r_0.5/cube_2pop_psi_{psi:.2f}_omega_{omega:.2f}_r_0.50_v0_135_.solved_vs_0.1000_inc_{f0_inc:.2f}_rot_{s}45.00.h5'
+
+        with h5py.File(file, 'r') as h5f:
+            h5f_sub = h5f[f"/PM/Vervet/r/"]
+            # R
+            # print(h5f_sub['analysis/epa'].keys())
+            # for i in range(5):
+            #     epa_trans = h5f_sub[f'analysis/epa/{i}/transmittance'][...]
+            #     print(np.mean(epa_trans.ravel()))
+            rofl_direction = h5f_sub['analysis/rofl/direction'][...]
+            rofl_inclination = h5f_sub['analysis/rofl/inclination'][...]
+            rofl_trel = h5f_sub['analysis/rofl/t_rel'][...]
+
+            fit_data = np.empty(
+                (5, rofl_direction.shape[0], rofl_direction.shape[1], 9))
+
+            tilt_angle = h5f_sub['simulation'].attrs['tilt_angle']
+            if tilt_angle not in [3.9, 5.5]:
+                warnings.warn('unexpected tilt angle: {tilt_angle}')
+
+            phis = [0, 0, 90, 180, 270]
+            thetas = [0, tilt_angle, tilt_angle, tilt_angle, tilt_angle]
+            # for t, (phi, theta) in enumerate(zip(phis, thetas)):
+            for i in range(fit_data.shape[1]):
+                for j in range(fit_data.shape[2]):
+                    fit_data[t, i,
+                             j, :] = _calc_intensity(rofl_direction[i, j],
+                                                     rofl_inclination[i, j],
+                                                     rofl_trel[i, j],
+                                                     np.deg2rad(theta),
+                                                     np.deg2rad(phi))
+
+            # optic_data.append(h5f_sub[f'simulation/optic/{t}'][...])
+
+            optic_data = h5f_sub[f'simulation/optic/{t}'][...]
+            optic_data = np.divide(optic_data,
+                                   np.mean(optic_data, axis=-1)[:, :, None]) - 1
+
+            fdata = fit_data[t, :, :, :]
+            fdata = fdata.reshape(-1, fdata.shape[-1])
+
+            optic_data = optic_data.reshape(-1, fdata.shape[-1])
+
+            print(s, t, np.mean(optic_data, axis=0))
+            data.append(np.mean(optic_data, axis=0))
+
+            x = np.linspace(0, 160, fdata.shape[-1], True)
+            # plt.plot(x, np.mean(fdata, axis=0))
+            plt.plot(x, np.mean(optic_data, axis=0))
+
+#%%
+with h5py.File(
+        'output/cube_2pop_135_rc1_r_0.5/tissue/cube_2pop_psi_0.10_omega_30.00_r_0.50_v0_135_.solved_vs_0.1000_inc_0.00_rot_-45.00.tissue.h5'
+) as h5f:
+    a = np.mean(np.mean(h5f['tissue'][...] > 0, 0), 0)
+
+
+# %%
+def to_spherical(om, f0, f1):
     v = np.array([np.cos(np.deg2rad(om)), np.sin(np.deg2rad(om)), 0])
     rot_inc = fastpli.tools.rotation.y(-np.deg2rad(f0))
     rot_phi = fastpli.tools.rotation.x(np.deg2rad(f1))
     rot = np.dot(rot_inc, rot_phi)
     v = np.dot(rot, v)
     return np.arctan2(v[1], v[0]), np.arcsin(v[2])
+
 
 # %%
 
