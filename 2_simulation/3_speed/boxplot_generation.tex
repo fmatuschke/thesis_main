@@ -39,7 +39,10 @@
     Boxplot/.style={
         width = 0.5\width,
         height = 0.35\width,
-        cycle list/Paired-8,
+        % cycle list/Paired-8,
+        colormap name=viridis, %Spectral
+        cycle list={
+            [colors of colormap={0,83,...,1000}]},
         axis x line=bottom,
         axis y line = left,
         enlarge y limits,
@@ -95,11 +98,11 @@
         Boxplot,
         scale only axis,
         xmin=0.42,
-        xmax=12.58,
-        xtick={1,2,3,4,5,6,7,8,9,10,11,12},
-        xticklabels={1,2,3,4,5,6,7,8,16,24,32,48},
+        xmax=13.58,
+        xtick={1,2,3,4,5,6,7,8,9,10,11,12,13},
+        xticklabels={1,2,3,4,5,6,7,8,16,24,32,40,48},
   ]
-     \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8,16,24,32,48} {
+     \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8,16,24,32,40,48} {
         \addplot+[fill, draw=black] table[%
             y=p\p, col sep=comma, row sep=newline,
             ]{\datapath};

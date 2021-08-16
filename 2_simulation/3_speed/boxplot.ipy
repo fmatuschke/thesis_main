@@ -4,19 +4,19 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 #%%
-fname = f"output/generation_{'mpi'}_v_{0.1}.pkl"
+fname = f"output/generation_{'mp'}_v_{0.1}.pkl"
 df = pd.read_pickle(fname)
-df_ = df.copy()
-for c in df_:
-    df_[c] = df['p1'].mean() / df[c]
-df_.to_csv(fname[:-4] + '.csv', index=False)
+# df_ = df.copy()
+# for c in df_:
+#     df_[c] = df['p1'].mean() / df[c]
+# df_.to_csv(fname[:-4] + '.csv', index=False)
 
 # %%
 fname = f"output/simulation_{'mp'}_v_{0.1}.pkl"
 df = pd.read_pickle(fname)
-df_ = df.copy()
-for c in df_:
-    n = int(c.split('_t')[-1])
-    df_[c] = df[f'p1_t{n}'].mean() / df[c]
-df_.to_csv(fname[:-4] + '.csv', index=False)
+# df_ = df.copy()
+# for c in df_:
+#     n = int(c.split('_t')[-1])
+#     df_[c] = df[f'p1_t{n}'].mean() / df[c]
+# df_.to_csv(fname[:-4] + '.csv', index=False)
 # %%
