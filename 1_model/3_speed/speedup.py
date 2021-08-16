@@ -27,12 +27,6 @@ parser.add_argument("-r",
                     required=True,
                     help="Number of repeat.")
 
-parser.add_argument("-s",
-                    "--steps",
-                    type=int,
-                    required=True,
-                    help="Number of steps.")
-
 parser.add_argument("-a",
                     "--after",
                     nargs='+',
@@ -50,7 +44,6 @@ parser.add_argument("-o",
 class Parameter(typing.NamedTuple):
     """  """
     file: str
-    steps: int
     repeat: int
     nthreads: list
     after: int
@@ -65,28 +58,26 @@ def run(p):
         solver.step()
     fiber_bundle = solver.fiber_bundles
 
-    df = pd.DataFrame(columns=['n', 'm', 'dt', 'p'])
+    df = pd.DataFrame(columns=['file', 'n', 'a', 'dt', 'p'])
 
-    for n in tqdm.trange(p.repeat, desc='n', leave=False):
-        for t in tqdm.tqdm(p.nthreads, desc='p', leave=False):
+    for t in tqdm.tqdm(p.nthreads, desc='p', leave=False):
+        for n in tqdm.trange(p.repeat, desc='n', leave=False):
             solver = fastpli.model.solver.Solver()
             solver.omp_num_threads = t
             solver.fiber_bundles = fiber_bundle
-            for i in tqdm.trange(p.steps, desc='i', leave=False):
-                dt = time.time()
-                solver.step()
-                dt = time.time() - dt
-                # t[n, i] = dt
-                df = df.append(
-                    {
-                        'file': p.file,
-                        'n': n,
-                        'm': i,
-                        'a': p.after,
-                        'dt': dt,
-                        'p': t
-                    },
-                    ignore_index=True)
+
+            dt = time.time()
+            solver.step()
+            dt = time.time() - dt
+            df = df.append(
+                {
+                    'file': p.file,
+                    'n': n,
+                    'a': p.after,
+                    'dt': dt,
+                    'p': t
+                },
+                ignore_index=True)
 
     return df
 
@@ -95,7 +86,6 @@ def main():
     args = parser.parse_args()
     parameters = [
         Parameter(file=file,
-                  steps=args.steps,
                   repeat=args.repeat,
                   nthreads=[1, 2, 3, 4, 5, 6, 7, 8, 16, 24, 32, 40, 48],
                   after=a) for file in args.input for a in args.after
