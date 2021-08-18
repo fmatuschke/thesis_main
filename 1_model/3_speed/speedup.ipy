@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-#%%
-file = 'r_0.5.pkl'
+# %%
+file = 'r_0.5_.pkl'
 df = pd.read_pickle(f'output/{file}')
 df.file = df.file.apply(lambda x: x[56:75])
 
@@ -19,7 +19,7 @@ for index, row in df_.iterrows():
                   (df_.a == row.a)].dt)
     df_.loc[index, 'speedup'] = a / b
 
-#%%
+# %%
 
 df = pd.DataFrame()
 for a in df_.a.unique():
@@ -37,7 +37,7 @@ df.to_csv(f'output/{file}_speedup.csv', index=False)
 
 # # df_out = pd.DataFrame(columns=['cross', ])
 
-#%%
+# %%
 for a in df_.a.unique():
     print(a)
     plt.figure()
