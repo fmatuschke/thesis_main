@@ -1,4 +1,4 @@
-#%%
+# %%
 import pandas as pd
 import os
 import seaborn as sns
@@ -30,8 +30,8 @@ for i, o in itertools.product(["0", "1"], ["25", "50", "75", "std", "mean"]):
     df = df.drop([f"omega_{o}_{i}"], axis=1)
 
 # %%
-df = df[(df.omega == 30) | (df.omega == 60) | (df.omega == 90)]
-df = df[(df.psi == 0.3) | (df.psi == 0.6) | (df.psi == 0.9)]
+# df = df[(df.omega == 30) | (df.omega == 60) | (df.omega == 90)]
+# df = df[(df.psi == 0.3) | (df.psi == 0.6) | (df.psi == 0.9)]
 
 # %%
 cols = ['phi', 'theta']  # omega
@@ -84,25 +84,51 @@ for o in tqdm.tqdm(df__.omega.unique()):
 
 # %%
 # reduce number of outliers
-df___ = df__[::10]
+# df___ = df__[::100]
 
 # %%
 
+dff = pd.DataFrame()
 for p in range(2):
-    plt.figure()
-    sns.boxplot(data=df___[df___.p == p], hue='psi', x='omega', y='theta')
-    plt.savefig(f'output/domega_theta_p_{p}.pdf')
+    df_p = df__[::100]
+    df_o = df_omega[::100]
+    # plt.figure()
+    # sns.boxplot(data=df___[df___.p == p], hue='psi', x='omega', y='theta')
+    # plt.savefig(f'output/domega_theta_p_{p}.pdf')
+    df_p_ = df_p[df_p.p == p]
+    df_o_ = df_o[df_o.p == p]
+    for omega in df_p_.omega.unique():
+        for psi in df_p_.psi.unique():
+            dff_t = pd.DataFrame({
+                f'{omega:.1f}_{psi:.1f}_{p}_theta':
+                    df_p_[(df_p_.omega == omega) &
+                          (df_p_.psi == psi)].theta.to_numpy()
+            })
+            dff_p = pd.DataFrame({
+                f'{omega:.1f}_{psi:.1f}_{p}_phi':
+                    df_p_[(df_p_.omega == omega) &
+                          (df_p_.psi == psi)].phi.to_numpy()
+            })
+            dff_o = pd.DataFrame({
+                f'{omega:.1f}_{psi:.1f}_{p}_domega':
+                    df_o_[(df_o_.omega == omega) &
+                          (df_o_.psi == psi)].domega.to_numpy()
+            })
+            dff = pd.concat([dff_t, dff_p, dff_o], axis=1)
+            dff.to_csv(f'output/omega_{omega:.1f}_psi_{psi:.1f}_p_{p}.csv',
+                       index=False)
 
 # %%
+df___ = df__[::100]
 for p in range(2):
     plt.figure()
     sns.boxplot(data=df___[df___.p == p], hue='psi', x='omega', y='phi')
     plt.savefig(f'output/domega_phi_p_{p}.pdf')
+
 # %%
-df___ = df_omega[::10]
+df___ = df_omega[::100]
 for p in range(2):
     plt.figure()
     sns.boxplot(data=df___[df___.p == p], hue='psi', x='omega', y='domega')
     plt.savefig(f'output/domega_domega_p_{p}.pdf')
-
 # %%

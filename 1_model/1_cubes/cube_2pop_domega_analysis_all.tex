@@ -1,0 +1,272 @@
+\documentclass[tikz]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{statistics}
+\usetikzlibrary{calc}
+\tikzset{>=latex}
+% 
+\newlength{\width}
+\newlength{\height}
+\setlength{\width}{13.87303cm} %5.433
+\setlength{\height}{22.37076cm} %8.8
+\def\datapath{../../__PATH__}
+\directlua0{
+  pdf.setinfo ("/Path: (__PATH__)")
+}
+% 
+\newcommand{\axes}{ %   
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:0.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:1.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{0}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:1.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:2.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{10}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:2.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:3.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{20}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:3.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:4.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{30}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:4.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:5.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{40}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:5.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:6.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{50}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:6.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:7.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{60}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:7.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:8.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{70}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:8.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:9.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{80}{\degree}$};
+   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+      ({axis cs:9.6,20.0} |- {axis description cs:0.0,-0.025}) -- 
+      ({axis cs:10.4,20.0} |- {axis description cs:0.0,-0.025})
+      node [black,midway,below,yshift=-1ex] {\footnotesize$\SI{90}{\degree}$};
+   % 
+   \draw[dotted, thin] ({axis cs:1.5,-90} |- {axis description cs:0,0}) -- ({axis cs:1.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:2.5,-90} |- {axis description cs:0,0}) -- ({axis cs:2.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:3.5,-90} |- {axis description cs:0,0}) -- ({axis cs:3.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:4.5,-90} |- {axis description cs:0,0}) -- ({axis cs:4.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:5.5,-90} |- {axis description cs:0,0}) -- ({axis cs:5.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:6.5,-90} |- {axis description cs:0,0}) -- ({axis cs:6.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:7.5,-90} |- {axis description cs:0,0}) -- ({axis cs:7.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:8.5,-90} |- {axis description cs:0,0}) -- ({axis cs:8.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:9.5,-90} |- {axis description cs:0,0}) -- ({axis cs:9.5,180} |- {axis description cs:0,1});
+   \draw[dotted, thin] ({axis cs:10.5,-90} |- {axis description cs:0,0}) -- ({axis cs:10.5,180} |- {axis description cs:0,1});
+   % 
+   \node [anchor=base west] at (axis description cs:1,-0.1125) {$\Omega$};
+}
+% 
+\begin{document}
+% 
+\pgfmathsetmacro{\ng}{9}
+\pgfmathsetmacro{\dx}{0.75}
+% 
+\pgfplotsset{
+    Boxplot/.style={
+        cycle list/Set1-9,
+        boxplot={
+            draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
+            box extend=\dx/(\ng+1)*1.5,
+            mark size=0.42pt,
+            draw/median/.code={%
+               \draw[mark size=0.5pt,/pgfplots/boxplot/every median/.try]
+               \pgfextra
+               \pgftransformshift{
+                  \pgfplotsboxplotpointabbox
+                     {\pgfplotsboxplotvalue{median}}
+                     {0.5}
+               }
+               \pgfuseplotmark{*}
+               \endpgfextra
+               ;
+            },
+        },
+        boxplot/draw direction=y,
+    },
+    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
+}
+%
+% 
+\begin{tikzpicture}[]
+   % 
+   \begin{groupplot}[%
+      group style={
+         group size=2 by 3,
+         horizontal sep=2cm,
+         vertical sep=1cm,
+         ylabels at=edge left,
+      },
+      width = 0.3425\width,
+      height = 0.18\height,
+      xmin=0.5,xmax=10.5,
+      axis x line=none,
+      axis y line=left,
+      y label style={at={(axis description cs:0.05,.5)}},
+      ymajorgrids,
+      enlarge y limits=false,
+      clip=false, scale only axis,
+      Boxplot,
+      ]
+      % 
+      \nextgroupplot[%
+         title={Fiber population 0},
+         ylabel={$\varphi_0$},
+         ymin=-90,ymax=180,
+         ytick={-90,0,90,180},
+         yticklabels={$\SI{-90}{\degree}$,$\SI{0}{\degree}$,$\SI{90}{\degree}$,$\SI{180}{\degree}$},
+         ]
+      \foreach \o in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {%
+         \foreach \p in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {%
+            \addplot+[fill, draw=black] table[%
+               y={\o_\p_0_phi}, col sep=comma, row sep=newline,
+               ]{\datapath/omega_\o_psi_\p_p_0.csv};
+      }}
+      \axes
+      % 
+      \nextgroupplot[%
+         title={Fiber population 1},
+         ylabel={$\varphi_1$},
+         ymin=-90,ymax=180,
+         ytick={-90,0,90,180},
+         yticklabels={$\SI{-90}{\degree}$,$\SI{0}{\degree}$,$\SI{90}{\degree}$,$\SI{180}{\degree}$},
+         ]
+      \foreach \o in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {%
+         \foreach \p in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {%
+            \addplot+[fill, draw=black] table[%
+               y={\o_\p_1_phi}, col sep=comma, row sep=newline,
+               ]{\datapath/omega_\o_psi_\p_p_1.csv};
+       }}
+      \axes
+      % 
+      \nextgroupplot[%
+         ylabel={$\alpha_{\mathit{inc,0}}$},
+         ymin=-90,ymax=90,
+         ytick={-90,0,90,180},
+         yticklabels={$\SI{-90}{\degree}$,$\SI{0}{\degree}$,$\SI{90}{\degree}$,$\SI{180}{\degree}$},
+         ]
+      \foreach \o in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {%
+         \foreach \p in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {%
+            \addplot+[fill, draw=black] table[%
+               y={\o_\p_0_theta}, col sep=comma, row sep=newline,
+               ]{\datapath/omega_\o_psi_\p_p_0.csv};
+       }}
+      \axes
+      % 
+      \nextgroupplot[%
+         ylabel={$\alpha_{\mathit{inc,1}}$},
+         ymin=-90,ymax=90,
+         ytick={-90,0,90,180},
+         yticklabels={$\SI{-90}{\degree}$,$\SI{0}{\degree}$,$\SI{90}{\degree}$,$\SI{180}{\degree}$},
+         ]
+      \foreach \o in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {%
+         \foreach \p in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {%
+            \addplot+[fill, draw=black] table[%
+               y={\o_\p_1_theta}, col sep=comma, row sep=newline,
+               ]{\datapath/omega_\o_psi_\p_p_1.csv};
+      }}
+      \axes
+      % 
+      \nextgroupplot[%
+         ylabel={$\Delta\Omega_0$},
+         ymin=0,ymax=90,
+         ytick={0,30,60,90},
+         yticklabels={$\SI{0}{\degree}$,$\SI{30}{\degree}$,$\SI{60}{\degree}$,$\SI{90}{\degree}$},
+         ]
+      \foreach \o in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {%
+         \foreach \p in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {%
+            \addplot+[fill, draw=black] table[%
+               y={\o_\p_0_domega}, col sep=comma, row sep=newline,
+               ]{\datapath/omega_\o_psi_\p_p_0.csv};
+       }}
+      \axes
+      % 
+      \nextgroupplot[%
+         ylabel={$\Delta\Omega_1$},
+         ymin=0,ymax=90,
+         ytick={0,30,60,90},
+         yticklabels={$\SI{0}{\degree}$,$\SI{30}{\degree}$,$\SI{60}{\degree}$,$\SI{90}{\degree}$},
+         ]
+      \foreach \o in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {%
+         \foreach \p in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {%
+            \addplot+[fill, draw=black] table[%
+               y={\o_\p_1_domega}, col sep=comma, row sep=newline,
+               ]{\datapath/omega_\o_psi_\p_p_1.csv};
+       }}
+      \axes
+   \end{groupplot}
+   % 
+   % LEGENDE
+   \begin{axis}[%
+      hide axis,
+      scale only axis,
+      height=0pt,
+      width=0pt,
+      cycle list/Set1-9,
+      legend to name={legend1},
+      legend style={draw=white!15!black,legend cell align=left},
+      legend columns=2,
+      transpose legend,
+      legend style={scale=0.5,/tikz/every even column/.append style={column sep=1ex}},
+      legend entries={%
+         {$\Psi = \SI{0.1}{}$},
+         {$\Psi = \SI{0.2}{}$},
+         {$\Psi = \SI{0.3}{}$},
+         {$\Psi = \SI{0.4}{}$},
+         {$\Psi = \SI{0.5}{}$},
+         {$\Psi = \SI{0.6}{}$},
+         {$\Psi = \SI{0.7}{}$},
+         {$\Psi = \SI{0.8}{}$},
+         {$\Psi = \SI{0.9}{}$},
+      },
+      legend image post style={mark=square*, only marks},
+      ]
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+      \addplot+[] coordinates {(0,0)};
+   \end{axis}
+   %
+   \coordinate (B) at (current bounding box.south);
+   \coordinate (C) at ($(group c1r3.south)!0.5!(group c2r3.south)$);
+   % 
+   % \draw[blue, thick] (L |- B) circle[radius=2pt];
+   \node[anchor=north, yshift=0em] at (C |- B) {\ref{legend1}};
+   %  
+   % center axis
+   \coordinate (left) at (current bounding box.west);
+   \path[] let \p1 = ($(left)-(C)$) in ($(C) - (\x1,0)$) -- ($(C) + (\x1,0)$);
+   % 
+\end{tikzpicture}
+% 
+% 
+\end{document}

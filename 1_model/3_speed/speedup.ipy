@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # %%
-file = 'r_0.5_.pkl'
+file = 'r_0.5__.pkl'
 df = pd.read_pickle(f'output/{file}')
 df.file = df.file.apply(lambda x: x[56:75])
 
