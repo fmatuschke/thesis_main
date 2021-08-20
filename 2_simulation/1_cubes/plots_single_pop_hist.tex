@@ -77,9 +77,9 @@
       \begin{polaraxis}[
          PStyle,
       ]
-         % FIXME: model, TODO: for now only dummy
          \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
-            \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+            \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+         \coordinate (A\xi) at (0,0);
       \end{polaraxis}
    \end{scope}
    %
@@ -90,16 +90,20 @@
       ]
          \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
             \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+         \coordinate (B\xi) at (0,0);
       \end{polaraxis}
    \end{scope}
 }
-% 
-% % center axis
-% \coordinate (PA) at (group c1r2.west);
-% \coordinate (PB) at (group c2r2.east);
-% \coordinate (PC) at (current bounding box.west);
-% \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
-% % 
+\coordinate (T) at (current bounding box.north);
+\coordinate (B) at (current bounding box.south);
+\coordinate (C1) at ($(B0)!0.5!(A1)$);
+\coordinate (L) at (current bounding box.west);
+\coordinate (R) at (current bounding box.east);
+\coordinate (C2) at ($(A0)!0.5!(A2)$);
+\draw[dashed] (T -| C1) -- (B -| C1);
+\draw[dashed] (L |- C2) -- (R |- C2);
+\path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
+%
 \end{tikzpicture}
 % 
 \end{document}
