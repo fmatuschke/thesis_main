@@ -109,10 +109,10 @@ for i, row in df.iterrows():
 df['domega'] = asd
 
 #%%
-
-if False:
-    for _, row in tqdm.tqdm(list(df.sort_values("f0_inc").iterrows())[::],
-                            total=len(df) // 1):
+#%%
+os.makedirs(os.path.join(FILE_PATH, 'output', DATASET, "hist"), exist_ok=True)
+if True:
+    for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_orientation(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -120,7 +120,8 @@ if False:
                                ncols=2,
                                subplot_kw=dict(projection="polar"),
                                figsize=(3.5, 2))
-        fig.suptitle(f"incl:{row.f0_inc}")
+        fig.suptitle(f"omega:{row.omega}")
+        # TODO: wichtung
         fastpli.analysis.orientation.histogram(phi,
                                                theta,
                                                ax=ax[0],
@@ -129,61 +130,45 @@ if False:
                                                weight_area=True,
                                                fun=lambda x: np.log(x + 1),
                                                cmap='cividis')
-
-        # ax[0].hist2d(
-        #     phi,
-        #     np.rad2deg(theta),
-        #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-        #           np.linspace(0, 90, 9 + 1)],
-        #     cmap=plt.get_cmap("cividis"),
-        #     # norm=mpl.colors.LogNorm(),
-        # )
-        #
         #
         phi, theta = models.ori_from_file(
             get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
             CONFIG.simulation.voi)
-        phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
-        fastpli.analysis.orientation.histogram(phi,
-                                               theta,
-                                               ax=ax[1],
-                                               n_phi=36,
-                                               n_theta=9,
-                                               weight_area=True,
-                                               fun=lambda x: np.log(x + 1),
-                                               cmap='cividis')
 
-        # df_omega = df_omega.append(
-        #     {
-        #         'f0_inc': row.f0_inc,
-        #         'radius': row.radius,
-        #         'omega': row.omega,
-        #         'psi': row.psi,
-        #         'species': row.species,
-        #         'microscope': row.microscope,
-        #         'f1_rot': row.f1_rot,
-        #         'domega': np.rad2deg(calc_omega(phi, theta))
-        #     },
-        #     ignore_index=True)
+        # to tex
+        h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
+                                                            theta,
+                                                            n_phi=36 * 2,
+                                                            n_theta=18,
+                                                            weight_area=True)
 
-        # ax[1].hist2d(
-        #     phi,
-        #     np.rad2deg(theta),
-        #     bins=[np.linspace(0, 2 * np.pi, 36 + 1),
-        #           np.linspace(0, 90, 9 + 1)],
-        #     cmap=plt.get_cmap("cividis"),
-        #     # norm=mpl.colors.LogNorm(),
-        # )
+        # 2d hist
+        with open(
+                os.path.join(
+                    FILE_PATH, 'output', DATASET, "hist",
+                    f"sim_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
+                ), "w") as f:
 
-        # plt.tight_layout()
-        plt.tight_layout(pad=0, w_pad=0, h_pad=0)
+            H = h
+            x_axis = x
+            y_axis = y
 
-        plt.savefig(
-            os.path.join(
-                FILE_PATH,
-                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_hist_{row.f0_inc}.pdf"
-            ))
-        plt.close()
+            # for pgfplots matrix plot*
+            x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
+            y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
+            H = H.T / np.sum(H.ravel())
+
+            X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
+
+            # print(X.shape)
+            # print(Y.shape)
+            # print(H.shape)
+            for h_array, x_array, y_array in zip(H, X, Y):
+                for h, x, y in zip(h_array, x_array, y_array):
+                    if y <= 90:
+                        f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
+                f.write('\n')
+
 # %%
 # fig, axs = plt.subplots(1, 1)
 

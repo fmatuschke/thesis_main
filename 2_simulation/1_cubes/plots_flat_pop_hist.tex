@@ -1,0 +1,144 @@
+\documentclass[tikz]{standalone}
+\usepackage{float}              % [H]
+\usepackage{graphicx}           % (pdf, png, jpg, eps)
+\usepackage{pgfplots}
+\usepackage{siunitx}
+\usepackage{currfile}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{polar}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{statistics}
+\tikzset{>=latex}
+% 
+\newlength{\width}
+\newlength{\height}
+\setlength{\width}{13.87303cm} %5.462 inch
+\setlength{\height}{22.37076cm} %8,807 inch
+\def\datapath{../../__PATH__/hist}
+\directlua0{
+  pdf.setinfo ("/Path: (__PATH__)")
+}
+% 
+\def\vrf{\langle{r_f}\rangle}
+\def\vfl{\nu_{l}}
+\def\vfr{\nu_{r}}
+% 
+\definecolor{dark21}{HTML}{1b9e77}
+\definecolor{dark22}{HTML}{d95f02}
+\definecolor{dark23}{HTML}{7570b3}
+\colorlet{RED}{dark22}
+\colorlet{GREEN}{dark21}
+\colorlet{BLUE}{dark23} 
+% 
+\begin{document}
+% 
+\pgfplotsset{%
+  colormap/cividis/.style={colormap={cividis}{[1pt]
+    rgb(0pt)=(0.00000000, 0.13511200, 0.30475100);
+    rgb(25pt)=(0.25974000, 0.30512000, 0.42281000);
+    rgb(50pt)=(0.48514100, 0.48245100, 0.47038400);
+    rgb(75pt)=(0.73242200, 0.67736400, 0.42571700);
+    rgb(100pt)=(0.99573700, 0.90934400, 0.21777200);
+}}}
+% 
+\pgfplotsset{%
+   PStyle/.style={%
+      every axis/.append style={font=\small},
+      width = 0.17\width, height = 0.17\width,
+      scale only axis,
+      xtick={0,45,...,315},
+      ytick={60,30},
+      yticklabels={$\SI{30}{\degree}$,$\SI{60}{\degree}$},
+      yticklabel style=white,
+      tickwidth=0, xtick distance = 45,
+      separate axis lines, y axis line style= { draw opacity=0 },
+      ymin=0, ymax=90,
+      axis on top=true,
+      colormap/cividis,
+      % colorbar, colorbar style={ytick=\empty, width=5pt}, 
+   }
+}
+% 
+\begin{tikzpicture}[]
+% 
+\def\p{3}
+\def\delta{3.3}
+\foreach \o[count=\oi from 0] in {0,30,60,90}{
+   %
+   \pgfmathparse{2*1.05*\delta*Mod(\oi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
+   \pgfmathparse{1*1.05*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   % 
+   \begin{scope}[shift={(\px + 0.00,-\py)}]
+      \begin{polaraxis}[
+         PStyle,
+      ]
+         % FIXME: model, TODO: for now only dummy
+         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+            \datapath/sim_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_0.0.dat};
+      \end{polaraxis}
+   \end{scope}
+   %
+   % simulation
+   \begin{scope}[shift={(\px + \delta,-\py)}]
+      \begin{polaraxis}[
+         PStyle,
+      ]
+         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+            \datapath/sim_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_0.0.dat};
+      \end{polaraxis}
+   \end{scope}
+}
+% 
+% % center axis
+% \coordinate (PA) at (group c1r2.west);
+% \coordinate (PB) at (group c2r2.east);
+% \coordinate (PC) at (current bounding box.west);
+% \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+% % 
+\end{tikzpicture}
+% 
+\begin{tikzpicture}[]
+% 
+\def\p{5}
+\def\delta{3.3}
+\foreach \o[count=\oi from 0] in {0,30,60,90}{
+   %
+   \pgfmathparse{2*1.05*\delta*Mod(\oi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
+   \pgfmathparse{1*1.05*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   % 
+   \begin{scope}[shift={(\px + 0.00,-\py)}]
+      \begin{polaraxis}[
+         PStyle,
+      ]
+         % FIXME: model, TODO: for now only dummy
+         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+            \datapath/sim_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_0.0.dat};
+      \end{polaraxis}
+   \end{scope}
+   %
+   % simulation
+   \begin{scope}[shift={(\px + \delta,-\py)}]
+      \begin{polaraxis}[
+         PStyle,
+      ]
+         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+            \datapath/sim_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_0.0.dat};
+      \end{polaraxis}
+   \end{scope}
+}
+% 
+% % center axis
+% \coordinate (PA) at (group c1r2.west);
+% \coordinate (PB) at (group c2r2.east);
+% \coordinate (PC) at (current bounding box.west);
+% \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+% % 
+\end{tikzpicture}
+% 
+\end{document}
