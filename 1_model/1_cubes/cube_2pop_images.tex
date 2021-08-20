@@ -1,49 +1,64 @@
-\documentclass[varwidth=60cm, multi=page]{standalone}
+\documentclass[multi=page]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
 \usepackage{tikz}
 \usepackage{ifthen}
+\usepackage{siunitx}
+\usetikzlibrary{calc}
 % \usetikzlibrary{external}
 % \tikzexternalize[prefix=./output/tmp/]
 % 
 \def\datapath{../../__PATH__/images}
 \directlua0{
   pdf.setinfo ("/Path: (__PATH__)")
-}
+}%
+
+
+\newlength\width
+\newlength\height
+\setlength{\width}{13.87303cm} %5.433
+\setlength{\height}{22.37076cm} %8.8
 % 
 \begin{document}
 % 
-\foreach \r in {0.50,1.00,2.00,5.00,10.00} {
+\def\r{0.50}
+\def\d{4.1}
 \begin{page}
 \begin{tikzpicture}
-\foreach \omega [count=\i] in {0,30,60,90} {
-\foreach \psi [count=\j] in {0.1,0.3,0.5,0.7} {
-      \node[inner sep=0pt] (\i\j) at (\j*2.99,-\i*2.99) {\includegraphics[trim=103 69 57 91, clip, width=3cm]{\datapath/cube_2pop_psi_\psi0_omega_\omega.00_r_\r_v0_135_.solved.png}};
-      \ifthenelse{\j=1}{ 
-            \node[xshift=-1em] at (\i\j.west) {$\omega$};}{}
-      \ifthenelse{\i=1}{\node[yshift=1em] at (\i\j.north) {$\psi$};}{}
-}}
-\path[use as bounding box] (11.north west) rectangle (44.south east);
+   \foreach \o [count=\i] in {30,60,90} {
+      \foreach \p [count=\j] in {3,6,9} {
+         \node[inner sep=0pt] (\i\j) at (\j*\d,-\i*\d) {%
+            \includegraphics[trim=68 34 23 56, clip, width=0.31\width]{%
+               \datapath/cube_2pop_psi_0.\p0_omega_\o.00_r_\r_v0_135_.solved.png}};
+         \ifthenelse{\j=1}{ 
+            \node[rotate=90, anchor=south] at (\i\j.west) {$\Omega=\SI{\o}{\degree}$};}{}
+         \ifthenelse{\i=1}{
+            \node[anchor=south] at (\i\j.north) {$\Psi=\SI{\p0}{\percent}$};}{}
+      }
+   }
+   % center axis
+   \coordinate (C) at (22.south);
+   \path[] let \p1 = ($({current bounding box.south west})-(C)$) in ($(C) - (\x1,0)$) -- ($(C) + (\x1,0)$);
 \end{tikzpicture}
 \end{page}
 % 
-% FULL PARAMETERS
-% 
 \begin{page}
 \begin{tikzpicture}
-\foreach \omega [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
-\foreach \psi [count=\j] in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
-\ifthenelse{\i=1}{
-      \node[inner sep=0pt] (\i\j) at (\j*2.99,-\i*2.99) {\includegraphics[trim=103 69 57 91, clip, width=3cm]{\datapath/cube_2pop_psi_0.00_omega_\omega.00_r_\r_v0_135_.solved.png}};
-}{
-      \node[inner sep=0pt] (\i\j) at (\j*2.99,-\i*2.99) {\includegraphics[trim=103 69 57 91, clip, width=3cm]{\datapath/cube_2pop_psi_\psi0_omega_\omega.00_r_\r_v0_135_.solved.png}};
-}
-\ifthenelse{\j=1}{\node[xshift=-1em] at (\i\j.west) {$\omega$};}{}
-\ifthenelse{\i=1}{\node[yshift=1em] at (\i\j.north) {$\psi$};}{}
-}}
-\path[use as bounding box] (11.north west) rectangle (109.south east);
+   \foreach \o [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
+      \foreach \p [count=\j] in {1,2,3,4,5,6,7,8,9} {
+         \node[inner sep=0pt] (\i\j) at (\j*\d,-\i*\d) {%
+            \includegraphics[trim=68 34 23 56, clip, width=0.31\width]{%
+               \datapath/cube_2pop_psi_0.\p0_omega_\o.00_r_\r_v0_135_.solved.png}};
+         \ifthenelse{\j=1}{ 
+            \node[rotate=90, anchor=south] at (\i\j.west) {$\Omega=\SI{\o}{\degree}$};}{}
+         \ifthenelse{\i=1}{
+            \node[anchor=south] at (\i\j.north) {$\Psi=\SI{\p0}{\percent}$};}{}
+      }
+   }
+   % center axis
+   \coordinate (C) at (55.south);
+   \path[] let \p1 = ($({current bounding box.south west})-(C)$) in ($(C) - (\x1,0)$) -- ($(C) + (\x1,0)$);
 \end{tikzpicture}
 \end{page}
-}
 % 
 \end{document}

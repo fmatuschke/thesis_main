@@ -22,6 +22,8 @@ python3 pre_stats_time_evolve.py -i output/parameter_statistic -p 48
 
 python3 pre_stats_box_plot.py -i output/parameter_statistic
 ./pre_stats_box_plot.sh output/parameter_statistic
+
+./plot.sh cube_2pop_orientation_hist2d.tex output/cube_2pop_135_rc1
 ```
 
 df\_ = df.apply(pd.Series.explode).reset_index()
