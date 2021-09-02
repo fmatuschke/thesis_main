@@ -49,7 +49,7 @@
 % 
 \pgfplotsset{%
    PStyle/.style={%
-      every axis/.append style={font=\small},
+      every axis/.append style={font=\scriptsize},
       width = 0.17\width, height = 0.17\width,
       scale only axis,
       xtick={0,45,...,315},
@@ -65,9 +65,14 @@
    }
 }
 % 
+% 
+% 
+\foreach \p in {1,2,3,4,5,6,7,8,9} {% 
+\directlua{tex.print('\string\\message{\p}')}
+% 
 \begin{tikzpicture}[]
 % 
-\def\p{3}
+% \def\p{5}
 \def\delta{3.3}
 \foreach \o[count=\oi from 0] in {0,30,60,90}{
    %
@@ -94,24 +99,53 @@
          \coordinate (B\oi) at (0,0);
       \end{polaraxis}
    \end{scope}
+   % 
+   \node[anchor=south, yshift=1.3cm] at ($(A\oi)!0.5!(B\oi)$) {\footnotesize $\Omega = \SI{\o}{\degree}$};
 }
-\coordinate (T) at (current bounding box.north);
-\coordinate (B) at (current bounding box.south);
-\coordinate (C1) at ($(B0)!0.5!(A1)$);
-\coordinate (L) at (current bounding box.west);
-\coordinate (R) at (current bounding box.east);
-\coordinate (C2) at ($(A0)!0.5!(A2)$);
-\draw[dashed] (T -| C1) -- (B -| C1);
-\draw[dashed] (L |- C2) -- (R |- C2);
+% \coordinate (T) at (current bounding box.north);
+% \coordinate (B) at (current bounding box.south);
+% \coordinate (C1) at ($(B0)!0.5!(A1)$);
+% \coordinate (L) at (current bounding box.west);
+% \coordinate (R) at (current bounding box.east);
+% \coordinate (C2) at ($(A0)!0.5!(A2)$);
+% \draw[dashed] (T -| C1) -- (B -| C1);
+% \draw[dashed] (L |- C2) -- (R |- C2);
 \path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
+% 
+\draw[dashed] (current bounding box.north) -- (current bounding box.south);
+\draw[dashed] (current bounding box.west) -- (current bounding box.east);
+%
+\node[anchor=south] at (current bounding box.north) {$\Psi = \SI{\p0}{\percent}$};
+%
+\begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
+\begin{axis}[
+    hide axis,
+    scale only axis,
+    height=0pt, width=0pt,
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    colormap/cividis,
+    colorbar horizontal,
+    point meta min = 0,
+    point meta max = 1,
+    colorbar style={
+        width=10cm,
+        xticklabel style={tick label style={font=\footnotesize}},
+        xtick={0,1},
+        xticklabels={$0$,$\mathit{max}$},
+    }]
+\end{axis}
+\end{scope}
 % 
 \end{tikzpicture}
+}
+% 
+% 
 % 
 \begin{tikzpicture}[]
 % 
-\def\p{5}
+\def\p{0}
 \def\delta{3.3}
-\foreach \o[count=\oi from 0] in {0,30,60,90}{
+\foreach \o[count=\oi from 0] in {0}{
    %
    \pgfmathparse{2*1.05*\delta*Mod(\oi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
    \pgfmathparse{1*1.05*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
@@ -136,16 +170,30 @@
          \coordinate (B\oi) at (0,0);
       \end{polaraxis}
    \end{scope}
+   % 
 }
-\coordinate (T) at (current bounding box.north);
-\coordinate (B) at (current bounding box.south);
-\coordinate (C1) at ($(B0)!0.5!(A1)$);
-\coordinate (L) at (current bounding box.west);
-\coordinate (R) at (current bounding box.east);
-\coordinate (C2) at ($(A0)!0.5!(A2)$);
-\draw[dashed] (T -| C1) -- (B -| C1);
-\draw[dashed] (L |- C2) -- (R |- C2);
-\path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
+\path[] ($(A0)!-0.575!(B0)$) -- ($(A0)!1.575!(B0)$);
+%
+\node[anchor=south] at (current bounding box.north) {$\Psi = \SI{100}{\percent}$};
+%
+\begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
+\begin{axis}[
+    hide axis,
+    scale only axis,
+    height=0pt, width=0pt,
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    colormap/cividis,
+    colorbar horizontal,
+    point meta min = 0,
+    point meta max = 1,
+    colorbar style={
+        width=10cm,
+        xticklabel style={tick label style={font=\footnotesize}},
+        xtick={0,1},
+        xticklabels={$0$,$\mathit{max}$},
+    }]
+\end{axis}
+\end{scope}
 % 
 \end{tikzpicture}
 % 

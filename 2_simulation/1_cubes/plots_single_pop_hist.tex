@@ -49,7 +49,7 @@
 % 
 \pgfplotsset{%
    PStyle/.style={%
-      every axis/.append style={font=\small},
+      every axis/.append style={font=\scriptsize},
       width = 0.17\width, height = 0.17\width,
       scale only axis,
       xtick={0,45,...,315},
@@ -93,6 +93,8 @@
          \coordinate (B\xi) at (0,0);
       \end{polaraxis}
    \end{scope}
+   % 
+   \node[anchor=south, yshift=1.3cm] at ($(A\xi)!0.5!(B\xi)$) {\scriptsize $\alpha_{\mathit{incl}} = \SI{\x}{\degree}$};
 }
 \coordinate (T) at (current bounding box.north);
 \coordinate (B) at (current bounding box.south);
@@ -104,6 +106,184 @@
 \draw[dashed] (L |- C2) -- (R |- C2);
 \path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
 %
+\begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
+\begin{axis}[
+    hide axis,
+    scale only axis,
+    height=0pt, width=0pt,
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    colormap/cividis,
+    colorbar horizontal,
+    point meta min = 0,
+    point meta max = 1,
+    colorbar style={
+        width=10cm,
+        xticklabel style={tick label style={font=\footnotesize}},
+        xtick={0,1},
+        xticklabels={$0$,$\mathit{max}$},
+    }]
+\end{axis}
+\end{scope}
+%
 \end{tikzpicture}
 % 
+% 
+% 
+\begin{tikzpicture}[]
+% 
+\def\delta{3.3}
+\foreach \x[count=\xi from 0] in {0,5,10,15,20,25,30,35,40,45}{
+   %
+   \pgfmathparse{2*1.05*\delta*Mod(\xi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
+   \pgfmathparse{1*1.05*\delta*div(\xi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   % 
+   \begin{scope}[shift={(\px + 0.00,-\py)}]
+      \begin{polaraxis}[
+         PStyle,
+      ]
+         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+            \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+         \coordinate (A\xi) at (0,0);
+      \end{polaraxis}
+   \end{scope}
+   %
+   % simulation
+   \begin{scope}[shift={(\px + \delta,-\py)}]
+      \begin{polaraxis}[
+         PStyle,
+      ]
+         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+            \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+         \coordinate (B\xi) at (0,0);
+      \end{polaraxis}
+   \end{scope}
+   % 
+   \node[anchor=south, yshift=1.3cm] at ($(A\xi)!0.5!(B\xi)$) {\scriptsize $\alpha_{\mathit{incl}} = \SI{\x}{\degree}$};
+}
+% 
+\path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
+% 
+\coordinate (L) at (current bounding box.west);
+\coordinate (R) at (current bounding box.east);
+% 
+\coordinate (C1) at ($(B0)!0.5!(A1)$);
+\coordinate (C2) at ($(A0)!0.5!(A2)$);
+\draw[dashed] (L |- C2) -- (R |- C2);
+% 
+\coordinate (C3) at ($(B2)!0.5!(A3)$);
+\coordinate (C4) at ($(A2)!0.5!(A4)$);
+\draw[dashed] (L |- C4) -- (R |- C4);
+% 
+\coordinate (C5) at ($(B4)!0.5!(A5)$);
+\coordinate (C6) at ($(A4)!0.5!(A6)$);
+\draw[dashed] (L |- C6) -- (R |- C6);
+%
+\coordinate (C7) at ($(B6)!0.5!(A7)$);
+\coordinate (C8) at ($(A6)!0.5!(A8)$);
+\draw[dashed] (L |- C8) -- (R |- C8);
+% 
+\draw[dashed] (current bounding box.north) -- (current bounding box.south);
+%
+\begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
+\begin{axis}[
+    hide axis,
+    scale only axis,
+    height=0pt, width=0pt,
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    colormap/cividis,
+    colorbar horizontal,
+    point meta min = 0,
+    point meta max = 1,
+    colorbar style={
+        width=10cm,
+        xticklabel style={tick label style={font=\footnotesize}},
+        xtick={0,1},
+        xticklabels={$0$,$\mathit{max}$},
+    }]
+\end{axis}
+\end{scope}
+% 
+\end{tikzpicture}
+% 
+% 
+% 
+% 
+% 
+% 
+\begin{tikzpicture}[]
+% 
+\def\delta{3.3}
+\foreach \x[count=\xi from 0] in {50,55,60,65,70,75,80,85,90}{
+   %
+   \pgfmathparse{2*1.05*\delta*Mod(\xi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
+   \pgfmathparse{1*1.05*\delta*div(\xi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   % 
+   \begin{scope}[shift={(\px + 0.00,-\py)}]
+      \begin{polaraxis}[
+         PStyle,
+      ]
+         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+            \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+         \coordinate (A\xi) at (0,0);
+      \end{polaraxis}
+   \end{scope}
+   %
+   % simulation
+   \begin{scope}[shift={(\px + \delta,-\py)}]
+      \begin{polaraxis}[
+         PStyle,
+      ]
+         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+            \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+         \coordinate (B\xi) at (0,0);
+      \end{polaraxis}
+   \end{scope}
+   % 
+   \node[anchor=south, yshift=1.3cm] at ($(A\xi)!0.5!(B\xi)$) {\scriptsize $\alpha_{\mathit{incl}} = \SI{\x}{\degree}$};
+}
+% 
+\path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
+% 
+\coordinate (L) at (current bounding box.west);
+\coordinate (R) at (current bounding box.east);
+% 
+\coordinate (C1) at ($(B0)!0.5!(A1)$);
+\coordinate (C2) at ($(A0)!0.5!(A2)$);
+\draw[dashed] (L |- C2) -- (R |- C2);
+% 
+\coordinate (C3) at ($(B2)!0.5!(A3)$);
+\coordinate (C4) at ($(A2)!0.5!(A4)$);
+\draw[dashed] (L |- C4) -- (R |- C4);
+% 
+\coordinate (C5) at ($(B4)!0.5!(A5)$);
+\coordinate (C6) at ($(A4)!0.5!(A6)$);
+\draw[dashed] (L |- C6) -- (R |- C6);
+%
+\coordinate (C7) at ($(B6)!0.5!(A7)$);
+\coordinate (C8) at ($(A6)!0.5!(A8)$);
+\draw[dashed] (L |- C8) -- (R |- C8);
+% 
+\draw[dashed] (current bounding box.north) -- (current bounding box.south);
+%
+\begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
+\begin{axis}[
+    hide axis,
+    scale only axis,
+    height=0pt, width=0pt,
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    colormap/cividis,
+    colorbar horizontal,
+    point meta min = 0,
+    point meta max = 1,
+    colorbar style={
+        width=10cm,
+        xticklabel style={tick label style={font=\footnotesize}},
+        xtick={0,1},
+        xticklabels={$0$,$\mathit{max}$},
+    }]
+\end{axis}
+\end{scope}
+% 
+\end{tikzpicture}
+%
 \end{document}
