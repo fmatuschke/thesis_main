@@ -77,9 +77,10 @@
 \foreach \o[count=\oi from 0] in {0,30,60,90}{
    %
    \pgfmathparse{2*1.05*\delta*Mod(\oi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
-   \pgfmathparse{1*1.05*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   \pgfmathparse{1*1.2*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
    % 
-   \begin{scope}[shift={(\px + 0.00,-\py)}]
+    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\oi}]
+   \begin{scope}[shift={(\px + 0.00,0)}]
       \begin{polaraxis}[
          PStyle,
       ]
@@ -90,7 +91,7 @@
    \end{scope}
    %
    % simulation
-   \begin{scope}[shift={(\px + \delta,-\py)}]
+   \begin{scope}[shift={(\px + \delta,0)}]
       \begin{polaraxis}[
          PStyle,
       ]
@@ -99,23 +100,29 @@
          \coordinate (B\oi) at (0,0);
       \end{polaraxis}
    \end{scope}
+   \end{scope}
    % 
-   \node[anchor=south, yshift=1.3cm] at ($(A\oi)!0.5!(B\oi)$) {\footnotesize $\Omega = \SI{\o}{\degree}$};
+   \node[anchor=south, yshift=1.3cm] at ($(A\oi)!0.5!(B\oi)$)
+      {\scriptsize $\Omega = \SI{\o}{\degree}$};
+   \node[anchor=south, yshift=1.5cm] at ($(A\oi)$)
+      {\scriptsize model};
+   \node[anchor=south, yshift=1.5cm] at ($(B\oi)$)
+      {\scriptsize simulation};
+   \coordinate (NN\oi) at (BB\oi.north);
+   \coordinate (SS\oi) at (BB\oi.south);
 }
-% \coordinate (T) at (current bounding box.north);
-% \coordinate (B) at (current bounding box.south);
-% \coordinate (C1) at ($(B0)!0.5!(A1)$);
-% \coordinate (L) at (current bounding box.west);
-% \coordinate (R) at (current bounding box.east);
-% \coordinate (C2) at ($(A0)!0.5!(A2)$);
-% \draw[dashed] (T -| C1) -- (B -| C1);
-% \draw[dashed] (L |- C2) -- (R |- C2);
+\coordinate (T) at (current bounding box.north);
+\coordinate (B) at (current bounding box.south);
+\coordinate (C1) at ($(B0)!0.5!(A1)$);
+\coordinate (L) at (current bounding box.west);
+\coordinate (R) at (current bounding box.east);
+\coordinate (C2) at ($(NN0)!0.5!(SS2)$);
+% 
+\draw[dashed] (T -| C1) -- (B -| C1);
+\draw[dashed] (L |- C2) -- (R |- C2);
 \path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
 % 
-\draw[dashed] (current bounding box.north) -- (current bounding box.south);
-\draw[dashed] (current bounding box.west) -- (current bounding box.east);
-%
-\node[anchor=south] at (current bounding box.north) {$\Psi = \SI{\p0}{\percent}$};
+\node[anchor=south] at (current bounding box.north) {\small crossing fiber pop., $\Psi = \SI{\p0}{\percent}$};
 %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
 \begin{axis}[
@@ -129,6 +136,7 @@
     point meta max = 1,
     colorbar style={
         width=10cm,
+        height=0.42cm,
         xticklabel style={tick label style={font=\footnotesize}},
         xtick={0,1},
         xticklabels={$0$,$\mathit{max}$},
@@ -148,7 +156,7 @@
 \foreach \o[count=\oi from 0] in {0}{
    %
    \pgfmathparse{2*1.05*\delta*Mod(\oi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
-   \pgfmathparse{1*1.05*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   \pgfmathparse{1*1.2*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
    % 
    \begin{scope}[shift={(\px + 0.00,-\py)}]
       \begin{polaraxis}[
@@ -174,8 +182,13 @@
 }
 \path[] ($(A0)!-0.575!(B0)$) -- ($(A0)!1.575!(B0)$);
 %
-\node[anchor=south] at (current bounding box.north) {$\Psi = \SI{100}{\percent}$};
-%
+\node[anchor=south, yshift=1.5cm] at ($(A0)$)
+   {\scriptsize model};
+\node[anchor=south, yshift=1.5cm] at ($(B0)$)
+   {\scriptsize simulation};
+\node[anchor=south] at (current bounding box.north)
+   {\small crossing fiber pop., $\Psi = \SI{100}{\percent}$};
+   %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
 \begin{axis}[
     hide axis,
@@ -188,6 +201,7 @@
     point meta max = 1,
     colorbar style={
         width=10cm,
+        height=0.42cm,
         xticklabel style={tick label style={font=\footnotesize}},
         xtick={0,1},
         xticklabels={$0$,$\mathit{max}$},

@@ -14,6 +14,7 @@
 \usepgfplotslibrary{groupplots}
 \usepgfplotslibrary{statistics}
 \tikzset{>=latex}
+\DeclareSIUnit{\arbitraryunit}{a.u.}
 % 
 \newlength{\width}
 \newlength{\height}
@@ -92,7 +93,7 @@
    % cycle list/Paired-10,
 ]
 % 
-\nextgroupplot[title={\vphantom{/}transmittance}]
+\nextgroupplot[title={\vphantom{/}transmittance / $\si{\arbitraryunit}$}]
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot, fill, draw=black] table[%
       y={epa_trans_\inc}, col sep=comma, row sep=newline,
@@ -150,11 +151,12 @@
 % 
 \end{groupplot}
 % 
-% \node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {\large $\Psi = \psi$};
-% 
+\node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {single fiber pop.};
 % center axis
 \coordinate (PA) at (group c1r2.west);
 \coordinate (PB) at (group c2r2.east);
+\coordinate (TA) at (group c1r1.north);
+\coordinate (TB) at (group c2r1.north);
 \coordinate (PC) at (current bounding box.west);
 \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
 % 

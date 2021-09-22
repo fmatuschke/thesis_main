@@ -18,6 +18,7 @@ python3 resolution.ipy
 
 ```sh
 python3 measure_vervet.ipy
+./plot.sh birefringence.tex output/bf_rc1 --single
 ```
 
 # voxel size
