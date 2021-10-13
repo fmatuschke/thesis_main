@@ -55,18 +55,18 @@
         },
         boxplot/draw direction=y,
     },
-}
-%% 
+} 
+%
 \foreach \setup [count=\k] in {PM} { % LAP
 \foreach \species [count=\l] in {Roden,Vervet,Human} { % {Roden,Vervet,Human}
 % 
 \begin{tikzpicture}[]
 \begin{axis}[%
-   width = 0.75*\width,
+   width = 0.1*\width,
    height = 0.22*\height,
    scale only axis,
    xmin=0.42,
-   xmax=5.58,
+   xmax=1.58,
    axis x line=none,
    axis y line=left,
    enlarge y limits,
@@ -76,89 +76,28 @@
    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
    Boxplot,
    ]
-\foreach \dn [count=\idn] in {0.002,0.004,0.006,0.008,0.01}{
+\foreach \dn [count=\idn] in {0.008}{ %0.002,0.004,0.006,0.008,0.01
    \foreach \r in {0.5,1.0,2.0,5.0,10.0}{
       \addplot+[fill, draw=black] table[%
          y={\r_\dn}, col sep=comma, row sep=newline,
          ]{\datapath/transmittance_\setup_\species.csv};
    }
 }
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+\draw[decorate,decoration={brace,amplitude=1ex,mirror},white]
    ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) --
    ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.002}{}$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.004}{}$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.006}{}$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.008}{}$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:4.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:5.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.01}{}$};
-% 
-% center axis
-\coordinate (PC) at (rel axis cs:0.5,0);
-% 
+   node [white,midway,below,yshift=-1ex, align=left]
+   {\footnotesize \phantom{$\Delta n = \SI{0.002}{}$}};
 \end{axis}
-% 
-% LEGENDE
-\begin{axis}[%
-    hide axis,
-    scale only axis,
-    height=0pt,
-    width=0pt,
-    cycle list/Paired-5,
-    legend to name={legendT\k\l},
-    legend style={draw=white!15!black,legend cell align=left},
-    legend transposed=true,
-    legend columns=2,
-    legend style={/tikz/every even column/.append style={column sep=1ex}},
-    legend entries={%
-        {$\mathit{v_{s}}=\SI{0.002}{}$},
-        {$\mathit{v_{s}}=\SI{0.004}{}$},
-        {$\mathit{v_{s}}=\SI{0.006}{}$},
-        {$\mathit{v_{s}}=\SI{0.008}{}$},
-        {$\mathit{v_{s}}=\SI{0.01}{}$},
-    },
-    legend image post style={mark=square*, only marks},
-    ]
-    \addplot+[] coordinates {(0,0)};
-    \addplot+[] coordinates {(0,0)};
-    \addplot+[] coordinates {(0,0)};
-    \addplot+[] coordinates {(0,0)};
-    \addplot+[] coordinates {(0,0)};
-\end{axis}
-%
-\node[anchor=north] at (PC |- current bounding box.south) {\ref{legendT\k\l}};
-% 
-% CENTER AXIS
-\coordinate (P) at (current bounding box.west);
-\path[] let \p1 = ($(PC)-(P)$) in (P) -- ($(P) + (2*\x1,0)$);
-% 
 \end{tikzpicture}
 }}
-% 
-% 
 % 
 \foreach \setup [count=\k] in {PM} { % LAP
 \foreach \species [count=\l] in {Roden,Vervet,Human} { % {Roden,Vervet,Human}
 % 
 \begin{tikzpicture}[]
 \begin{axis}[%
-   width = 0.75*\width,
+   width = 0.6*\width,
    height = 0.22*\height,
    scale only axis,
    xmin=0.42,
@@ -205,19 +144,19 @@
    node [black,midway,below,yshift=-1ex, align=left]
    {\footnotesize $\Delta n = \SI{0.01}{}$};
 % 
-% center axis
-\coordinate (PC) at (rel axis cs:0.5,0);
-% 
 \end{axis}
+\end{tikzpicture}
+}}
 % 
+
 % LEGENDE
+\begin{tikzpicture}[] 
 \begin{axis}[%
     hide axis,
     scale only axis,
     height=0pt,
     width=0pt,
     cycle list/Paired-5,
-    legend to name={legendR\k\l},
     legend style={draw=white!15!black,legend cell align=left},
     legend transposed=true,
     legend columns=2,
@@ -236,15 +175,7 @@
     \addplot+[] coordinates {(0,0)};
     \addplot+[] coordinates {(0,0)};
     \addplot+[] coordinates {(0,0)};
-\end{axis}
-%
-\node[anchor=north] at (PC |- current bounding box.south) {\ref{legendR\k\l}};
-% 
-% CENTER AXIS
-\coordinate (P) at (current bounding box.west);
-\path[] let \p1 = ($(PC)-(P)$) in (P) -- ($(P) + (2*\x1,0)$);
-% 
+\end{axis} 
 \end{tikzpicture}
-}}
 % 
 \end{document}

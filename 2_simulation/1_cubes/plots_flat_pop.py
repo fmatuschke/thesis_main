@@ -82,17 +82,17 @@ if True:
         phi, theta = fastpli.analysis.orientation.remap_orientation(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
-        fig, ax = plt.subplots(nrows=1,
-                               ncols=2,
-                               subplot_kw=dict(projection="polar"),
-                               figsize=(3.5, 2))
-        fig.suptitle(f"omega:{row.omega}")
+        # fig, ax = plt.subplots(nrows=1,
+        #                        ncols=2,
+        #                        subplot_kw=dict(projection="polar"),
+        #                        figsize=(3.5, 2))
+        # fig.suptitle(f"omega:{row.omega}")
         #
         # simulation values
         h, x, y, _ = fastpli.analysis.orientation.histogram(
             phi,
             theta,
-            ax=ax[0],
+            # ax=ax[0],
             n_phi=36,
             n_theta=9,
             weight_area=True,
@@ -260,6 +260,20 @@ for psi in df_.psi.unique():
         FILE_PATH, 'output', DATASET, 'analysis',
         f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}.csv"),
                index=False)
+
+    df_theo = pd.DataFrame()
+    N = 10
+    x = np.linspace(0, 90, N, True)
+    y = np.repeat(np.linspace(0, 90, N)[:, None], 10, 1)
+    y[:, 0:int(psi * 10)] = 0
+    y = circmean(y, 180, 0, axis=1)
+    df_theo['x'] = np.linspace(0, 9, N, True)
+    df_theo['y'] = y
+
+    df_theo.to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_theo_dir.csv"),
+                   index=False)
 
 #%%
 

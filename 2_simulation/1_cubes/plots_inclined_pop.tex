@@ -117,16 +117,28 @@
       y={rofl_inc_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
+% 
 \pgfplotsset{update limits=false}
+% individual plots
 \addplot+[mark=none, white,
-   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, semithick]  coordinates {(0,0) (9,0)};
+   dash pattern= on 0.58pt off 0.42pt,dash phase=0.04pt, semithick]  coordinates {(0,0) (9,0)};
 \addplot+[mark=none, black,
-   dash pattern= on 3pt off 3pt]  coordinates {(0,0) (9,0)};
+   dash pattern= on 0.5pt off 0.5pt]  coordinates {(0,0) (9,0)};
 \addplot+[mark=none, white,
-   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, semithick]  coordinates {(0,0) (9,90)};
+   dash pattern= on 0.58pt off 0.42pt,dash phase=0.04pt, semithick]  coordinates {(0,0) (9,90)};
 \addplot+[mark=none, black,
-   dash pattern= on 3pt off 3pt]  coordinates {(0,0) (9,90)};
+   dash pattern= on 0.5pt off 0.5pt]  coordinates {(0,0) (9,90)};
+% circmean
+\addplot+[mark=none, white,
+   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, semithick]  table[%
+      x={x}, y={y}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
+\addplot+[mark=none, black,
+   dash pattern= on 3pt off 3pt]  table[%
+      x={x}, y={y}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
 \pgfplotsset{update limits=true}
+% 
 % 
 \nextgroupplot[title={\vphantom{/}trel}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      

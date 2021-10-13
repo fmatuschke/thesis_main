@@ -114,7 +114,7 @@ df['domega'] = asd
 
 #%%
 os.makedirs(os.path.join(FILE_PATH, 'output', DATASET, "hist"), exist_ok=True)
-if True:
+if False:
     for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_orientation(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
@@ -129,7 +129,7 @@ if True:
         h, x, y, _ = fastpli.analysis.orientation.histogram(
             phi,
             theta,
-            ax=ax[0],
+            # ax=ax[0],
             n_phi=36,
             n_theta=9,
             weight_area=True,
@@ -245,11 +245,19 @@ for psi in df_.psi.unique():
         f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}.csv"),
                index=False)
 
-# %%
+    df_theo = pd.DataFrame()
+    N = 10
+    x = np.linspace(0, 90, N, True)
+    y = np.repeat(np.linspace(0, 90, N)[:, None], 10, 1)
+    y[:, int(psi * 10):] = 0
+    y = circmean(y, 90, -90, axis=1)
+    df_theo['x'] = np.linspace(0, 9, N, True)
+    df_theo['y'] = y
 
-# %%
-
-# %%
+    df_theo.to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_theo_incl.csv"),
+                   index=False)
 
 #%%
 if False:
