@@ -249,7 +249,7 @@ for psi in df_.psi.unique():
     N = 10
     x = np.linspace(0, 90, N, True)
     y = np.repeat(np.linspace(0, 90, N)[:, None], 10, 1)
-    y[:, int(psi * 10):] = 0
+    y[:, 0:int(psi * 10)] = 0
     y = circmean(y, 90, -90, axis=1)
     df_theo['x'] = np.linspace(0, 9, N, True)
     df_theo['y'] = y

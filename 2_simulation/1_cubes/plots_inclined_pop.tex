@@ -129,11 +129,11 @@
 \addplot+[mark=none, black,
    dash pattern= on 0.5pt off 0.5pt]  coordinates {(0,0) (9,90)};
 % circmean
-\addplot+[mark=none, white,
+\addplot+[mark=none, white, smooth,
    dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, semithick]  table[%
       x={x}, y={y}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
-\addplot+[mark=none, black,
+\addplot+[mark=none, black, smooth,
    dash pattern= on 3pt off 3pt]  table[%
       x={x}, y={y}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};

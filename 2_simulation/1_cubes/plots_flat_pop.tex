@@ -167,118 +167,112 @@
 % 
 \end{tikzpicture}
 }
-% % 
-% % 
 % 
 % 
+\pgfplotsset{
+   every tick label/.append style={font=\small,},
+   title style={font=\normalsize,},
+   Boxplot/.style={
+      boxplot={draw position={\plotnumofactualtype+4.5},},
+      boxplot/draw direction=y,
+   },
+}
 % 
+\foreach \psi in {1.0} {
 % 
+\directlua{tex.print('\string\\message{\psi}')}
 % 
+\begin{tikzpicture}[]
 % 
-% \pgfplotsset{
-%    every tick label/.append style={font=\small,},
-%    title style={font=\normalsize,},
-%    Boxplot/.style={
-%       boxplot={draw position={\plotnumofactualtype+4.5},},
-%       boxplot/draw direction=y,
-%    },
-% }
-% % 
-% \foreach \psi in {1.0} {
-% % 
-% \directlua{tex.print('\string\\message{\psi}')}
-% % 
-% \begin{tikzpicture}[]
-% % 
-% \begin{groupplot}[%
-%    group style={
-%       group size=2 by 3,
-%       horizontal sep=1cm,
-%       vertical sep=1cm,
-%       ylabels at=edge left,
-%    },
-%    width = 0.495\width,
-%    height = 0.275\height,
-%    % scale only axis,
-%    xmin=-0.5, xmax=9.5,
-%    xtick={4.5},
-%    % xticklabels={$\SI{0}{\degree}$},
-%    xticklabels={$0$},
-%    xlabel={$\Omega / \si{\degree}$},
-%    every axis x label/.style={
-%       at={(ticklabel* cs:1.0,0.0)},
-%       anchor=north west,
-%    },
-%    every axis title/.append style={
-%       yshift=-8pt,
-%    },
-%    % axis x line=none,
-%    % axis y line=left,
-%    enlarge y limits,
-%    ymajorgrids,
-%    clip=false,
-%    cycle list/Paired-10,
-% ]
-% % 
-% \nextgroupplot[title={\vphantom{/}transmittance}]
-% \foreach \omega in {0.0} {      
-%    \addplot+[Boxplot, fill, draw=black] table[%
-%       y={epa_trans_\omega}, col sep=comma, row sep=newline,
-%       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
-% }
-% % 
-% \nextgroupplot[title={\vphantom{/}retardation}]
-% \foreach \omega in {0.0} {       
-%    \addplot+[Boxplot, fill, draw=black] table[%
-%       y={epa_ret_\omega}, col sep=comma, row sep=newline,
-%       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
-% }
-% % 
-% \nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
-% \foreach \omega in {0.0} {       
-%    \addplot+[Boxplot, fill, draw=black] table[%
-%       y={rofl_dir_\omega}, col sep=comma, row sep=newline,
-%       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
-%    % \addplot+[mark=none, BLUE, dashed] coordinates {(0,0) (9,0)};
-%    % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
-% }
-% % 
-% \nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
-% \foreach \omega in {0.0} {        
-%    \addplot+[Boxplot, fill, draw=black] table[%
-%       y={rofl_inc_\omega}, col sep=comma, row sep=newline,
-%       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
-%    % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,0)};
-% }
-% % 
-% \nextgroupplot[title={\vphantom{/}trel}]
-% \foreach \omega in {0.0} {       
-%    \addplot+[Boxplot, fill, draw=black] table[%
-%       y={rofl_trel_\omega}, col sep=comma, row sep=newline,
-%       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
-% }
-% % 
-% \nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
-% \foreach \omega in {0.0} {     
-%    \addplot+[Boxplot, fill, draw=black] table[%
-%       y={domega_\omega}, col sep=comma, row sep=newline,
-%       ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
-% }
-% %
-% \end{groupplot}
-% % 
-% % \coordinate (CA) at (group c1r1.north);
-% % \coordinate (CB) at (group c2r1.north);
-% \node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {crossing fiber pop., $\Psi = \psi$};
-% % 
-% % center axis
-% \coordinate (PA) at (group c1r2.west);
-% \coordinate (PB) at (group c2r2.east);
-% \coordinate (PC) at (current bounding box.west);
-% \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
-% % 
-% \end{tikzpicture}
-% }
+\begin{groupplot}[%
+   group style={
+      group size=2 by 3,
+      horizontal sep=1cm,
+      vertical sep=1cm,
+      ylabels at=edge left,
+   },
+   width = 0.495\width,
+   height = 0.275\height,
+   % scale only axis,
+   xmin=-0.5, xmax=9.5,
+   xtick={4.5},
+   % xticklabels={$\SI{0}{\degree}$},
+   xticklabels={$0$},
+   xlabel={$\Omega / \si{\degree}$},
+   every axis x label/.style={
+      at={(ticklabel* cs:1.0,0.0)},
+      anchor=north west,
+   },
+   every axis title/.append style={
+      yshift=-8pt,
+   },
+   % axis x line=none,
+   % axis y line=left,
+   enlarge y limits,
+   ymajorgrids,
+   clip=false,
+   cycle list/Paired-10,
+]
+% 
+\nextgroupplot[title={\vphantom{/}transmittance}]
+\foreach \omega in {0.0} {      
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={epa_trans_\omega}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+}
+% 
+\nextgroupplot[title={\vphantom{/}retardation}]
+\foreach \omega in {0.0} {       
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={epa_ret_\omega}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+}
+% 
+\nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
+\foreach \omega in {0.0} {       
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={rofl_dir_\omega}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+   % \addplot+[mark=none, BLUE, dashed] coordinates {(0,0) (9,0)};
+   % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,90)};
+}
+% 
+\nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
+\foreach \omega in {0.0} {        
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={rofl_inc_\omega}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+   % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,0)};
+}
+% 
+\nextgroupplot[title={\vphantom{/}trel}]
+\foreach \omega in {0.0} {       
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={rofl_trel_\omega}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+}
+% 
+\nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
+\foreach \omega in {0.0} {     
+   \addplot+[Boxplot, fill, draw=black] table[%
+      y={domega_\omega}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi.csv};
+}
+%
+\end{groupplot}
+% 
+% \coordinate (CA) at (group c1r1.north);
+% \coordinate (CB) at (group c2r1.north);
+\node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {crossing fiber pop., $\Psi = \psi$};
+% 
+% center axis
+\coordinate (PA) at (group c1r2.west);
+\coordinate (PB) at (group c2r2.east);
+\coordinate (PC) at (current bounding box.west);
+\path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+% 
+\end{tikzpicture}
+}
 % 
 % 
 \end{document}

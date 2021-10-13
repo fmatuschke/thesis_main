@@ -77,7 +77,7 @@ def get_file_from_series(df):
 
 #%%
 os.makedirs(os.path.join(FILE_PATH, 'output', DATASET, "hist"), exist_ok=True)
-if True:
+if False:
     for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_orientation(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
