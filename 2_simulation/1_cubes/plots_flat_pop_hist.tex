@@ -52,7 +52,10 @@
       every axis/.append style={font=\scriptsize},
       width = 0.17\width, height = 0.17\width,
       scale only axis,
-      xtick={0,45,...,315},
+      xtick={0,45,90,135,180,225,270,315},
+      xticklabels={$\SI{0}{\degree}$,$\SI{45}{\degree}$,$\SI{90}{\degree}$,
+                  $\SI{135}{\degree}$,$\SI{180}{\degree}$,$\SI{225}{\degree}$,
+                  $\SI{270}{\degree}$,$\SI{315}{\degree}$},
       ytick={60,30},
       yticklabels={$\SI{30}{\degree}$,$\SI{60}{\degree}$},
       yticklabel style=white,
@@ -139,7 +142,7 @@
         height=0.42cm,
         xticklabel style={tick label style={font=\footnotesize}},
         xtick={0,1},
-        xticklabels={$0$,$\mathit{max}$},
+        xticklabels={$0$,$\log(\mathit{max+1})$},
     }]
 \end{axis}
 \end{scope}
@@ -204,7 +207,7 @@
         height=0.42cm,
         xticklabel style={tick label style={font=\footnotesize}},
         xtick={0,1},
-        xticklabels={$0$,$\mathit{max}$},
+        xticklabels={$0$,$\log(\mathit{max+1})$},
     }]
 \end{axis}
 \end{scope}

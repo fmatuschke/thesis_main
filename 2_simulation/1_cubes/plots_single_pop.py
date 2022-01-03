@@ -127,8 +127,8 @@ if True:
             phi,
             theta,
             ax=ax[0],
-            n_phi=36,
-            n_theta=9,
+            n_phi=36 * 2,
+            n_theta=18,
             weight_area=True,
             fun=lambda x: np.log(x + 1),
             cmap='cividis')
