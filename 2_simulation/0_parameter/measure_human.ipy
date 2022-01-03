@@ -3,10 +3,20 @@ import numpy as np
 import skimage.io
 import os
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import cv2
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+
+
+#%%
+def save_img(name, data, vmin, vmax):
+    cmap = cm.cividis
+    norm = plt.Normalize(vmin=vmin, vmax=vmax)
+    image = cmap(norm(data))
+    plt.imsave(name, image, origin='lower')
+
 
 #%%
 retardation = skimage.io.imread(os.path.join(
@@ -21,102 +31,154 @@ transmittance = skimage.io.imread(os.path.join(
                                   plugin='simpleitk')
 
 # %%
-skip = 25
+skip = 15
 plt.imshow(transmittance[::skip, ::skip],
            cmap=plt.get_cmap('cividis'),
            origin='lower')
 
 # %%
-roi = np.array([[0, 235], [300, 400], [300, 500], [0, 300]])
-roi = np.vstack((roi, roi[0, :]))
-roi *= 25
+rightroi = np.array([[0, 235], [300, 400], [300, 500], [0, 300]])
+rightroi = np.vstack((rightroi, rightroi[0, :]))
+rightroi *= 25
 
 clip = np.array([[0, 200], [420, 500]]) * 25
-skip = 5
+# skip = 5
+
+# transmittance BG
+plt.subplots()
+vmax = np.mean(transmittance[600:4200:skip, 600:4200:skip].ravel())
+vmax += np.std(transmittance[600:4200:skip, 600:4200:skip].ravel()) * 5
+plt.imshow(transmittance[600:4200:skip, 600:4200:skip],
+           cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=vmax,
+           origin='lower')
+cval = (np.amin(transmittance[600:4200:skip, 600:4200:skip]),
+        np.amax(transmittance[600:4200:skip, 600:4200:skip]))
+print(vmax)
 
 # transmittance
 plt.subplots()
 plt.imshow(transmittance[clip[0, 1]:clip[1, 1]:skip, clip[0, 0]:clip[1,
                                                                      0]:skip],
            cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=vmax,
            origin='lower')
-cval = (np.amin(transmittance[clip[0, 1]:clip[1, 1]:skip,
-                              clip[0, 0]:clip[1, 0]:skip]),
-        np.amax(transmittance[clip[0, 1]:clip[1, 1]:skip,
-                              clip[0, 0]:clip[1, 0]:skip]))
-print(cval)
-plt.plot((roi[:, 0] - clip[0, 0]) / skip, (roi[:, 1] - clip[0, 1]) / skip,
+# cval = (np.amin(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]),
+#         np.amax(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]))
+# print(cval)
+plt.plot((rightroi[:, 0] - clip[0, 0]) / skip,
+         (rightroi[:, 1] - clip[0, 1]) / skip,
          c='red')
 plt.axis('off')
 plt.tight_layout()
-plt.savefig(os.path.join(
-    PATH, f'output/transmittance_human_cc_{cval[0]:.0f}_{cval[1]:.0f}.png'),
-            bbox_inches='tight')
+print(transmittance.shape)
+print(clip[::-1], (27000, 24500))
+print(rightroi[:, 0], rightroi[:, 1])
+save_img(os.path.join(PATH, f'output/transmittance_human_cc_0_{vmax:.0f}.png'),
+         transmittance[clip[0, 1]:clip[1, 1]:skip,
+                       clip[0, 0]:clip[1, 0]:skip], 0, vmax)
+
+# plt.savefig(os.path.join(PATH,
+#                          f'output/transmittance_human_cc_0_{vmax:.0f}.png'),
+#             bbox_inches='tight')
+
+# plt.plot((rightroi[:, 0] - clip[1]) / skip, (rightroi[:, 1] - clip[0]) / skip,
+#          c='red')
+plt.axis('off')
+plt.tight_layout()
 
 # retardation
 plt.subplots()
 plt.imshow(retardation[clip[0, 1]:clip[1, 1]:skip, clip[0, 0]:clip[1, 0]:skip],
            cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=1,
            origin='lower')
-
-cval = (np.amin(retardation[clip[0, 1]:clip[1, 1]:skip,
-                            clip[0, 0]:clip[1, 0]:skip]),
-        np.amax(retardation[clip[0, 1]:clip[1, 1]:skip,
-                            clip[0, 0]:clip[1, 0]:skip]))
-print(cval)
-plt.plot((roi[:, 0] - clip[0, 0]) / skip, (roi[:, 1] - clip[0, 1]) / skip,
+# cval = (np.amin(retardation[clip[0]:24500:skip, clip[1]:27000:skip]),
+#         np.amax(retardation[clip[0]:24500:skip, clip[1]:27000:skip]))
+# print(cval)
+plt.plot((rightroi[:, 0] - clip[0, 0]) / skip,
+         (rightroi[:, 1] - clip[0, 1]) / skip,
          c='red')
 plt.axis('off')
 plt.tight_layout()
-plt.savefig(os.path.join(
-    PATH, f'output/retardation_human_cc_{cval[0]:.0f}_{cval[1]:.0f}.png'),
-            bbox_inches='tight')
+# print(rightroi[:, 0], rightroi[:, 1])
+save_img(os.path.join(PATH, f'output/retardation_human_cc_0_1.png'),
+         retardation[clip[0, 1]:clip[1, 1]:skip, clip[0, 0]:clip[1,
+                                                                 0]:skip], 0, 1)
+
+# plt.savefig(os.path.join(PATH, f'output/retardation_human_cc_0_1.png'),
+#             bbox_inches='tight')
 
 # %%
-mask = np.zeros_like(retardation, dtype=np.uint8)
-cv2.fillPoly(mask, [roi], 1)
+# thumbnail
+data = transmittance[::50, ::50]
+save_img(f'output/transmittance_human_thumbnail_0_{vmax:.1f}.png', data, 0,
+         vmax)
+data = retardation[::50, ::50]
+save_img('output/retardation_human_thumbnail_0_1.png', data, 0, 1)
 
-# plt.subplots()
-# plt.imshow(mask_left[::100, ::100])
+# %%
+mask_right = np.zeros_like(retardation, dtype=np.uint8)
+cv2.fillPoly(mask_right, [rightroi], 1)
+
+print(np.sum(mask_right))
+
 # plt.subplots()
 # plt.imshow(retardation[::100, ::100])
 
 #%%
+transmittance_right = np.extract(mask_right, transmittance)
+retardation_right = np.extract(mask_right, retardation)
 
-transmittance_ = np.extract(mask, transmittance)
-retardation_ = np.extract(mask, retardation)
-plt.imshow(mask[::100, ::100])
 # %%
-t_mean = np.mean(transmittance_)
-t_std = np.std(transmittance_)
+t_right_mean = np.mean(transmittance_right)
+t_right_std = np.std(transmittance_right)
 
-r_bg_mean = np.mean(transmittance[-2000:-100, -2000:-100])
-r_bg_std = np.std(transmittance[-2000:-100, -2000:-100])
-plt.imshow(transmittance[-2000:-100, -2000:-100])
+r_bg_mean = np.mean(transmittance[0:4200, 0:4200])
+r_bg_std = np.std(transmittance[0:4200, 0:4200])
 
-print(t_mean, t_std)
+print(t_right_mean, t_right_std)
 print(r_bg_mean, r_bg_std)
-print("fuellgrad 0.75:", -np.log(t_mean / r_bg_mean) / (0.06 * 0.75), 'pm',
-      (1 / t_mean) / (0.06 * 0.75) * t_std + (1 / r_bg_mean) /
+print("fuellgrad 0.75:", -np.log(t_right_mean / r_bg_mean) / (0.06 * 0.75),
+      'pm', (1 / t_right_mean) / (0.06 * 0.75) * t_right_std + (1 / r_bg_mean) /
       (0.06 * 0.75) * r_bg_std)
-print(np.mean(retardation_), np.std(retardation_))
+print(np.mean(retardation_right), np.std(retardation_right))
 
 # %%
 plt.subplots()
-plt.hist(transmittance_,
-         int(np.sqrt(transmittance_.size)),
-         label='cc',
-         fc=(239 / 255, 138 / 255, 98 / 255, 0.75))
+plt.hist(transmittance_right[transmittance_right < 1000],
+         255,
+         label='right',
+         fc=(43 / 255, 140 / 255, 190 / 255, 0.75))
 plt.legend()
 plt.savefig(os.path.join(PATH, f'output/transmittance_human_cc_hist.png'),
             bbox_inches='tight')
 
+y, x = np.histogram(transmittance_right[transmittance_right < 1000], 255)
+y = np.append(y, 0)
+np.savetxt("output/human_transmittance_right.dat",
+           np.vstack((x, y)).T,
+           header='x y',
+           comments='',
+           fmt='%.6e')
+
 plt.subplots()
-plt.hist(retardation_,
-         int(np.sqrt(retardation_.size)),
-         label='cc',
-         fc=(239 / 255, 138 / 255, 98 / 255, 0.75))
+plt.hist(retardation_right,
+         255,
+         label='right',
+         fc=(43 / 255, 140 / 255, 190 / 255, 0.75))
 plt.legend()
 plt.savefig(os.path.join(PATH, f'output/retardation_human_cc_hist.png'),
             bbox_inches='tight')
+
+y, x = np.histogram(retardation_right, 255)
+y = np.append(y, 0)
+np.savetxt("output/human_retardation_right.dat",
+           np.vstack((x, y)).T,
+           header='x y',
+           comments='',
+           fmt='%.6e')
 # %%
