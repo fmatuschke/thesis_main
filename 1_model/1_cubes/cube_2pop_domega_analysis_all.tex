@@ -16,6 +16,10 @@
 \usetikzlibrary{calc}
 \tikzset{>=latex}
 % 
+\newcommand{\openingAngle}{\textnormal{$\Xi$}}
+\newcommand{\popa}{\textnormal{$\mathcal{F}_0$}}
+\newcommand{\popb}{\textnormal{$\mathcal{F}_1$}}
+% 
 \newlength{\width}
 \newlength{\height}
 \setlength{\width}{13.87303cm} %5.433
@@ -134,7 +138,7 @@
       ]
       % 
       \nextgroupplot[%
-         title={Fiber population 0},
+         title={$\popa$},
          ylabel={$\varphi_0$},
          ymin=-90,ymax=180,
          ytick={-90,0,90,180},
@@ -149,7 +153,7 @@
       \axes
       % 
       \nextgroupplot[%
-         title={Fiber population 1},
+         title={$\popb$},
          ylabel={$\varphi_1$},
          ymin=-90,ymax=180,
          ytick={-90,0,90,180},
@@ -192,7 +196,7 @@
       \axes
       % 
       \nextgroupplot[%
-         ylabel={$\Delta\Omega_0$},
+         ylabel={$\openingAngle_0$},
          ymin=0,ymax=90,
          ytick={0,30,60,90},
          yticklabels={$\SI{0}{\degree}$,$\SI{30}{\degree}$,$\SI{60}{\degree}$,$\SI{90}{\degree}$},
@@ -206,7 +210,7 @@
       \axes
       % 
       \nextgroupplot[%
-         ylabel={$\Delta\Omega_1$},
+         ylabel={$\openingAngle_1$},
          ymin=0,ymax=90,
          ytick={0,30,60,90},
          yticklabels={$\SI{0}{\degree}$,$\SI{30}{\degree}$,$\SI{60}{\degree}$,$\SI{90}{\degree}$},
