@@ -119,11 +119,11 @@ if True:
         phi, theta = fastpli.analysis.orientation.remap_orientation(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
-        fig, ax = plt.subplots(nrows=1,
-                               ncols=2,
-                               subplot_kw=dict(projection="polar"),
-                               figsize=(3.5, 2))
-        fig.suptitle(f"omega:{row.omega}")
+        # fig, ax = plt.subplots(nrows=1,
+        #                        ncols=2,
+        #                        subplot_kw=dict(projection="polar"),
+        #                        figsize=(3.5, 2))
+        # fig.suptitle(f"omega:{row.omega}")
         #
         # simulation values
         h, x, y, _ = fastpli.analysis.orientation.histogram(
