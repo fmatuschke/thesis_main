@@ -50,7 +50,7 @@
 \pgfplotsset{%
    PStyle/.style={%
       every axis/.append style={font=\scriptsize},
-      width = 0.17\width, height = 0.17\width,
+      width = 0.165\width, height = 0.165\width,
       scale only axis,
       xtick={0,45,90,135,180,225,270,315},
       xticklabels={$\SI{0}{\degree}$,$\SI{45}{\degree}$,$\SI{90}{\degree}$,
@@ -64,7 +64,29 @@
       ymin=0, ymax=90,
       axis on top=true,
       colormap/cividis,
+      point meta min=0,
+      % point meta max=0.693147181, %ln(2)
       % colorbar, colorbar style={ytick=\empty, width=5pt}, 
+   }
+}
+% 
+\pgfplotsset{%
+   CBStyle/.style={%
+      hide axis,
+      scale only axis,
+      height=0pt, width=0pt,
+      xmin=0, xmax=1, ymin=0, ymax=1,
+      colormap/cividis,
+      colorbar horizontal,
+      point meta min = 0,
+      point meta max = 1,
+      colorbar style={
+         width=10cm,
+         height=0.42cm,
+         xticklabel style={tick label style={font=\footnotesize}},
+         xtick={0,1},
+         xticklabels={$0$,$\log(\mathit{pdf+1})$},
+      }
    }
 }
 % 
@@ -81,7 +103,8 @@
       \begin{polaraxis}[
          PStyle,
       ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+         \addplot [matrix plot*,point meta=explicit,]
+            table[meta expr={ln(\thisrowno{2}+1)}] {%
             \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
          \coordinate (A\xi) at (0,0);
       \end{polaraxis}
@@ -92,7 +115,8 @@
       \begin{polaraxis}[
          PStyle,
       ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+         \addplot [matrix plot*,point meta=explicit,]
+            table[meta expr={ln(\thisrowno{2}+1)}] {%
             \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
          \coordinate (B\xi) at (0,0);
       \end{polaraxis}
@@ -121,22 +145,7 @@
 \node[anchor=south] at (T) {\small  single fiber pop.};
 %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
-\begin{axis}[
-    hide axis,
-    scale only axis,
-    height=0pt, width=0pt,
-    xmin=0, xmax=1, ymin=0, ymax=1,
-    colormap/cividis,
-    colorbar horizontal,
-    point meta min = 0,
-    point meta max = 1,
-    colorbar style={
-        width=10cm,
-        height=0.42cm,
-        xticklabel style={tick label style={font=\footnotesize}},
-        xtick={0,1},
-        xticklabels={$0$,$\log(\mathit{max+1})$},
-    }]
+\begin{axis}[CBStyle]
 \end{axis}
 \end{scope}
 %
@@ -203,22 +212,7 @@
 \node[anchor=south] at (current bounding box.north) {\small  single fiber pop.};
 %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
-\begin{axis}[
-    hide axis,
-    scale only axis,
-    height=0pt, width=0pt,
-    xmin=0, xmax=1, ymin=0, ymax=1,
-    colormap/cividis,
-    colorbar horizontal,
-    point meta min = 0,
-    point meta max = 1,
-    colorbar style={
-        width=10cm,
-        height=0.42cm,
-        xticklabel style={tick label style={font=\footnotesize}},
-        xtick={0,1},
-        xticklabels={$0$,$\log(\mathit{max+1})$},
-    }]
+\begin{axis}[CBStyle]
 \end{axis}
 \end{scope}
 % 
@@ -288,22 +282,7 @@
 \node[anchor=south] at (current bounding box.north) {\small  single fiber pop.};
 %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
-\begin{axis}[
-    hide axis,
-    scale only axis,
-    height=0pt, width=0pt,
-    xmin=0, xmax=1, ymin=0, ymax=1,
-    colormap/cividis,
-    colorbar horizontal,
-    point meta min = 0,
-    point meta max = 1,
-    colorbar style={
-        width=10cm,
-        height=0.42cm,
-        xticklabel style={tick label style={font=\footnotesize}},
-        xtick={0,1},
-        xticklabels={$0$,$\log(\mathit{max+1})$},
-    }]
+\begin{axis}[CBStyle]
 \end{axis}
 \end{scope}
 % 

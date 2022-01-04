@@ -76,51 +76,48 @@ def get_file_from_series(df):
 
 
 #%%
+def to_pgfmatrix_dat(x, y, h, filename):
+    with open(filename, "w") as f:
+        H = h
+        x_axis = x
+        y_axis = y
+
+        # for pgfplots matrix plot*
+        x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
+        y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
+        H = H.T / np.sum(H.ravel())
+
+        X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
+        for h_array, x_array, y_array in zip(H, X, Y):
+            for h, x, y in zip(h_array, x_array, y_array):
+                if y <= 90:
+                    f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
+            f.write('\n')
+
+
+#%%
 os.makedirs(os.path.join(FILE_PATH, 'output', DATASET, "hist"), exist_ok=True)
+n_phi = 36 * 2
+n_theta = 18
+
 if True:
     for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_orientation(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
-        # fig, ax = plt.subplots(nrows=1,
-        #                        ncols=2,
-        #                        subplot_kw=dict(projection="polar"),
-        #                        figsize=(3.5, 2))
-        # fig.suptitle(f"omega:{row.omega}")
-        #
-        # simulation values
-        h, x, y, _ = fastpli.analysis.orientation.histogram(
-            phi,
-            theta,
-            # ax=ax[0],
-            n_phi=36 * 2,
-            n_theta=18,
-            weight_area=True,
-            fun=lambda x: np.log(x + 1),
-            cmap='cividis')
+        h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
+                                                            theta,
+                                                            n_phi=n_phi,
+                                                            n_theta=n_theta,
+                                                            weight_area=True)
         #
         # 2d hist
-        with open(
-                os.path.join(
-                    FILE_PATH, 'output', DATASET, "hist",
-                    f"sim_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
-                ), "w") as f:
-
-            H = h
-            x_axis = x
-            y_axis = y
-
-            # for pgfplots matrix plot*
-            x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
-            y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
-            H = H.T / np.sum(H.ravel())
-
-            X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
-            for h_array, x_array, y_array in zip(H, X, Y):
-                for h, x, y in zip(h_array, x_array, y_array):
-                    if y <= 90:
-                        f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
-                f.write('\n')
+        to_pgfmatrix_dat(
+            x, y, h,
+            os.path.join(
+                FILE_PATH, 'output', DATASET, "hist",
+                f"sim_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
+            ))
 
         # GT
         phi, theta = models.ori_from_file(
@@ -130,32 +127,17 @@ if True:
         # to tex
         h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
                                                             theta,
-                                                            n_phi=36 * 2,
-                                                            n_theta=18,
+                                                            n_phi=n_phi,
+                                                            n_theta=n_theta,
                                                             weight_area=True)
 
         # 2d hist
-        with open(
-                os.path.join(
-                    FILE_PATH, 'output', DATASET, "hist",
-                    f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
-                ), "w") as f:
-
-            H = h
-            x_axis = x
-            y_axis = y
-
-            # for pgfplots matrix plot*
-            x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
-            y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
-            H = H.T / np.sum(H.ravel())
-
-            X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
-            for h_array, x_array, y_array in zip(H, X, Y):
-                for h, x, y in zip(h_array, x_array, y_array):
-                    if y <= 90:
-                        f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
-                f.write('\n')
+        to_pgfmatrix_dat(
+            x, y, h,
+            os.path.join(
+                FILE_PATH, 'output', DATASET, "hist",
+                f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
+            ))
 
 
 #%%
