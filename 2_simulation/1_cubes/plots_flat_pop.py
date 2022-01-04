@@ -1,15 +1,10 @@
 #%%
-import itertools
-import multiprocessing as mp
 import os
 
 import fastpli.analysis
 import helper.circular
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import tqdm
 from scipy.stats import circmean
 
@@ -76,6 +71,37 @@ def get_file_from_series(df):
 
 
 #%%
+def calc_omega(p, t):
+    v0 = np.array([np.cos(p) * np.sin(t), np.sin(p) * np.sin(t), np.cos(t)])
+    v1 = v0[:, 0].copy()
+
+    for v in v0.T[1:, :]:
+        s = np.dot(v1, v)
+
+        if s > 0:
+            v1 += v
+        else:
+            v1 -= v
+
+    v1 /= np.linalg.norm(v1)
+    data = np.empty(v0.shape[1])
+    for i in range(v0.shape[1]):
+        d = np.abs(np.dot(v0[:, i], v1))  # because orientation
+        data[i] = np.arccos(d)
+
+    return data
+
+
+domega = []
+for i, row in df.iterrows():
+    phi, theta = fastpli.analysis.orientation.remap_orientation(
+        row.rofl_dir, np.pi / 2 - row.rofl_inc)
+
+    domega.append(np.rad2deg(calc_omega(phi, theta)))
+df['domega'] = domega
+
+
+#%%
 def to_pgfmatrix_dat(x, y, h, filename):
     with open(filename, "w") as f:
         H = h
@@ -139,50 +165,7 @@ if True:
                 f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
             ))
 
-
-#%%
-def calc_omega(p, t):
-    v0 = np.array([np.cos(p) * np.sin(t), np.sin(p) * np.sin(t), np.cos(t)])
-    v1 = v0[:, 0].copy()
-
-    for v in v0.T[1:, :]:
-        s = np.dot(v1, v)
-
-        if s > 0:
-            v1 += v
-        else:
-            v1 -= v
-    v1 /= np.linalg.norm(v1)
-
-    # print(v1)
-
-    data = np.empty(v0.shape[1])
-
-    for i in range(v0.shape[1]):
-        d = np.abs(np.dot(v0[:, i], v1))  # because orientation
-        data[i] = np.arccos(d)
-
-    return data
-    # return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
-
-
-asd = []
-for i, row in df.iterrows():
-    # row = df.iloc[i]
-    phi, theta = fastpli.analysis.orientation.remap_orientation(
-        row.rofl_dir, np.pi / 2 - row.rofl_inc)
-
-    asd.append(np.rad2deg(calc_omega(phi, theta)))
-df['domega'] = asd
-
-# %%
-# fig, axs = plt.subplots(1, 1)
-
-sns.set_theme(style="ticks", palette="pastel")
-
-# Load the example tips dataset
-tips = sns.load_dataset("tips")
-
+# %% calc and save results for boxplots
 df_ = df.apply(pd.Series.explode).reset_index()
 
 phi, theta = df_["rofl_dir"].to_numpy(
@@ -217,13 +200,6 @@ for omega in df_.omega.unique():
                             df_[(df_['omega'] == omega) &
                                 (df_['psi'] == psi)][name], 90, -90)
 
-#%%
-
-# df_save = df_[[
-#     "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret", "domega",
-#     "psi", "omega"
-# ]]
-
 for psi in df_.psi.unique():
     df__ = df_[df_.psi == psi]
 
@@ -256,44 +232,3 @@ for psi in df_.psi.unique():
         FILE_PATH, 'output', DATASET, 'analysis',
         f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_theo_dir.csv"),
                    index=False)
-
-#%%
-
-if False:
-    for name in tqdm.tqdm(
-        ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
-         "domega"]):
-
-        # Draw a nested boxplot to show bills by day and time
-        fig, axs = plt.subplots(1, 1)
-        sns.boxplot(
-            x="omega",
-            y=name,
-            # hue="smoker",
-            # palette=["m", "g"],
-            data=df_)
-        sns.despine(offset=10, trim=True)
-        # plt.tight_layout()
-
-        # if "epa_ret" == name:
-        #     x = np.linspace(0, np.pi, 42)
-        #     y = (np.cos(x) + 1) / 2
-        #     # plt.plot(x / np.pi * 3, y, linewidth=4.2)
-        #     plt.plot(x / np.pi * (len(df) - 1),
-        #              y * np.mean(df_[df_.f0_inc == 0].epa_ret),
-        #              linewidth=4.2)
-
-        if name in ["rofl_dir", "epa_dir"]:
-            x = [0, (len(df) - 1)]
-            y = [0, 0]
-            plt.plot(x, y, linewidth=4.2)
-            x = [0, (len(df) - 1)]
-            y = [0, 90]
-            plt.plot(x, y, linewidth=4.2)
-
-        plt.tight_layout(pad=0, w_pad=0, h_pad=0)
-        plt.savefig(
-            os.path.join(
-                FILE_PATH,
-                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_{name}.pdf"
-            ))

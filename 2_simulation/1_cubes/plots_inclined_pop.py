@@ -1,16 +1,10 @@
 #%%
-import collections
-import itertools
-import multiprocessing as mp
 import os
 
 import fastpli.analysis
 import helper.circular
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import tqdm
 from scipy.stats import circmean
 
@@ -38,9 +32,6 @@ df = df[df.microscope == "PM"]
 df = df[df.species == "Vervet"]
 df = df[df.model == "r"]
 df = df[df.radius == 0.5]
-# df = df[df.psi == 0.3]
-# df = df[df.psi == 0.5]
-# psi = df.psi.unique()[-1]
 
 df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
@@ -87,28 +78,23 @@ def calc_omega(p, t):
             v1 += v
         else:
             v1 -= v
+
     v1 /= np.linalg.norm(v1)
-
-    # print(v1)
-
     data = np.empty(v0.shape[1])
-
     for i in range(v0.shape[1]):
         d = np.abs(np.dot(v0[:, i], v1))  # because orientation
         data[i] = np.arccos(d)
 
     return data
-    # return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
 
 
-asd = []
+domega = []
 for i, row in df.iterrows():
-    # row = df.iloc[i]
     phi, theta = fastpli.analysis.orientation.remap_orientation(
         row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
-    asd.append(np.rad2deg(calc_omega(phi, theta)))
-df['domega'] = asd
+    domega.append(np.rad2deg(calc_omega(phi, theta)))
+df['domega'] = domega
 
 
 #%%
@@ -176,11 +162,7 @@ if True:
                 f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
             ))
 
-# %%
-# fig, axs = plt.subplots(1, 1)
-
-sns.set_theme(style="ticks", palette="pastel")
-
+# %% calc and save results for boxplots
 df_ = df.apply(pd.Series.explode).reset_index()
 
 phi, theta = df_["rofl_dir"].to_numpy(
@@ -205,8 +187,6 @@ for omega in df_.omega.unique():
                     name] = helper.circular.remap(
                         df_[(df_['omega'] == omega) &
                             (df_['psi'] == psi)][name], 90, -90)
-
-#%%
 
 for psi in df_.psi.unique():
     df__ = df_[df_.psi == psi]
@@ -240,48 +220,3 @@ for psi in df_.psi.unique():
         FILE_PATH, 'output', DATASET, 'analysis',
         f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_theo_incl.csv"),
                    index=False)
-
-#%%
-if False:
-    for name in tqdm.tqdm(
-        ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
-         "domega"]):
-        if "dir" in name:
-            df_[name] = helper.circular.remap(df_[name], 90, -90)
-
-        # Draw a nested boxplot to show bills by day and time
-        fig, axs = plt.subplots(1, 1)
-        sns.boxplot(
-            x="f0_inc",
-            y=name,
-            # hue="smoker",
-            # palette=["m", "g"],
-            data=df_)
-        sns.despine(offset=10, trim=True)
-        # plt.tight_layout()
-
-        if "epa_ret" == name:
-            x = np.linspace(0, np.pi, 42)
-            y_max = np.mean(df_[df_.f0_inc == 0].epa_ret)
-            y_min = np.mean(df_[df_.f0_inc == 90].epa_ret)
-            y = (np.cos(x) + 1) / 2
-            # plt.plot(x / np.pi * 3, y, linewidth=4.2)
-            plt.plot(x / np.pi * (len(df) - 1), y * y_max, linewidth=4.2)
-            # plt.plot(x / np.pi * (len(df) - 1), y * 0.85, linewidth=4.2)
-            # plt.plot(x / np.pi * (len(df) - 1),
-            #          y * (y_max - y_min) + y_min,
-            #          linewidth=4.2)
-
-        if "rofl_inc" == name:
-            x = [0, (len(df) - 1)]
-            y = [0, 90]
-            plt.plot(x, y, linewidth=4.2)
-            # axs.set_ylim(-15, 105)
-
-        plt.tight_layout(pad=0, w_pad=0, h_pad=0)
-        plt.savefig(
-            os.path.join(
-                FILE_PATH,
-                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_{name}.pdf"
-            ))
-# %%
