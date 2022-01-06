@@ -90,7 +90,7 @@ def calc_omega(p, t):
 
 domega = []
 for i, row in df.iterrows():
-    phi, theta = fastpli.analysis.orientation.remap_orientation(
+    phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
         row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
     domega.append(np.rad2deg(calc_omega(phi, theta)))
@@ -124,7 +124,7 @@ n_theta = 18
 
 if True:
     for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
-        phi, theta = fastpli.analysis.orientation.remap_orientation(
+        phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
         # simulation values
@@ -167,7 +167,7 @@ df_ = df.apply(pd.Series.explode).reset_index()
 
 phi, theta = df_["rofl_dir"].to_numpy(
     float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
-# phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
+# phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(phi, theta)
 theta[phi > 3 / 4 * np.pi] = np.pi - theta[phi > 3 / 4 * np.pi]
 phi[phi > 3 / 4 * np.pi] -= np.pi
 df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -

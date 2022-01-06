@@ -65,7 +65,7 @@ if True:
     domega = []
     for i, row in df.iterrows():
         # row = df.iloc[i]
-        phi, theta = fastpli.analysis.orientation.remap_orientation(
+        phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
         domega.append(np.mean(np.rad2deg(calc_omega(phi, theta))))
