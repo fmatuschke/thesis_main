@@ -49,10 +49,13 @@
 % 
 \pgfplotsset{%
    PStyle/.style={%
-      every axis/.append style={font=\scriptsize},
+      every axis/.append style={font=\tiny},
       width = 0.17\width, height = 0.17\width,
       scale only axis,
-      xtick={0,45,...,315},
+      xtick={0,45,90,135,180,225,270,315},
+      xticklabels={$\SI{0}{\degree}$,$\SI{45}{\degree}$,$\SI{90}{\degree}$,
+                  $\SI{135}{\degree}$,$\SI{180}{\degree}$,$\SI{225}{\degree}$,
+                  $\SI{270}{\degree}$,$\SI{315}{\degree}$},
       ytick={60,30},
       yticklabels={$\SI{30}{\degree}$,$\SI{60}{\degree}$},
       yticklabel style=white,
@@ -61,7 +64,29 @@
       ymin=0, ymax=90,
       axis on top=true,
       colormap/cividis,
+      point meta min=0,
+      % point meta max=0.693147181, %ln(2)
       % colorbar, colorbar style={ytick=\empty, width=5pt}, 
+   }
+}
+% 
+\pgfplotsset{%
+   CBStyle/.style={%
+      hide axis,
+      scale only axis,
+      height=0pt, width=0pt,
+      xmin=0, xmax=1, ymin=0, ymax=1,
+      colormap/cividis,
+      colorbar horizontal,
+      point meta min = 0,
+      point meta max = 1,
+      colorbar style={
+         width=10cm,
+         height=0.42cm,
+         xticklabel style={tick label style={font=\footnotesize}},
+         xtick={0,1},
+         xticklabels={$0$,$\log(\mathit{pdf+1})$},
+      }
    }
 }
 % 
@@ -124,22 +149,7 @@
 \node[anchor=south] at (current bounding box.north) {\small inclined fiber pop., $\Psi = \SI{\p0}{\percent}$};
 % 
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
-\begin{axis}[
-    hide axis,
-    scale only axis,
-    height=0pt, width=0pt,
-    xmin=0, xmax=1, ymin=0, ymax=1,
-    colormap/cividis,
-    colorbar horizontal,
-    point meta min = 0,
-    point meta max = 1,
-    colorbar style={
-        width=10cm,
-        height=0.42cm,
-        xticklabel style={tick label style={font=\footnotesize}},
-        xtick={0,1},
-        xticklabels={$0$,$\mathit{max}$},
-    }]
+\begin{axis}[CBStyle]
 \end{axis}
 \end{scope}
 % 
@@ -189,22 +199,7 @@
    {\small inclined fiber pop., $\Psi = \SI{100}{\percent}$};
 % 
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
-\begin{axis}[
-    hide axis,
-    scale only axis,
-    height=0pt, width=0pt,
-    xmin=0, xmax=1, ymin=0, ymax=1,
-    colormap/cividis,
-    colorbar horizontal,
-    point meta min = 0,
-    point meta max = 1,
-    colorbar style={
-        width=10cm,
-        height=0.42cm,
-        xticklabel style={tick label style={font=\footnotesize}},
-        xtick={0,1},
-        xticklabels={$0$,$\mathit{max}$},
-    }]
+\begin{axis}[CBStyle]
 \end{axis}
 \end{scope}
 % 

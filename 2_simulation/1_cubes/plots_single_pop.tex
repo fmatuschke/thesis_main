@@ -13,6 +13,7 @@
 \usepgfplotslibrary{colorbrewer}
 \usepgfplotslibrary{groupplots}
 \usepgfplotslibrary{statistics}
+\usepgfplotslibrary{fillbetween}
 \tikzset{>=latex}
 \DeclareSIUnit{\arbitraryunit}{a.u.}
 % 
@@ -38,8 +39,6 @@
 % 
 \input{cividis.tex}
 % 
-\begin{document}
-% 
 \pgfplotsset{
    every tick label/.append style={font=\small,},
    title style={font=\normalsize,},
@@ -51,8 +50,48 @@
          draw position={\plotnumofactualtype},
          draw direction=y,
       },
+      fill=GREEN, draw=black,
    },
 }
+% 
+\newcommand{\plotgt}[3]{
+\pgfplotsset{update limits=false}
+\def\nboxes{18}
+\addplot+[mark=none, white, smooth,
+   dash=on 0.9pt off 0.6pt phase 0.2pt, line width=0.8pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_25}, col sep=comma, row sep=newline,
+   ]{#1};
+\addplot+[mark=none, black, smooth, name path=A,
+   dash=on 0.5pt off 1pt phase 0pt, line width=0.4pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_25}, col sep=comma, row sep=newline,
+   ]{#1};
+% 
+\addplot+[mark=none, white, smooth,
+   % dash=on 3.4pt off 2.6pt phase 0.2pt, line width=0.8pt
+   dash=on 0.9pt off 0.6pt phase 0.2pt, line width=0.8pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_50}, col sep=comma, row sep=newline,
+   ]{#1};
+\addplot+[mark=none, black, smooth,
+   % dash=on 3pt off 3pt phase 0pt, line width=0.4pt
+   dash=on 0.5pt off 1pt phase 0pt, line width=0.4pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_50}, col sep=comma, row sep=newline,
+   ]{#1};
+% 
+\addplot+[mark=none, white, smooth,
+   dash=on 0.9pt off 0.6pt phase 0.2pt, line width=0.8pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_75}, col sep=comma, row sep=newline,
+   ]{#1};
+\addplot+[mark=none, black, smooth, name path=B,
+   dash=on 0.5pt off 1pt phase 0pt, line width=0.4pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_75}, col sep=comma, row sep=newline,
+   ]{#1};
+% 
+\addplot[gray!30] fill between [of=A and B];
+\pgfplotsset{cycle list shift=-7}
+\pgfplotsset{update limits=true}
+}
+% 
+\begin{document}
 % 
 % \pgfplotsset{colormap/Reds-CM}
 % 
@@ -66,85 +105,82 @@
       ylabels at=edge left,
    },
    width = 0.495\width,
-   % height = 0.2\height,
    height = 0.275\height,
-   % scale only axis,
    xmin=-0.5, xmax=18.5,
    xtick={0,6,12,18},
-   % xticklabels={$\SI{0}{\degree}$, $\SI{30}{\degree}$, $\SI{60}{\degree}$, $\SI{90}{\degree}$},
    xticklabels={$0$, $30$, $60$, $90$},
    xlabel={$\Omega / \si{\degree}$},
    every axis x label/.style={
       at={(ticklabel* cs:1.0,0.0)},
       anchor=north west,
    },
-   every axis title/.append style={
-      yshift=-8pt,
-   },
-   % axis x line=none,
-   % axis y line=left,
+   every axis title/.append style={yshift=-8pt,},
    enlarge y limits,
    ymajorgrids,
    clip=true,
-   colormap name=viridis, %Spectral
+   colormap name=viridis,
    cycle list={
       [colors of colormap={0,50,...,1000}]},
-   % Spectral
-   % cycle list/Paired-10,
 ]
+% 
 % 
 \nextgroupplot[title={\vphantom{/}transmittance / $\si{\arbitraryunit}$}]
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={epa_trans_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 % 
+% 
 \nextgroupplot[title={\vphantom{/}retardation}]
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={epa_ret_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 \pgfplotsset{update limits=false}
-\addplot+[mark=none, white,
-   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, thick,
-   domain=0:18, samples=42, smooth] {(cos(x*10) + 1) / 2 * 0.795};
-\addplot+[mark=none, black,
-   dash pattern= on 3pt off 3pt,
-   domain=0:18, samples=42, smooth] {(cos(x*10) + 1) / 2 * 0.795};
+\addplot+[mark=none, white, smooth, domain=0:18, samples=42,
+         dash=on 3.4pt off 2.6pt phase 0.2pt, line width=0.8pt]
+   {(cos(x*10) + 1) / 2 * 0.795};
+\addplot+[mark=none, black, smooth, domain=0:18, samples=42, 
+         dash=on 3pt off 3pt phase 0pt, line width=0.4pt]
+   {(cos(x*10) + 1) / 2 * 0.795};
 \pgfplotsset{update limits=true}
 % 
-\nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
+% 
+\nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}] 
+\plotgt{\datapath/cube_2pop_135_rc1_single_plots_single_pop_model.csv}{f0_inc}{phi}
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_dir_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 % 
+% 
 \nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
+\plotgt{\datapath/cube_2pop_135_rc1_single_plots_single_pop_model.csv}{f0_inc}{alpha}
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_inc_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 \pgfplotsset{update limits=false}
-\addplot+[mark=none, white,
-   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, thick] coordinates {(0,0) (18,90)};
-\addplot+[mark=none, black,
-   dash pattern= on 3pt off 3pt] coordinates {(0,0) (18,90)};
+\addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (18,0)};
 \pgfplotsset{update limits=true}
+% 
 % 
 \nextgroupplot[title={\vphantom{/}trel}]
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_trel_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }
 % 
+% 
 \nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
+\plotgt{\datapath/cube_2pop_135_rc1_single_plots_single_pop_model.csv}{f0_inc}{domega}
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={domega_\inc}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_single_plots_single_pop.csv};
 }

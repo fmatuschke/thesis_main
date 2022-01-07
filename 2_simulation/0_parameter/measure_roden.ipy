@@ -3,10 +3,20 @@ import numpy as np
 import h5py
 import os
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import cv2
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 THESIS = os.path.join(os.path.realpath(__file__).split('/thesis/')[0], 'thesis')
+
+
+#%%
+def save_img(name, data, vmin, vmax):
+    cmap = cm.cividis
+    norm = plt.Normalize(vmin=vmin, vmax=vmax)
+    image = cmap(norm(data))
+    plt.imsave(name, image, origin='lower')
+
 
 #%%
 retardation = h5py.File(
@@ -23,7 +33,7 @@ transmittance = h5py.File(
     ), 'r')['Image'][...]
 
 # %%
-skip = 25
+skip = 3
 plt.imshow(transmittance[::skip, ::skip],
            cmap=plt.get_cmap('cividis'),
            origin='lower')
@@ -48,54 +58,93 @@ roi = np.array([[870, 1160], [933, 1102], [982, 1066], [1046, 1049],
                 [1093, 1050], [1161, 1075], [1266, 1145], [1237, 1193],
                 [1200, 1139], [1145, 1100], [1070, 1075], [1008, 1078],
                 [966, 1102], [924, 1141], [903, 1175]])
-roi = np.vstack((roi, roi[0, :]))
-roi *= 4
+leftroi = np.vstack((roi, roi[0, :]))
+leftroi *= 4
 
 clip = np.array([[825, 1000], [1350, 1275]]) * 4
-skip = 4
+# skip = 2
+
+# transmittance BG
+plt.subplots()
+vmax = np.mean(transmittance[100:500:skip, 100:500:skip].ravel())
+vmax += np.std(transmittance[100:500:skip, 100:500:skip].ravel()) * 5
+plt.imshow(transmittance[100:500:skip, 100:500:skip],
+           cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=vmax,
+           origin='lower')
+cval = (np.amin(transmittance[100:500:skip, 100:500:skip]),
+        np.amax(transmittance[100:500:skip, 100:500:skip]))
+print(vmax)
 
 # transmittance
 plt.subplots()
 plt.imshow(transmittance[clip[0, 1]:clip[1, 1]:skip, clip[0, 0]:clip[1,
                                                                      0]:skip],
            cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=vmax,
            origin='lower')
-
-cval = (np.amin(transmittance[clip[0, 1]:clip[1, 1]:skip,
-                              clip[0, 0]:clip[1, 0]:skip]),
-        np.amax(transmittance[clip[0, 1]:clip[1, 1]:skip,
-                              clip[0, 0]:clip[1, 0]:skip]))
-print(cval)
-plt.plot((roi[:, 0] - clip[0, 0]) / skip, (roi[:, 1] - clip[0, 1]) / skip,
+# cval = (np.amin(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]),
+#         np.amax(transmittance[clip[0]:24500:skip, clip[1]:27000:skip]))
+# print(cval)
+plt.plot((leftroi[:, 0] - clip[0, 0]) / skip,
+         (leftroi[:, 1] - clip[0, 1]) / skip,
          c='red')
 plt.axis('off')
 plt.tight_layout()
-plt.savefig(os.path.join(
-    PATH, f'output/transmittance_mouse_cc_{cval[0]:.0f}_{cval[1]:.0f}.png'),
-            bbox_inches='tight')
+print(transmittance.shape)
+print(clip[::-1], (27000, 24500))
+print(leftroi[:, 0], leftroi[:, 1])
+save_img(os.path.join(PATH, f'output/transmittance_rodent_cc_0_{vmax:.0f}.png'),
+         transmittance[clip[0, 1]:clip[1, 1]:skip,
+                       clip[0, 0]:clip[1, 0]:skip], 0, vmax)
+
+# plt.savefig(os.path.join(PATH,
+#                          f'output/transmittance_rodent_cc_0_{vmax:.0f}.png'),
+#             bbox_inches='tight')
+
+# plt.plot((leftroi[:, 0] - clip[1]) / skip, (leftroi[:, 1] - clip[0]) / skip,
+#          c='red')
+plt.axis('off')
+plt.tight_layout()
 
 # retardation
 plt.subplots()
 plt.imshow(retardation[clip[0, 1]:clip[1, 1]:skip, clip[0, 0]:clip[1, 0]:skip],
            cmap=plt.get_cmap('cividis'),
+           vmin=0,
+           vmax=1,
            origin='lower')
-
-cval = (np.amin(retardation[clip[0, 1]:clip[1, 1]:skip,
-                            clip[0, 0]:clip[1, 0]:skip]),
-        np.amax(retardation[clip[0, 1]:clip[1, 1]:skip,
-                            clip[0, 0]:clip[1, 0]:skip]))
-print(cval)
-plt.plot((roi[:, 0] - clip[0, 0]) / skip, (roi[:, 1] - clip[0, 1]) / skip,
+# cval = (np.amin(retardation[clip[0]:24500:skip, clip[1]:27000:skip]),
+#         np.amax(retardation[clip[0]:24500:skip, clip[1]:27000:skip]))
+# print(cval)
+plt.plot((leftroi[:, 0] - clip[0, 0]) / skip,
+         (leftroi[:, 1] - clip[0, 1]) / skip,
          c='red')
 plt.axis('off')
 plt.tight_layout()
-plt.savefig(os.path.join(
-    PATH, f'output/retardation_mouse_cc_{cval[0]:.0f}_{cval[1]:.0f}.png'),
-            bbox_inches='tight')
+# print(leftroi[:, 0] , leftroi[:, 1] )
+save_img(os.path.join(PATH, f'output/retardation_rodent_cc_0_1.png'),
+         retardation[clip[0, 1]:clip[1, 1]:skip, clip[0, 0]:clip[1,
+                                                                 0]:skip], 0, 1)
+
+# plt.savefig(os.path.join(PATH, f'output/retardation_rodent_cc_0_1.png'),
+#             bbox_inches='tight')
 
 # %%
-mask = np.zeros_like(retardation, dtype=np.uint8)
-cv2.fillPoly(mask, [roi], 1)
+# thumbnail
+data = transmittance[::5, ::5]
+save_img(f'output/transmittance_rodent_thumbnail_0_{vmax:.1f}.png', data, 0,
+         vmax)
+data = retardation[::5, ::5]
+save_img('output/retardation_rodent_thumbnail_0_1.png', data, 0, 1)
+
+# %%
+mask_left = np.zeros_like(retardation, dtype=np.uint8)
+cv2.fillPoly(mask_left, [leftroi], 1)
+
+print(np.sum(mask_left))
 
 # plt.subplots()
 # plt.imshow(mask_left[::100, ::100])
@@ -104,40 +153,56 @@ cv2.fillPoly(mask, [roi], 1)
 
 #%%
 
-transmittance_ = np.extract(mask, transmittance)
-retardation_ = np.extract(mask, retardation)
-plt.imshow(mask)
+transmittance_left = np.extract(mask_left, transmittance)
+retardation_left = np.extract(mask_left, retardation)
+
 # %%
-t_mean = np.mean(transmittance_)
-t_std = np.std(transmittance_)
+t_left_mean = np.mean(transmittance_left)
+t_left_std = np.std(transmittance_left)
 
-r_bg_mean = np.mean(transmittance[100:1000, 100:1000])
-r_bg_std = np.std(transmittance[100:1000, 100:1000])
-plt.imshow(transmittance[100:1000, 100:1000])
+r_bg_mean = np.mean(transmittance[0:4200, 0:4200])
+r_bg_std = np.std(transmittance[0:4200, 0:4200])
 
-print(t_mean, t_std)
+print(t_left_mean, t_left_std)
 print(r_bg_mean, r_bg_std)
-print("fuellgrad 0.75:", -np.log(t_mean / r_bg_mean) / (0.06 * 0.75), 'pm',
-      (1 / t_mean) / (0.06 * 0.75) * t_std + (1 / r_bg_mean) /
+print("fuellgrad 0.75:", -np.log(t_left_mean / r_bg_mean) / (0.06 * 0.75), 'pm',
+      (1 / t_left_mean) / (0.06 * 0.75) * t_left_std + (1 / r_bg_mean) /
       (0.06 * 0.75) * r_bg_std)
-print(np.mean(retardation_), np.std(retardation_))
+print(np.mean(retardation_left), np.std(retardation_left))
 
 # %%
 plt.subplots()
-plt.hist(transmittance_,
-         int(np.sqrt(transmittance_.size)),
-         label='cc',
+plt.hist(transmittance_left,
+         255,
+         label='left',
          fc=(239 / 255, 138 / 255, 98 / 255, 0.75))
 plt.legend()
-plt.savefig(os.path.join(PATH, f'output/transmittance_mouse_cc_hist.png'),
+plt.savefig(os.path.join(PATH, f'output/transmittance_rodent_cc_hist.png'),
             bbox_inches='tight')
 
+#
+y, x = np.histogram(transmittance_left, 255)
+y = np.append(y, 0)
+np.savetxt("output/rodent_transmittance_left.dat",
+           np.vstack((x, y)).T,
+           header='x y',
+           comments='',
+           fmt='%.6e')
+
 plt.subplots()
-plt.hist(retardation_,
-         int(np.sqrt(retardation_.size)),
-         label='cc',
+plt.hist(retardation_left,
+         255,
+         label='left',
          fc=(239 / 255, 138 / 255, 98 / 255, 0.75))
 plt.legend()
-plt.savefig(os.path.join(PATH, f'output/retardation_mouse_cc_hist.png'),
+plt.savefig(os.path.join(PATH, f'output/retardation_rodent_cc_hist.png'),
             bbox_inches='tight')
+
+y, x = np.histogram(retardation_left, 255)
+y = np.append(y, 0)
+np.savetxt("output/rodent_retardation_left.dat",
+           np.vstack((x, y)).T,
+           header='x y',
+           comments='',
+           fmt='%.6e')
 # %%

@@ -242,8 +242,7 @@ def run(p):
         data_ = np.concatenate((data_, data_), axis=0)
 
         # rm multiple
-        phi_, theta_ = helper.spherical_interpolation.remap_spherical(
-            phi_, theta_)
+        phi_, theta_ = helper.spherical_interpolation.remap_sphere(phi_, theta_)
 
         x_ = np.multiply(np.cos(phi_), np.sin(theta_))
         y_ = np.multiply(np.sin(phi_), np.sin(theta_))

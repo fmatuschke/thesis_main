@@ -1,15 +1,10 @@
 #%%
-import itertools
-import multiprocessing as mp
 import os
 
 import fastpli.analysis
 import helper.circular
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import tqdm
 from scipy.stats import circmean
 
@@ -76,89 +71,6 @@ def get_file_from_series(df):
 
 
 #%%
-os.makedirs(os.path.join(FILE_PATH, 'output', DATASET, "hist"), exist_ok=True)
-if False:
-    for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
-        phi, theta = fastpli.analysis.orientation.remap_orientation(
-            row.rofl_dir, np.pi / 2 - row.rofl_inc)
-
-        # fig, ax = plt.subplots(nrows=1,
-        #                        ncols=2,
-        #                        subplot_kw=dict(projection="polar"),
-        #                        figsize=(3.5, 2))
-        # fig.suptitle(f"omega:{row.omega}")
-        #
-        # simulation values
-        h, x, y, _ = fastpli.analysis.orientation.histogram(
-            phi,
-            theta,
-            # ax=ax[0],
-            n_phi=36,
-            n_theta=9,
-            weight_area=True,
-            fun=lambda x: np.log(x + 1),
-            cmap='cividis')
-        #
-        # 2d hist
-        with open(
-                os.path.join(
-                    FILE_PATH, 'output', DATASET, "hist",
-                    f"sim_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
-                ), "w") as f:
-
-            H = h
-            x_axis = x
-            y_axis = y
-
-            # for pgfplots matrix plot*
-            x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
-            y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
-            H = H.T / np.sum(H.ravel())
-
-            X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
-            for h_array, x_array, y_array in zip(H, X, Y):
-                for h, x, y in zip(h_array, x_array, y_array):
-                    if y <= 90:
-                        f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
-                f.write('\n')
-
-        # GT
-        phi, theta = models.ori_from_file(
-            get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
-            CONFIG.simulation.voi)
-
-        # to tex
-        h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
-                                                            theta,
-                                                            n_phi=36 * 2,
-                                                            n_theta=18,
-                                                            weight_area=True)
-
-        # 2d hist
-        with open(
-                os.path.join(
-                    FILE_PATH, 'output', DATASET, "hist",
-                    f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
-                ), "w") as f:
-
-            H = h
-            x_axis = x
-            y_axis = y
-
-            # for pgfplots matrix plot*
-            x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
-            y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
-            H = H.T / np.sum(H.ravel())
-
-            X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
-            for h_array, x_array, y_array in zip(H, X, Y):
-                for h, x, y in zip(h_array, x_array, y_array):
-                    if y <= 90:
-                        f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
-                f.write('\n')
-
-
-#%%
 def calc_omega(p, t):
     v0 = np.array([np.cos(p) * np.sin(t), np.sin(p) * np.sin(t), np.cos(t)])
     v1 = v0[:, 0].copy()
@@ -170,42 +82,142 @@ def calc_omega(p, t):
             v1 += v
         else:
             v1 -= v
+
     v1 /= np.linalg.norm(v1)
-
-    # print(v1)
-
     data = np.empty(v0.shape[1])
-
     for i in range(v0.shape[1]):
         d = np.abs(np.dot(v0[:, i], v1))  # because orientation
         data[i] = np.arccos(d)
 
     return data
-    # return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
 
 
-asd = []
+domega = []
 for i, row in df.iterrows():
-    # row = df.iloc[i]
-    phi, theta = fastpli.analysis.orientation.remap_orientation(
+    phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
         row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
-    asd.append(np.rad2deg(calc_omega(phi, theta)))
-df['domega'] = asd
+    domega.append(np.rad2deg(calc_omega(phi, theta)))
+df['domega'] = domega
 
-# %%
-# fig, axs = plt.subplots(1, 1)
 
-sns.set_theme(style="ticks", palette="pastel")
+#%%
+def to_pgfmatrix_dat(x, y, h, filename):
+    with open(filename, "w") as f:
+        H = h
+        x_axis = x
+        y_axis = y
 
-# Load the example tips dataset
-tips = sns.load_dataset("tips")
+        # for pgfplots matrix plot*
+        x_axis = x_axis[:-1] + (x_axis[1] - x_axis[0]) / 2
+        y_axis = y_axis[:-1] + (y_axis[1] - y_axis[0]) / 2
+        H = H.T / np.sum(H.ravel())
 
+        X, Y = np.meshgrid(np.rad2deg(x_axis), np.rad2deg(y_axis))
+        for h_array, x_array, y_array in zip(H, X, Y):
+            for h, x, y in zip(h_array, x_array, y_array):
+                if y <= 90:
+                    f.write(f'{x:.2f} {y:.2f} {h:.6f}\n')
+            f.write('\n')
+
+
+#%%
+os.makedirs(os.path.join(FILE_PATH, 'output', DATASET, "hist"), exist_ok=True)
+n_phi = 36 * 2
+n_theta = 18
+df_gt = pd.DataFrame()
+
+if True:
+    for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
+        phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
+            row.rofl_dir, np.pi / 2 - row.rofl_inc)
+
+        h, x, y, _ = fastpli.analysis.orientation.histogram(phi,
+                                                            theta,
+                                                            n_phi=n_phi,
+                                                            n_theta=n_theta,
+                                                            weight_area=True)
+        #
+        # 2d hist
+        to_pgfmatrix_dat(
+            x, y, h,
+            os.path.join(
+                FILE_PATH, 'output', DATASET, "hist",
+                f"sim_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
+            ))
+
+        # GT
+        phi_gt, theta_gt = models.ori_from_file(
+            get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
+            CONFIG.simulation.voi)
+        phi = phi_gt.copy()
+        theta = theta_gt.copy()
+
+        # remap GT
+        phi, theta = fastpli.analysis.orientation.remap_half_sphere_x(
+            phi, theta)
+        domega = np.rad2deg(calc_omega(phi, theta))
+
+        phi = np.rad2deg(phi)
+        alpha = np.rad2deg(np.pi / 2 - theta)
+        if row.psi < 0.5:
+            phi = helper.circular.remap(phi, row.omega + 90, row.omega - 90)
+        else:
+            phi = helper.circular.remap(phi, 90, -90)
+        a_mean = circmean(alpha, 180, -180)
+        alpha[alpha < a_mean - 90] = theta[alpha < a_mean - 90] + 180
+
+        phi_25, phi_50, phi_75 = np.quantile(phi, [0.25, 0.5, 0.75])
+        alpha_25, alpha_50, alpha_75 = np.quantile(alpha, [0.25, 0.5, 0.75])
+        domega_25, domega_50, domega_75 = np.quantile(domega, [0.25, 0.5, 0.75])
+
+        df_gt = df_gt.append(
+            {
+                'phi_25': phi_25,
+                'phi_50': phi_50,
+                'phi_75': phi_75,
+                'alpha_25': alpha_25,
+                'alpha_50': alpha_50,
+                'alpha_75': alpha_75,
+                'domega_25': domega_25,
+                'domega_50': domega_50,
+                'domega_75': domega_75,
+                'psi': row.psi,
+                'omega': row.omega,
+                'f0_inc': row.f0_inc,
+                'f1_rot': row.f1_rot,
+            },
+            ignore_index=True)
+
+        # to tex
+        h, x, y, _ = fastpli.analysis.orientation.histogram(phi_gt,
+                                                            theta_gt,
+                                                            n_phi=n_phi,
+                                                            n_theta=n_theta,
+                                                            weight_area=True)
+
+        # 2d hist
+        to_pgfmatrix_dat(
+            x, y, h,
+            os.path.join(
+                FILE_PATH, 'output', DATASET, "hist",
+                f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
+            ))
+
+# %% save GT quantiles
+df_gt = df_gt.sort_values(by=['f0_inc', 'f1_rot', 'omega'])
+for psi in df_gt.psi.unique():
+    df_gt[df_gt.psi == psi].to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi:.1f}_model.csv"),
+                                   index=False)
+
+# %% calc and save results for boxplots
 df_ = df.apply(pd.Series.explode).reset_index()
 
 phi, theta = df_["rofl_dir"].to_numpy(
     float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
-# phi, theta = fastpli.analysis.orientation.remap_orientation(phi, theta)
+# phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(phi, theta)
 theta[phi < 1 / 4 * np.pi] = np.pi - theta[phi < 1 / 4 * np.pi]
 phi[phi > 3 / 4 * np.pi] -= np.pi
 df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
@@ -214,9 +226,9 @@ df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
 df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
 
 for f0 in df_.f0_inc.unique():
-    theta = df_.loc[df_.f0_inc == f0, "rofl_inc"]
-    t_mean = circmean(theta, 180, -180)
-    theta[theta < t_mean - 90] = theta[theta < t_mean - 90] + 180
+    alpha = df_.loc[df_.f0_inc == f0, "rofl_inc"]
+    a_mean = circmean(alpha, 180, -180)
+    alpha[alpha < a_mean - 90] = theta[alpha < a_mean - 90] + 180
     df_.loc[df_.f0_inc == f0, "rofl_inc"] = theta
 
 for omega in df_.omega.unique():
@@ -234,13 +246,6 @@ for omega in df_.omega.unique():
                         name] = helper.circular.remap(
                             df_[(df_['omega'] == omega) &
                                 (df_['psi'] == psi)][name], 90, -90)
-
-#%%
-
-# df_save = df_[[
-#     "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret", "domega",
-#     "psi", "omega"
-# ]]
 
 for psi in df_.psi.unique():
     df__ = df_[df_.psi == psi]
@@ -274,44 +279,3 @@ for psi in df_.psi.unique():
         FILE_PATH, 'output', DATASET, 'analysis',
         f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_theo_dir.csv"),
                    index=False)
-
-#%%
-
-if False:
-    for name in tqdm.tqdm(
-        ["rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
-         "domega"]):
-
-        # Draw a nested boxplot to show bills by day and time
-        fig, axs = plt.subplots(1, 1)
-        sns.boxplot(
-            x="omega",
-            y=name,
-            # hue="smoker",
-            # palette=["m", "g"],
-            data=df_)
-        sns.despine(offset=10, trim=True)
-        # plt.tight_layout()
-
-        # if "epa_ret" == name:
-        #     x = np.linspace(0, np.pi, 42)
-        #     y = (np.cos(x) + 1) / 2
-        #     # plt.plot(x / np.pi * 3, y, linewidth=4.2)
-        #     plt.plot(x / np.pi * (len(df) - 1),
-        #              y * np.mean(df_[df_.f0_inc == 0].epa_ret),
-        #              linewidth=4.2)
-
-        if name in ["rofl_dir", "epa_dir"]:
-            x = [0, (len(df) - 1)]
-            y = [0, 0]
-            plt.plot(x, y, linewidth=4.2)
-            x = [0, (len(df) - 1)]
-            y = [0, 90]
-            plt.plot(x, y, linewidth=4.2)
-
-        plt.tight_layout(pad=0, w_pad=0, h_pad=0)
-        plt.savefig(
-            os.path.join(
-                FILE_PATH,
-                f"output/{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_{name}.pdf"
-            ))

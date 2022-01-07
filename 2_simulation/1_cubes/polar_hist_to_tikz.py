@@ -155,7 +155,7 @@ def generate(df,
                 data_ = np.concatenate((data_, data_), axis=0)
 
             # rm multiple
-            phi_, theta_ = helper.spherical_interpolation.remap_spherical(
+            phi_, theta_ = helper.spherical_interpolation.remap_sphere(
                 phi_, theta_)
 
             phi_theta = []

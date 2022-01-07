@@ -13,6 +13,7 @@
 \usepgfplotslibrary{colorbrewer}
 \usepgfplotslibrary{groupplots}
 \usepgfplotslibrary{statistics}
+\usepgfplotslibrary{fillbetween}
 \tikzset{>=latex}
 \DeclareSIUnit{\arbitraryunit}{a.u.}
 % 
@@ -36,8 +37,6 @@
 \colorlet{GREEN}{dark21}
 \colorlet{BLUE}{dark23} 
 % 
-\begin{document}
-% 
 \pgfplotsset{
    every tick label/.append style={font=\small,},
    title style={font=\normalsize,},
@@ -49,8 +48,48 @@
          draw position={\plotnumofactualtype},
          draw direction=y,
       },
+      fill=GREEN, draw=black,
    },
 }
+% 
+\newcommand{\plotgt}[3]{
+\pgfplotsset{update limits=false}
+\def\nboxes{9}
+\addplot+[mark=none, white, smooth,
+   dash=on 0.9pt off 0.6pt phase 0.2pt, line width=0.8pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_25}, col sep=comma, row sep=newline,
+   ]{#1};
+\addplot+[mark=none, black, smooth, name path=A,
+   dash=on 0.5pt off 1pt phase 0pt, line width=0.4pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_25}, col sep=comma, row sep=newline,
+   ]{#1};
+% 
+\addplot+[mark=none, white, smooth,
+   % dash=on 3.4pt off 2.6pt phase 0.2pt, line width=0.8pt
+   dash=on 0.9pt off 0.6pt phase 0.2pt, line width=0.8pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_50}, col sep=comma, row sep=newline,
+   ]{#1};
+\addplot+[mark=none, black, smooth,
+   % dash=on 3pt off 3pt phase 0pt, line width=0.4pt
+   dash=on 0.5pt off 1pt phase 0pt, line width=0.4pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_50}, col sep=comma, row sep=newline,
+   ]{#1};
+% 
+\addplot+[mark=none, white, smooth,
+   dash=on 0.9pt off 0.6pt phase 0.2pt, line width=0.8pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_75}, col sep=comma, row sep=newline,
+   ]{#1};
+\addplot+[mark=none, black, smooth, name path=B,
+   dash=on 0.5pt off 1pt phase 0pt, line width=0.4pt] table[%
+   x expr={\thisrow{#2}/90*\nboxes}, y={#3_75}, col sep=comma, row sep=newline,
+   ]{#1};
+% 
+\addplot[gray!30] fill between [of=A and B];
+\pgfplotsset{cycle list shift=-7}
+\pgfplotsset{update limits=true}
+}
+%  
+\begin{document}
 % 
 % \foreach \psi in {0.7} {
 \foreach \psi in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9} {
@@ -68,11 +107,8 @@
    },
    width = 0.495\width,
    height = 0.275\height,
-   % height = 0.2\height,
-   % scale only axis,
    xmin=-0.5, xmax=9.5,
    xtick={0,3,6,9},
-   % xticklabels={$\SI{0}{\degree}$, $\SI{30}{\degree}$, $\SI{60}{\degree}$, $\SI{90}{\degree}$},
    xticklabels={$0$, $30$, $60$, $90$},
    xlabel={$\Omega / \si{\degree}$},
    every axis x label/.style={
@@ -82,8 +118,6 @@
    every axis title/.append style={
       yshift=-8pt,
    },
-   % axis x line=none,
-   % axis y line=left,
    enlarge y limits,
    ymajorgrids,
    clip=true,
@@ -92,64 +126,64 @@
 % 
 \nextgroupplot[title={\vphantom{/}transmittance}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={epa_trans_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
+% 
 \nextgroupplot[title={\vphantom{/}retardation}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={epa_ret_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
+% 
 \nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
+\plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{phi}
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_dir_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
+% 
 \nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
+\plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{alpha}
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_inc_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
-% 
 \pgfplotsset{update limits=false}
-% individual plots
-\addplot+[mark=none, white,
-   dash pattern= on 0.58pt off 0.42pt,dash phase=0.04pt, semithick]  coordinates {(0,0) (9,0)};
-\addplot+[mark=none, black,
-   dash pattern= on 0.5pt off 0.5pt]  coordinates {(0,0) (9,0)};
-\addplot+[mark=none, white,
-   dash pattern= on 0.58pt off 0.42pt,dash phase=0.04pt, semithick]  coordinates {(0,0) (9,90)};
-\addplot+[mark=none, black,
-   dash pattern= on 0.5pt off 0.5pt]  coordinates {(0,0) (9,90)};
+% individual populations
+\addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (9,0)};
+\addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (9,90)};
 % circmean
 \addplot+[mark=none, white, smooth,
-   dash pattern= on 3.5pt off 2.5pt,dash phase=0.25pt, semithick]  table[%
-      x={x}, y={y}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
+   dash=on 3.4pt off 2.6pt phase 0.2pt, line width=0.8pt]  table[%
+   x={x}, y={y}, col sep=comma, row sep=newline,
+   ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
 \addplot+[mark=none, black, smooth,
-   dash pattern= on 3pt off 3pt]  table[%
-      x={x}, y={y}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
+   dash=on 3pt off 3pt phase 0pt, line width=0.4pt]  table[%
+   x={x}, y={y}, col sep=comma, row sep=newline,
+   ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
 \pgfplotsset{update limits=true}
 % 
 % 
 \nextgroupplot[title={\vphantom{/}trel}]
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_trel_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
+% 
 \nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
+\plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{domega}
 \foreach \omega in {0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0} {      
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={domega_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
@@ -182,6 +216,7 @@
    Boxplot/.style={
       boxplot={draw position={\plotnumofactualtype+4.5},},
       boxplot/draw direction=y,
+      fill=GREEN, draw=black,
    },
 }
 % 
@@ -200,10 +235,8 @@
    },
    width = 0.495\width,
    height = 0.275\height,
-   % scale only axis,
    xmin=-0.5, xmax=9.5,
    xtick={4.5},
-   % xticklabels={$\SI{0}{\degree}$},
    xticklabels={$0$},
    xlabel={$\Omega / \si{\degree}$},
    every axis x label/.style={
@@ -213,8 +246,6 @@
    every axis title/.append style={
       yshift=-8pt,
    },
-   % axis x line=none,
-   % axis y line=left,
    enlarge y limits,
    ymajorgrids,
    clip=false,
@@ -223,21 +254,21 @@
 % 
 \nextgroupplot[title={\vphantom{/}transmittance / $\si{\arbitraryunit}$}]
 \foreach \omega in {0.0} {      
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={epa_trans_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}retardation}]
 \foreach \omega in {0.0} {       
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={epa_ret_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
 \foreach \omega in {0.0} {       
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_dir_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
    % \addplot+[mark=none, BLUE, dashed] coordinates {(0,0) (9,0)};
@@ -246,7 +277,7 @@
 % 
 \nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
 \foreach \omega in {0.0} {        
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_inc_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
    % \addplot+[mark=none, black, dashed] coordinates {(0,0) (9,0)};
@@ -254,14 +285,14 @@
 % 
 \nextgroupplot[title={\vphantom{/}trel}]
 \foreach \omega in {0.0} {       
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={rofl_trel_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
 % 
 \nextgroupplot[title={\vphantom{/}domega / $\si{\degree}$}]
 \foreach \omega in {0.0} {     
-   \addplot+[Boxplot, fill, draw=black] table[%
+   \addplot+[Boxplot] table[%
       y={domega_\omega}, col sep=comma, row sep=newline,
       ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi.csv};
 }
