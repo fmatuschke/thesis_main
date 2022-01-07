@@ -156,6 +156,7 @@ if True:
         # remap GT
         phi, theta = fastpli.analysis.orientation.remap_half_sphere_x(
             phi, theta)
+        domega = np.rad2deg(calc_omega(phi, theta))
 
         phi = np.rad2deg(phi)
         alpha = np.rad2deg(np.pi / 2 - theta)
@@ -163,12 +164,12 @@ if True:
             phi = helper.circular.remap(phi, row.omega + 90, row.omega - 90)
         else:
             phi = helper.circular.remap(phi, 90, -90)
+        a_mean = circmean(alpha, 180, -180)
+        alpha[alpha < a_mean - 90] = theta[alpha < a_mean - 90] + 180
 
         phi_25, phi_50, phi_75 = np.quantile(phi, [0.25, 0.5, 0.75])
         alpha_25, alpha_50, alpha_75 = np.quantile(alpha, [0.25, 0.5, 0.75])
-        # print(row.f0_inc)
-        # print(phi_25, phi_50, phi_75)
-        # print(alpha_25, alpha_50, alpha_75)
+        domega_25, domega_50, domega_75 = np.quantile(domega, [0.25, 0.5, 0.75])
 
         df_gt = df_gt.append(
             {
@@ -178,10 +179,13 @@ if True:
                 'alpha_25': alpha_25,
                 'alpha_50': alpha_50,
                 'alpha_75': alpha_75,
+                'domega_25': domega_25,
+                'domega_50': domega_50,
+                'domega_75': domega_75,
                 'psi': row.psi,
                 'omega': row.omega,
                 'f0_inc': row.f0_inc,
-                'f1_rot': row.f1_rot
+                'f1_rot': row.f1_rot,
             },
             ignore_index=True)
 
@@ -201,12 +205,12 @@ if True:
             ))
 
 # %% save GT quantiles
+df_gt = df_gt.sort_values(by=['f0_inc', 'f1_rot', 'omega'])
 for psi in df_gt.psi.unique():
-    df_gt[df_gt.psi == psi].to_csv(
-        os.path.join(
-            FILE_PATH, 'output', DATASET, 'analysis',
-            f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi:.2f}_model.csv"
-        ))
+    df_gt[df_gt.psi == psi].to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi:.1f}_model.csv"),
+                                   index=False)
 
 # %% calc and save results for boxplots
 df_ = df.apply(pd.Series.explode).reset_index()
@@ -222,9 +226,9 @@ df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
 df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
 
 for f0 in df_.f0_inc.unique():
-    theta = df_.loc[df_.f0_inc == f0, "rofl_inc"]
-    t_mean = circmean(theta, 180, -180)
-    theta[theta < t_mean - 90] = theta[theta < t_mean - 90] + 180
+    alpha = df_.loc[df_.f0_inc == f0, "rofl_inc"]
+    a_mean = circmean(alpha, 180, -180)
+    alpha[alpha < a_mean - 90] = theta[alpha < a_mean - 90] + 180
     df_.loc[df_.f0_inc == f0, "rofl_inc"] = theta
 
 for omega in df_.omega.unique():
