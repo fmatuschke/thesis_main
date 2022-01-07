@@ -6,7 +6,9 @@
 \usepackage{currfile}
 \usepackage{ifthen}
 \usepackage{tikz}
-\usepackage{mathtools}
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
+\usepackage{lualatex-math}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
@@ -26,6 +28,7 @@
 \directlua0{
   pdf.setinfo ("/Path: (__PATH__)")
 }
+\newcommand{\fiberRadiusMean}{\textnormal{$\overbar{r}_f$}}
 % 
 \begin{document}
 \pgfmathsetmacro{\ng}{5}
@@ -101,7 +104,7 @@
    height = 0.22*\height,
    scale only axis,
    xmin=0.42,
-   xmax=5.58,
+   xmax=1.58,
    axis x line=none,
    axis y line=left,
    enlarge y limits,
@@ -111,38 +114,38 @@
    ylabel absolute, every axis y label/.append style={yshift=0.0ex},
    Boxplot,
    ]
-\foreach \dn [count=\idn] in {0.002,0.004,0.006,0.008,0.01}{
+\foreach \dn [count=\idn] in {0.008}{ % 0.002,0.004,0.006,,0.01
    \foreach \r in {0.5,1.0,2.0,5.0,10.0}{
       \addplot+[fill, draw=black] table[%
          y={\r_\dn}, col sep=comma, row sep=newline,
          ]{\datapath/retardation_\setup_\species.csv};
    }
 }
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.002}{}$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.004}{}$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.006}{}$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.008}{}$};
-\draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-   ({axis cs:4.6,0.0} |- {axis description cs:0.0,0.0}) --
-   ({axis cs:5.4,0.0} |- {axis description cs:0.0,0.0})
-   node [black,midway,below,yshift=-1ex, align=left]
-   {\footnotesize $\Delta n = \SI{0.01}{}$};
+% \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+%    ({axis cs:0.6,0.0} |- {axis description cs:0.0,0.0}) --
+%    ({axis cs:1.4,0.0} |- {axis description cs:0.0,0.0})
+%    node [black,midway,below,yshift=-1ex, align=left]
+%    {\footnotesize $\Delta n = \SI{0.002}{}$};
+% \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+%    ({axis cs:1.6,0.0} |- {axis description cs:0.0,0.0}) --
+%    ({axis cs:2.4,0.0} |- {axis description cs:0.0,0.0})
+%    node [black,midway,below,yshift=-1ex, align=left]
+%    {\footnotesize $\Delta n = \SI{0.004}{}$};
+% \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+%    ({axis cs:2.6,0.0} |- {axis description cs:0.0,0.0}) --
+%    ({axis cs:3.4,0.0} |- {axis description cs:0.0,0.0})
+%    node [black,midway,below,yshift=-1ex, align=left]
+%    {\footnotesize $\Delta n = \SI{0.006}{}$};
+% \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+%    ({axis cs:3.6,0.0} |- {axis description cs:0.0,0.0}) --
+%    ({axis cs:4.4,0.0} |- {axis description cs:0.0,0.0})
+%    node [black,midway,below,yshift=-1ex, align=left]
+%    {\footnotesize $\Delta n = \SI{0.008}{}$};
+% \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+%    ({axis cs:4.6,0.0} |- {axis description cs:0.0,0.0}) --
+%    ({axis cs:5.4,0.0} |- {axis description cs:0.0,0.0})
+%    node [black,midway,below,yshift=-1ex, align=left]
+%    {\footnotesize $\Delta n = \SI{0.01}{}$};
 % 
 \end{axis}
 \end{tikzpicture}
@@ -162,11 +165,11 @@
     legend columns=2,
     legend style={/tikz/every even column/.append style={column sep=1ex}},
     legend entries={%
-        {$\mathit{v_{s}}=\SI{0.002}{}$},
-        {$\mathit{v_{s}}=\SI{0.004}{}$},
-        {$\mathit{v_{s}}=\SI{0.006}{}$},
-        {$\mathit{v_{s}}=\SI{0.008}{}$},
-        {$\mathit{v_{s}}=\SI{0.01}{}$},
+        {$\fiberRadiusMean=\SI{0.5}{\micro\meter}$},
+        {$\fiberRadiusMean=\SI{1.0}{\micro\meter}$},
+        {$\fiberRadiusMean=\SI{2.0}{\micro\meter}$},
+        {$\fiberRadiusMean=\SI{5.0}{\micro\meter}$},
+        {$\fiberRadiusMean=\SI{10.0}{\micro\meter}$},
     },
     legend image post style={mark=square*, only marks},
     ]
