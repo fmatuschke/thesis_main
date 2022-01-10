@@ -40,6 +40,8 @@ psi = df.psi.unique()[-1]
 df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
 df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
+df["R_mean"] = df["R"].apply(lambda x: np.mean(x))
+df["R2_mean"] = df["R2"].apply(lambda x: np.mean(x))
 
 
 #%%
@@ -204,16 +206,19 @@ if True:
                 f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
             ))
 
-# %% save GT quantiles
-df_gt = df_gt.sort_values(by=['f0_inc', 'f1_rot', 'omega'])
-for psi in df_gt.psi.unique():
-    df_gt[df_gt.psi == psi].to_csv(os.path.join(
-        FILE_PATH, 'output', DATASET, 'analysis',
-        f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi:.1f}_model.csv"),
-                                   index=False)
+    # %% save GT quantiles
+    df_gt = df_gt.sort_values(by=['f0_inc', 'f1_rot', 'omega'])
+    for psi in df_gt.psi.unique():
+        df_gt[df_gt.psi == psi].to_csv(os.path.join(
+            FILE_PATH, 'output', DATASET, 'analysis',
+            f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi:.1f}_model.csv"
+        ),
+                                       index=False)
 
 # %% calc and save results for boxplots
-df_ = df.apply(pd.Series.explode).reset_index()
+df_ = df.explode([
+    'rofl_dir', 'rofl_inc', 'rofl_trel', 'epa_trans', 'epa_ret', 'R', 'domega'
+])
 
 phi, theta = df_["rofl_dir"].to_numpy(
     float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
@@ -223,8 +228,6 @@ phi[phi > 3 / 4 * np.pi] -= np.pi
 df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
                                                                theta)
 
-df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
-
 for f0 in df_.f0_inc.unique():
     alpha = df_.loc[df_.f0_inc == f0, "rofl_inc"]
     a_mean = circmean(alpha, 180, -180)
@@ -233,7 +236,7 @@ for f0 in df_.f0_inc.unique():
 
 for omega in df_.omega.unique():
     for psi in df_.psi.unique():
-        for name in ["epa_dir", "rofl_dir"]:
+        for name in ["rofl_dir"]:
             if psi < 0.5:
                 df_.loc[(df_['omega'] == omega) & (df_['psi'] == psi),
                         name] = helper.circular.remap(
@@ -249,22 +252,19 @@ for omega in df_.omega.unique():
 
 for psi in df_.psi.unique():
     df__ = df_[df_.psi == psi]
-
     dff = pd.DataFrame()
-
     for o in df__.omega.unique():
         for n in [
                 "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
-                "domega"
+                "domega", "R"
         ]:
-            # print(psi, n, o)
-            # print(df__[df__.omega == o][n])
-            dff[f'{n}_{o}'] = df__[df__.omega == o][n].to_numpy()
+            dff[f'{n}'] = df__[df__.omega == o][n].to_numpy()
 
-    dff.to_csv(os.path.join(
-        FILE_PATH, 'output', DATASET, 'analysis',
-        f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}.csv"),
-               index=False)
+        dff.to_csv(os.path.join(
+            FILE_PATH, 'output', DATASET, 'analysis',
+            f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_omega_{o:.0f}.csv"
+        ),
+                   index=False)
 
     df_theo = pd.DataFrame()
     N = 10
@@ -279,3 +279,27 @@ for psi in df_.psi.unique():
         FILE_PATH, 'output', DATASET, 'analysis',
         f"{DATASET}_{os.path.basename(__file__)[:-3]}_psi_{psi}_theo_dir.csv"),
                    index=False)
+
+# %% ACC
+df = pd.read_pickle(
+    os.path.join(FILE_PATH, 'output', DATASET,
+                 'analysis/cube_2pop_simulation_schilling.pkl'))
+
+df = df[df.microscope == "PM"]
+df = df[df.species == "Vervet"]
+df = df[df.model == "r"]
+df = df[df.radius == 0.5]
+
+for psi in df.psi.unique():
+    df_ = df[df.psi == psi]
+    dff = pd.DataFrame()
+
+    for n in ["omega", "acc"]:
+        dff[f'{n}'] = df_[n].to_numpy()
+
+    dff = dff.sort_values(["omega"])
+
+    dff.to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_schilling_psi_{psi}.csv"),
+               index=False)

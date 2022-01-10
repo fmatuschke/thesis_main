@@ -119,8 +119,6 @@ def run(p):
 
     for name in [
             "acc",
-            # "R", # sind kopien
-            # "R2",
     ]:
 
         crange = polar_hist_to_tikz.generate(
@@ -139,15 +137,8 @@ def run(p):
         df.species == species) & (df.model == model)
 
     for name in [
-            "R",
-            "R2",
-            # "dir_mean",
-            "rtrel_mean",
-            # "rdir_mean",
-            # "rincl_mean",
-            "ret_mean",
-            "trans_mean",
-            "domega_mean"
+            "R_mean", "rtrel_mean", "rdir_mean", "rincl_mean", "ret_mean",
+            "trans_mean", "domega_mean"
     ]:
 
         crange = None
@@ -159,11 +150,11 @@ def run(p):
             crange = [0, 1]
         elif "ret" in name:
             crange = [0, 0.8]
-        # elif "dir" in name:
-        #     crange = [0, np.pi]
-        # elif "incl" in name:
-        #     # crange = [-np.pi / 2, np.pi / 2]
-        #     crange = [0, np.pi / 2]
+        elif "dir" in name:
+            crange = [0, np.pi]
+        elif "incl" in name:
+            crange = [-np.pi / 2, np.pi / 2]
+            # crange = [0, np.pi / 2]
 
         crange = polar_hist_to_tikz.generate(
             df[sub],

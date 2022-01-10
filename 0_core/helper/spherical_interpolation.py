@@ -12,6 +12,9 @@ def radii_to_lati_long(phi, theta):
     return lati, long
 
 
+# TODO: mit circmean
+
+
 def on_data(phi, theta, data, phi_i, theta_i):
     ''' https://github.com/PhTrempe/sknni
     '''

@@ -142,8 +142,6 @@ def run(parameter):
             'omega': omega,
             'psi': psi,
             'acc': acc,
-            'R': df[sub].R.to_numpy(float),
-            'R2': df[sub].R2.to_numpy(float)
         },
         index=[0])
 

@@ -116,8 +116,13 @@ def run(file):
                                    np.mean(optic_data, axis=-1)[:, :, :,
                                                                 None]) - 1
 
-            R = np.mean(np.abs(fit_data.ravel() - optic_data.ravel()))
-            R2 = np.mean(np.power(fit_data.ravel() - optic_data.ravel(), 2))
+            fdata = np.moveaxis(fit_data, 0, 2)
+            odata = np.moveaxis(optic_data, 0, 2)
+            fdata = np.reshape(fdata, (fdata.shape[0] * fdata.shape[1], -1))
+            odata = np.reshape(odata, (odata.shape[0] * odata.shape[1], -1))
+
+            R = np.mean(np.abs(fdata - odata), axis=-1)
+            R2 = np.mean(np.power(fdata - odata, 2), axis=-1)
 
             # print("R:", R, "R2:", R2)
             # print(fit_data.ravel())
