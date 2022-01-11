@@ -34,9 +34,11 @@ df = df[df.model == "r"]
 df = df[df.radius == 0.5]
 df = df[df.psi == 1.0]
 
-df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
-df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
-df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
+# df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
+# df["trel_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
+# df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
+# df["R_mean"] = df["R"].apply(lambda x: np.mean(x))
+# df["R2_mean"] = df["R2"].apply(lambda x: np.mean(x))
 
 
 #%%
@@ -195,15 +197,17 @@ if True:
                 f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
             ))
 
-# %% save GT quantiles
-df_gt = df_gt.sort_values(by=['f0_inc', 'f1_rot', 'omega'])
-df_gt.to_csv(os.path.join(
-    FILE_PATH, 'output', DATASET, 'analysis',
-    f"{DATASET}_{os.path.basename(__file__)[:-3]}_model.csv"),
-             index=False)
+    # %% save GT quantiles
+    df_gt = df_gt.sort_values(by=['f0_inc', 'f1_rot', 'omega'])
+    df_gt.to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_model.csv"),
+                 index=False)
 
 # %% calc and save results for boxplots
-df_ = df.apply(pd.Series.explode).reset_index()
+df_ = df.explode([
+    'rofl_dir', 'rofl_inc', 'rofl_trel', 'epa_trans', 'epa_ret', 'R', 'domega'
+])
 
 phi, theta = df_["rofl_dir"].to_numpy(
     float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
@@ -218,16 +222,39 @@ for f0 in df_.f0_inc.unique():
     alpha[alpha < f0 - 90] = alpha[alpha < f0 - 90] + 180
     df_.loc[df_.f0_inc == f0, "rofl_inc"] = alpha
 
-df_["epa_dir"] = np.rad2deg(df_["epa_dir"].to_numpy(float))
-
 dff = pd.DataFrame()
 for inc in df_.f0_inc.unique():
     for n in [
             "rofl_inc", "rofl_dir", "rofl_trel", "epa_trans", "epa_ret",
-            "domega"
+            "domega", "R"
     ]:
-        dff[f'{n}_{inc}'] = df_[df_.f0_inc == inc][n].to_numpy()
+        dff[f'{n}'] = df_[df_.f0_inc == inc][n].to_numpy()
 
-dff.to_csv(os.path.join(FILE_PATH, 'output', DATASET, 'analysis',
-                        f"{DATASET}_{os.path.basename(__file__)[:-3]}.csv"),
-           index=False)
+    dff.to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_f0_{inc:.1f}.csv"),
+               index=False)
+
+# %% ACC
+df = pd.read_pickle(
+    os.path.join(FILE_PATH, 'output', DATASET,
+                 'analysis/cube_2pop_simulation_schilling.pkl'))
+
+df = df[df.microscope == "PM"]
+df = df[df.species == "Vervet"]
+df = df[df.model == "r"]
+df = df[df.radius == 0.5]
+
+for psi in df.psi.unique():
+    df_ = df[df.psi == psi]
+    dff = pd.DataFrame()
+
+    for n in ["f0_inc", "acc"]:
+        dff[f'{n}'] = df_[n].to_numpy()
+
+    dff = dff.sort_values(["f0_inc"])
+
+    dff.to_csv(os.path.join(
+        FILE_PATH, 'output', DATASET, 'analysis',
+        f"{DATASET}_{os.path.basename(__file__)[:-3]}_schilling_psi_{psi}.csv"),
+               index=False)
