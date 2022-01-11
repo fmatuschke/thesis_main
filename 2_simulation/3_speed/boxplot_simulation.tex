@@ -37,122 +37,133 @@
 % 
 % \tikzset{fontscale/.style = {font=\footnotesize}}
 \pgfplotsset{
-    Boxplot/.style={
-        width = 0.5\width,
-        height = 0.35\width,
-        cycle list/Paired-5,
-        axis x line=none,
-        axis y line=left,
-        enlarge y limits,
-        ymajorgrids,
-        clip=false,
-        % y label style={at={(axis description cs:-0.125,.5)},rotate=0,anchor=south},
-        boxplot={
-            draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
-            box extend=\dx/(\ng+1)*1.5,
-            mark size=0.42pt,
-            draw/median/.code={%
-               \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
-               \pgfextra
-               \pgftransformshift{
-                  \pgfplotsboxplotpointabbox
-                     {\pgfplotsboxplotvalue{median}}
-                     {0.5}
-               }
-               \pgfuseplotmark{*}
-               \endpgfextra
-               ;
-            },
-        },
-        boxplot/draw direction=y,
-    },
-    ylabel absolute,
-    every axis x label/.append style={xshift=0.0ex, font=\footnotesize},
-    every axis y label/.append style={yshift=0.0em, at={(0.075,0.5)}, font=\footnotesize},
-    every x tick label/.append style = {font=\footnotesize},
-    every y tick label/.append style = {font=\footnotesize},
+   Boxplot/.style={
+      width = 0.41\width,
+      height = 0.35\width,
+      % xlabel={$\mathit{\#cores}$},
+      ylabel={$\mathit{speedup}$},
+      axis x line = none,
+      axis y line = left,
+      % enlarge y limits,
+      ymajorgrids,
+      clip=false,
+      ylabel absolute,
+      scale only axis,
+      every axis y label/.style={at={(ticklabel* cs:1.0)},, anchor=west},
+      every axis x label/.append style= {font=\footnotesize},
+      every axis y label/.append style= {font=\footnotesize},
+      every x tick label/.append style = {font=\footnotesize},
+      every y tick label/.append style = {font=\footnotesize},
+      % 
+      cycle list/Paired-5,
+      boxplot={
+         draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
+         box extend=\dx/(\ng+1)*1.5,
+         mark=*,
+         mark size=0.1pt,
+         mark options={fill=black},
+         draw/median/.code={%
+            \draw[mark size=1pt,/pgfplots/boxplot/every median/.try]
+            \pgfextra
+            \pgftransformshift{
+               \pgfplotsboxplotpointabbox
+                  {\pgfplotsboxplotvalue{median}}
+                  {0.5}
+            }
+            \pgfuseplotmark{*}
+            \endpgfextra
+            ;
+         },
+      },
+      boxplot/draw direction=y,
+   },
+   ylabel absolute,
+   every axis y label/.style={at={(ticklabel* cs:1.0)},, anchor=west},
+   every axis x label/.append style= {font=\footnotesize},
+   every axis y label/.append style= {font=\footnotesize},
+   every x tick label/.append style = {font=\footnotesize},
+   every y tick label/.append style = {font=\footnotesize},
 }
 %
 % 
 \begin{tikzpicture}[every node/.append style={font=\scriptsize}]
-  \begin{axis}[%
-        ylabel={$\mathit{speedup}$},
-        xmin=0.42,
-        xmax=8.58,
-        Boxplot,
-        scale only axis,
-        xtick={1,2,3,4,5,6,7,8},
-        xticklabels={1,2,3,4,5,6,7,8},
+\begin{axis}[%
+         xmin=0.42,
+         xmax=8.58,
+         ymin=0.5,
+         Boxplot,
+         xtick={1,2,3,4,5,6,7,8},
+         xticklabels={,,,,,,,},
       ]
-     \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8} {
-      \foreach \t [count=\it from 0] in {0,1,2,3,4} {
-        \addplot+[fill, draw=black] table[%
-            y=p\p_t\t, col sep=comma, row sep=newline,
-            ]{\datapath};
-    }}
-    \begin{scope}[overlay]
-    \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8}) node[sloped, pos=0.95, above] {ideal}; 
-    \end{scope}
-   %  
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$1$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$2$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$3$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$4$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$5$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$6$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$7$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] (last) {$8$};
-   % 
-   \coordinate (A) at (rel axis cs:0,1);
-   % \coordinate (B) at (axis cs:0,1);
-   \coordinate (PA) at (rel axis cs:0,0);
-   \coordinate (PB) at (rel axis cs:1,0);
-   \coordinate (P) at (rel axis cs:0.5,0);
+      \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8} {
+         \foreach \t [count=\it from 0] in {0,1,2,3,4} {
+         \addplot+[fill, draw=black] table[%
+               y=p\p_t\t, col sep=comma, row sep=newline,
+               ]{\datapath};
+      }}
+      \begin{scope}[overlay]
+         \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8}) node[sloped, pos=0.875, above] {\scriptsize ideal}; 
+      \end{scope}
+      %  
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$1$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$2$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$3$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$4$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$5$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$6$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$7$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] (last) {$8$};
+      \node[anchor=north east] at (rel axis cs:1,-0.0825) {\footnotesize$\mathit{\#cores}$};
+      % 
+      \coordinate (A) at (rel axis cs:0,1);
+      % \coordinate (B) at (axis cs:0,1);
+      \coordinate (PA) at (rel axis cs:0,0);
+      \coordinate (PB) at (rel axis cs:1,0);
+      \coordinate (P) at (rel axis cs:0.5,0);
    \end{axis}
    %
    % center axis
-   \coordinate (PC) at (current bounding box.west);
-   % \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+   \path[] ($(PA) - (0.6,0)$) -- ($(PB) + (0.6,0)$);
    % 
    %  
    % LEGENDE
    \begin{axis}[%
-      hide axis,
-      scale only axis,
-      height=0pt,
-      width=0pt,
-      cycle list/Paired-5,
-      legend to name={legend1},
-      legend style={draw=white!15!black,legend cell align=left},
-      legend transposed=true,
-      legend columns=2,
-      legend style={scale=0.5,/tikz/every even column/.append style={column sep=1ex}},
-      legend entries={{C},{E},{N},{W},{S}},
-      legend image post style={mark=square*, only marks},
+         hide axis,
+         scale only axis,
+         height=0pt,
+         width=0pt,
+         cycle list/Paired-5,
+         legend to name={legend1},
+         legend style={draw=white!15!black,legend cell align=left},
+         legend transposed=true,
+         legend columns=2,
+         legend style={scale=0.5,/tikz/every even column/.append style={column sep=1ex}},
+         legend entries={{C},{E},{N},{W},{S}},
+         legend image post style={mark=square*, only marks},
       ]
       \addplot+[] coordinates {(0,0)};
       \addplot+[] coordinates {(0,0)};
@@ -161,112 +172,112 @@
       \addplot+[] coordinates {(0,0)};
    \end{axis}
    %
-   \node[anchor=north west] at (A) {\ref{legend1}};
+   \node[anchor=north west, yshift=-1ex] at (A) {\ref{legend1}};
 % 
 \end{tikzpicture}
 %
 % 
 % 
 \begin{tikzpicture}[every node/.append style={font=\scriptsize}]
-  \begin{axis}[%
-        ylabel={$\mathit{speedup}$},
-        xmin=0.42,
-        xmax=13.58,
-        Boxplot,
-        scale only axis,
-        xtick={1,2,3,4,5,6,7,8,9,10,11,12,13},
-        xticklabels={1,2,3,4,5,6,7,8,16,24,32,40,48},
+\begin{axis}[%
+         xmin=0.45,
+         xmax=13.58,
+         ymin=0,
+         Boxplot,
+         xtick={1,2,3,4,5,6,7,8,9,10,11,12,13},
+         xticklabels={,,,,,,,,,,,,},
       ]
-     \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8,16,24,32,40,48} {
-      \foreach \t [count=\it from 0] in {0,1,2,3,4} {
-        \addplot+[fill, draw=black] table[%
-            y=p\p_t\t, col sep=comma, row sep=newline,
-            ]{\datapath};
-    }}
-    \begin{scope}[overlay]
-    \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8}) node[sloped, pos=0.5, above] {ideal}; 
-    \draw[black, dashed] ({axis cs:8,8}) -- ({axis cs:13,48}); 
-    \end{scope}
-   %  
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$1$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$2$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$3$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$4$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$5$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$6$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] {$7$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] (last) {$8$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:8.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:9.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] (last) {$16$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:9.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:10.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] (last) {$24$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:10.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:11.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] (last) {$32$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:11.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:12.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] (last) {$40$};
-   \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-      ({axis cs:12.6,20.0} |- {axis description cs:0.0,0.05}) -- 
-      ({axis cs:13.4,20.0} |- {axis description cs:0.0,0.05})
-      node [black,midway,below,yshift=-1ex] (last) {$48$};
-   % 
-   \coordinate (A) at (rel axis cs:0,1);
-   % \coordinate (B) at (axis cs:0,1);
-   % 
-   \coordinate (PA) at (rel axis cs:0,0);
-   \coordinate (PB) at (rel axis cs:1,0);
-   \coordinate (P) at (rel axis cs:0.5,0);
+      \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8,16,24,32,40,48} {
+         \foreach \t [count=\it from 0] in {0,1,2,3,4} {
+         \addplot+[fill, draw=black] table[%
+               y=p\p_t\t, col sep=comma, row sep=newline,
+               ]{\datapath};
+      }}
+      \begin{scope}[overlay]
+         \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8});
+         \draw[black, dashed] ({axis cs:8,8}) -- ({axis cs:13,48})
+            node[sloped, pos=0.65, above] {\scriptsize ideal};
+      \end{scope}
+      %  
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$1$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$2$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$3$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$4$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$5$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$6$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] {$7$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] (last) {$8$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:8.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:9.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] (last) {$16$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:9.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:10.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] (last) {$24$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:10.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:11.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] (last) {$32$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:11.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:12.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] (last) {$40$};
+      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
+         ({axis cs:12.6,20.0} |- {axis description cs:0.0,0.0}) -- 
+         ({axis cs:13.4,20.0} |- {axis description cs:0.0,0.0})
+         node [black,midway,below,yshift=-1ex] (last) {$48$};
+      \node[anchor=north east] at (rel axis cs:1,-0.0825) {\footnotesize$\mathit{\#cores}$};
+      % 
+      \coordinate (A) at (rel axis cs:0,1);
+      % \coordinate (B) at (axis cs:0,1);
+      % 
+      \coordinate (PA) at (rel axis cs:0,0);
+      \coordinate (PB) at (rel axis cs:1,0);
+      \coordinate (P) at (rel axis cs:0.5,0);
    \end{axis}
    %
    % center axis
-   \coordinate (PC) at (current bounding box.west);
-   % \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+   \path[] ($(PA) - (0.6,0)$) -- ($(PB) + (0.6,0)$);
    % 
    % LEGENDE
    \begin{axis}[%
-      hide axis,
-      scale only axis,
-      height=0pt,
-      width=0pt,
-      cycle list/Paired-5,
-      legend to name={legend2},
-      legend style={draw=white!15!black,legend cell align=left},
-      legend transposed=true,
-      legend columns=2,
-      legend style={scale=0.5,/tikz/every even column/.append style={column sep=1ex}},
-      legend entries={{C},{E},{N},{W},{S}},
-      legend image post style={mark=square*, only marks},
+         hide axis,
+         scale only axis,
+         height=0pt,
+         width=0pt,
+         cycle list/Paired-5,
+         legend to name={legend2},
+         legend style={draw=white!15!black,legend cell align=left},
+         legend transposed=true,
+         legend columns=2,
+         legend style={scale=0.5,/tikz/every even column/.append style={column sep=1ex}},
+         legend entries={{C},{E},{N},{W},{S}},
+         legend image post style={mark=square*, only marks},
       ]
       \addplot+[] coordinates {(0,0)};
       \addplot+[] coordinates {(0,0)};
@@ -275,7 +286,7 @@
       \addplot+[] coordinates {(0,0)};
    \end{axis}
    %
-   \node[anchor=north west] at (A) {\ref{legend2}};
+   \node[anchor=north west, yshift=-1ex] at (A) {\ref{legend2}};
    %  
 \end{tikzpicture}
 % 

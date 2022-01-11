@@ -17,18 +17,19 @@
 % 
 \newlength{\width}
 \newlength{\height}
-\setlength{\width}{13.87303cm}
+\setlength{\width}{13.87303cm} %5,4618228346inch
 \setlength{\height}{22.37076cm}
 \def\datapath{../../__PATH__}
 \directlua0{
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-% \makeatletter
-% \definecolor{cc21}{HTML}{A6CEE3}
-% \definecolor{cc22}{HTML}{1F78B4}
-% \pgfplotscreateplotcyclelist{cc2}{cc21, cc22}
-% \makeatother
+\definecolor{dark21}{HTML}{1b9e77}
+\definecolor{dark22}{HTML}{d95f02}
+\definecolor{dark23}{HTML}{7570b3}
+\colorlet{RED}{dark22}
+\colorlet{GREEN}{dark21}
+\colorlet{BLUE}{dark23} 
 % 
 \begin{document}
 % 
@@ -36,93 +37,92 @@
 \pgfmathsetmacro{\dx}{0.75}
 % 
 \pgfplotsset{
-    Boxplot/.style={
-        width = 0.5\width,
-        height = 0.35\width,
-        % cycle list/Paired-8,
-        colormap name=viridis, %Spectral
-        cycle list={
-            [colors of colormap={0,83,...,1000}]},
-        axis x line=bottom,
-        axis y line = left,
-        enlarge y limits,
-        ymajorgrids,
-        clip=false,
-        boxplot,
-        boxplot/draw direction=y,
-    },
-    ylabel absolute,
-    every axis x label/.append style={xshift=0.0ex, font=\footnotesize},
-    every axis y label/.append style={yshift=0.0em, at={(0.075,0.5)}, font=\footnotesize},
-    every x tick label/.append style = {font=\footnotesize},
-    every y tick label/.append style = {font=\footnotesize},
+   Boxplot/.style={
+      mark=*,
+      mark size=0.1pt,
+      mark options={fill=black},
+      boxplot={%
+         draw position={\plotnumofactualtype},
+         draw direction=y,
+      },
+      fill=GREEN, draw=black, solid,
+   },
+   AxisStyle/.style={
+      width = 0.41\width,
+      height = 0.35\width,
+      % xlabel={$\mathit{\#cores}$},
+      ylabel={$\mathit{speedup}$},
+      axis x line = bottom,
+      axis y line = left,
+      ymin=0.5,
+      % enlarge y limits,
+      ymajorgrids,
+      clip=false,
+      ylabel absolute,
+      scale only axis,
+      every axis y label/.style={at={(ticklabel* cs:1.0)},, anchor=west},
+      every axis x label/.append style= {font=\footnotesize},
+      every axis y label/.append style= {font=\footnotesize},
+      every x tick label/.append style = {font=\footnotesize},
+      every y tick label/.append style = {font=\footnotesize},
+   },
 }
 %
 % 
 \begin{tikzpicture}[]
-  \begin{axis}[%
-        ylabel={$\mathit{speedup}$},
-        xmin=0.42,
-        xmax=8.58,
-        Boxplot,
-        scale only axis,
-        xtick={1,2,3,4,5,6,7,8},
-        xticklabels={1,2,3,4,5,6,7,8},
-  ]
-     \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8} {
-        \addplot+[fill, draw=black] table[%
-            y=p\p, col sep=comma, row sep=newline,
-            ]{\datapath};
-    }
-    \begin{scope}[overlay]
-    \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8}) node[sloped, pos=0.95, above] {ideal}; 
-    \end{scope}
-  % 
-  \coordinate (PA) at (rel axis cs:0,0);
-  \coordinate (PB) at (rel axis cs:1,0);
-  \coordinate (P) at (rel axis cs:0.5,0);
-  \end{axis}
-  %
-  % center axis
-  \coordinate (PC) at (current bounding box.west);
-  % \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
-  
-  % \node[anchor=north] at (current bounding box.south) {\ref{legend}};
-  %  
+   \begin{axis}[%
+         AxisStyle,
+         xmin=-0.58,
+         xmax=7.58,
+         xtick={0,1,2,3,4,5,6,7},
+         xticklabels={1,2,3,4,5,6,7,8},
+      ]
+      \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8} {
+         \addplot+[Boxplot] table[%
+               y=p\p, col sep=comma, row sep=newline,
+               ]{\datapath};
+      }
+      \begin{scope}[overlay]
+         draw[black, dashed] ({axis cs:0,1}) -- ({axis cs:7,8}) node[sloped, pos=0.2, above] {\scriptsize ideal}; 
+      \end{scope}
+      % 
+      \node[anchor=north east] at (rel axis cs:1,-0.0825) {\footnotesize$\mathit{\#cores}$};
+      \coordinate (PA) at (rel axis cs:0,0);
+      \coordinate (PB) at (rel axis cs:1,0);
+      \coordinate (P) at (rel axis cs:0.5,0);
+   \end{axis}
+   %
+   % center axis
+   \path[] ($(PA) - (0.6,0)$) -- ($(PB) + (0.6,0)$);
 \end{tikzpicture}
 % % 
 % % 
 \begin{tikzpicture}[]
-  \begin{axis}[%
-        ylabel={$\mathit{speedup}$},
-        Boxplot,
-        scale only axis,
-        xmin=0.42,
-        xmax=13.58,
-        xtick={1,2,3,4,5,6,7,8,9,10,11,12,13},
-        xticklabels={1,2,3,4,5,6,7,8,16,24,32,40,48},
-  ]
-     \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8,16,24,32,40,48} {
-        \addplot+[fill, draw=black] table[%
+   \begin{axis}[%
+         AxisStyle,
+         xmin=-0.58,
+         xmax=12.58,
+         xtick={0,1,2,3,4,5,6,7,8,9,10,11,12},
+         xticklabels={1,2,3,4,5,6,7,8,16,24,32,40,48},
+   ]
+      \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8,16,24,32,40,48} {
+         \addplot+[Boxplot] table[%
             y=p\p, col sep=comma, row sep=newline,
             ]{\datapath};
-    }
-    \begin{scope}[overlay]
-    \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8}) node[sloped, pos=0.5, above] {ideal};
-    \draw[black, dashed] ({axis cs:8,8}) -- ({axis cs:13,48}); 
-    \end{scope}
-  % 
-  \coordinate (PA) at (rel axis cs:0,0);
-  \coordinate (PB) at (rel axis cs:1,0);
-  \coordinate (P) at (rel axis cs:0.5,0);
-  \end{axis}
-  %
-  % center axis
-  \coordinate (PC) at (current bounding box.west);
-  % \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
-  
-  % \node[anchor=north] at (current bounding box.south) {\ref{legend}};
-  %  
+      }
+      \begin{scope}[overlay]
+         \draw[black, dashed] ({axis cs:0,1}) -- ({axis cs:7,8}) node[sloped, pos=0.5, above] {\scriptsize ideal};
+         \draw[black, dashed] ({axis cs:7,8}) -- ({axis cs:12,48}); 
+      \end{scope}
+      % 
+      \node[anchor=north east] at (rel axis cs:1,-0.0825) {\footnotesize$\mathit{\#cores}$};
+      \coordinate (PA) at (rel axis cs:0,0);
+      \coordinate (PB) at (rel axis cs:1,0);
+      \coordinate (P) at (rel axis cs:0.5,0);
+   \end{axis}
+   %
+   % center axis
+   \path[] ($(PA) - (0.6,0)$) -- ($(PB) + (0.6,0)$);
 \end{tikzpicture}
 
 % 
