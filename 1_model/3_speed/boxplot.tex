@@ -36,8 +36,8 @@
       width = 0.8\width,
       height = 0.35\width,
       % 
-      % xlabel={$\mathit{\#cores}$},
-      % ylabel={$\mathit{speedup}$},
+      % xlabel={\#cores},
+      % ylabel={speedup},
       axis x line = none,
       axis y line = left,
       % enlarge y limits,
@@ -162,8 +162,8 @@
       \draw[dotted, thin] (axis cs:13.5,1) -- ({axis cs:13.5,50}|-{axis description cs:0,1});
       % 
       % axis labels
-      \node[anchor=west,xshift=0.5ex,fill=white,rounded corners=2pt,inner sep=1pt] at (rel axis cs:0,1) {$\mathit{speedup}$};
-      \node[anchor=south,fill=white,rounded corners=2pt,inner sep=1pt] at (rel axis cs:1,0) {$\mathit{\#cores}$};
+      \node[anchor=west,xshift=0.5ex,fill=white,rounded corners=2pt,inner sep=1pt] at (rel axis cs:0,1) {speedup};
+      \node[anchor=south,fill=white,rounded corners=2pt,inner sep=1pt] at (rel axis cs:1,0) {\#cores};
       % 
       \coordinate (PA) at (rel axis cs:0,0);
       \coordinate (PB) at (rel axis cs:1,0);
