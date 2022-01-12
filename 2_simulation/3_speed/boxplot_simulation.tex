@@ -6,29 +6,24 @@
 \usepackage{currfile}
 \usepackage{ifthen}
 \usepackage{tikz}
-\usetikzlibrary{calc}
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \pgfplotsset{compat=1.17}
 \usepgfplotslibrary{colorbrewer}
 \usepgfplotslibrary{groupplots}
 \usepgfplotslibrary{statistics}
+\usetikzlibrary{calc}
 \tikzset{>=latex}
 % 
-\newlength{\width}
-\newlength{\height}
-\setlength{\width}{13.87303cm}
-\setlength{\height}{22.37076cm}
 \def\datapath{../../__PATH__}
 \directlua0{
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-% \makeatletter
-% \definecolor{cc21}{HTML}{A6CEE3}
-% \definecolor{cc22}{HTML}{1F78B4}
-% \pgfplotscreateplotcyclelist{cc2}{cc21, cc22}
-% \makeatother
+\newlength{\width}
+\newlength{\height}
+\setlength{\width}{13.87303cm} %5,46182in
+\setlength{\height}{22.37076cm} %8,80738in
 % 
 \begin{document}
 % 
@@ -38,37 +33,33 @@
 % \tikzset{fontscale/.style = {font=\footnotesize}}
 \pgfplotsset{
    Boxplot/.style={
-      width = 0.41\width,
+      width = 0.8\width,
       height = 0.35\width,
+      % 
       % xlabel={$\mathit{\#cores}$},
-      ylabel={$\mathit{speedup}$},
+      % ylabel={$\mathit{speedup}$},
       axis x line = none,
       axis y line = left,
       % enlarge y limits,
       ymajorgrids,
       clip=false,
-      ylabel absolute,
       scale only axis,
-      every axis y label/.style={at={(ticklabel* cs:1.0)},, anchor=west},
-      every axis x label/.append style= {font=\footnotesize},
-      every axis y label/.append style= {font=\footnotesize},
-      every x tick label/.append style = {font=\footnotesize},
-      every y tick label/.append style = {font=\footnotesize},
+      % every axis x label/.style={at={(ticklabel* cs:1.0)}, anchor=south},
+      % every axis y label/.style={at={(ticklabel* cs:1.0)}, anchor=west},
       % 
-      cycle list/Paired-5,
+      cycle list/Paired-8,
       boxplot={
          draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
          box extend=\dx/(\ng+1)*1.5,
          mark=*,
-         mark size=0.1pt,
+         mark size=0.21pt,
          mark options={fill=black},
-         draw/median/.code={%
+         draw/median/.code={% replaces vertical bar
             \draw[mark size=1pt,/pgfplots/boxplot/every median/.try]
             \pgfextra
             \pgftransformshift{
                \pgfplotsboxplotpointabbox
-                  {\pgfplotsboxplotvalue{median}}
-                  {0.5}
+                  {\pgfplotsboxplotvalue{median}}{0.5}
             }
             \pgfuseplotmark{*}
             \endpgfextra
@@ -77,115 +68,15 @@
       },
       boxplot/draw direction=y,
    },
-   ylabel absolute,
-   every axis y label/.style={at={(ticklabel* cs:1.0)},, anchor=west},
-   every axis x label/.append style= {font=\footnotesize},
-   every axis y label/.append style= {font=\footnotesize},
-   every x tick label/.append style = {font=\footnotesize},
-   every y tick label/.append style = {font=\footnotesize},
 }
 %
-% 
-\begin{tikzpicture}[every node/.append style={font=\scriptsize}]
-\begin{axis}[%
-         xmin=0.42,
-         xmax=8.58,
-         ymin=0.5,
-         Boxplot,
-         xtick={1,2,3,4,5,6,7,8},
-         xticklabels={,,,,,,,},
-      ]
-      \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8} {
-         \foreach \t [count=\it from 0] in {0,1,2,3,4} {
-         \addplot+[fill, draw=black] table[%
-               y=p\p_t\t, col sep=comma, row sep=newline,
-               ]{\datapath};
-      }}
-      \begin{scope}[overlay]
-         \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8}) node[sloped, pos=0.875, above] {\scriptsize ideal}; 
-      \end{scope}
-      %  
-      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-         ({axis cs:0.6,20.0} |- {axis description cs:0.0,0.0}) -- 
-         ({axis cs:1.4,20.0} |- {axis description cs:0.0,0.0})
-         node [black,midway,below,yshift=-1ex] {$1$};
-      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-         ({axis cs:1.6,20.0} |- {axis description cs:0.0,0.0}) -- 
-         ({axis cs:2.4,20.0} |- {axis description cs:0.0,0.0})
-         node [black,midway,below,yshift=-1ex] {$2$};
-      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-         ({axis cs:2.6,20.0} |- {axis description cs:0.0,0.0}) -- 
-         ({axis cs:3.4,20.0} |- {axis description cs:0.0,0.0})
-         node [black,midway,below,yshift=-1ex] {$3$};
-      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-         ({axis cs:3.6,20.0} |- {axis description cs:0.0,0.0}) -- 
-         ({axis cs:4.4,20.0} |- {axis description cs:0.0,0.0})
-         node [black,midway,below,yshift=-1ex] {$4$};
-      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-         ({axis cs:4.6,20.0} |- {axis description cs:0.0,0.0}) -- 
-         ({axis cs:5.4,20.0} |- {axis description cs:0.0,0.0})
-         node [black,midway,below,yshift=-1ex] {$5$};
-      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-         ({axis cs:5.6,20.0} |- {axis description cs:0.0,0.0}) -- 
-         ({axis cs:6.4,20.0} |- {axis description cs:0.0,0.0})
-         node [black,midway,below,yshift=-1ex] {$6$};
-      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-         ({axis cs:6.6,20.0} |- {axis description cs:0.0,0.0}) -- 
-         ({axis cs:7.4,20.0} |- {axis description cs:0.0,0.0})
-         node [black,midway,below,yshift=-1ex] {$7$};
-      \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
-         ({axis cs:7.6,20.0} |- {axis description cs:0.0,0.0}) -- 
-         ({axis cs:8.4,20.0} |- {axis description cs:0.0,0.0})
-         node [black,midway,below,yshift=-1ex] (last) {$8$};
-      \node[anchor=north east] at (rel axis cs:1,-0.0825) {\footnotesize$\mathit{\#cores}$};
-      % 
-      \coordinate (A) at (rel axis cs:0,1);
-      % \coordinate (B) at (axis cs:0,1);
-      \coordinate (PA) at (rel axis cs:0,0);
-      \coordinate (PB) at (rel axis cs:1,0);
-      \coordinate (P) at (rel axis cs:0.5,0);
-   \end{axis}
-   %
-   % center axis
-   \path[] ($(PA) - (0.6,0)$) -- ($(PB) + (0.6,0)$);
-   % 
-   %  
-   % LEGENDE
-   \begin{axis}[%
-         hide axis,
-         scale only axis,
-         height=0pt,
-         width=0pt,
-         cycle list/Paired-5,
-         legend to name={legend1},
-         legend style={draw=white!15!black,legend cell align=left},
-         legend transposed=true,
-         legend columns=2,
-         legend style={scale=0.5,/tikz/every even column/.append style={column sep=1ex}},
-         legend entries={{C},{E},{N},{W},{S}},
-         legend image post style={mark=square*, only marks},
-      ]
-      \addplot+[] coordinates {(0,0)};
-      \addplot+[] coordinates {(0,0)};
-      \addplot+[] coordinates {(0,0)};
-      \addplot+[] coordinates {(0,0)};
-      \addplot+[] coordinates {(0,0)};
-   \end{axis}
-   %
-   \node[anchor=north west, yshift=-1ex] at (A) {\ref{legend1}};
-% 
-\end{tikzpicture}
-%
-% 
-% 
-\begin{tikzpicture}[every node/.append style={font=\scriptsize}]
+\begin{tikzpicture}[] %every node/.append style={font=\footnotesize}
 \begin{axis}[%
          xmin=0.45,
-         xmax=13.58,
+         xmax=13.55,
          ymin=0,
+         ymax=45,
          Boxplot,
-         xtick={1,2,3,4,5,6,7,8,9,10,11,12,13},
-         xticklabels={,,,,,,,,,,,,},
       ]
       \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8,16,24,32,40,48} {
          \foreach \t [count=\it from 0] in {0,1,2,3,4} {
@@ -195,8 +86,8 @@
       }}
       \begin{scope}[overlay]
          \draw[black, dashed] ({axis cs:1,1}) -- ({axis cs:8,8});
-         \draw[black, dashed] ({axis cs:8,8}) -- ({axis cs:13,48})
-            node[sloped, pos=0.65, above] {\scriptsize ideal};
+         \draw[black, dashed] ({axis cs:8,8}) -- ({axis cs:12.625,45})
+            node[sloped, pos=0.65, above] {\footnotesize ideal};
       \end{scope}
       %  
       \draw[decorate,decoration={brace,amplitude=1ex,mirror}]
@@ -251,18 +142,33 @@
          ({axis cs:12.6,20.0} |- {axis description cs:0.0,0.0}) -- 
          ({axis cs:13.4,20.0} |- {axis description cs:0.0,0.0})
          node [black,midway,below,yshift=-1ex] (last) {$48$};
-      \node[anchor=north east] at (rel axis cs:1,-0.0825) {\footnotesize$\mathit{\#cores}$};
       % 
-      \coordinate (A) at (rel axis cs:0,1);
-      % \coordinate (B) at (axis cs:0,1);
+      \draw[dotted, thin] (axis cs: 1.5,1) -- ({axis cs: 1.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs: 2.5,1) -- ({axis cs: 2.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs: 3.5,1) -- ({axis cs: 3.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs: 4.5,1) -- ({axis cs: 4.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs: 5.5,1) -- ({axis cs: 5.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs: 6.5,1) -- ({axis cs: 6.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs: 7.5,1) -- ({axis cs: 7.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs: 8.5,1) -- ({axis cs: 8.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs: 9.5,1) -- ({axis cs: 9.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs:10.5,1) -- ({axis cs:10.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs:11.5,1) -- ({axis cs:11.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs:12.5,1) -- ({axis cs:12.5,50}|-{axis description cs:0,1});
+      \draw[dotted, thin] (axis cs:13.5,1) -- ({axis cs:13.5,50}|-{axis description cs:0,1});
+      % 
+      % axis labels
+      \node[anchor=west,xshift=0.5ex,fill=white,rounded corners=2pt,inner sep=1pt] at (rel axis cs:0,1) {$\mathit{speedup}$};
+      \node[anchor=south,fill=white,rounded corners=2pt,inner sep=1pt] at (rel axis cs:1,0) {$\mathit{\#cores}$};
       % 
       \coordinate (PA) at (rel axis cs:0,0);
       \coordinate (PB) at (rel axis cs:1,0);
-      \coordinate (P) at (rel axis cs:0.5,0);
+      \coordinate (PC) at (rel axis cs:0.5,0);
+      \coordinate (L) at (rel axis cs:0,1);
    \end{axis}
    %
-   % center axis
-   \path[] ($(PA) - (0.6,0)$) -- ($(PB) + (0.6,0)$);
+   % center axis same as generation
+   \path[] ($(PA) - (0.7,0)$) -- ($(PB) + (0.7,0)$);
    % 
    % LEGENDE
    \begin{axis}[%
@@ -271,7 +177,7 @@
          height=0pt,
          width=0pt,
          cycle list/Paired-5,
-         legend to name={legend2},
+         legend to name={legend},
          legend style={draw=white!15!black,legend cell align=left},
          legend transposed=true,
          legend columns=2,
@@ -286,7 +192,7 @@
       \addplot+[] coordinates {(0,0)};
    \end{axis}
    %
-   \node[anchor=north west, yshift=-1ex] at (A) {\ref{legend2}};
+   \node[anchor=north west, yshift=-1ex] at (L) {\ref{legend}};
    %  
 \end{tikzpicture}
 % 

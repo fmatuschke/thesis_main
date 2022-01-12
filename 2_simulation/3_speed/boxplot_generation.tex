@@ -39,7 +39,7 @@
 \pgfplotsset{
    Boxplot/.style={
       mark=*,
-      mark size=0.1pt,
+      mark size=0.21pt,
       mark options={fill=black},
       boxplot={%
          draw position={\plotnumofactualtype},
@@ -48,60 +48,31 @@
       fill=GREEN, draw=black, solid,
    },
    AxisStyle/.style={
-      width = 0.41\width,
+      width = 0.395\width,
       height = 0.35\width,
-      % xlabel={$\mathit{\#cores}$},
+      xlabel={$\mathit{\#cores}$},
       ylabel={$\mathit{speedup}$},
       axis x line = bottom,
       axis y line = left,
-      ymin=0.5,
       % enlarge y limits,
       ymajorgrids,
       clip=false,
-      ylabel absolute,
       scale only axis,
+      every axis x label/.style={at={(ticklabel* cs:1.0)},, anchor=south},
       every axis y label/.style={at={(ticklabel* cs:1.0)},, anchor=west},
-      every axis x label/.append style= {font=\footnotesize},
-      every axis y label/.append style= {font=\footnotesize},
-      every x tick label/.append style = {font=\footnotesize},
-      every y tick label/.append style = {font=\footnotesize},
+      % every axis x label/.append style= {font=\footnotesize},
+      % every axis y label/.append style= {font=\footnotesize},
+      % every x tick label/.append style = {font=\footnotesize},
+      % every y tick label/.append style = {font=\footnotesize},
    },
 }
 %
-% 
-\begin{tikzpicture}[]
-   \begin{axis}[%
-         AxisStyle,
-         xmin=-0.58,
-         xmax=7.58,
-         xtick={0,1,2,3,4,5,6,7},
-         xticklabels={1,2,3,4,5,6,7,8},
-      ]
-      \foreach \p [count=\ip from 0] in {1,2,3,4,5,6,7,8} {
-         \addplot+[Boxplot] table[%
-               y=p\p, col sep=comma, row sep=newline,
-               ]{\datapath};
-      }
-      \begin{scope}[overlay]
-         draw[black, dashed] ({axis cs:0,1}) -- ({axis cs:7,8}) node[sloped, pos=0.2, above] {\scriptsize ideal}; 
-      \end{scope}
-      % 
-      \node[anchor=north east] at (rel axis cs:1,-0.0825) {\footnotesize$\mathit{\#cores}$};
-      \coordinate (PA) at (rel axis cs:0,0);
-      \coordinate (PB) at (rel axis cs:1,0);
-      \coordinate (P) at (rel axis cs:0.5,0);
-   \end{axis}
-   %
-   % center axis
-   \path[] ($(PA) - (0.6,0)$) -- ($(PB) + (0.6,0)$);
-\end{tikzpicture}
-% % 
-% % 
 \begin{tikzpicture}[]
    \begin{axis}[%
          AxisStyle,
          xmin=-0.58,
          xmax=12.58,
+         % ymin=1,
          xtick={0,1,2,3,4,5,6,7,8,9,10,11,12},
          xticklabels={1,2,3,4,5,6,7,8,16,24,32,40,48},
    ]
@@ -111,18 +82,17 @@
             ]{\datapath};
       }
       \begin{scope}[overlay]
-         \draw[black, dashed] ({axis cs:0,1}) -- ({axis cs:7,8}) node[sloped, pos=0.5, above] {\scriptsize ideal};
+         \draw[black, dashed] ({axis cs:0,1}) -- ({axis cs:7,8}) node[sloped, pos=0.5, above] {\footnotesize ideal};
          \draw[black, dashed] ({axis cs:7,8}) -- ({axis cs:12,48}); 
       \end{scope}
       % 
-      \node[anchor=north east] at (rel axis cs:1,-0.0825) {\footnotesize$\mathit{\#cores}$};
       \coordinate (PA) at (rel axis cs:0,0);
       \coordinate (PB) at (rel axis cs:1,0);
-      \coordinate (P) at (rel axis cs:0.5,0);
+      \coordinate (PC) at (rel axis cs:0.5,0);
    \end{axis}
    %
-   % center axis
-   \path[] ($(PA) - (0.6,0)$) -- ($(PB) + (0.6,0)$);
+   % center axis same as simulation
+   \path[] ($(PA) - (0.7,0)$) -- ($(PB) + (0.7,0)$);
 \end{tikzpicture}
 
 % 
