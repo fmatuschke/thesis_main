@@ -46,11 +46,26 @@
    title style={font=\normalsize,},
    Boxplot/.style={
       mark=*,
-      mark size=0.1pt,
+      mark size=0.21pt,
       mark options={fill=black},
       boxplot={%
          draw position={\plotnumofactualtype},
          draw direction=y,
+         draw/median/.code={%
+            \draw[black,/pgfplots/boxplot/every median/.try]
+               (boxplot box cs:\pgfplotsboxplotvalue{median},0) --
+               (boxplot box cs:\pgfplotsboxplotvalue{median},1);
+            % add circle for visibility
+            \draw[mark size=1.5pt,/pgfplots/boxplot/every median/.try]
+            \pgfextra
+            \pgftransformshift{
+               \pgfplotsboxplotpointabbox
+                  {\pgfplotsboxplotvalue{median}}{0.5}
+            }
+            \pgfuseplotmark{*}
+            \endpgfextra
+            ;
+         },
       },
       fill=GREEN, draw=black, solid,
    },
@@ -216,7 +231,8 @@
 % 
 % \coordinate (CA) at (group c1r1.north);
 % \coordinate (CB) at (group c2r1.north);
-\node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {inclined fiber pop., $\Psi = \psi$};
+\pgfmathparse{int(\psi*100)}
+\node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {crossing fiber pop., $\Psi = \SI{\pgfmathresult}{\percent}$};
 \node[anchor=north, scale=0.75] at 
    ($(group c1r4.south)!0.5!(group c2r4.south) - (0,0.5)$) {\ref{legend1}};
 % 

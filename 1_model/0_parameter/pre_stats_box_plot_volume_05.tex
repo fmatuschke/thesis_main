@@ -32,7 +32,7 @@
 % 
 \pgfplotsset{
     Boxplot/.style={
-        cycle list/Paired-8,
+        cycle list/Dark2-8,
         xmin=0.42,
         xmax=4.58,
         ymin=0.5,
@@ -46,18 +46,21 @@
         boxplot={
             draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
             box extend=\dx/(\ng+1),
-            mark size=0.42pt,
+            mark size=0.21pt,
             draw/median/.code={%
-               \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
-               \pgfextra
-               \pgftransformshift{
-                  \pgfplotsboxplotpointabbox
-                     {\pgfplotsboxplotvalue{median}}
-                     {0.5}
-               }
-               \pgfuseplotmark{*}
-               \endpgfextra
-               ;
+                \draw[black,/pgfplots/boxplot/every median/.try]
+                (boxplot box cs:\pgfplotsboxplotvalue{median},0) --
+                (boxplot box cs:\pgfplotsboxplotvalue{median},1);
+                % add circle for visibility
+                \draw[mark size=1.5pt,/pgfplots/boxplot/every median/.try]
+                \pgfextra
+                \pgftransformshift{
+                \pgfplotsboxplotpointabbox
+                    {\pgfplotsboxplotvalue{median}}{0.5}
+                }
+                \pgfuseplotmark{*}
+                \endpgfextra
+                ;
             },
         },
         boxplot/draw direction=y,

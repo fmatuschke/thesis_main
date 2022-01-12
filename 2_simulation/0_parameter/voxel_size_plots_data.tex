@@ -35,11 +35,9 @@
 \pgfmathsetmacro{\ng}{6}
 \pgfmathsetmacro{\dx}{0.75}
 % 
-\pgfplotsset{colormap/Paired-6}
-% \pgfplotsset{colormap/Dark2-8}
 \pgfplotsset{
     Boxplot/.style={
-        cycle list/Paired-6,
+        cycle list/Dark2-6,
         xmin=0.42,
         xmax=5.58,
         axis x line=none,
@@ -50,19 +48,22 @@
         boxplot={
             draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
             box extend=\dx/(\ng+1),
-            mark size=0.1pt,
+            mark size=0.21pt,
             mark options={fill=black},
             draw/median/.code={%
-               \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
-               \pgfextra
-               \pgftransformshift{
-                  \pgfplotsboxplotpointabbox
-                     {\pgfplotsboxplotvalue{median}}
-                     {0.5}
-               }
-               \pgfuseplotmark{*}
-               \endpgfextra
-               ;
+                \draw[black,/pgfplots/boxplot/every median/.try]
+                (boxplot box cs:\pgfplotsboxplotvalue{median},0) --
+                (boxplot box cs:\pgfplotsboxplotvalue{median},1);
+                % add circle for visibility
+                \draw[mark size=1.5pt,/pgfplots/boxplot/every median/.try]
+                \pgfextra
+                \pgftransformshift{
+                \pgfplotsboxplotpointabbox
+                    {\pgfplotsboxplotvalue{median}}{0.5}
+                }
+                \pgfuseplotmark{*}
+                \endpgfextra
+                ;
             },
         },
         boxplot/draw direction=y,
@@ -114,7 +115,7 @@
         y={data_diff}, col sep=comma, row sep=newline,
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
-\node[anchor=south] (title) at ({axis description cs:0.5,1.1}) {\species};
+% \node[anchor=south] (title) at ({axis description cs:0.5,1.1}) {\species};
 \node[anchor=south] (title) at ({axis description cs:0.5,0.95})
     {$||,\alpha_{\mathit{inc}}=\SI{\finc}{\degree}$};
 \xachse
@@ -173,7 +174,7 @@
     scale only axis,
     height=0pt,
     width=0pt,
-    cycle list/Paired-6,
+    cycle list/Dark2-6,
     legend to name={legend\n\k\l\m},
     legend style={draw=white!15!black,legend cell align=left},
     legend transposed=true,

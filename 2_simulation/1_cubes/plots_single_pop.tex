@@ -41,18 +41,31 @@
 \colorlet{GREEN}{dark21}
 \colorlet{BLUE}{dark23} 
 % 
-\input{cividis.tex}
-% 
 \pgfplotsset{
    every tick label/.append style={font=\small,},
    title style={font=\normalsize,},
    Boxplot/.style={
       mark=*,
-      mark size=0.1pt,
+      mark size=0.21pt,
       mark options={fill=black},
       boxplot={%
          draw position={\plotnumofactualtype},
          draw direction=y,
+         draw/median/.code={%
+            \draw[black,/pgfplots/boxplot/every median/.try]
+               (boxplot box cs:\pgfplotsboxplotvalue{median},0) --
+               (boxplot box cs:\pgfplotsboxplotvalue{median},1);
+            % add circle for visibility
+            \draw[mark size=1.5pt,/pgfplots/boxplot/every median/.try]
+            \pgfextra
+            \pgftransformshift{
+               \pgfplotsboxplotpointabbox
+                  {\pgfplotsboxplotvalue{median}}{0.5}
+            }
+            \pgfuseplotmark{*}
+            \endpgfextra
+            ;
+         },
       },
       fill=GREEN, draw=black, solid,
    },

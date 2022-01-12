@@ -17,8 +17,8 @@
 % 
 \newlength{\width}
 \newlength{\height}
-\setlength{\width}{13.87303cm} %5,4618228346inch
-\setlength{\height}{22.37076cm}
+\setlength{\width}{13.87303cm} %5.462 inch
+\setlength{\height}{22.37076cm} %8,807 inch
 \def\datapath{../../__PATH__}
 \directlua0{
   pdf.setinfo ("/Path: (__PATH__)")
@@ -44,11 +44,26 @@
       boxplot={%
          draw position={\plotnumofactualtype},
          draw direction=y,
+         draw/median/.code={%
+            \draw[black,/pgfplots/boxplot/every median/.try]
+               (boxplot box cs:\pgfplotsboxplotvalue{median},0) --
+               (boxplot box cs:\pgfplotsboxplotvalue{median},1);
+            % add circle for visibility
+            \draw[mark size=1.5pt,/pgfplots/boxplot/every median/.try]
+            \pgfextra
+            \pgftransformshift{
+               \pgfplotsboxplotpointabbox
+                  {\pgfplotsboxplotvalue{median}}{0.5}
+            }
+            \pgfuseplotmark{*}
+            \endpgfextra
+            ;
+         },
       },
       fill=GREEN, draw=black, solid,
    },
    AxisStyle/.style={
-      width = 0.395\width,
+      width = 0.37\width, %2.59in
       height = 0.35\width,
       xlabel={$\mathit{\#cores}$},
       ylabel={$\mathit{speedup}$},
@@ -60,10 +75,8 @@
       scale only axis,
       every axis x label/.style={at={(ticklabel* cs:1.0)},, anchor=south},
       every axis y label/.style={at={(ticklabel* cs:1.0)},, anchor=west},
-      % every axis x label/.append style= {font=\footnotesize},
-      % every axis y label/.append style= {font=\footnotesize},
-      % every x tick label/.append style = {font=\footnotesize},
-      % every y tick label/.append style = {font=\footnotesize},
+      every tick label/.append style={font=\small,},
+      every axis label/.append style= {font=\footnotesize},
    },
 }
 %

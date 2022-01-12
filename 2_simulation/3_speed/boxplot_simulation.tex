@@ -22,8 +22,8 @@
 % 
 \newlength{\width}
 \newlength{\height}
-\setlength{\width}{13.87303cm} %5,46182in
-\setlength{\height}{22.37076cm} %8,80738in
+\setlength{\width}{13.87303cm} %5.462 inch
+\setlength{\height}{22.37076cm} %8,807 inch
 % 
 \begin{document}
 % 
@@ -47,15 +47,19 @@
       % every axis x label/.style={at={(ticklabel* cs:1.0)}, anchor=south},
       % every axis y label/.style={at={(ticklabel* cs:1.0)}, anchor=west},
       % 
-      cycle list/Paired-8,
+      cycle list/Dark2-5,
       boxplot={
          draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
          box extend=\dx/(\ng+1)*1.5,
          mark=*,
          mark size=0.21pt,
          mark options={fill=black},
-         draw/median/.code={% replaces vertical bar
-            \draw[mark size=1pt,/pgfplots/boxplot/every median/.try]
+         draw/median/.code={%
+            \draw[black,/pgfplots/boxplot/every median/.try]
+               (boxplot box cs:\pgfplotsboxplotvalue{median},0) --
+               (boxplot box cs:\pgfplotsboxplotvalue{median},1);
+            % add circle for visibility
+            \draw[mark size=1.5pt,/pgfplots/boxplot/every median/.try]
             \pgfextra
             \pgftransformshift{
                \pgfplotsboxplotpointabbox
@@ -176,7 +180,7 @@
          scale only axis,
          height=0pt,
          width=0pt,
-         cycle list/Paired-5,
+         cycle list/Dark2-5,
          legend to name={legend},
          legend style={draw=white!15!black,legend cell align=left},
          legend transposed=true,

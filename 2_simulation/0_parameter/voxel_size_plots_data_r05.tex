@@ -30,11 +30,9 @@
 \pgfmathsetmacro{\ng}{6}
 \pgfmathsetmacro{\dx}{0.75}
 % 
-\pgfplotsset{colormap/Paired-6}
-% \pgfplotsset{colormap/Dark2-8}
 \pgfplotsset{
     Boxplot/.style={
-        cycle list/Paired-6,
+        cycle list/Dark2-6,
         xmin=0.42,
         xmax=4.58,
         axis x line=none,
@@ -45,19 +43,22 @@
         boxplot={
             draw position={1-\dx/2+floor((\plotnumofactualtype+0.001)/\ng) + \dx/(\ng-1)*mod(\plotnumofactualtype,\ng)},
             box extend=\dx/(\ng+1),
-            mark size=0.1pt,
+            mark size=0.21pt,
             mark options={fill=black},
             draw/median/.code={%
-               \draw[mark size=2pt,/pgfplots/boxplot/every median/.try]
-               \pgfextra
-               \pgftransformshift{
-                  \pgfplotsboxplotpointabbox
-                     {\pgfplotsboxplotvalue{median}}
-                     {0.5}
-               }
-               \pgfuseplotmark{*}
-               \endpgfextra
-               ;
+            \draw[black,/pgfplots/boxplot/every median/.try]
+                (boxplot box cs:\pgfplotsboxplotvalue{median},0) --
+                (boxplot box cs:\pgfplotsboxplotvalue{median},1);
+                % add circle for visibility
+                \draw[mark size=1.5pt,/pgfplots/boxplot/every median/.try]
+                \pgfextra
+                \pgftransformshift{
+                \pgfplotsboxplotpointabbox
+                    {\pgfplotsboxplotvalue{median}}{0.5}
+                }
+                \pgfuseplotmark{*}
+                \endpgfextra
+                ;
             },
         },
         boxplot/draw direction=y,
@@ -140,7 +141,7 @@
     scale only axis,
     height=0pt,
     width=0pt,
-    cycle list/Paired-6,
+    cycle list/Dark2-6,
     legend to name={legend\n\k\l\m},
     legend style={draw=white!15!black,legend cell align=left},
     legend transposed=true,
