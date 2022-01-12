@@ -232,7 +232,7 @@
 % 
 % \coordinate (CA) at (group c1r1.north);
 % \coordinate (CB) at (group c2r1.north);
-\pgfmathparse{int(\psi*100)}
+\pgfmathparse{int(round(\psi*10))*10}
 \node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {crossing fiber pop., $\Psi = \SI{\pgfmathresult}{\percent}$};
 \node[anchor=north, scale=0.75] at 
    ($(group c1r4.south)!0.5!(group c2r4.south) - (0,0.5)$) {\ref{legend1}};

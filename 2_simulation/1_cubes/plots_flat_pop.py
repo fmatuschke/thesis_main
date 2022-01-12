@@ -130,7 +130,7 @@ n_theta = 18
 df_gt = pd.DataFrame()
 
 if True:
-    for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
+    for _, row in tqdm.tqdm(df.iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -220,20 +220,14 @@ df_ = df.explode([
     'rofl_dir', 'rofl_inc', 'rofl_trel', 'epa_trans', 'epa_ret', 'R', 'domega'
 ])
 
-phi, theta = df_["rofl_dir"].to_numpy(
-    float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
-# phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(phi, theta)
-theta[phi < 1 / 4 * np.pi] = np.pi - theta[phi < 1 / 4 * np.pi]
-phi[phi > 3 / 4 * np.pi] -= np.pi
-df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
-                                                               theta)
+# remap and convert to degree
+phi = df_["rofl_dir"].to_numpy(float)
+theta = np.pi / 2 - df_["rofl_inc"].to_numpy(float)
+phi, theta = fastpli.analysis.orientation.remap_half_sphere_x(phi, theta)
+df_["rofl_dir"] = np.rad2deg(phi)
+df_["rofl_inc"] = np.rad2deg(np.pi / 2 - theta)
 
-for f0 in df_.f0_inc.unique():
-    alpha = df_.loc[df_.f0_inc == f0, "rofl_inc"]
-    a_mean = circmean(alpha, 180, -180)
-    alpha[alpha < a_mean - 90] = theta[alpha < a_mean - 90] + 180
-    df_.loc[df_.f0_inc == f0, "rofl_inc"] = theta
-
+# remap for crassing angles and fractions
 for omega in df_.omega.unique():
     for psi in df_.psi.unique():
         for name in ["rofl_dir"]:
@@ -250,6 +244,7 @@ for omega in df_.omega.unique():
                             df_[(df_['omega'] == omega) &
                                 (df_['psi'] == psi)][name], 90, -90)
 
+# save
 for psi in df_.psi.unique():
     df__ = df_[df_.psi == psi]
     dff = pd.DataFrame()

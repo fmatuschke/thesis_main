@@ -125,8 +125,9 @@ os.makedirs(os.path.join(FILE_PATH, 'output', DATASET, "hist"), exist_ok=True)
 n_phi = 36 * 2
 n_theta = 18
 df_gt = pd.DataFrame()
+
 if True:
-    for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
+    for _, row in tqdm.tqdm(df.iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -159,6 +160,10 @@ if True:
 
         phi = np.rad2deg(phi)
         alpha = np.rad2deg(np.pi / 2 - theta)
+
+        a_mean = circmean(alpha, 90, -90)
+        print(row.f0_inc, a_mean)
+
         alpha[alpha < row.f0_inc - 90] = alpha[alpha < row.f0_inc - 90] + 180
         phi_25, phi_50, phi_75 = np.quantile(phi, [0.25, 0.5, 0.75])
         alpha_25, alpha_50, alpha_75 = np.quantile(alpha, [0.25, 0.5, 0.75])

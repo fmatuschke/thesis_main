@@ -11,6 +11,8 @@ from scipy.stats import circmean
 import models
 import parameter
 
+import matplotlib.pyplot as plt
+
 #%%
 
 CONFIG = parameter.get_tupleware()
@@ -126,7 +128,7 @@ n_theta = 18
 df_gt = pd.DataFrame()
 
 if True:
-    for _, row in tqdm.tqdm(df.sort_values("omega").iterrows(), total=len(df)):
+    for _, row in tqdm.tqdm(df.iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -159,8 +161,7 @@ if True:
 
         phi = np.rad2deg(phi)
         alpha = np.rad2deg(np.pi / 2 - theta)
-        phi = helper.circular.remap(phi, 90, -90)
-        a_mean = circmean(alpha, 180, -180)
+        a_mean = circmean(alpha, 90, -90)
         alpha[alpha < a_mean - 90] = alpha[alpha < a_mean - 90] + 180
 
         phi_25, phi_50, phi_75 = np.quantile(phi, [0.25, 0.5, 0.75])
@@ -214,13 +215,16 @@ df_ = df.explode([
     'rofl_dir', 'rofl_inc', 'rofl_trel', 'epa_trans', 'epa_ret', 'R', 'domega'
 ])
 
-phi, theta = df_["rofl_dir"].to_numpy(
-    float), np.pi / 2 - df_["rofl_inc"].to_numpy(float)
+# remap and convert to degree
+phi = df_["rofl_dir"].to_numpy(float)
+theta = np.pi / 2 - df_["rofl_inc"].to_numpy(float)
 # phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(phi, theta)
 theta[phi > 3 / 4 * np.pi] = np.pi - theta[phi > 3 / 4 * np.pi]
 phi[phi > 3 / 4 * np.pi] -= np.pi
 df_["rofl_dir"], df_["rofl_inc"] = np.rad2deg(phi), np.rad2deg(np.pi / 2 -
                                                                theta)
+
+# remap with respect to models inclination
 for omega in df_.omega.unique():
     alpha = df_.loc[df_.omega == omega, "rofl_inc"]
     a_mean = circmean(alpha, 180, -180)

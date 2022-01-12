@@ -155,55 +155,5 @@
 \end{scope}
 % 
 \end{tikzpicture}
-}
-% 
-% 
-% 
-\begin{tikzpicture}[]
-% 
-\def\p{0}
-\def\delta{3.3}
-\foreach \o[count=\oi from 0] in {0}{
-   %
-   \pgfmathparse{2*1.05*\delta*Mod(\oi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
-   \pgfmathparse{1*1.2*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
-   % 
-   \begin{scope}[shift={(\px + 0.00,-\py)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
-            \datapath/gt_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_0.0.dat};
-         \coordinate (A\oi) at (0,0);
-      \end{polaraxis}
-   \end{scope}
-   %
-   % simulation
-   \begin{scope}[shift={(\px + \delta,-\py)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
-            \datapath/sim_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_0.0.dat};
-         \coordinate (B\oi) at (0,0);
-      \end{polaraxis}
-   \end{scope}
-   % 
-}
-\path[] ($(A0)!-0.575!(B0)$) -- ($(A0)!1.575!(B0)$);
-%
-\node[anchor=south, yshift=1.5cm] at ($(A0)$)
-   {\scriptsize model};
-\node[anchor=south, yshift=1.5cm] at ($(B0)$)
-   {\scriptsize simulation};
-\node[anchor=south] at (current bounding box.north)
-   {\small crossing fiber pop., $\Psi = \SI{100}{\percent}$};
-   %
-\begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
-\begin{axis}[CBStyle]
-\end{axis}
-\end{scope}
-% 
-\end{tikzpicture}
-% 
+} 
 \end{document}
