@@ -31,9 +31,9 @@
             \includegraphics[trim=68 34 23 56, clip, width=0.31\width]{%
                \datapath/cube_2pop_psi_0.\p0_omega_\o.00_r_\r_v0_135_.solved.png}};
          \ifthenelse{\j=1}{ 
-            \node[rotate=90, anchor=south] at (\i\j.west) {$\Omega=\SI{\o}{\degree}$};}{}
+            \node[rotate=90, anchor=south] at (\i\j.west) {$\modelOmega=\SI{\o}{\degree}$};}{}
          \ifthenelse{\i=1}{
-            \node[anchor=south] at (\i\j.north) {$\Psi=\SI{\p0}{\percent}$};}{}
+            \node[anchor=south] at (\i\j.north) {$\modelPsi=\SI{\p0}{\percent}$};}{}
       }
    }
    % center axis
@@ -45,14 +45,14 @@
 \begin{page}
 \begin{tikzpicture}
    \foreach \o [count=\i] in {0,10,20,30,40,50,60,70,80,90} {
-      \foreach \p [count=\j] in {1,2,3,4,5,6,7,8,9} {
+      \foreach \p [count=\j] in {10,20,30,40,50,60,70,80,90} {
          \node[inner sep=0pt] (\i\j) at (\j*\d,-\i*\d) {%
             \includegraphics[trim=68 34 23 56, clip, width=0.31\width]{%
-               \datapath/cube_2pop_psi_0.\p0_omega_\o.00_r_\r_v0_135_.solved.png}};
+               \datapath/cube_2pop_psi_0.\p_omega_\o.00_r_\r_v0_135_.solved.png}};
          \ifthenelse{\j=1}{ 
-            \node[rotate=90, anchor=south] at (\i\j.west) {$\Omega=\SI{\o}{\degree}$};}{}
+            \node[rotate=90, anchor=south] at (\i\j.west) {$\modelOmega=\SI{\o}{\degree}$};}{}
          \ifthenelse{\i=1}{
-            \node[anchor=south] at (\i\j.north) {$\Psi=\SI{\p0}{\percent}$};}{}
+            \node[anchor=south] at (\i\j.north) {$\modelPsi=\SI{\p}{\percent}$};}{}
       }
    }
    % center axis

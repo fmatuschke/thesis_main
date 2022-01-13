@@ -82,7 +82,7 @@
    \draw[dotted, thin] ({axis cs:9.5,-90} |- {axis description cs:0,0}) -- ({axis cs:9.5,180} |- {axis description cs:0,1});
    \draw[dotted, thin] ({axis cs:10.5,-90} |- {axis description cs:0,0}) -- ({axis cs:10.5,180} |- {axis description cs:0,1});
    % 
-   \node [anchor=base west] at (axis description cs:1,-0.1125) {$\Omega$};
+   \node [anchor=base west] at (axis description cs:1,-0.1125) {$\modelOmega$};
 }
 % 
 \begin{document}
@@ -171,7 +171,7 @@
       \axes
       % 
       \nextgroupplot[%
-         ylabel={$\alpha_{\mathit{inc,0}}$},
+         ylabel={$\inc_{0}}$},
          ymin=-90,ymax=90,
          ytick={-90,0,90,180},
          yticklabels={$\SI{-90}{\degree}$,$\SI{0}{\degree}$,$\SI{90}{\degree}$,$\SI{180}{\degree}$},
@@ -185,7 +185,7 @@
       \axes
       % 
       \nextgroupplot[%
-         ylabel={$\alpha_{\mathit{inc,1}}$},
+         ylabel={$\inc_{1}}$},
          ymin=-90,ymax=90,
          ytick={-90,0,90,180},
          yticklabels={$\SI{-90}{\degree}$,$\SI{0}{\degree}$,$\SI{90}{\degree}$,$\SI{180}{\degree}$},
@@ -240,15 +240,15 @@
       transpose legend,
       legend style={scale=0.5,/tikz/every even column/.append style={column sep=1ex}},
       legend entries={%
-         {$\Psi = \SI{0.1}{}$},
-         {$\Psi = \SI{0.2}{}$},
-         {$\Psi = \SI{0.3}{}$},
-         {$\Psi = \SI{0.4}{}$},
-         {$\Psi = \SI{0.5}{}$},
-         {$\Psi = \SI{0.6}{}$},
-         {$\Psi = \SI{0.7}{}$},
-         {$\Psi = \SI{0.8}{}$},
-         {$\Psi = \SI{0.9}{}$},
+         {$\modelPsi = \SI{10}{\percent}$},
+         {$\modelPsi = \SI{20}{\percent}$},
+         {$\modelPsi = \SI{30}{\percent}$},
+         {$\modelPsi = \SI{40}{\percent}$},
+         {$\modelPsi = \SI{50}{\percent}$},
+         {$\modelPsi = \SI{60}{\percent}$},
+         {$\modelPsi = \SI{70}{\percent}$},
+         {$\modelPsi = \SI{80}{\percent}$},
+         {$\modelPsi = \SI{90}{\percent}$},
       },
       legend image post style={mark=square*, only marks},
       ]
