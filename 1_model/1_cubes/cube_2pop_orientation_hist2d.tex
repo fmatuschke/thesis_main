@@ -11,10 +11,11 @@
 \usepgfplotslibrary{polar}
 \usepgfplotslibrary{colorbrewer}
 \usetikzlibrary{calc}
-% \pgfplotsset{cycle list/Set1}
-\pgfplotsset{cycle list/Paired-10}
-% \usetikzlibrary{external}
-% \tikzexternalize[prefix=./output/tmp/]
+% 
+\def\datapath{../../__PATH__} % relative to build path
+\directlua0{
+   pdf.setinfo ("/Path: (__PATH__)")
+ }
 % 
 \pgfplotsset{%
   colormap/cividis/.style={colormap={cividis}{[1pt]
@@ -24,27 +25,20 @@
     rgb(75pt)=(0.73242200, 0.67736400, 0.42571700);
     rgb(100pt)=(0.99573700, 0.90934400, 0.21777200);
 }}}
+%  
+\input{parameters}
 % 
-\def\datapath{../../__PATH__} % relative to build path
-\directlua0{
-   pdf.setinfo ("/Path: (__PATH__)")
- }
-% 
-\def\width{13.87303cm}
-\def\height{22.37076cm}
+\newlength{\width}
+\newlength{\height}
+\setlength{\width}{13.87303cm} %5.462 inch
+\setlength{\height}{22.37076cm} %8,807 inch
 \def\radiusvalue{0.5}
 % 
-\def\deltax{7}
-\def\deltay{6}
-% 
-\pgfmathdeclarefunction{lg10}{1}{%
-    \pgfmathparse{ln(#1)/ln(10)}%
-}
+\def\deltax{4.3}
+\def\deltay{4.3}
 % 
 \begin{document}
-\pgfplotsset{colormap/Set1}
 % 
-% \foreach \omegavalues/\psivalues [count=\pp] in {{60.0}/{0.6}}{
 % \foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9}}{
 \foreach \omegavalues/\psivalues [count=\pp] in {{30.0,60.0,90.0}/{0.3,0.6,0.9},{0.0,10.0,20.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0}/{0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}}{
 \begin{tikzpicture}
@@ -53,68 +47,74 @@
 % 
 \foreach \omegavalue [count=\i] in \omegavalues {
 \foreach \psivalue [count=\j] in \psivalues {
-   \begin{scope}[shift={(\j*\deltax,-\i*\deltay)}, local bounding box=\i\j]
-%    
-\begin{scope}[local bounding box=bb]
-\begin{polaraxis}[
-    width=6cm, height = 6cm,
-    xtick={0,45,...,315},
-    ytick={60,30},
-    yticklabels={30,60},
-    yticklabel style=white,
-    tickwidth=0,
-    xtick distance = 45,
-    separate axis lines,
-    y axis line style= { draw opacity=0 },
-    ymin=0, ymax=90,
-    axis on top=true,
-   %  point meta min = 0,
-   %  point meta max = 0.06,
-    colorbar,
-    colorbar style={
-        % yticklabel=\pgfmathparse{10^\tick}\pgfmathprintnumber\pgfmathresult
-        % title=Color key,
-        % ylabel=Z-value,
-      %   ymin = 0, ymax = 0.02,
-      %   ytick={0,0.02,...,0.06},
-      %   yticklabel style={
-      %       text width=2.5em,
-      %       align=right,
-      %       /pgf/number format/.cd,
-      %           fixed,
-      %           fixed zerofill
-      %   }
-    },
-    colormap/cividis,
-    % /pgf/number format/sci subscript
-]
-\addplot [%
-matrix plot*,
-point meta=\thisrowno{2}
-% point meta=lg10(\thisrowno{2}+1)
-] table[] {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat};
-\coordinate (A) at (0,90);
-\coordinate (B) at (180,90);
-\coordinate (C) at (\omegavalue,90);
-\coordinate (D) at (\omegavalue+180,90);
-% \addplot[white, very thick] coordinates {(0,90) (180,90)};
-% \addplot[white, very thick] coordinates {(\omegavalue,90) (\omegavalue+180,90)};
-% 
-%, contour filled={number=9}
-% \addplot3 [surf] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat}; %, contour filled={number=9}
-% \addplot3 [contour gnuplot={number=14},thick,] file {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat};
-\end{polaraxis}
-% 
-\draw[white, very thick, dashed] (A) -- (B);
-\draw[white, very thick, dashed] (C) -- (D);
-% 
-\end{scope}
-\begin{scope}[]
-\ifthenelse{\i=1}{\node[anchor=south, xshift=-1.5em] at (bb.north) {$\modelPsi = \psivalue$};}{}
-\ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (bb.west) {$\modelOmega = \SI{\omegavalue}{\degree}$};}{}
-\end{scope}
+\begin{scope}[shift={(\j*\deltax,-\i*\deltay)}, local bounding box=\i\j]
+  \begin{scope}[local bounding box=bb]
+    \begin{polaraxis}[
+        width=4.3cm, height=4.3cm,
+        xtick={0,45,...,315},
+        xticklabels={$\SI{0}{\degree}$,$\SI{45}{\degree}$,$\SI{90}{\degree}$,$\SI{135}{\degree}$,$\SI{180}{\degree}$,$\SI{225}{\degree}$,$\SI{270}{\degree}$,$\SI{315}{\degree}$},
+        ytick={60,30},
+        yticklabels={$\SI{30}{\degree}$,$\SI{60}{\degree}$},
+        yticklabel style=white,
+        tickwidth=0,
+        xtick distance = 45,
+        separate axis lines,
+        y axis line style= { draw opacity=0 },
+        ymin=0, ymax=90,
+        axis on top=true,
+        % colorbar,
+        % colorbar style={
+        %   ytick={0,1},
+        %   yticklabels={$0$,$\log(\mathit{pdf+1})$},
+        % },
+        colormap/cividis,
+      ] 
+      \addplot [%
+          matrix plot*,
+          point meta=explicit,]
+        table[meta expr={ln(\thisrowno{2}+1)}]
+          {\datapath/hist/cube_stats_p_\psivalue_o_\omegavalue_r_\radiusvalue.dat};
+      \coordinate (A) at (0,90);
+      \coordinate (B) at (180,90);
+      \coordinate (C) at (\omegavalue,90);
+      \coordinate (D) at (\omegavalue+180,90);
+      \coordinate (CC) at (0,0);
+    \end{polaraxis}
+    % 
+    \draw[white, very thick, dashed] (A) -- (B);
+    \draw[white, very thick, dashed] (C) -- (D);
+    % 
+  \end{scope}
+  \begin{scope}[overlay]
+    \ifthenelse{\i=1}{\node[anchor=south, xshift=-0.2ex] at (bb.north) {$\modelPsi = \psivalue$};}{}
+    \ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (bb.west) {$\modelOmega = \SI{\omegavalue}{\degree}$};}{}
+  \end{scope}
+  % center
+  \path[] ($(CC)-(2.6,0)$) -- ($(CC)+(2.6,0)$);
+  \path[] ($(CC)-(0,2.6)$) -- ($(CC)+(0,2.6)$);
 \end{scope}
 }}
+% 
+\begin{scope}[shift={(current bounding box.south)}, xshift=-5cm,]
+  \begin{axis}[%
+    hide axis,
+    scale only axis,
+    height=0pt, width=0pt,
+    xmin=0, xmax=1, ymin=0, ymax=1,
+    colormap/cividis,
+    colorbar horizontal,
+    point meta min = 0,
+    point meta max = 1,
+    colorbar style={
+        width=10cm,
+        height=0.42cm,
+        xticklabel style={tick label style={font=\footnotesize}},
+        xtick={0,1},
+        xticklabels={$0$,$\log(\mathit{pdf+1})$},
+    }]
+  \end{axis}
+\end{scope}
+% 
 \end{tikzpicture}
 }
 % 

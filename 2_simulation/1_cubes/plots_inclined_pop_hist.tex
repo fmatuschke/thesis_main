@@ -5,6 +5,7 @@
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
+\usepackage{relsize}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
@@ -25,9 +26,7 @@
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-\def\vrf{\langle{r_f}\rangle}
-\def\vfl{\nu_{l}}
-\def\vfr{\nu_{r}}
+\input{parameters}
 % 
 \definecolor{dark21}{HTML}{1b9e77}
 \definecolor{dark22}{HTML}{d95f02}
@@ -96,19 +95,19 @@
 % 
 \begin{tikzpicture}[]
 % 
-% \def\p{3}
 \def\delta{3.3}
 \foreach \o[count=\oi from 0] in {0,30,60,90}{
    %
-   \pgfmathparse{2*1.05*\delta*Mod(\oi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
-   \pgfmathparse{1*1.2*\delta*div(\oi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   \pgfmathsetmacro{\px}{2*1.05*\delta*Mod(\oi,2)}
+   \pgfmathsetmacro{\py}{1*1.2*\delta*div(\oi,2)}
    % 
    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\oi}]
    \begin{scope}[shift={(\px + 0.00,0)}]
       \begin{polaraxis}[
          PStyle,
       ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+         \addplot [matrix plot*,point meta=explicit,]
+               table[meta expr={ln(\thisrowno{2}+1)}]  {%
             \datapath/gt_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_90.0.dat};
          \coordinate (A\oi) at (0,0);
       \end{polaraxis}
@@ -119,14 +118,15 @@
       \begin{polaraxis}[
          PStyle,
       ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+         \addplot [matrix plot*,point meta=explicit,]
+               table[meta expr={ln(\thisrowno{2}+1)}]  {%
             \datapath/sim_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_90.0.dat};
          \coordinate (B\oi) at (0,0);
       \end{polaraxis}
    \end{scope}
    \end{scope}
    % 
-   \node[anchor=south, yshift=1.3cm] at ($(A\oi)!0.5!(B\oi)$)
+   \node[anchor=center, yshift=1.5cm] at ($(A\oi)!0.5!(B\oi)$)
       {\scriptsize $\Omega = \SI{\o}{\degree}$};
    \node[anchor=south, yshift=1.5cm] at ($(A\oi)$)
       {\scriptsize model};

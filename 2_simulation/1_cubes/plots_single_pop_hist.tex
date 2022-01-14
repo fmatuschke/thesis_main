@@ -5,6 +5,7 @@
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
+\usepackage{relsize}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
@@ -25,9 +26,7 @@
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-\def\vrf{\langle{r_f}\rangle}
-\def\vfl{\nu_{l}}
-\def\vfr{\nu_{r}}
+\input{parameters}
 % 
 \definecolor{dark21}{HTML}{1b9e77}
 \definecolor{dark22}{HTML}{d95f02}
@@ -95,34 +94,35 @@
 \def\delta{3.3}
 \foreach \x[count=\xi from 0] in {0,30,60,90}{
    %
-   \pgfmathparse{2*1.05*\delta*Mod(\xi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
-   \pgfmathparse{1*1.2*\delta*div(\xi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   \pgfmathsetmacro{\px}{2*1.05*\delta*Mod(\xi,2)}
+   \pgfmathsetmacro{\py}{1*1.2*\delta*div(\xi,2)}
    % 
    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\xi}]
-   \begin{scope}[shift={(\px + 0.00,0)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=explicit,]
-            table[meta expr={ln(\thisrowno{2}+1)}] {%
-            \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
-         \coordinate (A\xi) at (0,0);
-      \end{polaraxis}
-   \end{scope}
-   %
-   % simulation
-   \begin{scope}[shift={(\px + \delta,0)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=explicit,]
-            table[meta expr={ln(\thisrowno{2}+1)}] {%
-            \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
-         \coordinate (B\xi) at (0,0);
-      \end{polaraxis}
+      \begin{scope}[shift={(\px + 0.00,0)}]
+         \begin{polaraxis}[
+            PStyle,
+         ]
+            \addplot [matrix plot*,point meta=explicit,]
+               table[meta expr={ln(\thisrowno{2}+1)}] {%
+               \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+            \coordinate (A\xi) at (0,0);
+         \end{polaraxis}
+      \end{scope}
+      %
+      % simulation
+      \begin{scope}[shift={(\px + \delta,0)}]
+         \begin{polaraxis}[
+            PStyle,
+         ]
+            \addplot [matrix plot*,point meta=explicit,]
+               table[meta expr={ln(\thisrowno{2}+1)}] {%
+               \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+            \coordinate (B\xi) at (0,0);
+         \end{polaraxis}
+      \end{scope}
    \end{scope}
    % 
-   \node[anchor=south, yshift=1.75cm] at ($(A\xi)!0.5!(B\xi)$) 
+   \node[anchor=center, yshift=1.5cm] at ($(A\xi)!0.5!(B\xi)$)
       {\scriptsize $\modelInc = \SI{\x}{\degree}$};
    \node[anchor=south, yshift=1.5cm] at ($(A\xi)$)
       {\scriptsize model};
@@ -130,7 +130,6 @@
       {\scriptsize simulation};
    \coordinate (NN\xi) at (BB\xi.north);
    \coordinate (SS\xi) at (BB\xi.south);
-   \end{scope}
 }
 \coordinate (T) at (current bounding box.north);
 \coordinate (B) at (current bounding box.south);
@@ -162,28 +161,29 @@
    \pgfmathparse{1*1.2*\delta*div(\xi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
    % 
    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\xi}]
-   \begin{scope}[shift={(\px + 0.00,0)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
-            \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
-         \coordinate (A\xi) at (0,0);
-      \end{polaraxis}
-   \end{scope}
-   %
-   % simulation
-   \begin{scope}[shift={(\px + \delta,0)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
-            \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
-         \coordinate (B\xi) at (0,0);
-      \end{polaraxis}
+      \begin{scope}[shift={(\px + 0.00,0)}]
+         \begin{polaraxis}[
+            PStyle,
+         ]
+            \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+               \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+            \coordinate (A\xi) at (0,0);
+         \end{polaraxis}
+      \end{scope}
+      %
+      % simulation
+      \begin{scope}[shift={(\px + \delta,0)}]
+         \begin{polaraxis}[
+            PStyle,
+         ]
+            \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+               \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+            \coordinate (B\xi) at (0,0);
+         \end{polaraxis}
+      \end{scope}
    \end{scope}
    % 
-   \node[anchor=south, yshift=1.75cm] at ($(A\xi)!0.5!(B\xi)$) 
+   \node[anchor=center, yshift=1.5cm] at ($(A\xi)!0.5!(B\xi)$)
       {\scriptsize $\modelInc = \SI{\x}{\degree}$};
    \node[anchor=south, yshift=1.5cm] at ($(A\xi)$)
       {\scriptsize model};
@@ -191,7 +191,6 @@
       {\scriptsize simulation};
    \coordinate (NN\xi) at (BB\xi.north);
    \coordinate (SS\xi) at (BB\xi.south);
-   \end{scope}
 }
 % 
 \path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
@@ -232,28 +231,29 @@
    \pgfmathparse{1*1.2*\delta*div(\xi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
    % 
    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\xi}]
-   \begin{scope}[shift={(\px + 0.00,0)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
-            \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
-         \coordinate (A\xi) at (0,0);
-      \end{polaraxis}
-   \end{scope}
-   %
-   % simulation
-   \begin{scope}[shift={(\px + \delta,0)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
-            \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
-         \coordinate (B\xi) at (0,0);
-      \end{polaraxis}
+      \begin{scope}[shift={(\px + 0.00,0)}]
+         \begin{polaraxis}[
+            PStyle,
+         ]
+            \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+               \datapath/gt_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+            \coordinate (A\xi) at (0,0);
+         \end{polaraxis}
+      \end{scope}
+      %
+      % simulation
+      \begin{scope}[shift={(\px + \delta,0)}]
+         \begin{polaraxis}[
+            PStyle,
+         ]
+            \addplot [matrix plot*,point meta=\thisrowno{2},] table[] {%
+               \datapath/sim_hists_p_1.0_o_0.0_r_0.5_f0_\x.0_f1_0.0.dat};
+            \coordinate (B\xi) at (0,0);
+         \end{polaraxis}
+      \end{scope}
    \end{scope}
    % 
-   \node[anchor=south, yshift=1.75cm] at ($(A\xi)!0.5!(B\xi)$) 
+   \node[anchor=center, yshift=1.5cm] at ($(A\xi)!0.5!(B\xi)$)
       {\scriptsize $\modelInc = \SI{\x}{\degree}$};
    \node[anchor=south, yshift=1.5cm] at ($(A\xi)$)
       {\scriptsize model};
@@ -261,7 +261,6 @@
       {\scriptsize simulation};
    \coordinate (NN\xi) at (BB\xi.north);
    \coordinate (SS\xi) at (BB\xi.south);
-   \end{scope}
 }
 % 
 \path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
@@ -279,7 +278,7 @@
 \draw[dashed] (L |- C8) -- (R |- C8);
 % 
 \draw[dashed] (current bounding box.north) -- (current bounding box.south);
-\node[anchor=south] at (current bounding box.north) {\small  single fiber pop.};
+\node[anchor=south] at (current bounding box.north) {\small single fiber pop.};
 %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
 \begin{axis}[CBStyle]

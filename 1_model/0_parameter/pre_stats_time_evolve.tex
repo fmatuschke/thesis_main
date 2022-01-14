@@ -2,6 +2,8 @@
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
 \usepackage{pgfplots}
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
@@ -25,9 +27,7 @@
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-\def\vrf{\langle{r_f}\rangle}
-\def\vfl{\nu_{l}}
-\def\vfr{\nu_{r}}
+\input{parameters}
 % 
 \begin{document}
 % 
@@ -163,8 +163,8 @@ cycle multiindex* list={
          \pgfmathparse{int(round(\fl))} \let\intfl=\pgfmathresult
          \pgfmathparse{int(round(\fr))} \let\intfr=\pgfmathresult
          \ifthenelse{\intfr = 4}{%
-            \addlegendentryexpanded{$\vfr=\intfr,\vfl=\intfl,\vrf=\r$}}{%
-            \addlegendentryexpanded{$\vfr=\intfr$}}
+            \addlegendentryexpanded{$\segRadiusFactor=\intfr,\segLengthFactor=\intfl,\fiberRadiusMean=\r$}}{%
+            \addlegendentryexpanded{$\segRadiusFactor=\intfr$}}
 % 
          % \pgfmathtruncatemacro\counter{\counter+1}
          % \ifthenelse{\counter = 3}{\addlegendimage{empty legend}\addlegendentry{}}{}

@@ -5,6 +5,7 @@
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
+\usepackage{relsize}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
@@ -26,7 +27,7 @@
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-\include{parameters}
+\input{parameters}
 % 
 \definecolor{dark21}{HTML}{1b9e77}
 \definecolor{dark22}{HTML}{d95f02}
@@ -134,7 +135,7 @@
 }
 % 
 % 
-\nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}direction $\dir$ / $\si{\degree}$}]
 \plotgt{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi_model.csv}{omega}{phi}
 \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
    \addplot+[Boxplot] table[%
@@ -157,7 +158,7 @@
 \pgfplotsset{update limits=true}
 % 
 % 
-\nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}inclination $\inc$ / $\si{\degree}$}]
 \plotgt{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi_model.csv}{omega}{alpha}
 \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
    \addplot+[Boxplot] table[%
@@ -169,7 +170,7 @@
 \pgfplotsset{update limits=true}
 % 
 % 
-\nextgroupplot[title={\vphantom{/}trel}]
+\nextgroupplot[title={\vphantom{/}\trel}]
 \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
    \addplot+[Boxplot] table[%
       y={rofl_trel}, col sep=comma, row sep=newline,

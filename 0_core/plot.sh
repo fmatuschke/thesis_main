@@ -25,6 +25,7 @@ mkdir -p output/tikz
 cd output/tmp
 
 cp ../../${NAME}.tex ${NAMEOUT}.tex
+cp ../../parameters.tex .
 sed -i 's?__PATH__?'"$2"'?g' ${NAMEOUT}.tex
 lualatex -interaction=nonstopmode -halt-on-error ${NAMEOUT}.tex
 

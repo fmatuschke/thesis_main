@@ -5,6 +5,8 @@
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
@@ -16,9 +18,7 @@
 \usetikzlibrary{calc}
 \tikzset{>=latex}
 % 
-\newcommand{\openingAngle}{\textnormal{$\Xi$}}
-\newcommand{\popa}{\textnormal{$\mathcal{F}_0$}}
-\newcommand{\popb}{\textnormal{$\mathcal{F}_1$}}
+\input{parameters}
 % 
 \newlength{\width}
 \newlength{\height}
@@ -171,7 +171,7 @@
       \axes
       % 
       \nextgroupplot[%
-         ylabel={$\inc_{0}}$},
+         ylabel={$\inc_{0}$},
          ymin=-90,ymax=90,
          ytick={-90,0,90,180},
          yticklabels={$\SI{-90}{\degree}$,$\SI{0}{\degree}$,$\SI{90}{\degree}$,$\SI{180}{\degree}$},
@@ -185,7 +185,7 @@
       \axes
       % 
       \nextgroupplot[%
-         ylabel={$\inc_{1}}$},
+         ylabel={$\inc_{1}$},
          ymin=-90,ymax=90,
          ytick={-90,0,90,180},
          yticklabels={$\SI{-90}{\degree}$,$\SI{0}{\degree}$,$\SI{90}{\degree}$,$\SI{180}{\degree}$},

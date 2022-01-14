@@ -5,6 +5,7 @@
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
+\usepackage{relsize}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
@@ -26,7 +27,7 @@
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-\include{parameters}
+\input{parameters}
 % 
 \definecolor{dark21}{HTML}{1b9e77}
 \definecolor{dark22}{HTML}{d95f02}
@@ -135,7 +136,7 @@
 \pgfplotsset{update limits=true}
 % 
 % 
-\nextgroupplot[title={\vphantom{/}direction / $\si{\degree}$}] 
+\nextgroupplot[title={\vphantom{/}direction $\dir$ / $\si{\degree}$}] 
 \plotgt{\datapath/cube_2pop_135_rc1_single_plots_single_pop_model.csv}{f0_inc}{phi}
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot] table[%
@@ -147,7 +148,7 @@
 \pgfplotsset{update limits=true}
 % 
 % 
-\nextgroupplot[title={\vphantom{/}inclination / $\si{\degree}$}]
+\nextgroupplot[title={\vphantom{/}inclination $\inc$ / $\si{\degree}$}]
 \plotgt{\datapath/cube_2pop_135_rc1_single_plots_single_pop_model.csv}{f0_inc}{alpha}
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot] table[%
@@ -159,7 +160,7 @@
 \pgfplotsset{update limits=true}
 % 
 % 
-\nextgroupplot[title={\vphantom{/}trel}]
+\nextgroupplot[title={\vphantom{/}\trel}]
 \foreach \inc in {0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0} {
    \addplot+[Boxplot] table[%
       y={rofl_trel}, col sep=comma, row sep=newline,

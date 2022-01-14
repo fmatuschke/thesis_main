@@ -2,6 +2,8 @@
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
 \usepackage{pgfplots}
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
@@ -25,9 +27,7 @@
   pdf.setinfo ("/Path: (__PATH__)")
 }
 % 
-\def\vrf{\langle{r_f}\rangle}
-\def\vfl{\nu_{l}}
-\def\vfr{\nu_{r}}
+\input{parameters}
 % 
 \begin{document}
 % 
@@ -120,7 +120,7 @@ cycle multiindex* list={
       %         {\datapath/cube_stat_time_evolve_r_\r_psi_0.5_fr_\fr_fl_\fl_.csv};
       %    }
       % % 
-      \nextgroupplot[ylabel={$\# steps$}, title={$\vrf = \SI{\r}{\micro\meter}, \modelPsi=\psi$}]
+      \nextgroupplot[ylabel={$\# steps$}, title={$\fiberRadiusMean = \SI{\r}{\micro\meter}, \modelPsi=\psi$}]
          \Loop{
           \addplot+[] table[
             x={times_50}, y={steps_50},
@@ -222,8 +222,8 @@ cycle multiindex* list={
                \pgfmathparse{int(round(\fl))} \let\intfl=\pgfmathresult
                \pgfmathparse{int(round(\fr))} \let\intfr=\pgfmathresult
                \ifthenelse{\intfr = 1}{%
-                  \addlegendentryexpanded{$\vfr=\intfr,\vfl=\intfl$}}{%,\vrf=\r
-                  \addlegendentryexpanded{$\vfr=\intfr$}}
+                  \addlegendentryexpanded{$\segRadiusFactor=\intfr,\segLengthFactor=\intfl$}}{%,\fiberRadiusMean=\r
+                  \addlegendentryexpanded{$\segRadiusFactor=\intfr$}}
       % 
                % \pgfmathtruncatemacro\counter{\counter+1}
                % \ifthenelse{\counter = 3}{\addlegendimage{empty legend}\addlegendentry{}}{}
