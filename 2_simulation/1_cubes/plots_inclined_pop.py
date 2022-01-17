@@ -163,6 +163,7 @@ if True:
         alpha = np.rad2deg(np.pi / 2 - theta)
         a_mean = circmean(alpha, 90, -90)
         alpha[alpha < a_mean - 90] = alpha[alpha < a_mean - 90] + 180
+        alpha[alpha > a_mean + 90] = alpha[alpha > a_mean + 90] - 180
 
         phi_25, phi_50, phi_75 = np.quantile(phi, [0.25, 0.5, 0.75])
         alpha_25, alpha_50, alpha_75 = np.quantile(alpha, [0.25, 0.5, 0.75])
