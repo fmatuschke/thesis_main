@@ -34,8 +34,8 @@
 \setlength{\height}{22.37076cm} %8,807 inch
 \def\radiusvalue{0.5}
 % 
-\def\deltax{4.3}
-\def\deltay{4.3}
+\def\deltax{4.2}
+\def\deltay{4.2}
 % 
 \begin{document}
 % 
@@ -50,14 +50,23 @@
 \begin{scope}[shift={(\j*\deltax,-\i*\deltay)}, local bounding box=\i\j]
   \begin{scope}[local bounding box=bb]
     \begin{polaraxis}[
-        width=4.3cm, height=4.3cm,
-        xtick={0,45,...,315},
-        xticklabels={$\SI{0}{\degree}$,$\SI{45}{\degree}$,$\SI{90}{\degree}$,$\SI{135}{\degree}$,$\SI{180}{\degree}$,$\SI{225}{\degree}$,$\SI{270}{\degree}$,$\SI{315}{\degree}$},
+        width=5cm, height=5cm,
+        xtick={0,90,...,270},
+        xticklabels={\rotatebox[origin=c]{-90}{$\SI{0}{\degree}$},%
+                     $\SI{90}{\degree}$,%
+                     \rotatebox[origin=c]{90}{$\SI{180}{\degree}$},%
+                     $\SI{270}{\degree}$,%
+                     },
+        extra x ticks={45,135,...,315},
+        % extra x tick labels={,,,},
+        extra x tick labels={$\SI{45}{\degree}$,%
+                             $\SI{135}{\degree}$,%
+                             $\SI{225}{\degree}$,%
+                             $\SI{315}{\degree}$},
         ytick={60,30},
         yticklabels={$\SI{30}{\degree}$,$\SI{60}{\degree}$},
         yticklabel style=white,
         tickwidth=0,
-        xtick distance = 45,
         separate axis lines,
         y axis line style= { draw opacity=0 },
         ymin=0, ymax=90,
@@ -86,12 +95,13 @@
     % 
   \end{scope}
   \begin{scope}[overlay]
-    \ifthenelse{\i=1}{\node[anchor=south, xshift=-0.2ex] at (bb.north) {$\modelPsi = \psivalue$};}{}
-    \ifthenelse{\j=1}{\node[anchor=south, rotate=90] at (bb.west) {$\modelOmega = \SI{\omegavalue}{\degree}$};}{}
+    \pgfmathparse{int(round(\psivalue*10))*10}
+    \ifthenelse{\i=1}{\node[anchor=south, xshift=-0.2ex] at (bb.north) {$\modelPsi = \SI{\pgfmathresult}{\percent}$};}{}
+    \ifthenelse{\j=1}{\node[anchor=south, xshift=-0.2ex, rotate=90] at (bb.west) {$\modelOmega = \SI{\omegavalue}{\degree}$};}{}
   \end{scope}
   % center
-  \path[] ($(CC)-(2.6,0)$) -- ($(CC)+(2.6,0)$);
-  \path[] ($(CC)-(0,2.6)$) -- ($(CC)+(0,2.6)$);
+  \path[] ($(CC)-(2.7,0)$) -- ($(CC)+(2.7,0)$);
+  \path[] (CC) -- ($(CC)+(0,2.7)$);
 \end{scope}
 }}
 % 
