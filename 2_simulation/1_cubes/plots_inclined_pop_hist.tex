@@ -49,12 +49,20 @@
 \pgfplotsset{%
    PStyle/.style={%
       every axis/.append style={font=\tiny},
-      width = 0.17\width, height = 0.17\width,
+      width = 0.185\width, height = 0.185\width,
       scale only axis,
-      xtick={0,45,90,135,180,225,270,315},
-      xticklabels={$\SI{0}{\degree}$,$\SI{45}{\degree}$,$\SI{90}{\degree}$,
-                  $\SI{135}{\degree}$,$\SI{180}{\degree}$,$\SI{225}{\degree}$,
-                  $\SI{270}{\degree}$,$\SI{315}{\degree}$},
+      xtick={0,90,...,270},
+      xticklabels={\rotatebox[origin=c]{-90}{$\SI{0}{\degree}$},%
+                  $\SI{90}{\degree}$,%
+                  \rotatebox[origin=c]{90}{$\SI{180}{\degree}$},%
+                  $\SI{270}{\degree}$,%
+                  },
+      extra x ticks={45,135,...,315},
+      % extra x tick labels={,,,},
+      extra x tick labels={$\SI{45}{\degree}$,%
+                           $\SI{135}{\degree}$,%
+                           $\SI{225}{\degree}$,%
+                           $\SI{315}{\degree}$},
       ytick={60,30},
       yticklabels={$\SI{30}{\degree}$,$\SI{60}{\degree}$},
       yticklabel style=white,
@@ -89,52 +97,52 @@
    }
 }
 % 
+\pgfmathsetmacro{\delta}{3.3}
+\pgfmathsetmacro{\dx}{2*1.05}
+\pgfmathsetmacro{\dy}{1*1.1}
 % 
 \foreach \p in {1,2,3,4,5,6,7,8,9} {% 
 \directlua{tex.print('\string\\message{\p}')}
 % 
 \begin{tikzpicture}[]
-% 
-\def\delta{3.3}
 \foreach \o[count=\oi from 0] in {0,30,60,90}{
    %
-   \pgfmathsetmacro{\px}{2*1.05*\delta*Mod(\oi,2)}
-   \pgfmathsetmacro{\py}{1*1.2*\delta*div(\oi,2)}
+   \pgfmathsetmacro{\px}{\dx*\delta*Mod(\oi,2)}
+   \pgfmathsetmacro{\py}{\dy*\delta*div(\oi,2)}
    % 
    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\oi}]
-   \begin{scope}[shift={(\px + 0.00,0)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=explicit,]
-               table[meta expr={ln(\thisrowno{2}+1)}]  {%
-            \datapath/gt_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_90.0.dat};
-         \coordinate (A\oi) at (0,0);
-      \end{polaraxis}
+      \begin{scope}[shift={(\px + 0.00,0)}]
+         \begin{polaraxis}[
+            PStyle,
+         ]
+            \addplot [matrix plot*,point meta=explicit,]
+                  table[meta expr={ln(\thisrowno{2}+1)}]  {%
+               \datapath/gt_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_90.0.dat};
+            \coordinate (A\oi) at (0,0);
+         \end{polaraxis}
+      \end{scope}
+      %
+      % simulation
+      \begin{scope}[shift={(\px + \delta,0)}]
+         \begin{polaraxis}[
+            PStyle,
+         ]
+            \addplot [matrix plot*,point meta=explicit,]
+                  table[meta expr={ln(\thisrowno{2}+1)}]  {%
+               \datapath/sim_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_90.0.dat};
+            \coordinate (B\oi) at (0,0);
+         \end{polaraxis}
+      \end{scope}
+      % 
+      \node[anchor=south, yshift=1.4cm] at ($(A\oi)!0.5!(B\oi)$)
+         {\scriptsize $\modelOmega = \SI{\o}{\degree}$};
+      \node[anchor=south, yshift=1.4cm+1ex] at ($(A\oi)$) {\scriptsize model};
+      \node[anchor=south, yshift=1.4cm+1ex] at ($(B\oi)$) {\scriptsize simulation};
    \end{scope}
-   %
-   % simulation
-   \begin{scope}[shift={(\px + \delta,0)}]
-      \begin{polaraxis}[
-         PStyle,
-      ]
-         \addplot [matrix plot*,point meta=explicit,]
-               table[meta expr={ln(\thisrowno{2}+1)}]  {%
-            \datapath/sim_hists_p_0.\p_o_\o.0_r_0.5_f0_0.0_f1_90.0.dat};
-         \coordinate (B\oi) at (0,0);
-      \end{polaraxis}
-   \end{scope}
-   \end{scope}
-   % 
-   \node[anchor=center, yshift=1.5cm] at ($(A\oi)!0.5!(B\oi)$)
-      {\scriptsize $\Omega = \SI{\o}{\degree}$};
-   \node[anchor=south, yshift=1.5cm] at ($(A\oi)$)
-      {\scriptsize model};
-   \node[anchor=south, yshift=1.5cm] at ($(B\oi)$)
-      {\scriptsize simulation};
    \coordinate (NN\oi) at (BB\oi.north);
    \coordinate (SS\oi) at (BB\oi.south);
 }
+\path[] ($(A0)!-0.17!(B1)$) -- ($(A0)!1.17!(B1)$); % center
 \coordinate (T) at (current bounding box.north);
 \coordinate (B) at (current bounding box.south);
 \coordinate (C1) at ($(B0)!0.5!(A1)$);
@@ -142,9 +150,8 @@
 \coordinate (R) at (current bounding box.east);
 \coordinate (C2) at ($(NN0)!0.5!(SS2)$);
 % 
-\draw[dashed] (T -| C1) -- (B -| C1);
-\draw[dashed] (L |- C2) -- (R |- C2);
-\path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
+\draw[dashed,dash expand off] (T -| C1) -- (B -| C1);
+\draw[dashed,dash expand off] (L |- C2) -- (R |- C2);
 % 
 \node[anchor=south] at (current bounding box.north) {\small inclined fiber pop., $\modelPsi = \SI{\p0}{\percent}$};
 % 

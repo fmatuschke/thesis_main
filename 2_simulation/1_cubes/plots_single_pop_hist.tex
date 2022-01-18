@@ -49,12 +49,20 @@
 \pgfplotsset{%
    PStyle/.style={%
       every axis/.append style={font=\tiny},
-      width = 0.17\width, height = 0.17\width,
+      width = 0.185\width, height = 0.185\width,
       scale only axis,
-      xtick={0,45,90,135,180,225,270,315},
-      xticklabels={$\SI{0}{\degree}$,$\SI{45}{\degree}$,$\SI{90}{\degree}$,
-                  $\SI{135}{\degree}$,$\SI{180}{\degree}$,$\SI{225}{\degree}$,
-                  $\SI{270}{\degree}$,$\SI{315}{\degree}$},
+      xtick={0,90,...,270},
+      xticklabels={\rotatebox[origin=c]{-90}{$\SI{0}{\degree}$},%
+                  $\SI{90}{\degree}$,%
+                  \rotatebox[origin=c]{90}{$\SI{180}{\degree}$},%
+                  $\SI{270}{\degree}$,%
+                  },
+      extra x ticks={45,135,...,315},
+      % extra x tick labels={,,,},
+      extra x tick labels={$\SI{45}{\degree}$,%
+                           $\SI{135}{\degree}$,%
+                           $\SI{225}{\degree}$,%
+                           $\SI{315}{\degree}$},
       ytick={60,30},
       yticklabels={$\SI{30}{\degree}$,$\SI{60}{\degree}$},
       yticklabel style=white,
@@ -89,13 +97,15 @@
    }
 }
 % 
-\begin{tikzpicture}[]
+\pgfmathsetmacro{\delta}{3.3}
+\pgfmathsetmacro{\dx}{2*1.05}
+\pgfmathsetmacro{\dy}{1*1.1}
 % 
-\def\delta{3.3}
+\begin{tikzpicture}[]
 \foreach \x[count=\xi from 0] in {0,30,60,90}{
    %
-   \pgfmathsetmacro{\px}{2*1.05*\delta*Mod(\xi,2)}
-   \pgfmathsetmacro{\py}{1*1.2*\delta*div(\xi,2)}
+   \pgfmathsetmacro{\px}{\dx*\delta*Mod(\xi,2)}
+   \pgfmathsetmacro{\py}{\dy*\delta*div(\xi,2)}
    % 
    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\xi}]
       \begin{scope}[shift={(\px + 0.00,0)}]
@@ -120,17 +130,15 @@
             \coordinate (B\xi) at (0,0);
          \end{polaraxis}
       \end{scope}
+      \node[anchor=south, yshift=1.4cm] at ($(A\xi)!0.5!(B\xi)$)
+         {\scriptsize $\modelInc = \SI{\x}{\degree}$};
+      \node[anchor=south, yshift=1.4cm+1ex] at ($(A\xi)$) {\scriptsize model};
+      \node[anchor=south, yshift=1.4cm+1ex] at ($(B\xi)$) {\scriptsize simulation};
    \end{scope}
-   % 
-   \node[anchor=center, yshift=1.5cm] at ($(A\xi)!0.5!(B\xi)$)
-      {\scriptsize $\modelInc = \SI{\x}{\degree}$};
-   \node[anchor=south, yshift=1.5cm] at ($(A\xi)$)
-      {\scriptsize model};
-   \node[anchor=south, yshift=1.5cm] at ($(B\xi)$)
-      {\scriptsize simulation};
    \coordinate (NN\xi) at (BB\xi.north);
    \coordinate (SS\xi) at (BB\xi.south);
 }
+\path[] ($(A0)!-0.17!(B1)$) -- ($(A0)!1.17!(B1)$); % center
 \coordinate (T) at (current bounding box.north);
 \coordinate (B) at (current bounding box.south);
 \coordinate (C1) at ($(B0)!0.5!(A1)$);
@@ -138,9 +146,8 @@
 \coordinate (R) at (current bounding box.east);
 \coordinate (C2) at ($(NN0)!0.5!(SS2)$);
 % 
-\draw[dashed] (T -| C1) -- (B -| C1);
-\draw[dashed] (L |- C2) -- (R |- C2);
-\path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
+\draw[dashed, dash expand off] (T -| C1) -- (B -| C1);
+\draw[dashed, dash expand off] (L |- C2) -- (R |- C2);
 \node[anchor=south] at (T) {\small  single fiber pop.};
 %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
@@ -151,14 +158,11 @@
 \end{tikzpicture}
 % 
 % 
-% 
 \begin{tikzpicture}[]
-% 
-\def\delta{3.3}
 \foreach \x[count=\xi from 0] in {0,5,10,15,20,25,30,35,40,45}{
    %
-   \pgfmathparse{2*1.05*\delta*Mod(\xi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
-   \pgfmathparse{1*1.2*\delta*div(\xi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   \pgfmathsetmacro{\px}{\dx*\delta*Mod(\xi,2)}
+   \pgfmathsetmacro{\py}{\dy*\delta*div(\xi,2)}
    % 
    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\xi}]
       \begin{scope}[shift={(\px + 0.00,0)}]
@@ -181,33 +185,29 @@
             \coordinate (B\xi) at (0,0);
          \end{polaraxis}
       \end{scope}
+      % 
+      \node[anchor=south, yshift=1.4cm] at ($(A\xi)!0.5!(B\xi)$)
+         {\scriptsize $\modelInc = \SI{\x}{\degree}$};
+      \node[anchor=south, yshift=1.4cm+1ex] at ($(A\xi)$) {\scriptsize model};
+      \node[anchor=south, yshift=1.4cm+1ex] at ($(B\xi)$) {\scriptsize simulation};
    \end{scope}
-   % 
-   \node[anchor=center, yshift=1.5cm] at ($(A\xi)!0.5!(B\xi)$)
-      {\scriptsize $\modelInc = \SI{\x}{\degree}$};
-   \node[anchor=south, yshift=1.5cm] at ($(A\xi)$)
-      {\scriptsize model};
-   \node[anchor=south, yshift=1.5cm] at ($(B\xi)$)
-      {\scriptsize simulation};
    \coordinate (NN\xi) at (BB\xi.north);
    \coordinate (SS\xi) at (BB\xi.south);
 }
-% 
-\path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
-% 
+\path[] ($(A0)!-0.17!(B1)$) -- ($(A0)!1.17!(B1)$); % center
 \coordinate (L) at (current bounding box.west);
 \coordinate (R) at (current bounding box.east);
 % 
 \coordinate (C2) at ($(NN0)!0.5!(SS2)$);
-\draw[dashed] (L |- C2) -- (R |- C2);
+\draw[dashed, dash expand off] (L |- C2) -- (R |- C2);
 \coordinate (C4) at ($(NN2)!0.5!(SS4)$);
-\draw[dashed] (L |- C4) -- (R |- C4);
+\draw[dashed, dash expand off] (L |- C4) -- (R |- C4);
 \coordinate (C6) at ($(NN4)!0.5!(SS6)$);
-\draw[dashed] (L |- C6) -- (R |- C6);
+\draw[dashed, dash expand off] (L |- C6) -- (R |- C6);
 \coordinate (C8) at ($(NN6)!0.5!(SS8)$);
-\draw[dashed] (L |- C8) -- (R |- C8);
+\draw[dashed, dash expand off] (L |- C8) -- (R |- C8);
 % 
-\draw[dashed] (current bounding box.north) -- (current bounding box.south);
+\draw[dashed, dash expand off] (current bounding box.north) -- (current bounding box.south);
 \node[anchor=south] at (current bounding box.north) {\small  single fiber pop.};
 %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
@@ -223,12 +223,10 @@
 % 
 % 
 \begin{tikzpicture}[]
-% 
-\def\delta{3.3}
 \foreach \x[count=\xi from 0] in {50,55,60,65,70,75,80,85,90}{
    %
-   \pgfmathparse{2*1.05*\delta*Mod(\xi,2)} \pgfmathsetmacro{\px}{\pgfmathresult}
-   \pgfmathparse{1*1.2*\delta*div(\xi,2)} \pgfmathsetmacro{\py}{\pgfmathresult}
+   \pgfmathsetmacro{\px}{\dx*\delta*Mod(\xi,2)}
+   \pgfmathsetmacro{\py}{\dy*\delta*div(\xi,2)}
    % 
    \begin{scope}[shift={(0,-\py)}, local bounding box={BB\xi}]
       \begin{scope}[shift={(\px + 0.00,0)}]
@@ -251,33 +249,29 @@
             \coordinate (B\xi) at (0,0);
          \end{polaraxis}
       \end{scope}
+      % 
+      \node[anchor=south, yshift=1.4cm] at ($(A\xi)!0.5!(B\xi)$)
+         {\scriptsize $\modelInc = \SI{\x}{\degree}$};
+      \node[anchor=south, yshift=1.4cm+1ex] at ($(A\xi)$) {\scriptsize model};
+      \node[anchor=south, yshift=1.4cm+1ex] at ($(B\xi)$) {\scriptsize simulation};
    \end{scope}
-   % 
-   \node[anchor=center, yshift=1.5cm] at ($(A\xi)!0.5!(B\xi)$)
-      {\scriptsize $\modelInc = \SI{\x}{\degree}$};
-   \node[anchor=south, yshift=1.5cm] at ($(A\xi)$)
-      {\scriptsize model};
-   \node[anchor=south, yshift=1.5cm] at ($(B\xi)$)
-      {\scriptsize simulation};
    \coordinate (NN\xi) at (BB\xi.north);
    \coordinate (SS\xi) at (BB\xi.south);
 }
-% 
-\path[] ($(A0)!-0.185!(B1)$) -- ($(A0)!1.185!(B1)$);
-% 
+\path[] ($(A0)!-0.17!(B1)$) -- ($(A0)!1.17!(B1)$); % center
 \coordinate (L) at (current bounding box.west);
 \coordinate (R) at (current bounding box.east);
 % 
 \coordinate (C2) at ($(NN0)!0.5!(SS2)$);
-\draw[dashed] (L |- C2) -- (R |- C2);
+\draw[dashed, dash expand off] (L |- C2) -- (R |- C2);
 \coordinate (C4) at ($(NN2)!0.5!(SS4)$);
-\draw[dashed] (L |- C4) -- (R |- C4);
+\draw[dashed, dash expand off] (L |- C4) -- (R |- C4);
 \coordinate (C6) at ($(NN4)!0.5!(SS6)$);
-\draw[dashed] (L |- C6) -- (R |- C6);
+\draw[dashed, dash expand off] (L |- C6) -- (R |- C6);
 \coordinate (C8) at ($(NN6)!0.5!(SS8)$);
-\draw[dashed] (L |- C8) -- (R |- C8);
+\draw[dashed, dash expand off] (L |- C8) -- (R |- C8);
 % 
-\draw[dashed] (current bounding box.north) -- (current bounding box.south);
+\draw[dashed, dash expand off] (current bounding box.north) -- (current bounding box.south);
 \node[anchor=south] at (current bounding box.north) {\small single fiber pop.};
 %
 \begin{scope}[shift={(current bounding box.south)}, xshift=-5cm, yshift=0em]
