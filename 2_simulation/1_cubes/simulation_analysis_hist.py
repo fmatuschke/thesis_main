@@ -27,16 +27,16 @@ args = parser.parse_args()
 sim_path = args.input
 os.makedirs(os.path.join(sim_path, "hist"), exist_ok=True)
 df_acc = pd.read_pickle(
-    os.path.join(sim_path, "analysis", f"cube_2pop_simulation_schilling.pkl"))
+    os.path.join(sim_path, "analysis", "cube_2pop_simulation_schilling.pkl"))
 
 df = pd.read_pickle(
-    os.path.join(sim_path, "analysis", f"cube_2pop_simulation.pkl"))
+    os.path.join(sim_path, "analysis", "cube_2pop_simulation.pkl"))
 
 print()
 print(df.columns)
 print()
 
-if True:
+if False:
 
     def calc_omega(p, t):
         v0 = np.array([np.cos(p) * np.sin(t), np.sin(p) * np.sin(t), np.cos(t)])
@@ -72,6 +72,7 @@ if True:
     df['domega_mean'] = domega
 
 df["rtrel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
+df["R_mean"] = df["R"].apply(lambda x: np.mean(x))
 # df["domega_mean"] = df["domega"].apply(lambda x: np.mean(x))
 # df["rtrel_mean"][df["rtrel_mean"] > 0.55] = 0
 #
@@ -137,8 +138,12 @@ def run(p):
         df.species == species) & (df.model == model)
 
     for name in [
-            "R_mean", "rtrel_mean", "rdir_mean", "rincl_mean", "ret_mean",
-            "trans_mean", "domega_mean"
+            # "R_mean",
+            # "rtrel_mean",
+            # "ret_mean",
+            # "trans_mean",
+            # "domega_mean",
+            # "rdir_mean", "rincl_mean",
     ]:
 
         crange = None

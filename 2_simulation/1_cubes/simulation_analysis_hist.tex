@@ -13,15 +13,12 @@
 \usetikzlibrary{external}
 \usetikzlibrary{calc}
 % 
-% \tikzexternalize[prefix=./tikz/,
-%                %   figure name=\radius_\setup_\species_\model_,
-%                 %  mode=list and make, 
-%                  ]
-% 
 \def\datapath{../../__PATH__}
 \directlua0{
   pdf.setinfo ("/Path: (__PATH__)")
 }
+% 
+\input{parameters}
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
@@ -52,12 +49,20 @@
 \begin{polaraxis}[
     width=3.25cm, height = 3.25cm,
     scale only axis=true,
-    xtick={0,45,...,315},
+    xtick={0,90,...,270},
+    xticklabels={\rotatebox[origin=c]{-90}{$\SI{0}{\degree}$},%
+                $\SI{90}{\degree}$,%
+                \rotatebox[origin=c]{90}{$\SI{180}{\degree}$},%
+                $\SI{270}{\degree}$,%
+                },
+    extra x ticks={45,135,...,315},
+    % extra x tick labels={,,,},
+    extra x tick labels={$\SI{45}{\degree}$,%
+                          $\SI{135}{\degree}$,%
+                          $\SI{225}{\degree}$,%
+                          $\SI{315}{\degree}$},
     ytick={60,30},
-    xlabel style={overlay},
-    xticklabel style={overlay},
-    yticklabels={30,60},
-    ylabel style={overlay},
+    yticklabels={$\SI{30}{\degree}$,$\SI{60}{\degree}$},
     yticklabel style={white, overlay},
     % colormap/viridis,
     colormap name=cividis,
@@ -82,8 +87,9 @@
 % 
 \end{scope}
 \begin{pgfinterruptboundingbox}
-\ifthenelse{\i=0}{\node[anchor=south] at ($(\i\j.north)+(0,0.42)$) {$\modelPsi = \psi$};}{}
-\ifthenelse{\j=0}{\node[anchor=south, rotate=90] at ($(\i\j.west)-(0.55,0)$) {$\inc = \fnull$};}{}
+\pgfmathparse{int(round(\psi*10))*10}
+\ifthenelse{\i=0}{\node[anchor=south] at ($(\i\j.north)+(0,0.42)$) {$\modelPsi = \pgfmathresult$};}{}
+\ifthenelse{\j=0}{\node[anchor=south, rotate=90] at ($(\i\j.west)-(0.55,0)$) {$\modelInc = \fnull$};}{}
 % \draw (\i\j.north west) rectangle (\i\j.south east);
 \end{pgfinterruptboundingbox}
 % 

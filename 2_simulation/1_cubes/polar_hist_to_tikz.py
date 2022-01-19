@@ -86,6 +86,9 @@ def generate(df,
         sed("@file_name", file_name, f"polar_hist_to_tikz.tex",
             f"output/tmp/{file_name}.tex")
     else:
+        print()
+        print(value)
+        print()
         raise ValueError("FOOO")
         sed("@file_name", file_name, f"polar_hist_to_tikz_ori.tex",
             f"output/tmp/{file_name}.tex")
@@ -96,6 +99,10 @@ def generate(df,
     sed("@cmin", str(crange[0]), f"output/tmp/{file_name}.tex")
     sed("@cmax", str(crange[1]), f"output/tmp/{file_name}.tex")
     sed("@size", str(size) + "cm", f"output/tmp/{file_name}.tex")
+    if value == 'trans_mean':
+        sed("@cbarunit", r"\\arbitraryunit", f"output/tmp/{file_name}.tex")
+    else:
+        sed("@cbarunit", "", f"output/tmp/{file_name}.tex")
 
     for psi in psi_list:
         for f0_inc in f0_list:
@@ -253,6 +260,7 @@ def generate(df,
     with open(f"output/tmp/{file_name}.out",
               "wb") as out, open(f"output/tmp/{file_name}.err", "wb") as err:
         shutil.copyfile("cividis.tex", "output/tmp/cividis.tex")
+        shutil.copyfile("parameters.tex", "output/tmp/parameters.tex")
         # print(
         #     f"lualatex -interaction=nonstopmode -halt-on-error {file_name}.tex")
         subprocess.run(
