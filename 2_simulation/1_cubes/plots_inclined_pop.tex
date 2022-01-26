@@ -72,7 +72,6 @@
 \addplot+[draw=none, mark=none, name path=A, smooth] table[%
    x expr={\thisrow{#2}/90*\nboxes}, y={#3_25}, col sep=comma, row sep=newline,
    ]{#1};
-% 
 \addplot+[mark=none, BLUE!50!black, smooth, densely dashdotted] table[%
    x expr={\thisrow{#2}/90*\nboxes}, y={#3_50}, col sep=comma, row sep=newline,
    ]{#1};
@@ -81,6 +80,19 @@
    ]{#1};
 \addplot[BLUE!75, smooth] fill between [of=A and B];
 \pgfplotsset{cycle list shift=-7}
+% 
+% \addplot+[draw=none, mark=none, name path=A, smooth] table[%
+%    x expr={\thisrow{#2}/90*\nboxes}, y expr={\thisrow{#3_mean}-\thisrow{#3_std}}, col sep=comma, row sep=newline,
+%    ]{#1};
+% \addplot+[mark=none, BLUE!50!black, smooth, densely dashdotted] table[%
+% x expr={\thisrow{#2}/90*\nboxes}, y expr={\thisrow{#3_mean}}, col sep=comma, row sep=newline,
+%    ]{#1};
+% \addplot+[draw=none, mark=none, name path=B, smooth] table[%
+% x expr={\thisrow{#2}/90*\nboxes}, y expr={\thisrow{#3_mean}+\thisrow{#3_std}}, col sep=comma, row sep=newline,
+%    ]{#1};
+% \addplot[RED!75, smooth, opacity=0.5] fill between [of=A and B];
+% \pgfplotsset{cycle list shift=-7}
+%
 \pgfplotsset{update limits=true}
 }
 %  
@@ -110,96 +122,97 @@
       at={(ticklabel* cs:1.0,0.0)},
       anchor=north west,
    },
-   every axis title/.append style={
-      yshift=-8pt,
-   },
+   every axis title/.append style={yshift=-8pt,},
    enlarge y limits,
    ymajorgrids,
    clip=true,
 ]
 % 
-\nextgroupplot[title={\vphantom{/}transmittance}]
-\foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
-   \addplot+[Boxplot] table[%
-      y={epa_trans}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
-}
+\nextgroupplot[title={\vphantom{Gg}transmittance / $\si{\arbitraryunit}$}]
+   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
+      \addplot+[Boxplot] table[%
+         y={epa_trans}, col sep=comma, row sep=newline,
+         ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
+   }
 % 
 % 
-\nextgroupplot[title={\vphantom{/}retardation}]
-\foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
-   \addplot+[Boxplot] table[%
-      y={epa_ret}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
-}
+\nextgroupplot[title={\vphantom{Gg}retardation}]
+   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
+      \addplot+[Boxplot] table[%
+         y={epa_ret}, col sep=comma, row sep=newline,
+         ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
+   }
 % 
 % 
-\nextgroupplot[title={\vphantom{/}direction $\dir$ / $\si{\degree}$}]
-\plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{phi}
-\foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
-   \addplot+[Boxplot] table[%
-      y={rofl_dir}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
-}
-\pgfplotsset{update limits=false}
-\addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (9,0)};
-\pgfplotsset{update limits=true}
+\nextgroupplot[title={\vphantom{Gg}direction $\dir$},
+               yticklabel={$\pgfmathprintnumber{\tick}\si{\degree}$}] 
+   \plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{phi}
+   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
+      \addplot+[Boxplot] table[%
+         y={rofl_dir}, col sep=comma, row sep=newline,
+         ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
+   }
+   \pgfplotsset{update limits=false}
+   \addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (9,0)};
+   \pgfplotsset{update limits=true}
 % 
 % 
-\nextgroupplot[title={\vphantom{/}inclination $\inc$ / $\si{\degree}$}]
-\plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{alpha}
-\foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
-   \addplot+[Boxplot] table[%
-      y={rofl_inc}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
-}
-\pgfplotsset{update limits=false}
-% individual populations
-\addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (9,0)};
-\addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (9,90)};
-% circmean
-\addplot+[mark=none, white, smooth,
-   dash=on 3.4pt off 2.6pt phase 0.2pt, line width=0.8pt]  table[%
-   x={x}, y={y}, col sep=comma, row sep=newline,
-   ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
-\addplot+[mark=none, black, smooth,
-   dash=on 3pt off 3pt phase 0pt, line width=0.4pt]  table[%
-   x={x}, y={y}, col sep=comma, row sep=newline,
-   ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
-\pgfplotsset{update limits=true}
+\nextgroupplot[title={\vphantom{Gg}inclination $\inc$},
+               yticklabel={$\pgfmathprintnumber{\tick}\si{\degree}$}] 
+   \plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{alpha}
+   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
+      \addplot+[Boxplot] table[%
+         y={rofl_inc}, col sep=comma, row sep=newline,
+         ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
+   }
+   \pgfplotsset{update limits=false}
+   % individual populations
+   \addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (9,0)};
+   \addplot+[mark=none, black, densely dotted]  coordinates {(0,0) (9,90)};
+   % circmean
+   \addplot+[mark=none, white, smooth,
+      dash=on 3.4pt off 2.6pt phase 0.2pt, line width=0.8pt]  table[%
+      x={x}, y={y}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
+   \addplot+[mark=none, black, smooth,
+      dash=on 3pt off 3pt phase 0pt, line width=0.4pt]  table[%
+      x={x}, y={y}, col sep=comma, row sep=newline,
+      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_theo_incl.csv};
+   \pgfplotsset{update limits=true}
 % 
 % 
-\nextgroupplot[title={\vphantom{/}\trel}]
-\foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
-   \addplot+[Boxplot] table[%
-      y={rofl_trel}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
-}
+\nextgroupplot[title={\vphantom{Gg}\trel}]
+   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
+      \addplot+[Boxplot] table[%
+         y={rofl_trel}, col sep=comma, row sep=newline,
+         ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
+   }
 % 
 % 
-\nextgroupplot[title={\vphantom{/}$\openingAngle$ / $\si{\degree}$}]
-\plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{domega}
-\foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
-   \addplot+[Boxplot] table[%
-      y={domega}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
-}
+\nextgroupplot[title={\vphantom{Gg}$\openingAngle$},
+               yticklabel={$\pgfmathprintnumber{\tick}\si{\degree}$}] 
+   \plotgt{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_model.csv}{omega}{domega}
+   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
+      \addplot+[Boxplot] table[%
+         y={domega}, col sep=comma, row sep=newline,
+         ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
+   }
 % 
 % 
-\nextgroupplot[title={\vphantom{/}acc},
-   xmin=-5, xmax=95,
-   xtick={0,30,60,90},]
+\nextgroupplot[title={\vphantom{Gg}acc},
+               xmin=-5, xmax=95,
+               xtick={0,30,60,90},]
    \addplot+[mark options={fill=GREEN,scale=0.75},GREEN]
       table[x={omega},y={acc},col sep=comma, row sep=newline,]
       {\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_schilling_psi_\psi.csv};
 % 
 % 
-\nextgroupplot[title={\vphantom{/}R}]
-\foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
-   \addplot+[Boxplot] table[%
-      y={R}, col sep=comma, row sep=newline,
-      ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
-}
+\nextgroupplot[title={\vphantom{Gg}R}]
+   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
+      \addplot+[Boxplot] table[%
+         y={R}, col sep=comma, row sep=newline,
+         ]{\datapath/cube_2pop_135_rc1_inclined_plots_inclined_pop_psi_\psi_omega_\omega.csv};
+   }
 \end{groupplot}
 % 
 % LEGENDE
@@ -221,13 +234,13 @@
    \addlegendentry{model median};
    % 
    \addlegendimage{area legend,BLUE!75,fill=BLUE!75,only marks}
-   \addlegendentry{model $\SI{25}{\percent}-\SI{75}{\percent}$};
+   \addlegendentry{model \bvariance{}};
 \end{axis}
 % 
 % \coordinate (CA) at (group c1r1.north);
 % \coordinate (CB) at (group c2r1.north);
-\pgfmathparse{int(round(\psi*10))*10}
-\node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {inclined fiber pop., $\modelPsi = \SI{\pgfmathresult}{\percent}$};
+\pgfmathsetmacro{\psivalueint}{int(round(\psi*10))*10}
+\node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {crossing fiber pop., $\modelPsi = \SI[round-mode=places,round-precision=0]{\psivalueint}{\percent}$};
 \node[anchor=north, scale=0.75] at 
    ($(group c1r4.south)!0.5!(group c2r4.south) - (0,0.5)$) {\ref{legend1}};
 % 
@@ -235,7 +248,8 @@
 \coordinate (PA) at (group c1r2.west);
 \coordinate (PB) at (group c2r2.east);
 \coordinate (PC) at (current bounding box.west);
-\path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+% \path[] let \p1 = ($(PA)-(PC)$) in ($(PA) - (\x1,0)$) -- ($(PB) + (\x1,0)$);
+\path[] ($(PA) - (31.5pt,0)$) -- ($(PB) + (31.5pt,0)$);
 % 
 \end{tikzpicture}
 }
