@@ -6,7 +6,7 @@ import helper.circular
 import numpy as np
 import pandas as pd
 import tqdm
-from scipy.stats import circmean
+from scipy.stats import circmean, circstd
 
 import models
 import parameter
@@ -160,11 +160,16 @@ if True:
 
         phi = np.rad2deg(phi)
         alpha = np.rad2deg(np.pi / 2 - theta)
-
         a_mean = circmean(alpha, 90, -90)
-        print(row.f0_inc, a_mean)
 
         alpha[alpha < row.f0_inc - 90] = alpha[alpha < row.f0_inc - 90] + 180
+        alpha[alpha > row.f0_inc + 90] = alpha[alpha > row.f0_inc + 90] - 180
+
+        a_mean = circmean(alpha, 90, -90)
+        a_std = circstd(alpha, 90, -90)
+        phi_mean = circmean(phi, 180, -180)
+        phi_std = circstd(phi, 180, -180)
+
         phi_25, phi_50, phi_75 = np.quantile(phi, [0.25, 0.5, 0.75])
         alpha_25, alpha_50, alpha_75 = np.quantile(alpha, [0.25, 0.5, 0.75])
         domega_25, domega_50, domega_75 = np.quantile(domega, [0.25, 0.5, 0.75])
@@ -174,9 +179,13 @@ if True:
                 'phi_25': phi_25,
                 'phi_50': phi_50,
                 'phi_75': phi_75,
+                'phi_mean': phi_mean,
+                'phi_std': phi_std,
                 'alpha_25': alpha_25,
                 'alpha_50': alpha_50,
                 'alpha_75': alpha_75,
+                'alpha_mean': a_mean,
+                'alpha_std': a_std,
                 'domega_25': domega_25,
                 'domega_50': domega_50,
                 'domega_75': domega_75,
