@@ -149,9 +149,60 @@ if True:
             ))
 
         # GT
-        phi_gt, theta_gt = models.ori_from_file(
+        # phi_gt, theta_gt = models.ori_from_file(
+        #     get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
+        #     CONFIG.simulation.voi)
+        phis_gt, thetas_gt = models.fb_ori_from_file(
             get_file_from_series(row)[0], row.f0_inc, row.f1_rot,
             CONFIG.simulation.voi)
+
+        phi_gt = [item for sublist in phis_gt for item in sublist]
+        theta_gt = [item for sublist in thetas_gt for item in sublist]
+        phi_gt = np.array(phi_gt)
+        theta_gt = np.array(theta_gt)
+
+        # remap GT
+        values = {}
+        for fi, (phi, theta) in enumerate(zip(phis_gt, thetas_gt)):
+            # remap GT
+            phi, theta = fastpli.analysis.orientation.remap_half_sphere_x(
+                phi, theta)
+            domega = np.rad2deg(calc_omega(phi, theta))
+
+            phi = np.rad2deg(phi)
+            alpha = np.rad2deg(np.pi / 2 - theta)
+            if row.psi < 0.5:
+                phi = helper.circular.remap(phi, row.omega + 90, row.omega - 90)
+            else:
+                phi = helper.circular.remap(phi, 90, -90)
+            a_mean = circmean(alpha, 90, -90)
+            alpha[alpha < a_mean - 90] = alpha[alpha < a_mean - 90] + 180
+            alpha[alpha > a_mean + 90] = alpha[alpha > a_mean + 90] - 180
+
+            a_mean = circmean(alpha, 90, -90)
+            a_std = circstd(alpha, 90, -90)
+            phi_mean = circmean(phi, 180, -180)
+            phi_std = circstd(phi, 180, -180)
+
+            phi_25, phi_50, phi_75 = np.quantile(phi, [0.25, 0.5, 0.75])
+            alpha_25, alpha_50, alpha_75 = np.quantile(alpha, [0.25, 0.5, 0.75])
+            domega_25, domega_50, domega_75 = np.quantile(
+                domega, [0.25, 0.5, 0.75])
+
+            values[f'a_{fi}_mean'] = a_mean
+            values[f'a_{fi}_std'] = a_std
+            values[f'phi_{fi}_mean'] = phi_mean
+            values[f'phi_{fi}_std'] = phi_std
+            values[f'phi_{fi}_25'] = phi_25
+            values[f'phi_{fi}_50'] = phi_50
+            values[f'phi_{fi}_75'] = phi_75
+            values[f'alpha_{fi}_25'] = alpha_25
+            values[f'alpha_{fi}_50'] = alpha_50
+            values[f'alpha_{fi}_75'] = alpha_75
+            values[f'domega_{fi}_25'] = domega_25
+            values[f'domega_{fi}_50'] = domega_50
+            values[f'domega_{fi}_75'] = domega_75
+
         phi = phi_gt.copy()
         theta = theta_gt.copy()
 
@@ -179,27 +230,25 @@ if True:
         alpha_25, alpha_50, alpha_75 = np.quantile(alpha, [0.25, 0.5, 0.75])
         domega_25, domega_50, domega_75 = np.quantile(domega, [0.25, 0.5, 0.75])
 
-        df_gt = df_gt.append(
-            {
-                'phi_25': phi_25,
-                'phi_50': phi_50,
-                'phi_75': phi_75,
-                'phi_mean': phi_mean,
-                'phi_std': phi_std,
-                'alpha_25': alpha_25,
-                'alpha_50': alpha_50,
-                'alpha_75': alpha_75,
-                'alpha_mean': a_mean,
-                'alpha_std': a_std,
-                'domega_25': domega_25,
-                'domega_50': domega_50,
-                'domega_75': domega_75,
-                'psi': row.psi,
-                'omega': row.omega,
-                'f0_inc': row.f0_inc,
-                'f1_rot': row.f1_rot,
-            },
-            ignore_index=True)
+        values['a_mean'] = a_mean
+        values['a_std'] = a_std
+        values['phi_mean'] = phi_mean
+        values['phi_std'] = phi_std
+        values['phi_25'] = phi_25
+        values['phi_50'] = phi_50
+        values['phi_75'] = phi_75
+        values['alpha_25'] = alpha_25
+        values['alpha_50'] = alpha_50
+        values['alpha_75'] = alpha_75
+        values['domega_25'] = domega_25
+        values['domega_50'] = domega_50
+        values['domega_75'] = domega_75
+        values['psi'] = row.psi
+        values['omega'] = row.omega
+        values['f0_inc'] = row.f0_inc
+        values['f1_rot'] = row.f1_rot
+
+        df_gt = df_gt.append(values, ignore_index=True)
 
         # to tex
         h, x, y, _ = fastpli.analysis.orientation.histogram(phi_gt,
