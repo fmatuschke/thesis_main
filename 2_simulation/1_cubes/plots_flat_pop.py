@@ -171,18 +171,20 @@ if True:
 
             phi = np.rad2deg(phi)
             alpha = np.rad2deg(np.pi / 2 - theta)
-            if row.psi < 0.5:
-                phi = helper.circular.remap(phi, row.omega + 90, row.omega - 90)
-            else:
+
+            if fi == 0:
                 phi = helper.circular.remap(phi, 90, -90)
-            a_mean = circmean(alpha, 90, -90)
-            alpha[alpha < a_mean - 90] = alpha[alpha < a_mean - 90] + 180
-            alpha[alpha > a_mean + 90] = alpha[alpha > a_mean + 90] - 180
+                phi_mean = circmean(phi, 90, -90)
+                phi_std = circstd(phi, 90, -90)
+            else:
+                phi = helper.circular.remap(phi, row.omega + 90, row.omega - 90)
+                phi_mean = circmean(phi, row.omega + 90, row.omega - 90)
+                phi_std = circstd(phi, row.omega + 90, row.omega - 90)
 
             a_mean = circmean(alpha, 90, -90)
             a_std = circstd(alpha, 90, -90)
-            phi_mean = circmean(phi, 180, -180)
-            phi_std = circstd(phi, 180, -180)
+            alpha[alpha < -90] += 180
+            alpha[alpha > +90] -= 180
 
             phi_25, phi_50, phi_75 = np.quantile(phi, [0.25, 0.5, 0.75])
             alpha_25, alpha_50, alpha_75 = np.quantile(alpha, [0.25, 0.5, 0.75])
