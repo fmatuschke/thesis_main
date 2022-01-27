@@ -69,26 +69,26 @@
 \newcommand{\plotgt}[3]{
    \pgfplotsset{update limits=false}
    \def\nboxes{9}
-   \addplot+[draw=none, mark=none, name path=A, smooth] table[%
+   \addplot+[draw=none, mark=none, name path=A, smooth,tension=0.21] table[%
       x expr={\thisrow{#2}/90*\nboxes}, y={#3_0_25}, col sep=comma, row sep=newline,
       ]{#1};
-   \addplot+[draw=none, mark=none, name path=B, smooth] table[%
+   \addplot+[draw=none, mark=none, name path=B, smooth,tension=0.21] table[%
       x expr={\thisrow{#2}/90*\nboxes}, y={#3_0_75}, col sep=comma, row sep=newline,
       ]{#1};
-   \addplot[BLUE!75, smooth, opacity=0.5] fill between [of=A and B];
+   \addplot[BLUE!75, smooth,tension=0.21, opacity=0.5] fill between [of=A and B];
    % 
-   \addplot+[draw=none, mark=none, name path=A, smooth] table[%
+   \addplot+[draw=none, mark=none, name path=A, smooth,tension=0.21] table[%
       x expr={\thisrow{#2}/90*\nboxes}, y={#3_1_25}, col sep=comma, row sep=newline,
       ]{#1};
-   \addplot+[draw=none, mark=none, name path=B, smooth] table[%
+   \addplot+[draw=none, mark=none, name path=B, smooth,tension=0.21] table[%
       x expr={\thisrow{#2}/90*\nboxes}, y={#3_1_75}, col sep=comma, row sep=newline,
       ]{#1};
-   \addplot[RED!75, smooth, opacity=0.5] fill between [of=A and B];
+   \addplot[RED!75, smooth,tension=0.21, opacity=0.5] fill between [of=A and B];
    % 
-   \addplot+[mark=none, BLUE!50!black, smooth, densely dashdotted] table[%
+   \addplot+[mark=none, BLUE!50!black, smooth,tension=0.21, densely dashdotted] table[%
       x expr={\thisrow{#2}/90*\nboxes}, y={#3_0_50}, col sep=comma, row sep=newline,
       ]{#1};
-   \addplot+[mark=none, RED!50!black, smooth, densely dashdotted] table[%
+   \addplot+[mark=none, RED!50!black, smooth,tension=0.21, densely dashdotted] table[%
       x expr={\thisrow{#2}/90*\nboxes}, y={#3_1_50}, col sep=comma, row sep=newline,
       ]{#1};
    %
