@@ -67,33 +67,32 @@
 }
 % 
 \newcommand{\plotgt}[3]{
-\pgfplotsset{update limits=false}
-\def\nboxes{18}
-\addplot+[draw=none, mark=none, name path=A, smooth] table[%
-   x expr={\thisrow{#2}/90*\nboxes}, y={#3_25}, col sep=comma, row sep=newline,
-   ]{#1};
-\addplot+[mark=none, BLUE!50!black, smooth, densely dashdotted] table[%
-   x expr={\thisrow{#2}/90*\nboxes}, y={#3_50}, col sep=comma, row sep=newline,
-   ]{#1};
-\addplot+[draw=none, mark=none, name path=B, smooth] table[%
-   x expr={\thisrow{#2}/90*\nboxes}, y={#3_75}, col sep=comma, row sep=newline,
-   ]{#1};
-\addplot[BLUE!75, smooth] fill between [of=A and B];
-\pgfplotsset{cycle list shift=-7}
-% 
-% \addplot+[draw=none, mark=none, name path=A, smooth] table[%
-%    x expr={\thisrow{#2}/90*\nboxes}, y expr={\thisrow{#3_mean}-\thisrow{#3_std}}, col sep=comma, row sep=newline,
-%    ]{#1};
-% \addplot+[mark=none, BLUE!50!black, smooth, densely dashdotted] table[%
-% x expr={\thisrow{#2}/90*\nboxes}, y expr={\thisrow{#3_mean}}, col sep=comma, row sep=newline,
-%    ]{#1};
-% \addplot+[draw=none, mark=none, name path=B, smooth] table[%
-% x expr={\thisrow{#2}/90*\nboxes}, y expr={\thisrow{#3_mean}+\thisrow{#3_std}}, col sep=comma, row sep=newline,
-%    ]{#1};
-% \addplot[RED!75, smooth, opacity=0.5] fill between [of=A and B];
-% \pgfplotsset{cycle list shift=-7}
-%
-\pgfplotsset{update limits=true}
+   \pgfplotsset{update limits=false}
+   \def\nboxes{18}
+   \addplot+[draw=none, mark=none, name path=A, smooth] table[%
+      x expr={\thisrow{#2}/90*\nboxes}, y={#3_25}, col sep=comma, row sep=newline,
+      ]{#1};
+   \addplot+[draw=none, mark=none, name path=B, smooth] table[%
+      x expr={\thisrow{#2}/90*\nboxes}, y={#3_75}, col sep=comma, row sep=newline,
+      ]{#1};
+   \addplot[BLUE!75, smooth, opacity=0.5] fill between [of=A and B];
+   % 
+   % \addplot+[draw=none, mark=none, name path=A, smooth] table[%
+   %    x expr={\thisrow{#2}/90*\nboxes}, y={#3_1_25}, col sep=comma, row sep=newline,
+   %    ]{#1};
+   % \addplot+[draw=none, mark=none, name path=B, smooth] table[%
+   %    x expr={\thisrow{#2}/90*\nboxes}, y={#3_1_75}, col sep=comma, row sep=newline,
+   %    ]{#1};
+   % \addplot[RED!75, smooth, opacity=0.5] fill between [of=A and B];
+   % 
+   \addplot+[mark=none, BLUE!50!black, smooth, densely dashdotted] table[%
+      x expr={\thisrow{#2}/90*\nboxes}, y={#3_50}, col sep=comma, row sep=newline,
+      ]{#1};
+   % \addplot+[mark=none, RED!50!black, smooth, densely dashdotted] table[%
+   %    x expr={\thisrow{#2}/90*\nboxes}, y={#3_1_50}, col sep=comma, row sep=newline,
+   %    ]{#1};
+   %
+   \pgfplotsset{update limits=true}
 }
 % 
 \begin{document}
@@ -223,11 +222,14 @@
    \addlegendimage{black,mark=none, dash=on 3pt off 3pt phase 0pt, line width=0.4pt}
    \addlegendentry{theoretical};
    % 
-   \addlegendimage{mark=none, BLUE!50!black, smooth, densely dashdotted}
+   \addlegendimage{mark=none, black, smooth, densely dashdotted}
    \addlegendentry{model median};
    % 
    \addlegendimage{area legend,BLUE!75,fill=BLUE!75,only marks}
-   \addlegendentry{model \bvariance{}};
+   \addlegendentry{\popa{} \bvariance{}};
+   % 
+   % \addlegendimage{area legend,RED!75,fill=RED!75,only marks}
+   % \addlegendentry{model \popa{} \bvariance{}};
 \end{axis}
 % 
 \node[anchor=south] at ($(group c1r1.north)!0.5!(group c2r1.north) + (0,0.5)$) {single fiber pop.};
