@@ -1,0 +1,57 @@
+{
+   "[latex]": {
+      "editor.formatOnSave": false,
+      "files.insertFinalNewline": false
+   },
+   "[tex]": {
+      "editor.formatOnSave": false,
+      "files.insertFinalNewline": false
+   },
+   "files.associations": {
+      "*.tikz": "tex"
+   },
+   "files.exclude": {
+      "**/.nfs*": true,
+      "**/.vscode": true,
+      "**/env*/**": true,
+      "**/venv*/**": true,
+      "**/__pycache__/**": true,
+      "**/*.egg-info/**": true,
+      "**/.worktrees/**": true,
+      "**/.ipynb_checkpoints": true,
+      "**/.pytest_cache": true,
+      "./data": true,
+      "./paper": true,
+      "./thesis": true,
+      "**/output": true,
+   },
+   "files.watcherExclude": {
+      "**/.git/**": true,
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/*/**": true,
+      "**/env*/**": true,
+      "**/venv*/**": true,
+      "**/__pycache__/**": true,
+      "**/*.egg-info/**": true,
+      "**/build/**": true,
+      "./data": true,
+      "./paper": true,
+      "./thesis": true,
+      "**/output": true,
+   },
+   "search.exclude": {
+      "**/.git/**": true,
+      "**/node_modules": true,
+      "**/bower_components": true,
+      "**/env*/**": true,
+      "**/venv*/**": true,
+      "**/__pycache__/**": true,
+      "**/*.egg-info/**": true,
+      "**/build/**": true,
+      "./data": true,
+      "./paper": true,
+      "./thesis": true,
+      "**/output": true,
+   },
+}
