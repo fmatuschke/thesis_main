@@ -26,7 +26,7 @@ python3 generate_tissue.py -i output/cube_2pop_135_rc1 -p 48
 
 ```sh
 python3 plots_single_pop.py
-./plot.sh plots_single_pop.tex output/cube_2pop_135_rc1_single --single
+./plot.sh plots_single_pop.tex output/cube_2pop_135_rc1_single
 ```
 
 ### flat population analysis
@@ -34,7 +34,7 @@ python3 plots_single_pop.py
 ```sh
 #  change psi value
 python3 plots_flat_pop.py
-./plot.sh plots_flat_pop.tex output/cube_2pop_135_rc1_flat --single
+./plot.sh plots_flat_pop.tex output/cube_2pop_135_rc1_flat
 ```
 
 ### inclined population analysis
@@ -42,7 +42,7 @@ python3 plots_flat_pop.py
 ```sh
 #  change psi value
 python3 plots_inclined_pop.py
-./plot.sh plots_inclined_pop.tex output/cube_2pop_135_rc1_inclined --single
+./plot.sh plots_inclined_pop.tex output/cube_2pop_135_rc1_inclined
 ```
 
 ### polar histogramms

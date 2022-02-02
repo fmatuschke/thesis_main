@@ -188,6 +188,15 @@
          ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi_omega_\omega.csv};
    }
 % 
+% 
+\nextgroupplot[title={\vphantom{Gg}R}]
+   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
+      \addplot+[Boxplot] table[%
+         y={R}, col sep=comma, row sep=newline,
+         ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi_omega_\omega.csv};
+   }
+% 
+% 
 \nextgroupplot[title={\vphantom{Gg}$\openingAngle$},
                yticklabel={$\pgfmathprintnumber{\tick}\si{\degree}$}] 
    \plotgt{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi_model.csv}{omega}{domega}
@@ -204,15 +213,6 @@
    \addplot+[mark options={fill=GREEN,scale=0.75},GREEN]
       table[x={omega},y={acc},col sep=comma, row sep=newline,]
       {\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_schilling_psi_\psi.csv};
-% 
-% 
-\nextgroupplot[title={\vphantom{Gg}R}]
-   \foreach \omega in {0,10,20,30,40,50,60,70,80,90} {      
-      \addplot+[Boxplot] table[%
-         y={R}, col sep=comma, row sep=newline,
-         ]{\datapath/cube_2pop_135_rc1_flat_plots_flat_pop_psi_\psi_omega_\omega.csv};
-   }
-% 
 \end{groupplot}
 % 
 % LEGENDE

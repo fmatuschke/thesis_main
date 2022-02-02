@@ -32,11 +32,12 @@ df_acc = pd.read_pickle(
 df = pd.read_pickle(
     os.path.join(sim_path, "analysis", "cube_2pop_simulation.pkl"))
 
-print()
-print(df.columns)
-print()
+# print()
+# print(df.columns)
+# print(df['f0_inc'].unique())
+# print()
 
-if False:
+if False:  # same reason as dir and inc
 
     def calc_omega(p, t):
         v0 = np.array([np.cos(p) * np.sin(t), np.sin(p) * np.sin(t), np.cos(t)])
@@ -63,7 +64,7 @@ if False:
         # return v1, np.mean(data), np.std(data), np.quantile(data, [0.25, 0.5, 0.75])
 
     domega = []
-    for i, row in df.iterrows():
+    for i, row in tqdm.tqdm(df.iterrows(), total=len(df), desc='calc_domega'):
         # row = df.iloc[i]
         phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
@@ -71,41 +72,16 @@ if False:
         domega.append(np.mean(np.rad2deg(calc_omega(phi, theta))))
     df['domega_mean'] = domega
 
-df["rtrel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
-df["R_mean"] = df["R"].apply(lambda x: np.mean(x))
-# df["domega_mean"] = df["domega"].apply(lambda x: np.mean(x))
-# df["rtrel_mean"][df["rtrel_mean"] > 0.55] = 0
-#
-df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
 df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
-df["dir_mean"] = df["epa_dir"].apply(
-    lambda x: scipy.stats.circmean(x, 0, np.pi))
-
-df["rdir_mean"] = df["rofl_dir"].apply(
-    lambda x: scipy.stats.circmean(x, 0, np.pi))
+df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
 df["rincl_mean"] = df["rofl_inc"].apply(
     lambda x: scipy.stats.circmean(x, -0.5 * np.pi, 0.5 * np.pi))
-
-for i, row in df.iterrows():
-    if np.rad2deg(np.min(row.rofl_dir)) < 0:
-        print("A")
-    if np.rad2deg(np.max(row.rofl_dir)) >= 180:
-        print(row.rofl_dir[row.rofl_dir >= np.pi])
-        print("B")
-    if np.rad2deg(np.min(row.rofl_inc)) < -90:
-        print("C")
-    if np.rad2deg(np.max(row.rofl_inc)) >= 90:
-        print("D")
-
-# with np.printoptions(
-#         precision=2,
-#         suppress=True,
-#         edgeitems=42,
-# ):
-#     for i, row in df[(df.psi == 0.1) & (df.f0_inc == 0) &
-#                      (df.f1_rot == 90)].iterrows():
-#         print(row.omega, row.f1_rot, np.rad2deg(row.rdir_mean),
-#               np.rad2deg(row.rincl_mean), np.rad2deg(row.rofl_inc))
+df["rtrel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
+df["R_mean"] = df["R"].apply(lambda x: np.mean(x))
+# df["dir_mean"] = df["epa_dir"].apply(
+#     lambda x: scipy.stats.circmean(x, 0, np.pi))
+# df["rdir_mean"] = df["rofl_dir"].apply(
+#     lambda x: scipy.stats.circmean(x, 0, np.pi))
 
 
 def run(p):
@@ -129,21 +105,27 @@ def run(p):
             crange=[0, 1],
             psi_list=[0.10, 0.30, 0.50, 0.70, 0.90],
             f0_list=[0, 30, 60, 90])
-        # psi_list=[0.30, 0.50, 0.60, 0.90],
-        # f0_list=[0, 30, 60, 90])
         print(name, crange)
+
+        # crange = polar_hist_to_tikz.generate(
+        #     df_acc[sub],
+        #     name,
+        #     f"simulation_analysis_hist_{radius}_setup_{microscope}_s_{species}_m_{model}_{name}_all",
+        #     crange=[0, 1])
+        # print(name, crange)
 
     # modalities
     sub = (df.radius == radius) & (df.microscope == microscope) & (
         df.species == species) & (df.model == model)
 
     for name in [
-            # "R_mean",
-            # "rtrel_mean",
-            # "ret_mean",
-            # "trans_mean",
+            "R_mean",
+            "rtrel_mean",
+            "ret_mean",
+            "trans_mean",
             # "domega_mean",
-            # "rdir_mean", "rincl_mean",
+            # "rdir_mean",
+            # "rincl_mean",
     ]:
 
         crange = None
@@ -169,6 +151,13 @@ def run(p):
             psi_list=[0.10, 0.30, 0.50, 0.70, 0.90],
             f0_list=[0, 30, 60, 90])
         print(name, crange)
+
+        # crange = polar_hist_to_tikz.generate(
+        #     df[sub],
+        #     name,
+        #     f"simulation_analysis_hist_{radius}_setup_{microscope}_s_{species}_m_{model}_{name}_all",
+        #     crange=crange)
+        # print(name, crange)
 
 
 if __name__ == "__main__":

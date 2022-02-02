@@ -59,6 +59,8 @@ def generate(df,
              f0_list=None,
              psi_list=None):
 
+    df = df.copy()
+
     if f0_list is None:
         f0_list = sorted(df.f0_inc.unique())
     if psi_list is None:
@@ -110,7 +112,7 @@ def generate(df,
             data = df_[value].to_numpy(float)
 
             if len(df_[df_.omega == 0]) != 1:
-                print("FOOOOO")
+                print("FOOOOO", len(df_[df_.omega == 0]))
                 exit(1)
 
             # get points on sphere
