@@ -1,5 +1,6 @@
 #%%
 import os
+import multiprocessing as mp
 
 import fastpli.analysis
 import helper.circular
@@ -37,11 +38,11 @@ df = df[df.radius == 0.5]
 
 psi = df.psi.unique()[-1]
 
-df["trel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
-df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
-df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
-df["R_mean"] = df["R"].apply(lambda x: np.mean(x))
-df["R2_mean"] = df["R2"].apply(lambda x: np.mean(x))
+df["trel_mean"] = df["rofl_trel"].apply(np.mean)
+df["ret_mean"] = df["epa_ret"].apply(np.mean)
+df["trans_mean"] = df["epa_trans"].apply(np.mean)
+df["R_mean"] = df["R"].apply(np.mean)
+df["R2_mean"] = df["R2"].apply(np.mean)
 
 
 #%%
@@ -127,10 +128,14 @@ def to_pgfmatrix_dat(x, y, h, filename):
 os.makedirs(os.path.join(FILE_PATH, 'output', DATASET, "hist"), exist_ok=True)
 n_phi = 36 * 2
 n_theta = 18
-df_gt = pd.DataFrame()
+# df_gt = pd.DataFrame()
+df_gt = []
 
-if True:
-    for _, row in tqdm.tqdm(df.iterrows(), total=len(df)):
+if False:
+
+    def run(row):
+        row = row[1]
+        # for _, row in tqdm.tqdm(df.iterrows(), total=len(df)):
         phi, theta = fastpli.analysis.orientation.remap_half_sphere_z(
             row.rofl_dir, np.pi / 2 - row.rofl_inc)
 
@@ -215,10 +220,10 @@ if True:
 
         phi = np.rad2deg(phi)
         alpha = np.rad2deg(np.pi / 2 - theta)
-        if row.psi < 0.5:
-            phi = helper.circular.remap(phi, row.omega + 90, row.omega - 90)
-        else:
-            phi = helper.circular.remap(phi, 90, -90)
+        phi_mean = circmean([0] * int(row.psi * 10) + [row.omega] *
+                            (10 - int(row.psi * 10)), 135, -45)
+        # print(row.psi, row.omega, phi_mean)
+        phi = helper.circular.remap(phi, phi_mean + 90, phi_mean - 90)
         a_mean = circmean(alpha, 90, -90)
         alpha[alpha < a_mean - 90] = alpha[alpha < a_mean - 90] + 180
         alpha[alpha > a_mean + 90] = alpha[alpha > a_mean + 90] - 180
@@ -250,7 +255,7 @@ if True:
         values['f0_inc'] = row.f0_inc
         values['f1_rot'] = row.f1_rot
 
-        df_gt = df_gt.append(values, ignore_index=True)
+        # df_gt.append(values)
 
         # to tex
         h, x, y, _ = fastpli.analysis.orientation.histogram(phi_gt,
@@ -266,6 +271,17 @@ if True:
                 FILE_PATH, 'output', DATASET, "hist",
                 f"gt_hists_p_{row.psi:.1f}_o_{row.omega:.1f}_r_{row.radius:.1f}_f0_{row.f0_inc:.1f}_f1_{row.f1_rot:.1f}.dat"
             ))
+
+        return values
+
+    with mp.Pool(processes=16) as pool:
+        df_gt = [
+            d for d in tqdm.tqdm(pool.imap_unordered(run, df.iterrows()),
+                                 total=len(df),
+                                 smoothing=0)
+        ]
+
+    df_gt = pd.DataFrame.from_dict(df_gt)
 
     # %% save GT quantiles
     df_gt = df_gt.sort_values(by=['f0_inc', 'f1_rot', 'omega'])
@@ -292,18 +308,13 @@ df_["rofl_inc"] = np.rad2deg(np.pi / 2 - theta)
 for omega in df_.omega.unique():
     for psi in df_.psi.unique():
         for name in ["rofl_dir"]:
-            if psi < 0.5:
-                df_.loc[(df_['omega'] == omega) & (df_['psi'] == psi),
-                        name] = helper.circular.remap(
-                            df_[(df_['omega'] == omega) &
-                                (df_['psi'] == psi)][name],
-                            float(omega) + 90,
-                            float(omega) - 90)
-            else:
-                df_.loc[(df_['omega'] == omega) & (df_['psi'] == psi),
-                        name] = helper.circular.remap(
-                            df_[(df_['omega'] == omega) &
-                                (df_['psi'] == psi)][name], 90, -90)
+            phi_mean = circmean([0] * int(psi * 10) + [omega] *
+                                (10 - int(psi * 10)), 135, -45)
+            df_.loc[(df_['omega'] == omega) & (df_['psi'] == psi),
+                    name] = helper.circular.remap(
+                        df_[(df_['omega'] == omega) &
+                            (df_['psi'] == psi)][name], phi_mean + 90,
+                        phi_mean - 90)
 
 # save
 for psi in df_.psi.unique():
