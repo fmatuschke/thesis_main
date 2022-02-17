@@ -76,12 +76,10 @@ df["trans_mean"] = df["epa_trans"].apply(lambda x: np.mean(x))
 df["ret_mean"] = df["epa_ret"].apply(lambda x: np.mean(x))
 df["rincl_mean"] = df["rofl_inc"].apply(
     lambda x: scipy.stats.circmean(x, -0.5 * np.pi, 0.5 * np.pi))
+df["rdir_mean"] = df["rofl_dir"].apply(
+    lambda x: scipy.stats.circmean(x, 0, np.pi))
 df["rtrel_mean"] = df["rofl_trel"].apply(lambda x: np.mean(x))
 df["R_mean"] = df["R"].apply(lambda x: np.mean(x))
-# df["dir_mean"] = df["epa_dir"].apply(
-#     lambda x: scipy.stats.circmean(x, 0, np.pi))
-# df["rdir_mean"] = df["rofl_dir"].apply(
-#     lambda x: scipy.stats.circmean(x, 0, np.pi))
 
 
 def run(p):
@@ -95,7 +93,7 @@ def run(p):
         df_acc.species == species) & (df_acc.model == model)
 
     for name in [
-            "acc",
+            # "acc",
     ]:
 
         crange = polar_hist_to_tikz.generate(
@@ -119,13 +117,13 @@ def run(p):
         df.species == species) & (df.model == model)
 
     for name in [
-            "R_mean",
-            "rtrel_mean",
-            "ret_mean",
-            "trans_mean",
+            # "R_mean",
+            # "rtrel_mean",
+            # "ret_mean",
+            # "trans_mean",
             # "domega_mean",
-            # "rdir_mean",
-            # "rincl_mean",
+            "rdir_mean",
+            "rincl_mean",
     ]:
 
         crange = None
@@ -138,9 +136,9 @@ def run(p):
         elif "ret" in name:
             crange = [0, 0.8]
         elif "dir" in name:
-            crange = [0, np.pi]
+            crange = [0, 180]
         elif "incl" in name:
-            crange = [-np.pi / 2, np.pi / 2]
+            crange = [-90, 90]
             # crange = [0, np.pi / 2]
 
         crange = polar_hist_to_tikz.generate(

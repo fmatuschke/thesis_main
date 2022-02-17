@@ -77,6 +77,8 @@ def generate(df,
 
     if crange is None:
         crange = (np.min(df[value]), np.max(df[value]))
+        if "dir" in value or "inc" in value:
+            crange = (np.rad2deg(crange[0]), np.rad2deg(crange[1]))
 
     if size is None:
         size = 0.95 * 13.8 / len(f0_list) * 0.675  # convertion to cm?
@@ -88,10 +90,10 @@ def generate(df,
         sed("@file_name", file_name, f"polar_hist_to_tikz.tex",
             f"output/tmp/{file_name}.tex")
     else:
-        print()
-        print(value)
-        print()
-        raise ValueError("FOOO")
+        # print()
+        # print(value)
+        # print()
+        # raise ValueError("FOOO")
         sed("@file_name", file_name, f"polar_hist_to_tikz_ori.tex",
             f"output/tmp/{file_name}.tex")
 
@@ -216,11 +218,12 @@ def generate(df,
                 x_i, y_i, z_i, data_i = helper.spherical_interpolation.on_mesh(
                     phi_, theta_, data_, d_phi, d_theta)
             else:
-                raise ValueError("cant do that")
-                # x_i = np.empty((0))
-                # y_i = np.empty((0))
-                # z_i = np.empty((0))
-                # data_i = np.empty((0))
+                # raise ValueError("cant do that")
+                # dummy, not used in plot
+                x_i = np.empty((0))
+                y_i = np.empty((0))
+                z_i = np.empty((0))
+                data_i = np.empty((0))
 
                 # still not working with interpolation ...
                 # xdata, ydata = np.cos(data_), np.sin(data_)
@@ -231,6 +234,10 @@ def generate(df,
                 # data_i = np.arctan2(ydata_i, xdata_i)
                 # data_i += np.pi
                 # data_i %= np.pi
+
+            if "dir" in value or "inc" in value:
+                data_i = np.rad2deg(data_i)
+                data_ = np.rad2deg(data_)
 
             with open(
                     f"output/tmp/{file_name}_psi_{psi:.2f}_f0_{f0_inc:.2f}_hist.dat",
