@@ -1,17 +1,13 @@
 \documentclass[tikz]{standalone}
 \usepackage{float}              % [H]
 \usepackage{graphicx}           % (pdf, png, jpg, eps)
-\usepackage{amsmath, amssymb, amsthm, mathtools}
-\usepackage{fontspec}
-\usepackage[warnings-off={mathtools-colon,mathtools-overbracket}]{unicode-math}
-\usepackage{lualatex-math}
-\setmathfont{Latin Modern Math}
 \usepackage{pgfplots}
 \usepackage{siunitx}
 \usepackage{currfile}
 \usepackage{ifthen}
 \usepackage{tikz}
-% \usepackage{mathtools}
+\usepackage{mathtools}
+\usepackage{relsize}
 \usetikzlibrary{calc}
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
@@ -23,6 +19,8 @@
 % \tikzexternalize
 \tikzset{>=latex}
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
+% 
+\input{parameters}
 % 
 \def\width{13.87303cm}
 \def\height{22.37076cm}
@@ -117,7 +115,7 @@
 }
 % \node[anchor=south] (title) at ({axis description cs:0.5,1.1}) {\species};
 \node[anchor=south] (title) at ({axis description cs:0.5,0.95})
-    {$||,\modelInc=\SI{\finc}{\degree}$};
+    {$\pfbs,\modelInc=\SI{\finc}{\degree}$};
 \xachse
 % 
 % 
@@ -132,7 +130,7 @@
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
 \node[anchor=south] (title) at ({axis description cs:0.5,0.95})
-    {$||,\modelInc=\SI{\finc}{\degree}$};
+    {$\pfbs,\modelInc=\SI{\finc}{\degree}$};
 \xachse
 % 
 \nextgroupplot[%
@@ -146,7 +144,7 @@
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
 \node[anchor=south] (title) at ({axis description cs:0.5,0.95})
-    {$\times,\modelInc=\SI{\finc}{\degree}$};
+    {$\cfbs,\modelInc=\SI{\finc}{\degree}$};
 \xachse
 % 
 \nextgroupplot[%
@@ -160,7 +158,7 @@
         ]{\datapath/vs_stats_omega_\omega_psi_\psi_f0_inc_\finc_mode_\mode_species_\species_setup_\setup_vs_\vs_r_\r_m_\noise.csv};
 }
 \node[anchor=south] (title) at ({axis description cs:0.5,0.95})
-    {$\times,\modelInc=\SI{\finc}{\degree}$};
+    {$\cfbs,\modelInc=\SI{\finc}{\degree}$};
 \xachse
 %
 % center axis
